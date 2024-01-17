@@ -15,6 +15,10 @@ class GameEngine {
         this.wheel = null;
         this.keys = {};
 
+        // World position
+        this.worldX = 0;
+        this.worldY = 0;
+
         // Options and the Details
         this.options = options || {
             debugging: false,
@@ -81,10 +85,31 @@ class GameEngine {
     };
 
     draw() {
-        // Clear the whole canvas with transparent color (rgba(0, 0, 0, 0))
+        // Clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        // Draw latest things first
+        // Get the grass texture and define the scale factor
+        const grass = ASSET_MANAGER.getAsset("./sprites/grass.png");
+        const scaleFactor = 2;  // Define the scale factor of the ground texture (e.g., 2 for twice as large)
+        const tileWidth = grass.width * scaleFactor;
+        const tileHeight = grass.height * scaleFactor;
+
+        // Calculate the starting point for drawing tiles
+        let startX = -(this.worldX % tileWidth);
+        if (this.worldX < 0) startX -= tileWidth;
+        let startY = -(this.worldY % tileHeight);
+        if (this.worldY < 0) startY -= tileHeight;
+
+        // Draw the grass tiles with pixel snapping
+        for (let x = startX; x < this.ctx.canvas.width; x += tileWidth) {
+            for (let y = startY; y < this.ctx.canvas.height; y += tileHeight) {
+                // Math.round(x) and Math.round(y) are used to ensure that the position of each tile is rounded to the nearest integer,
+                // which prevents the tiles from blurring when the world position is not an integer. (fixes a tile edge flickering issue).
+                this.ctx.drawImage(grass, 0, 0, grass.width, grass.height, Math.round(x), Math.round(y), tileWidth, tileHeight);
+            }
+        }
+
+        // Draw game entities
         for (let i = this.entities.length - 1; i >= 0; i--) {
             this.entities[i].draw(this.ctx, this);
         }
