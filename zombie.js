@@ -2,12 +2,12 @@ class Zombie {
     constructor(game) {
         this.game = game;
 
-        this.animator = new Animator(ASSET_MANAGER.getAsset("./sprites/zombie-spritesheet.png"), 0, 0, 48, 55, 2, 0.5);
+        this.animator = new Animator(ASSET_MANAGER.getAsset("./sprites/zombie-spritesheet-stand.png"), 0, 0, 48, 55, 2, 0.5);
         this.yOffset = -25; // Offsets the character upwards from the center of the canvas (you see this used in the draw() method below)
 
         // Calculate the middle of the canvas, then adjust by half of the character's width and height to center the character
-        this.x = (game.ctx.canvas.width / 2) - (this.animator.width * 1.5 / 2);
-        this.y = (game.ctx.canvas.height / 2) - (this.animator.height * 1.5 / 2);
+        this.x = 10;
+        this.y = 10;
 
         // initializing the player's bounding box
         this.box = new BoundingBox(this.x + 40, this.y - 20, 57, 85, "enemy");
@@ -24,7 +24,6 @@ class Zombie {
     calcTargetAngle() {
 
 
-
     }
 
     update() {
@@ -33,6 +32,9 @@ class Zombie {
         const delta = this.game.clockTick * this.movementSpeed;
 
         this.isMoving = false; // Reset the isMoving flag to false
+
+        this.x -= this.game.worldX;
+        this.y -= this.game.worldY;
 
 
 
@@ -64,25 +66,25 @@ class Zombie {
         // }
 
         // Apply movement to the character's world position in the game engine
-        this.game.worldX += moveX * delta;
-        this.game.worldY += moveY * delta;
+        // this.game.worldX += moveX * delta;
+        // this.game.worldY += moveY * delta;
 
         // Check if the animation state needs to be switched
-        // TODO: Check if the player has the scythe or a different weapon equipped and change the spritesheet accordingly
-        if (this.isMoving && this.currentAnimation !== "walking") {
-            this.currentAnimation = "walking";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-walk-scythe.png"), 0, 0, 92, 55, 4, 0.2);
-        } else if (!this.isMoving && this.currentAnimation !== "standing") {
-            this.currentAnimation = "standing";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
-        }
-    };
+        // // TODO: Check if the player has the scythe or a different weapon equipped and change the spritesheet accordingly
+        // if (this.isMoving && this.currentAnimation !== "walking") {
+        //     this.currentAnimation = "walking";
+        //     this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-walk-scythe.png"), 0, 0, 92, 55, 4, 0.2);
+        // } else if (!this.isMoving && this.currentAnimation !== "standing") {
+        //     this.currentAnimation = "standing";
+        //     this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
+        // }
+    }
 
-    draw(ctx) {
+    draw(ctx, game) {
         // Draw the character in the center of the canvas with the direction and offset the character up or down via the yOffset
         this.animator.drawFrame(this.game.clockTick, ctx,
-            ctx.canvas.width / 2 - this.animator.width * 1.5 / 2,
-            ctx.canvas.height / 2 - this.animator.height * 1.5 / 2 + this.yOffset,
+            this.x -= this.game.worldX,
+        this.y -= this.game.worldY,
             this.lastMove); // Pass the lastMove as direction
         this.box.draw(ctx, this.game);
     }

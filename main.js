@@ -6,6 +6,7 @@ ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-walk.png");
 ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-walk-scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-stand.png");
 ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-stand-scythe.png");
+ASSET_MANAGER.queueDownload("./sprites/zombie-spritesheet-stand.png");
 ASSET_MANAGER.queueDownload("./sprites/grass.png");
 
 ASSET_MANAGER.downloadAll(() => {
@@ -16,6 +17,7 @@ ASSET_MANAGER.downloadAll(() => {
 	gameEngine.init(ctx);	// Initialize the game engine given the canvas context
 
 	gameEngine.addEntity(new Dude(gameEngine));	// Add the player character 'Dude' to the game engine
+	gameEngine.addEntity(new Zombie(gameEngine));
 
 	gameEngine.start();	// Start the game engine
 });

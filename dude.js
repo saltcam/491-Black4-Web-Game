@@ -74,7 +74,7 @@ class Dude{
         }
     };
 
-    draw(ctx) {
+    draw(ctx, game) {
         // Draw the character in the center of the canvas with the direction and offset the character up or down via the yOffset
         this.animator.drawFrame(this.game.clockTick, ctx,
             ctx.canvas.width / 2 - this.animator.width * 1.5 / 2,

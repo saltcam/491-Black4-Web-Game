@@ -40,7 +40,8 @@ class BoundingBox {
         }
 
             ctx.strokeRect(
-                this.left, this.top,
+                this.left,
+                this.top,
                 this.width,
                 this.height);
             ctx.closePath();
