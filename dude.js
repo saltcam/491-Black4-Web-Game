@@ -4,7 +4,11 @@ class Dude {
         this.game = game;
 
         // Define the animator for the character. The parameters are: spritesheet, xStart, yStart, width, height, frameCount, frameDuration
-        this.animator = new Animator(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-walk.png"), 0, 0, 48, 55, 4, 0.2);
+        // For unarmed walk, use width of 48, height of 55, frameCount of 4, and frameDuration of 0.2
+        // For scythe walk, use width of 92, height of 55, frameCount of 4, and frameDuration of 0.2
+        // For unarmed standing, use width of 48, height of 55, frameCount of 2, and frameDuration of 0.5
+        // For scythe standing, use width of 92, height of 55, frameCount of 2, and frameDuration of 0.5
+        this.animator = new Animator(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);
 
         this.yOffset = -25; // Offsets the character upwards from the center of the canvas (you see this used in the draw() method below)
 
@@ -15,7 +19,7 @@ class Dude {
         this.movementSpeed = 200; // Movement Speed
         this.lastMove = "right"; // Default direction
         this.isMoving = false;  // Is the character currently moving?
-        this.currentAnimation = "walking"; // Can be "walking" or "standing" for now
+        this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
     };
 
     update() {
@@ -25,33 +29,45 @@ class Dude {
 
         this.isMoving = false; // Reset the isMoving flag to false
 
-        // Update the world position based on key presses
-        if (this.game.keys["w"]) {
-            this.isMoving = true; // Set the isMoving flag to true
-            this.game.worldY -= delta;
-        }
-        if (this.game.keys["s"]) {
-            this.isMoving = true; // Set the isMoving flag to true
-            this.game.worldY += delta;
-        }
+        // Initialize movement vector components, we will use this to normalize the movement vector (so diagonal movement isn't faster than horizontal or vertical movement)
+        let moveX = 0;
+        let moveY = 0;
+
+        // Update movement vector based on key presses
+        if (this.game.keys["w"]) moveY -= 1;
+        if (this.game.keys["s"]) moveY += 1;
         if (this.game.keys["a"]) {
-            this.isMoving = true; // Set the isMoving flag to true
-            this.game.worldX -= delta;
-            this.lastMove = "left"; // Set the lastMove to left
+            moveX -= 1;
+            this.lastMove = "left";     // Remember the last direction the character moved
         }
         if (this.game.keys["d"]) {
-            this.isMoving = true; // Set the isMoving flag to true
-            this.game.worldX += delta;
-            this.lastMove = "right"; // Set the lastMove to right
+            moveX += 1;
+            this.lastMove = "right";    // Remember the last direction the character moved
         }
 
+        // Check if the character is moving
+        this.isMoving = (moveX !== 0 || moveY !== 0);
+
+        // Normalize the movement vector by calculating the length of the vector and dividing the components by the length
+        // If this confuses you, just know that all this is doing is preventing diagonal movement from being faster than horizontal or vertical movement
+        let length = Math.sqrt(moveX * moveX + moveY * moveY);
+        if (length > 0) {
+            moveX /= length;
+            moveY /= length;
+        }
+
+        // Apply movement to the character's world position in the game engine
+        this.game.worldX += moveX * delta;
+        this.game.worldY += moveY * delta;
+
         // Check if the animation state needs to be switched
+        // TODO: Check if the player has the scythe or a different weapon equipped and change the spritesheet accordingly
         if (this.isMoving && this.currentAnimation !== "walking") {
             this.currentAnimation = "walking";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-walk.png"), 4, 0.2);
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-walk-scythe.png"), 0, 0, 92, 55, 4, 0.2);
         } else if (!this.isMoving && this.currentAnimation !== "standing") {
             this.currentAnimation = "standing";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand.png"), 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
         }
     };
 
