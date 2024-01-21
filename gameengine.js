@@ -31,6 +31,17 @@ class GameEngine {
         this.timer = new Timer();
     };
 
+    initCamera() {
+        // Assuming the player is already created and added to the entities list
+        if(!this.entities.find(entity => entity instanceof Dude)) {
+            console.log("Player not found!");
+        }
+        else {
+            const player = this.entities.find(entity => entity instanceof Dude);
+            this.camera = new Camera(player, this.ctx.canvas.width, this.ctx.canvas.height);
+        }
+    }
+
     start() {
         this.running = true;
         const gameLoop = () => {
@@ -88,31 +99,22 @@ class GameEngine {
         // Clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        // Get the grass texture and define the scale factor
-        const grass = ASSET_MANAGER.getAsset("./sprites/grass.png");
-        const scaleFactor = 2;  // Define the scale factor of the ground texture (e.g., 2 for twice as large)
-        const tileWidth = grass.width * scaleFactor;
-        const tileHeight = grass.height * scaleFactor;
-
-        // Calculate the starting point for drawing tiles
-        let startX = -(this.worldX % tileWidth);
-        if (this.worldX < 0) startX -= tileWidth;
-        let startY = -(this.worldY % tileHeight);
-        if (this.worldY < 0) startY -= tileHeight;
-
-        // Draw the grass tiles with pixel snapping
-        for (let x = startX; x < this.ctx.canvas.width; x += tileWidth) {
-            for (let y = startY; y < this.ctx.canvas.height; y += tileHeight) {
-                // Math.round(x) and Math.round(y) are used to ensure that the position of each tile is rounded to the nearest integer,
-                // which prevents the tiles from blurring when the world position is not an integer. (fixes a tile edge flickering issue).
-                this.ctx.drawImage(grass, 0, 0, grass.width, grass.height, Math.round(x), Math.round(y), tileWidth, tileHeight);
-            }
+        // Draw the grass texture relative to the camera
+        this.drawGrassBackground();
+        
+        // Draw entities relative to the camera
+        for (let i = 0; i < this.entities.length; i++) {
+            // Adjust the position of each entitiy to the camera
+            this.entities[i].draw(this.ctx, this.camera.x, this.camera.y);
         }
 
-        // Draw game entities
-        for (let i = this.entities.length - 1; i >= 0; i--) {
-            this.entities[i].draw(this.ctx, this);
-        }
+        // // Draw game entities ORIGINAL
+        // for (let i = this.entities.length - 1; i >= 0; i--) {
+        //     this.entities[i].draw(this.ctx, this);
+        // }
+
+        //draw the mouse tracker
+        this.drawMouseTracker(this.ctx);
     };
 
     update() {

@@ -28,10 +28,14 @@ class Animator {
 
         // Draw the current frame
         ctx.drawImage(this.spritesheet,
-            this.xStart + (this.width * frame), this.yStart, 
-            this.width, this.height,
-            x, y,
-            this.width * 1.5, this.height * 1.5);
+            this.xStart + (this.width * frame),
+            this.yStart,
+            this.width,
+            this.height,
+            x,
+            y,
+            this.width * 1.5,
+            this.height * 1.5);
 
         // Restore the context to its original state
         ctx.restore();

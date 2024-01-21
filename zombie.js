@@ -1,5 +1,8 @@
-class Zombie {
+class Zombie extends Entity{
     constructor(game) {
+        super(game, 600, 300, 57, 85, "enemy", 200,
+            "./sprites/zombie-spritesheet-stand-.png",
+            0, 0, 48, 55, 4, 0.2);
         this.game = game;
 
         this.animator = new Animator(ASSET_MANAGER.getAsset("./sprites/zombie-spritesheet-stand.png"), 0, 0, 48, 55, 2, 0.5);
@@ -27,66 +30,16 @@ class Zombie {
     }
 
     update() {
-        // Calculate the delta time which is defined as the time passed in seconds since the last frame.
-        // We will use this to calculate how much we should move the character on this frame.
-        const delta = this.game.clockTick * this.movementSpeed;
-
-        this.isMoving = false; // Reset the isMoving flag to false
-
-        this.x -= this.game.worldX;
-        this.y -= this.game.worldY;
-
-
-
-        // // Initialize movement vector components, we will use this to normalize the movement vector (so diagonal movement isn't faster than horizontal or vertical movement)
-        // let moveX = 0;
-        // let moveY = 0;
-        //
-        // // Update movement vector based on key presses
-        // if (this.game.keys["w"]) moveY -= 1;
-        // if (this.game.keys["s"]) moveY += 1;
-        // if (this.game.keys["a"]) {
-        //     moveX -= 1;
-        //     this.lastMove = "left";     // Remember the last direction the character moved
-        // }
-        // if (this.game.keys["d"]) {
-        //     moveX += 1;
-        //     this.lastMove = "right";    // Remember the last direction the character moved
-        // }
-        //
-        // // Check if the character is moving
-        // this.isMoving = (moveX !== 0 || moveY !== 0);
-        //
-        // // Normalize the movement vector by calculating the length of the vector and dividing the components by the length
-        // // If this confuses you, just know that all this is doing is preventing diagonal movement from being faster than horizontal or vertical movement
-        // let length = Math.sqrt(moveX * moveX + moveY * moveY);
-        // if (length > 0) {
-        //     moveX /= length;
-        //     moveY /= length;
-        // }
-
-        // Apply movement to the character's world position in the game engine
-        // this.game.worldX += moveX * delta;
-        // this.game.worldY += moveY * delta;
-
-        // Check if the animation state needs to be switched
-        // // TODO: Check if the player has the scythe or a different weapon equipped and change the spritesheet accordingly
-        // if (this.isMoving && this.currentAnimation !== "walking") {
-        //     this.currentAnimation = "walking";
-        //     this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-walk-scythe.png"), 0, 0, 92, 55, 4, 0.2);
-        // } else if (!this.isMoving && this.currentAnimation !== "standing") {
-        //     this.currentAnimation = "standing";
-        //     this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
-        // }
+        this.boundingBox.update(this.worldX, this.worldY);
     }
 
     draw(ctx, game) {
-        // Draw the character in the center of the canvas with the direction and offset the character up or down via the yOffset
-        this.animator.drawFrame(this.game.clockTick, ctx,
-            this.x -= this.game.worldX,
-        this.y -= this.game.worldY,
-            this.lastMove); // Pass the lastMove as direction
-        this.box.draw(ctx, this.game);
+        let screenX = this.worldX - this.game.camera.x;
+        let screenY = this.worldY - this.game.camera.y;
+
+        // Draw the player at the calculated screen position
+        this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+        this.boundingBox.draw(ctx, this.game);
     }
 
 }

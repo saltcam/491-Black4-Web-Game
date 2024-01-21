@@ -17,7 +17,8 @@ ASSET_MANAGER.downloadAll(() => {
 	gameEngine.init(ctx);	// Initialize the game engine given the canvas context
 
 	gameEngine.addEntity(new Dude(gameEngine));	// Add the player character 'Dude' to the game engine
+	gameEngine.initCamera();
 	gameEngine.addEntity(new Zombie(gameEngine));
-
+	//gameEngine.addEntity(new upgradeScreen(gameEngine)); // Add upgrade screen to the game engine
 	gameEngine.start();	// Start the game engine
 });

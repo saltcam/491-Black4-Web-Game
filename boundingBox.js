@@ -20,8 +20,8 @@ class BoundingBox {
 
     // update the x and y values in case the entity moves
     update(newX, newY){
-        this.x = newX;
-        this.y = newY;
+        this.left = newX;
+        this.top = newY;
     }
 
     draw(ctx, game) {
@@ -40,8 +40,8 @@ class BoundingBox {
         }
 
             ctx.strokeRect(
-                this.left,
-                this.top,
+                this.left - game.camera.x,
+                this.top - game.camera.y,
                 this.width,
                 this.height);
             ctx.closePath();
