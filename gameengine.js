@@ -15,9 +15,13 @@ class GameEngine {
         this.wheel = null;
         this.keys = {};
 
-        // World position
-        this.worldX = 0;
-        this.worldY = 0;
+        // this.worldX = 0;
+        // this.worldY = 0;
+
+        // Initialize the Camera
+        this.camera = null;
+
+        // this.mapComplete = false; // Used to track when map is complete to load the upgrade screen
 
         // Options and the Details
         this.options = options || {
@@ -42,7 +46,7 @@ class GameEngine {
         }
     }
 
-    start() {
+   start() {
         this.running = true;
         const gameLoop = () => {
             this.loop();
@@ -116,6 +120,29 @@ class GameEngine {
         //draw the mouse tracker
         this.drawMouseTracker(this.ctx);
     };
+
+    drawGrassBackground() {
+        const grass = ASSET_MANAGER.getAsset("./sprites/grass.png");
+        const scaleFactor = 2;
+        const tileWidth = grass.width * scaleFactor;
+        const tileHeight = grass.height * scaleFactor;
+
+        // Calculate the starting point for drawing tiles based on the camera position
+        // let startX = -Math.round(this.camera.x % tileWidth);
+        // let startY = -Math.round(this.camera.y % tileHeight);
+        let startX = -Math.round((this.camera.x + this.ctx.canvas.width / 2) % tileWidth);
+        let startY = -Math.round((this.camera.y + this.ctx.canvas.height / 2) % tileHeight);
+
+        if (startX > 0) startX -= tileWidth;
+        if (startY > 0) startY -= tileHeight;
+
+        // Fill the visible area with the grass texture
+        for (let x = startX; x <this.ctx.canvas.width; x += tileWidth) {
+            for (let y = startY; y < this.ctx.canvas.height; y += tileHeight) {
+                this.ctx.drawImage(grass, 0, 0, grass.width, grass.height, x, y, tileWidth, tileHeight);
+            }
+        }
+    }
 
     update() {
         let entitiesCount = this.entities.length;

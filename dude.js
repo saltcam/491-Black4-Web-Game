@@ -85,8 +85,8 @@ class Dude extends Entity{
         }
 
         // Apply movement to the character's world position in the game engine
-        this.game.worldX += moveX * delta;
-        this.game.worldY += moveY * delta;
+        this.worldX += moveX * delta;
+        this.worldY += moveY * delta;
 
         // Check if the animation state needs to be switched
         // TODO: Check if the player has the scythe or a different weapon equipped and change the spritesheet accordingly
