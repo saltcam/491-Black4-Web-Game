@@ -25,6 +25,16 @@ class Dude extends Entity{
         this.lastMove = "right"; // Default direction
         this.isMoving = false;  // Is the character currently moving?
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
+
+        //Attack cooldown and Last time the attack was used
+        this.primaryAttackCooldown = 1;
+        this.spinAttackCooldown = 2;
+        this.lastPrimaryAttackTime = -10000;
+        this.lastSpinAttackTime = -10000;
+
+        // Initialize the player worldX and Y to the center of the canvas
+        // this.worldX = this.game.ctx.canvas.width / 2 - this.animator.width * 1.5 / 2;
+        // this.worldY = this.game.ctx.canvas.height / 2 - this.animator.height * 1.5 / 2 + this.yOffset;
     };
 
     update() {
@@ -51,6 +61,16 @@ class Dude extends Entity{
         if (this.game.keys["d"]) {
             moveX += 1;
             this.lastMove = "right";    // Remember the last direction the character moved
+        }
+
+        if (this.game.rightClick) {
+            this.performSpinAttack();
+            this.game.rightClick = false; // Reset the right-click flag
+        }
+
+        if (this.game.leftClick) {
+            this.performPrimaryAttack();
+            this.game.leftClick = false; // Reset the right-click flag
         }
 
         // Check if the character is moving
@@ -81,12 +101,104 @@ class Dude extends Entity{
         this.boundingBox.update(this.worldX, this.worldY);
     };
 
+    //Find the center of the character
+    calculateCenter() {
+        return {
+            x: this.worldX + this.animator.width * 1.5 / 2,
+            y: this.worldY + this.animator.height * 1.5 / 2 + this.yOffset
+        };
+    }
+
+    // Sets the flag indicating a spin attack has happened
+    performSpinAttack() {
+        const currentTime = this.game.timer.gameTime;
+
+        if (this.game.rightClick && currentTime - this.lastSpinAttackTime >= this.spinAttackCooldown) {
+            this.isSpinning = true; // Set the isSpinning flag to true
+            this.spinAttackDuration = 10; // Duration of the spin attack in seconds
+            this.lastSpinAttackTime = currentTime;
+        }
+    }
+
+    /* Calculates the angle toward the mouse click position and sets the attack angle
+     Sets the flag indicating a primary attack has happened */
+    performPrimaryAttack() {
+        const currentTime = this.game.timer.gameTime;
+        if (this.game.leftClick && currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
+            const clickPos = this.game.leftClick;
+
+            let screenXCenter = this.worldX - this.game.camera.x + this.boundingBox.width * 1.5 / 2;
+            let screenYCenter = this.worldY - this.game.camera.y + this.boundingBox.height * 1.5 / 2;
+
+            // Calculate the angle towards the click position
+            const dx = clickPos.x - screenXCenter;
+            const dy = clickPos.y - screenYCenter;
+            this.attackAngle = Math.atan2(dy, dx);
+
+            this.isAttacking = true; // Set the isAttacking flag to true
+            this.attackDuration = 0.25; // Duration of the attack animation
+            this.game.leftClick = null; // Reset the left-click
+            this.lastPrimaryAttackTime = currentTime;
+        }
+    }
+
     draw(ctx, game) {
         // Draw the character in the center of the canvas with the direction and offset the character up or down via the yOffset
-        this.animator.drawFrame(this.game.clockTick, ctx,
-            ctx.canvas.width / 2 - this.animator.width * 1.5 / 2,
-            ctx.canvas.height / 2 - this.animator.height * 1.5 / 2 + this.yOffset,
-            this.lastMove); // Pass the lastMove as direction
-        this.box.draw(ctx, this.game);
+        // this.animator.drawFrame(this.game.clockTick, ctx,
+        //     ctx.canvas.width / 2 - this.animator.width * 1.5 / 2,
+        //     ctx.canvas.height / 2 - this.animator.height * 1.5 / 2 + this.yOffset,
+        //     this.lastMove); // Pass the lastMove as direction
+
+        //this.animator.drawFrame(this.game.clockTick, ctx,this.worldX, this.worldY, this.lastMove);
+        let screenX = this.worldX - this.game.camera.x;
+        let screenY = this.worldY - this.game.camera.y;
+
+        // Draw the player at the calculated screen position
+        this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+
+        this.boundingBox.draw(ctx, this.game);
+
+        // Calculate the screen position for the center of the player
+        let screenXCenter = this.worldX - this.game.camera.x + this.boundingBox.width * 1.5 / 2;
+        let screenYCenter = this.worldY - this.game.camera.y + this.boundingBox.height * 1.5 / 2;
+
+        // Draw the spin attack if the character is 'spinning'
+        if (this.isSpinning) {
+            const spinAttackRadius = 115; // Adjust this value to change size of attack
+
+            // Placeholder for attacking sprite. A red see through circle is drawn for now. (could be used for damage later?)
+            ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+            ctx.beginPath();
+            ctx.arc(screenXCenter, screenYCenter, spinAttackRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Update spin attack duration
+            this.spinAttackDuration -= this.game.clockTick;
+            if (this.spinAttackDuration <= 0) {
+                this.isSpinning = false;
+            }
+        }
+
+        // Draw the attack cone if the character is attacking
+        if (this.isAttacking) {
+
+            // Placeholder for attacking sprite. A red see through cone is drawn for now. (could be used for damage later?)
+            ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+            ctx.beginPath();
+            ctx.moveTo(screenXCenter, screenYCenter);
+
+            // Draw the attack cone
+            const coneRadius = 135; // Fixed radius for the attack cone
+            const coneAngle = Math.PI / 3; // Defines the spread of the attack cone
+            ctx.arc(screenXCenter, screenYCenter, coneRadius, this.attackAngle - coneAngle / 2, this.attackAngle + coneAngle / 2); // Draw a consistent arc for the attack cone
+            ctx.closePath();
+            ctx.fill();
+
+            // Update attack duration
+            this.attackDuration -= this.game.clockTick;
+            if (this.attackDuration <= 0) {
+                this.isAttacking = false;
+            }
+        }
     }
 }

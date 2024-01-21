@@ -66,9 +66,9 @@ class GameEngine {
 
         this.ctx.canvas.addEventListener("click", e => {
             if (this.options.debugging) {
-                console.log("CLICK", getXandY(e));
+                console.log("LEFT_CLICK", getXandY(e));
             }
-            this.click = getXandY(e);
+            this.leftClick = getXandY(e);
         });
 
         this.ctx.canvas.addEventListener("wheel", e => {
@@ -80,11 +80,11 @@ class GameEngine {
         });
 
         this.ctx.canvas.addEventListener("contextmenu", e => {
+            e.preventDefault(); // Prevent the default context menu
             if (this.options.debugging) {
                 console.log("RIGHT_CLICK", getXandY(e));
             }
-            e.preventDefault(); // Prevent Context Menu
-            this.rightclick = getXandY(e);
+            this.rightClick = true; // Set the right-click flag
         });
 
         this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key] = true);
@@ -140,6 +140,22 @@ class GameEngine {
         this.update();
         this.draw();
     };
+
+    //draws the mouse tracker
+    drawMouseTracker(ctx) {
+        if (this.mouse) {
+            const crossSize = 10; // Size of the cross
+            ctx.strokeStyle = 'white'; // Color of the cross
+            ctx.beginPath();
+            // Draw horizontal line
+            ctx.moveTo(this.mouse.x - crossSize, this.mouse.y);
+            ctx.lineTo(this.mouse.x + crossSize, this.mouse.y);
+            // Draw vertical line
+            ctx.moveTo(this.mouse.x, this.mouse.y - crossSize);
+            ctx.lineTo(this.mouse.x, this.mouse.y + crossSize);
+            ctx.stroke();
+        }
+    }
 
 };
 
