@@ -28,4 +28,31 @@ class Entity {
         this.worldY = worldY;
     }
 
+        // Method to find the center of the entity
+        calculateCenter() {
+            return {
+                x: this.worldX + this.animator.width / 2,
+                y: this.worldY + this.animator.height / 2
+            };
+        }
+
+        // Method to calculate the angle between the entity and a target (The player usually)
+        calcTargetAngle(target) {
+            if (target) {
+                const targetCenter = target.calculateCenter();
+                const selfCenter = this.calculateCenter();
+    
+                // Calculate direction vector towards the target's center
+                const dirX = targetCenter.x + 16 - selfCenter.x;
+                const dirY = targetCenter.y - selfCenter.y;
+    
+                // Normalize the direction
+                const length = Math.sqrt(dirX * dirX + dirY * dirY);
+                return {
+                    x: length > 0 ? dirX / length : 0,
+                    y: length > 0 ? dirY / length : 0
+                };
+            }
+        }
+
 }

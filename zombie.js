@@ -15,21 +15,21 @@ class Zombie extends Entity{
         // initializing the player's bounding box
         this.box = new BoundingBox(this.x + 40, this.y - 20, 57, 85, "enemy");
 
-        this.movementSpeed = 200; // Movement Speed
+        this.movementSpeed = 50; // Movement Speed
         this.lastMove = "right"; // Default direction
         this.isMoving = false;  // Is the character currently moving?
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
     }
 
-    /**
-     * calculates which angles to move at in order to chase player
-     */
-    calcTargetAngle() {
-
-
-    }
-
     update() {
+        const player = this.game.player;
+        const targetDirection = this.calcTargetAngle(player);
+
+        // Apply movement based on the direction and the zombie's speed
+        this.worldX += targetDirection.x * this.movementSpeed * this.game.clockTick;
+        this.worldY += targetDirection.y * this.movementSpeed * this.game.clockTick;
+
+        // Update the bounding box
         this.boundingBox.update(this.worldX, this.worldY);
     }
 

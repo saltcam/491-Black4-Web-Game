@@ -96,6 +96,9 @@ class GameEngine {
     };
 
     addEntity(entity) {
+        if (entity instanceof Dude) {
+            this.player = entity; // Keep a reference to the player for tracking
+        }
         this.entities.push(entity);
     };
 

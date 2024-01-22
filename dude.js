@@ -1,3 +1,5 @@
+var SPIN_ATTACK_RADIUS = 115; // Default value
+var CONE_ATTACK_RADIUS = 135; // Default value
 // Dude is our main character. He can move up down left and right on the map.
 class Dude extends Entity{
     constructor(game) {
@@ -98,16 +100,8 @@ class Dude extends Entity{
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
         }
 
-        this.boundingBox.update(this.worldX, this.worldY);
+        this.boundingBox.update(this.worldX + 39, this.worldY);
     };
-
-    //Find the center of the character
-    calculateCenter() {
-        return {
-            x: this.worldX + this.animator.width * 1.5 / 2,
-            y: this.worldY + this.animator.height * 1.5 / 2 + this.yOffset
-        };
-    }
 
     // Sets the flag indicating a spin attack has happened
     performSpinAttack() {
@@ -115,7 +109,7 @@ class Dude extends Entity{
 
         if (this.game.rightClick && currentTime - this.lastSpinAttackTime >= this.spinAttackCooldown) {
             this.isSpinning = true; // Set the isSpinning flag to true
-            this.spinAttackDuration = 10; // Duration of the spin attack in seconds
+            this.spinAttackDuration = 0.25; // Duration of the spin attack in seconds
             this.lastSpinAttackTime = currentTime;
         }
     }
@@ -127,8 +121,8 @@ class Dude extends Entity{
         if (this.game.leftClick && currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
             const clickPos = this.game.leftClick;
 
-            let screenXCenter = this.worldX - this.game.camera.x + this.boundingBox.width * 1.5 / 2;
-            let screenYCenter = this.worldY - this.game.camera.y + this.boundingBox.height * 1.5 / 2;
+            let screenXCenter = this.worldX - this.game.camera.x + this.animator.width * 1.5 / 2;
+            let screenYCenter = this.worldY - this.game.camera.y + this.animator.height * 1.5 / 2;
 
             // Calculate the angle towards the click position
             const dx = clickPos.x - screenXCenter;
@@ -159,12 +153,12 @@ class Dude extends Entity{
         this.boundingBox.draw(ctx, this.game);
 
         // Calculate the screen position for the center of the player
-        let screenXCenter = this.worldX - this.game.camera.x + this.boundingBox.width * 1.5 / 2;
-        let screenYCenter = this.worldY - this.game.camera.y + this.boundingBox.height * 1.5 / 2;
+        let screenXCenter = this.worldX - this.game.camera.x + this.animator.width * 1.5 / 2;
+        let screenYCenter = this.worldY - this.game.camera.y + this.animator.height * 1.5 / 2;
 
         // Draw the spin attack if the character is 'spinning'
         if (this.isSpinning) {
-            const spinAttackRadius = 115; // Adjust this value to change size of attack
+            const spinAttackRadius = SPIN_ATTACK_RADIUS; // Adjust this value to change size of attack
 
             // Placeholder for attacking sprite. A red see through circle is drawn for now. (could be used for damage later?)
             ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
@@ -188,7 +182,7 @@ class Dude extends Entity{
             ctx.moveTo(screenXCenter, screenYCenter);
 
             // Draw the attack cone
-            const coneRadius = 135; // Fixed radius for the attack cone
+            const coneRadius = CONE_ATTACK_RADIUS; // Fixed radius for the attack cone
             const coneAngle = Math.PI / 3; // Defines the spread of the attack cone
             ctx.arc(screenXCenter, screenYCenter, coneRadius, this.attackAngle - coneAngle / 2, this.attackAngle + coneAngle / 2); // Draw a consistent arc for the attack cone
             ctx.closePath();
