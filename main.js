@@ -7,7 +7,8 @@ ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-walk-scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-stand.png");
 ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-stand-scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/zombie-spritesheet-stand.png");
-ASSET_MANAGER.queueDownload("./sprites/grass.png");
+ASSET_MANAGER.queueDownload("./sprites/map_grasslands.png");
+ASSET_MANAGER.queueDownload("./sprites/map_stone_border.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");

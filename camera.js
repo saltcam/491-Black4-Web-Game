@@ -23,9 +23,22 @@ class Camera {
         return center.x - this.width / 2 + 20;
     }
 
+    set x(value) {
+        this._x = value;
+    }
+
     get y() {
         // Center the camera on the player vertically
         const center = this.player.calculateCenter();
         return center.y - this.height / 2 + 15;
+    }
+
+    set y(value) {
+        this._y = value;
+    }
+
+    update() {
+        this._x = this.player.worldX - this.width / 2;
+        this._y = this.player.worldY - this.height / 2;
     }
 }

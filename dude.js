@@ -1,6 +1,12 @@
 var SPIN_ATTACK_RADIUS = 115; // Default value
 var CONE_ATTACK_RADIUS = 135; // Default value
-// Dude is our main character. He can move up down left and right on the map.
+/* Dude is our main character. He can move up down left and right on the map.
+   For unarmed walk, use width of 48, height of 55, frameCount of 4, and frameDuration of 0.2
+   For scythe walk, use width of 92, height of 55, frameCount of 4, and frameDuration of 0.2
+   For unarmed standing, use width of 48, height of 55, frameCount of 2, and frameDuration of 0.5
+   For scythe standing, use width of 92, height of 55, frameCount of 2, and frameDuration of 0.5
+ */
+
 class Dude extends Entity{
     constructor(game) {
         super(1000, 1000, 10, game, 0, 0,
@@ -13,7 +19,7 @@ class Dude extends Entity{
         this.isMoving = false;  // Is the character currently moving?
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
 
-        //Attack cooldown and Last time the attack was used
+        // Attack cooldown and Last time the attack was used
         this.primaryAttackCooldown = 1;
         this.spinAttackCooldown = 2;
         this.lastPrimaryAttackTime = -1;

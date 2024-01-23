@@ -21,6 +21,9 @@ class GameEngine {
         // Initialize the Camera
         this.camera = null;
 
+        this.mapCenterX = 0;
+        this.mapCenterY = 0;
+
         // this.mapComplete = false; // Used to track when map is complete to load the upgrade screen
 
         // Options and the Details
@@ -35,6 +38,10 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
+
+        const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
+        this.mapCenterX = map.width / 2;
+        this.mapCenterY = map.height / 2;
     };
 
     initCamera() {
@@ -110,7 +117,7 @@ class GameEngine {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
         // Draw the grass texture relative to the camera
-        this.drawGrassBackground();
+        this.drawMap();
         
         // Draw entities relative to the camera
         for (let i = 0; i < this.entities.length; i++) {
@@ -118,12 +125,7 @@ class GameEngine {
             this.entities[i].draw(this.ctx, this.camera.x, this.camera.y);
         }
 
-        // // Draw game entities ORIGINAL
-        // for (let i = this.entities.length - 1; i >= 0; i--) {
-        //     this.entities[i].draw(this.ctx, this);
-        // }
-
-        //draw the mouse tracker
+        // Draw the mouse tracker
         this.drawMouseTracker(this.ctx);
         this.drawTimer(this.ctx);
     };
