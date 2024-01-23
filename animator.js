@@ -1,10 +1,11 @@
 // This is the animator class for dude.js. It is used to animate the character spritesheet and allows the spritesheet to be changed on the fly.
 class Animator {
-    constructor(spritesheet, xStart, yStart, width, height, frameCount, frameDuration) {
+    constructor(spritesheet, xStart, yStart, width, height, frameCount, frameDuration, scale) {
         Object.assign(this, { spritesheet, xStart, yStart, width, height, frameCount, frameDuration }); // Copy the parameters into the object
 
         this.elapsedTime = 0;
         this.totalTime = this.frameCount * this.frameDuration;
+        this.scale = scale;
     };
 
     drawFrame(tick, ctx, x, y, direction) {
@@ -20,13 +21,21 @@ class Animator {
         // Save the current context state 
         ctx.save();
 
+         // Calculate scale adjustments
+         const scaledWidth = this.width * this.scale;
+         const scaledHeight = this.height * this.scale;
+ 
+         // Adjust x and y to center the sprite based on the new scaled size
+         x = x - (scaledWidth - this.width) / 2;
+         y = y - (scaledHeight - this.height) / 2;
+
         // Flip the canvas context horizontally if the direction is left
         if (direction === "left") {
             ctx.scale(-1, 1);   // Scale the context horizontally by -1 (flips horizontally)
-            x = -x - (this.width * 1.5); // Adjust the x position when flipped
+            x = -x - (this.width * this.scale); // Adjust the x position when flipped
         }
 
-        // Draw the current frame
+        // Draw the current frame with scaling
         ctx.drawImage(this.spritesheet,
             this.xStart + (this.width * frame),
             this.yStart,
@@ -34,8 +43,8 @@ class Animator {
             this.height,
             x,
             y,
-            this.width * 1.5,
-            this.height * 1.5);
+            scaledWidth,
+            scaledHeight);
 
         // Restore the context to its original state
         ctx.restore();

@@ -1,6 +1,6 @@
 class Enemy_Contact extends Entity {
-    constructor(name, maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur) {
-        super(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur);
+    constructor(name, maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale) {
+        super(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale);
 
         this.name = name;
         this.lastMove = "right"; // Default direction
@@ -25,8 +25,15 @@ class Enemy_Contact extends Entity {
         this.worldX += targetDirection.x * this.movementSpeed * this.game.clockTick;
         this.worldY += targetDirection.y * this.movementSpeed * this.game.clockTick;
 
-        // Update the bounding box
-        this.boundingBox.update(this.worldX, this.worldY);
+        // Calculate the scaled center of the sprite
+        const scaledCenterX = this.worldX + (this.animator.width) / 2;
+        const scaledCenterY = this.worldY + (this.animator.height) / 2;
+
+        // Update the bounding box to be centered around the scaled sprite
+        const boxWidth = this.boundingBox.width; // You might want to scale these too
+        const boxHeight = this.boundingBox.height; // You might want to scale these too
+        this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
+        
         this.checkCollisionAndDealDamage();
     }
 

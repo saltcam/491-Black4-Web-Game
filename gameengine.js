@@ -21,9 +21,6 @@ class GameEngine {
         // Initialize the Camera
         this.camera = null;
 
-        this.mapCenterX = 0;
-        this.mapCenterY = 0;
-
         // this.mapComplete = false; // Used to track when map is complete to load the upgrade screen
 
         // Options and the Details
@@ -38,16 +35,28 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-
-        const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
-        this.mapCenterX = map.width / 2;
-        this.mapCenterY = map.height / 2;
     };
+
+    initMap() {
+        const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
+        this.mapWidth = map.width;
+        this.mapHeight = map.height;
+
+        // Assuming the player is already created and added to the entities list
+        if(!this.entities.find(entity => entity instanceof Dude)) {
+            console.log("gameengine.initMaP(): Player not found!");
+        }
+        else {
+            // Center the map behind the player
+            this.mapX = -this.mapWidth / 2 + this.player.animator.width / 2;
+            this.mapY = -this.mapHeight / 2 + this.player.animator.height / 2;
+        }
+    }
 
     initCamera() {
         // Assuming the player is already created and added to the entities list
         if(!this.entities.find(entity => entity instanceof Dude)) {
-            console.log("Player not found!");
+            console.log("gameengine.initCamera(): Player not found!");
         }
         else {
             const player = this.entities.find(entity => entity instanceof Dude);
@@ -116,7 +125,7 @@ class GameEngine {
         // Clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        // Draw the grass texture relative to the camera
+        // Draw the grass texture behind the player
         this.drawMap();
         
         // Draw entities relative to the camera
@@ -142,19 +151,14 @@ class GameEngine {
 
     drawMap() {
         const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
-        const mapWidth = map.width;
-        const mapHeight = map.height;
-
-        // Map's fixed position in the game world (top-left corner)
-        const mapWorldX = 0;
-        const mapWorldY = 0;
 
         // Adjust the position based on the camera
-        const screenX = mapWorldX - this.camera.x - this.ctx.canvas.width / 2;
-        const screenY = mapWorldY - this.camera.y - this.ctx.canvas.height / 2;
+        // Note: The map moves in the opposite direction of the camera to simulate player movement
+        const screenX = this.mapX - this.camera.x;
+        const screenY = this.mapY - this.camera.y;
 
         // Draw the map
-        this.ctx.drawImage(map, screenX, screenY, mapWidth, mapHeight);
+        this.ctx.drawImage(map, screenX, screenY, this.mapWidth, this.mapHeight);
     }
 
     update() {
@@ -177,9 +181,9 @@ class GameEngine {
         this.elapsedTime = Date.now() - this.startTime;
 
         if (this.elapsedTime % 10 === 0 && this.entities.length < 15) {
-            this.addEntity(new Enemy_Contact("Zombie", 15, this.entities.length, 1, gameEngine, 600, 300, 57, 85, "enemy", 50 + this.entities.length,
+            this.addEntity(new Enemy_Contact("Zombie", 15, this.entities.length, 1, gameEngine, 600, 300, 38, 56.66, "enemy", 50 + this.entities.length,
                 "./sprites/zombie-spritesheet-stand.png",
-                0, 0, 48, 55, 2, 0.5));
+                0, 0, 48, 55, 2, 0.5, 1.5));
         }
 
     };

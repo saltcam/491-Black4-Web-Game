@@ -1,18 +1,18 @@
 var SPIN_ATTACK_RADIUS = 115; // Default value
 var CONE_ATTACK_RADIUS = 135; // Default value
+
 /* Dude is our main character. He can move up down left and right on the map.
    For unarmed walk, use width of 48, height of 55, frameCount of 4, and frameDuration of 0.2
    For scythe walk, use width of 92, height of 55, frameCount of 4, and frameDuration of 0.2
    For unarmed standing, use width of 48, height of 55, frameCount of 2, and frameDuration of 0.5
    For scythe standing, use width of 92, height of 55, frameCount of 2, and frameDuration of 0.5
  */
-
 class Dude extends Entity{
     constructor(game) {
         super(1000, 1000, 10, game, 0, 0,
-            57, 85, "player", 200,
-            "./sprites/dude-spritesheet-stand-scythe.png",
-            0, 0, 92, 55, 2, 0.5);
+            38, 56.66, "player", 200,
+            "./sprites/dude-spritesheet-stand-scythe-CROSSTEST.png",
+            0, 0, 92, 55, 2, 0.5, 1.5);
 
         // Animation settings
         this.lastMove = "right"; // Default direction
@@ -24,22 +24,11 @@ class Dude extends Entity{
         this.spinAttackCooldown = 2;
         this.lastPrimaryAttackTime = -1;
         this.lastSpinAttackTime = -2;
-
-        // Dash features
-        this.isDashing = false;
-        this.dashCooldown = 5;
-        this.lastDashTime = 0;
-        this.dashX = 0;
-        this.dashY = 0;
-
-        // Set the initial spawn location
-        //this.worldX = this.game.mapCenterX;
-        //this.worldY = this.game.mapCenterY;
     };
 
     update() {
-        console.log(this.worldX);
-        console.log(this.worldY);
+        //console.log(this.worldX);
+        //console.log(this.worldY);
 
         // Calculate the delta time which is defined as the time passed in seconds since the last frame.
         // We will use this to calculate how much we should move the character on this frame.
@@ -51,27 +40,17 @@ class Dude extends Entity{
         let moveX = 0;
         let moveY = 0;
 
-        // if (!this.isDashing) {
-
-            // Update movement vector based on key presses
-            if (this.game.keys["w"]) moveY -= 1;
-            if (this.game.keys["s"]) moveY += 1;
-            if (this.game.keys["a"]) {
-                moveX -= 1;
-                this.lastMove = "left";     // Remember the last direction the character moved
-            }
-            if (this.game.keys["d"]) {
-                moveX += 1;
-                this.lastMove = "right";    // Remember the last direction the character moved
-            }
-
-
-        // }
-
-        // if (this.game.keys[" "]) {
-        //     console.log("DASH!");
-        //     this.isDashing = !this.isDashing;
-        // }
+        // Update movement vector based on key presses
+        if (this.game.keys["w"]) moveY -= 1;
+        if (this.game.keys["s"]) moveY += 1;
+        if (this.game.keys["a"]) {
+            moveX -= 1;
+            this.lastMove = "left";     // Remember the last direction the character moved
+        }
+        if (this.game.keys["d"]) {
+            moveX += 1;
+            this.lastMove = "right";    // Remember the last direction the character moved
+        }
 
         if (this.game.rightClick) {
             this.performSpinAttack();
@@ -105,26 +84,17 @@ class Dude extends Entity{
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-walk-scythe.png"), 0, 0, 92, 55, 4, 0.2);
         } else if (!this.isMoving && this.currentAnimation !== "standing") {
             this.currentAnimation = "standing";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe-CROSSTEST.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
         }
 
-        this.boundingBox.update(this.worldX + 39, this.worldY);
+        // Calculate the scaled center of the sprite
+        const scaledCenterX = this.worldX + (this.animator.width) / 2;
+        const scaledCenterY = this.worldY + (this.animator.height) / 2;
 
-        // Check is player is dashing, if so update position
-        if (this.isDashing) {
-            const dashSpeed = 500;
-            const dashDist = 300;
-            const dashMoveX = moveX * dashSpeed;
-            const dashMoveY = moveY * dashSpeed;
-            // update position in the world
-            this.worldX += dashMoveX * delta;
-            this.worldY += dashMoveY * delta;
-            this.dashDuration -= this.game.clockTick;
-            if (this.dashDuration <= 0) {
-                this.isDashing = false;
-            }
-
-        }
+        // Update the bounding box to be centered around the scaled sprite
+        const boxWidth = this.boundingBox.width; // You might want to scale these too
+        const boxHeight = this.boundingBox.height; // You might want to scale these too
+        this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
     };
 
     // Sets the flag indicating a spin attack has happened
@@ -140,11 +110,11 @@ class Dude extends Entity{
 
     /* Calculates the angle toward the mouse click position and sets the attack angle
      Sets the flag indicating a primary attack has happened */
-     performPrimaryAttack() {
+    performPrimaryAttack() {
         const currentTime = this.game.timer.gameTime;
         if (this.game.leftClick && currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
             const clickPos = this.game.leftClick;
-            console.log(clickPos);
+            //console.log(clickPos);
     
             // Calculate the center position of the Dude character
             const center = this.calculateCenter();
@@ -161,23 +131,6 @@ class Dude extends Entity{
             this.game.leftClick = null; // Reset the left-click
             this.lastPrimaryAttackTime = currentTime;
         }
-    }
-    
-
-
-    performDash() {
-         const currentTime = this.game.timer.gameTime;
-         this.movementSpeed = this.movementSpeed * 2;
-        if (currentTime - this.lastDashTime >= this.dashCooldown) {
-            this.isDashing = true;
-            this.dashDuration = 1;
-            this.lastDashTime = currentTime;
-        } else {
-            this.isDashing = false;
-            this.dashX = 0;
-            this.dashY = 0;
-        }
-        this.movementSpeed = 200;
     }
 
     draw(ctx, game) {

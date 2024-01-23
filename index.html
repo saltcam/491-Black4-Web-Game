@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Game Project Title Goes Here</title>
+    <title>Guy with Scythe</title>
   
     <script type="text/javascript" src="./assetmanager.js"></script>
     <script type="text/javascript" src="./timer.js"></script>
@@ -19,17 +19,59 @@
     <style>
         body {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             background-color: black;
+            color: white; /* Set text color to white */
         }
 
         #gameWorld {
             cursor: none;
         }
 
+        #debugModeSection {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        #debugModeSection, #debugInfo {
+            color: white; /* Ensure the debug text is white */
+        }
     </style>
 </head>
 <body>
     <canvas id="gameWorld" width="1440" height="810" style="background: white; border: 1px solid black" tabindex="0" autofocus></canvas>
+
+    <!-- Debug Mode Section -->
+    <div id="debugModeSection">
+        <label for="debugModeCheckbox"><strong>Debug Mode</strong></label>
+        <input type="checkbox" id="debugModeCheckbox">
+        <div id="debugInfo" style="display: none;">
+            <p>Player Position: <span id="playerPosition">0x, 0y</span></p>
+        </div>
+    </div>
+
+    <!-- Additional script for debug mode -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugCheckbox = document.getElementById('debugModeCheckbox');
+            const debugInfo = document.getElementById('debugInfo');
+            const playerPosition = document.getElementById('playerPosition');
+
+            debugCheckbox.addEventListener('change', function() {
+                if (debugCheckbox.checked) {
+                    debugInfo.style.display = 'block';
+                    // Assuming gameEngine is your game engine instance and player is the Dude instance
+                    setInterval(() => {
+                        if (gameEngine.player) {
+                            playerPosition.textContent = `${gameEngine.player.worldX}x, ${gameEngine.player.worldY}y`;
+                        }
+                    }, 100); // Update every 100 milliseconds
+                } else {
+                    debugInfo.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

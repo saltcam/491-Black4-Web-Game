@@ -18,11 +18,7 @@ class BoundingBox {
         this.type = type;
     }
 
-    // update the x and y values in case the entity moves
-    update(newX, newY){
-        this.left = newX;
-        this.top = newY;
-    }
+
 
     get right() {
         return this.left + this.width;
@@ -37,6 +33,14 @@ class BoundingBox {
             this.right > other.left &&
             this.top < other.bottom &&
             this.bottom > other.top;
+    }
+    
+    // Update the bounding box to be centered around a given point
+    updateCentered(centerX, centerY, width, height) {
+        this.left = centerX - width / 2;
+        this.top = centerY - height / 2;
+        this.width = width;
+        this.height = height;
     }
 
     draw(ctx, game) {
@@ -62,5 +66,4 @@ class BoundingBox {
             ctx.closePath();
 
     }
-
 }

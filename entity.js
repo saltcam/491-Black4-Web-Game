@@ -21,17 +21,21 @@ class Entity {
      * @param animH
      * @param animFCount
      * @param animFDur
+     * @param scale The scale of the entity's sprite. 1.0 is normal size.
      */
-    constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur){
+    constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale){
         this.maxHP = maxHP;
         this.currHP = currHP;
         this.atkPow = atkPow;
         this.game = game;
         this.boundingBox = new BoundingBox(worldX, worldY, boxWidth, boxHeight, boxType);
-        this.animator = new Animator(ASSET_MANAGER.getAsset(spritePath), animXStart, animYStart, animW, animH, animFCount, animFDur);
+        this.animator = new Animator(ASSET_MANAGER.getAsset(spritePath), animXStart, animYStart, animW, animH, animFCount, animFDur, scale);
         this.movementSpeed = speed;
         this.worldX = worldX;
         this.worldY = worldY;
+
+        // Adjust the bounding box size based on scale
+        this.boundingBox = new BoundingBox(worldX, worldY, boxWidth * scale, boxHeight * scale, boxType);
     }
 
         // Method to find the center of the entity
