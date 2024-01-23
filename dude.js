@@ -16,8 +16,8 @@ class Dude extends Entity{
         //Attack cooldown and Last time the attack was used
         this.primaryAttackCooldown = 1;
         this.spinAttackCooldown = 2;
-        this.lastPrimaryAttackTime = -10000;
-        this.lastSpinAttackTime = -10000;
+        this.lastPrimaryAttackTime = -1;
+        this.lastSpinAttackTime = -2;
 
         // Dash features
         this.isDashing = false;
@@ -126,8 +126,8 @@ class Dude extends Entity{
     
             // Calculate the center position of the Dude character
             const center = this.calculateCenter();
-            const screenXCenter = center.x - this.game.camera.x;
-            const screenYCenter = center.y - this.game.camera.y;
+            const screenXCenter = center.x - this.game.camera.x + 18;
+            const screenYCenter = center.y - this.game.camera.y + 15;
     
             // Calculate the angle towards the click position
             const dx = clickPos.x - screenXCenter;
@@ -143,11 +143,6 @@ class Dude extends Entity{
 w    
 
     draw(ctx, game) {
-        // Draw the character in the center of the canvas with the direction and offset the character up or down via the yOffset
-        // this.animator.drawFrame(this.game.clockTick, ctx,
-        //     ctx.canvas.width / 2 - this.animator.width * 1.5 / 2,
-        //     ctx.canvas.height / 2 - this.animator.height * 1.5 / 2 + this.yOffset,
-        //     this.lastMove); // Pass the lastMove as direction
 
         //this.animator.drawFrame(this.game.clockTick, ctx,this.worldX, this.worldY, this.lastMove);
         let screenX = this.worldX - this.game.camera.x;
@@ -189,7 +184,7 @@ w
             ctx.moveTo(screenXCenter, screenYCenter);
 
             // Draw the attack cone
-            const coneRadius = CONE_ATTACK_RADIUS; // Fixed radius for the attack cone
+            const coneRadius = CONE_ATTACK_RADIUS; // Radius for the attack cone
             const coneAngle = Math.PI / 3; // Defines the spread of the attack cone
             ctx.arc(screenXCenter, screenYCenter, coneRadius, this.attackAngle - coneAngle / 2, this.attackAngle + coneAngle / 2); // Draw a consistent arc for the attack cone
             ctx.closePath();

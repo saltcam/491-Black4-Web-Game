@@ -24,6 +24,21 @@ class BoundingBox {
         this.top = newY;
     }
 
+    get right() {
+        return this.left + this.width;
+    }
+
+    get bottom() {
+        return this.top + this.height;
+    }
+
+    isColliding(other) {
+        return this.left < other.right &&
+            this.right > other.left &&
+            this.top < other.bottom &&
+            this.bottom > other.top;
+    }
+
     draw(ctx, game) {
 
         // draws the box for you to see

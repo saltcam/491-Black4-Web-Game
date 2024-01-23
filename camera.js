@@ -20,7 +20,7 @@ class Camera {
     get x() {
         // Center the camera on the player horizontally
         const center = this.player.calculateCenter();
-        return center.x - this.width / 2 + 25;
+        return center.x - this.width / 2 + 20;
     }
 
     get y() {

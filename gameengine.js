@@ -27,6 +27,8 @@ class GameEngine {
         this.options = options || {
             debugging: false,
         };
+        this.startTime = null;
+        this.elapsedTime = 0;
     };
 
     init(ctx) {
@@ -48,6 +50,7 @@ class GameEngine {
 
    start() {
         this.running = true;
+        this.startTime = Date.now();
         const gameLoop = () => {
             this.loop();
             requestAnimFrame(gameLoop, this.ctx.canvas);
@@ -122,6 +125,7 @@ class GameEngine {
 
         //draw the mouse tracker
         this.drawMouseTracker(this.ctx);
+        this.drawTimer(this.ctx);
     };
 
     drawTimer(ctx) {
@@ -167,6 +171,15 @@ class GameEngine {
                 this.entities.splice(i, 1);
             }
         }
+
+        this.elapsedTime = Date.now() - this.startTime;
+
+        if (this.elapsedTime % 10 === 0 && this.entities.length < 15) {
+            this.addEntity(new Enemy_Contact("Zombie", 15, this.entities.length, 1, gameEngine, 600, 300, 57, 85, "enemy", 50 + this.entities.length,
+                "./sprites/zombie-spritesheet-stand.png",
+                0, 0, 48, 55, 2, 0.5));
+        }
+
     };
 
     loop() {
