@@ -109,6 +109,22 @@ class Dude extends Entity{
         }
 
         this.boundingBox.update(this.worldX + 39, this.worldY);
+
+        // Check is player is dashing, if so update position
+        if (this.isDashing) {
+            const dashSpeed = 500;
+            const dashDist = 300;
+            const dashMoveX = moveX * dashSpeed;
+            const dashMoveY = moveY * dashSpeed;
+            // update position in the world
+            this.worldX += dashMoveX * delta;
+            this.worldY += dashMoveY * delta;
+            this.dashDuration -= this.game.clockTick;
+            if (this.dashDuration <= 0) {
+                this.isDashing = false;
+            }
+
+        }
     };
 
     // Sets the flag indicating a spin attack has happened
@@ -146,7 +162,23 @@ class Dude extends Entity{
             this.lastPrimaryAttackTime = currentTime;
         }
     }
-w    
+    
+
+
+    performDash() {
+         const currentTime = this.game.timer.gameTime;
+         this.movementSpeed = this.movementSpeed * 2;
+        if (currentTime - this.lastDashTime >= this.dashCooldown) {
+            this.isDashing = true;
+            this.dashDuration = 1;
+            this.lastDashTime = currentTime;
+        } else {
+            this.isDashing = false;
+            this.dashX = 0;
+            this.dashY = 0;
+        }
+        this.movementSpeed = 200;
+    }
 
     draw(ctx, game) {
 
@@ -200,6 +232,14 @@ w
             this.attackDuration -= this.game.clockTick;
             if (this.attackDuration <= 0) {
                 this.isAttacking = false;
+            }
+        }
+
+        // Draw the character if they are dashing
+        if (this.isDashing) {
+
+            if (this.dashDuration <= 0) {
+                this.isDashing = false;
             }
         }
     }
