@@ -18,7 +18,12 @@ ASSET_MANAGER.downloadAll(() => {
 
 	gameEngine.addEntity(new Dude(gameEngine));	// Add the player character 'Dude' to the game engine
 	gameEngine.initCamera();
-	gameEngine.addEntity(new Zombie(gameEngine));
+	// gameEngine.addEntity(new Enemy_Contact("Zombie", 10, 10, 10, gameEngine, 600, 300, 57, 85, "enemy", 50,
+	// 	"./sprites/zombie-spritesheet-stand.png",
+	// 	0, 0, 48, 55, 2, 0.5));
+	gameEngine.addEntity(new Enemy_Contact("Zombie", 10, 10, 10, gameEngine, 600, 300, 57, 85, "enemy", 0,
+		"./sprites/zombie-spritesheet-stand.png",
+		0, 0, 48, 55, 2, 0.5));
 	//gameEngine.addEntity(new upgradeScreen(gameEngine)); // Add upgrade screen to the game engine
 	gameEngine.start();	// Start the game engine
 });

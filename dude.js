@@ -3,27 +3,12 @@ var CONE_ATTACK_RADIUS = 135; // Default value
 // Dude is our main character. He can move up down left and right on the map.
 class Dude extends Entity{
     constructor(game) {
-        super(game, 720, 405, 57, 85, "player", 200,
+        super(1000, 1000, 10, game, 0, 0,
+            57, 85, "player", 200,
             "./sprites/dude-spritesheet-stand-scythe.png",
             0, 0, 92, 55, 2, 0.5);
-        // this.game = game;
 
-        // Define the animator for the character. The parameters are: spritesheet, xStart, yStart, width, height, frameCount, frameDuration
-        // For unarmed walk, use width of 48, height of 55, frameCount of 4, and frameDuration of 0.2
-        // For scythe walk, use width of 92, height of 55, frameCount of 4, and frameDuration of 0.2
-        // For unarmed standing, use width of 48, height of 55, frameCount of 2, and frameDuration of 0.5
-        // For scythe standing, use width of 92, height of 55, frameCount of 2, and frameDuration of 0.5
-        // this.animator = new Animator(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);
-        this.yOffset = -25; // Offsets the character upwards from the center of the canvas (you see this used in the draw() method below)
-
-        // Calculate the middle of the canvas, then adjust by half of the character's width and height to center the character
-        // this.x = (game.ctx.canvas.width / 2) - (this.animator.width * 1.5 / 2);
-        // this.y = (game.ctx.canvas.height / 2) - (this.animator.height * 1.5 / 2);
-        // initializing the player's bounding box
-        //TODO find a better way of getting height and width values for player
-        // this.box = new BoundingBox(this.x + 40, this.y - 20, 57, 85, "player");
-
-        // this.movementSpeed = 200; // Movement Speed
+        // Animation settings
         this.lastMove = "right"; // Default direction
         this.isMoving = false;  // Is the character currently moving?
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
@@ -34,9 +19,16 @@ class Dude extends Entity{
         this.lastPrimaryAttackTime = -10000;
         this.lastSpinAttackTime = -10000;
 
-        // Initialize the player worldX and Y to the center of the canvas
-        // this.worldX = this.game.ctx.canvas.width / 2 - this.animator.width * 1.5 / 2;
-        // this.worldY = this.game.ctx.canvas.height / 2 - this.animator.height * 1.5 / 2 + this.yOffset;
+        // Dash features
+        this.isDashing = false;
+        this.dashCooldown = 5;
+        this.lastDashTime = 0;
+        this.dashX = 0;
+        this.dashY = 0;
+
+        // Set the initial spawn location
+        //this.worldX = this.game.mapCenterX;
+        //this.worldY = this.game.mapCenterY;
     };
 
     update() {
@@ -53,17 +45,27 @@ class Dude extends Entity{
         let moveX = 0;
         let moveY = 0;
 
-        // Update movement vector based on key presses
-        if (this.game.keys["w"]) moveY -= 1;
-        if (this.game.keys["s"]) moveY += 1;
-        if (this.game.keys["a"]) {
-            moveX -= 1;
-            this.lastMove = "left";     // Remember the last direction the character moved
-        }
-        if (this.game.keys["d"]) {
-            moveX += 1;
-            this.lastMove = "right";    // Remember the last direction the character moved
-        }
+        // if (!this.isDashing) {
+
+            // Update movement vector based on key presses
+            if (this.game.keys["w"]) moveY -= 1;
+            if (this.game.keys["s"]) moveY += 1;
+            if (this.game.keys["a"]) {
+                moveX -= 1;
+                this.lastMove = "left";     // Remember the last direction the character moved
+            }
+            if (this.game.keys["d"]) {
+                moveX += 1;
+                this.lastMove = "right";    // Remember the last direction the character moved
+            }
+
+
+        // }
+
+        // if (this.game.keys[" "]) {
+        //     console.log("DASH!");
+        //     this.isDashing = !this.isDashing;
+        // }
 
         if (this.game.rightClick) {
             this.performSpinAttack();
@@ -120,6 +122,7 @@ class Dude extends Entity{
         const currentTime = this.game.timer.gameTime;
         if (this.game.leftClick && currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
             const clickPos = this.game.leftClick;
+            console.log(clickPos);
     
             // Calculate the center position of the Dude character
             const center = this.calculateCenter();
@@ -154,6 +157,7 @@ w
         this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
 
         this.boundingBox.draw(ctx, this.game);
+        this.drawHealth(ctx);
 
         // Calculate the screen position for the center of the player
         let screenXCenter = this.worldX - this.game.camera.x + this.animator.width * 1.5 / 2;

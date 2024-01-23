@@ -124,27 +124,31 @@ class GameEngine {
         this.drawMouseTracker(this.ctx);
     };
 
-    drawGrassBackground() {
-        const grass = ASSET_MANAGER.getAsset("./sprites/grass.png");
-        const scaleFactor = 2;
-        const tileWidth = grass.width * scaleFactor;
-        const tileHeight = grass.height * scaleFactor;
+    drawTimer(ctx) {
+        ctx.font = '20px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center'
+        const minutes = Math.floor(this.elapsedTime / 60000);
+        const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
+        const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
+    }
 
-        // Calculate the starting point for drawing tiles based on the camera position
-        // let startX = -Math.round(this.camera.x % tileWidth);
-        // let startY = -Math.round(this.camera.y % tileHeight);
-        let startX = -Math.round((this.camera.x + this.ctx.canvas.width / 2) % tileWidth);
-        let startY = -Math.round((this.camera.y + this.ctx.canvas.height / 2) % tileHeight);
+    drawMap() {
+        const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
+        const mapWidth = map.width;
+        const mapHeight = map.height;
 
-        if (startX > 0) startX -= tileWidth;
-        if (startY > 0) startY -= tileHeight;
+        // Map's fixed position in the game world (top-left corner)
+        const mapWorldX = 0;
+        const mapWorldY = 0;
 
-        // Fill the visible area with the grass texture
-        for (let x = startX; x <this.ctx.canvas.width; x += tileWidth) {
-            for (let y = startY; y < this.ctx.canvas.height; y += tileHeight) {
-                this.ctx.drawImage(grass, 0, 0, grass.width, grass.height, x, y, tileWidth, tileHeight);
-            }
-        }
+        // Adjust the position based on the camera
+        const screenX = mapWorldX - this.camera.x - this.ctx.canvas.width / 2;
+        const screenY = mapWorldY - this.camera.y - this.ctx.canvas.height / 2;
+
+        // Draw the map
+        this.ctx.drawImage(map, screenX, screenY, mapWidth, mapHeight);
     }
 
     update() {
