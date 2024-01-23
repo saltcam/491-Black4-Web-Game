@@ -135,20 +135,27 @@ class GameEngine {
         this.drawMouseTracker(this.ctx);
         this.drawTimer(this.ctx);
 
-        // If the player is dead
-        if (this.player.isDead) {
-            // Draw "You Died!" text in large red font at the center of the canvas
-            this.ctx.font = '75px Arial';
-            this.ctx.fillStyle = 'red';
-            this.ctx.textAlign = 'center'
-            this.ctx.fillText('You Died!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
-        }
-
         // Draw entities relative to the camera
         for (let i = 0; i < this.entities.length; i++) {
             // Adjust the position of each entity to the camera
             this.entities[i].draw(this.ctx);
         }
+
+        // If the player is dead
+        if (this.player.isDead) {
+            this.ctx.beginPath();
+
+            this.ctx.fillStyle = "black";
+            this.ctx.fillRect(this.ctx.canvas.width / 2 - 175, this.ctx.canvas.height / 2 - 75, 350, 95);
+            // Draw "You Died!" text in large red font at the center of the canvas
+            this.ctx.font = '75px Arial';
+            this.ctx.fillStyle = 'red';
+            this.ctx.textAlign = 'center'
+            this.ctx.fillText('You Died!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+            this.ctx.closePath();
+        }
+
+
     }
 
     drawTimer(ctx) {
