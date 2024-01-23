@@ -18,7 +18,23 @@ class Enemy_Contact extends Entity {
 
     // this is the movement pattern for enemies that just approach the player
     update() {
+        // If health hits 0 or below, this entity is declared dead
+        if (this.currHP <= 0)
+        {
+            this.isDead = true;
+        }
+
         const player = this.game.player;
+
+        // Determine the direction to face based on the player's position
+        if (player.worldX < this.worldX) {
+            // Player is to the left, face left
+            this.lastMove = "left";
+        } else if (player.worldX > this.worldX) {
+            // Player is to the right, face right
+            this.lastMove = "right";
+        }
+
         const targetDirection = this.calcTargetAngle(player);
 
         // Apply movement based on the direction and the zombie's speed
@@ -33,7 +49,7 @@ class Enemy_Contact extends Entity {
         const boxWidth = this.boundingBox.width; // You might want to scale these too
         const boxHeight = this.boundingBox.height; // You might want to scale these too
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
-        
+
         this.checkCollisionAndDealDamage();
     }
 

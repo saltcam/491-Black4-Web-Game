@@ -28,14 +28,12 @@ class Entity {
         this.currHP = currHP;
         this.atkPow = atkPow;
         this.game = game;
-        this.boundingBox = new BoundingBox(worldX, worldY, boxWidth, boxHeight, boxType);
+        this.boundingBox = new BoundingBox(worldX, worldY, boxWidth * scale, boxHeight * scale, boxType);
         this.animator = new Animator(ASSET_MANAGER.getAsset(spritePath), animXStart, animYStart, animW, animH, animFCount, animFDur, scale);
         this.movementSpeed = speed;
         this.worldX = worldX;
         this.worldY = worldY;
-
-        // Adjust the bounding box size based on scale
-        this.boundingBox = new BoundingBox(worldX, worldY, boxWidth * scale, boxHeight * scale, boxType);
+        this.isDead = false;
     }
 
         // Method to find the center of the entity

@@ -7,11 +7,11 @@ var CONE_ATTACK_RADIUS = 135; // Default value
    For unarmed standing, use width of 48, height of 55, frameCount of 2, and frameDuration of 0.5
    For scythe standing, use width of 92, height of 55, frameCount of 2, and frameDuration of 0.5
  */
-class Dude extends Entity{
+class Dude extends Entity {
     constructor(game) {
         super(1000, 1000, 10, game, 0, 0,
             38, 56.66, "player", 200,
-            "./sprites/dude-spritesheet-stand-scythe-CROSSTEST.png",
+            "./sprites/dude-spritesheet-stand-scythe.png",
             0, 0, 92, 55, 2, 0.5, 1.5);
 
         // Animation settings
@@ -27,6 +27,12 @@ class Dude extends Entity{
     };
 
     update() {
+        // If health hits 0 or below, this entity is declared dead
+        if (this.currHP <= 0) {
+            this.isDead = true;
+        }
+
+        // Debug World Coordinates
         //console.log(this.worldX);
         //console.log(this.worldY);
 
@@ -84,7 +90,7 @@ class Dude extends Entity{
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-walk-scythe.png"), 0, 0, 92, 55, 4, 0.2);
         } else if (!this.isMoving && this.currentAnimation !== "standing") {
             this.currentAnimation = "standing";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe-CROSSTEST.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
         }
 
         // Calculate the scaled center of the sprite
@@ -103,7 +109,7 @@ class Dude extends Entity{
 
         if (this.game.rightClick && currentTime - this.lastSpinAttackTime >= this.spinAttackCooldown) {
             this.isSpinning = true; // Set the isSpinning flag to true
-            this.spinAttackDuration = 0.25; // Duration of the spin attack in seconds
+            this.spinAttackDuration = 0.1; // Duration of the spin attack in seconds
             this.lastSpinAttackTime = currentTime;
         }
     }
@@ -114,26 +120,28 @@ class Dude extends Entity{
         const currentTime = this.game.timer.gameTime;
         if (this.game.leftClick && currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
             const clickPos = this.game.leftClick;
+
+            // Debug: Show left click position
             //console.log(clickPos);
-    
-            // Calculate the center position of the Dude character
+
+            // Calculate the center of the character
             const center = this.calculateCenter();
-            const screenXCenter = center.x - this.game.camera.x + 18;
-            const screenYCenter = center.y - this.game.camera.y + 15;
-    
+            const screenXCenter = center.x - this.game.camera.x;
+            const screenYCenter = center.y - this.game.camera.y;
+
             // Calculate the angle towards the click position
             const dx = clickPos.x - screenXCenter;
             const dy = clickPos.y - screenYCenter;
             this.attackAngle = Math.atan2(dy, dx);
-    
+
             this.isAttacking = true; // Set the isAttacking flag to true
-            this.attackDuration = 0.25; // Duration of the attack animation
+            this.attackDuration = 0.1; // Duration of the attack animation
             this.game.leftClick = null; // Reset the left-click
             this.lastPrimaryAttackTime = currentTime;
         }
     }
 
-    draw(ctx, game) {
+    draw(ctx) {
 
         //this.animator.drawFrame(this.game.clockTick, ctx,this.worldX, this.worldY, this.lastMove);
         let screenX = this.worldX - this.game.camera.x;
@@ -145,18 +153,15 @@ class Dude extends Entity{
         this.boundingBox.draw(ctx, this.game);
         this.drawHealth(ctx);
 
-        // Calculate the screen position for the center of the player
-        let screenXCenter = this.worldX - this.game.camera.x + this.animator.width * 1.5 / 2;
-        let screenYCenter = this.worldY - this.game.camera.y + this.animator.height * 1.5 / 2;
+        // Used to calculate the center of the screen from which attacks originate from
+        let screenXCenter = this.calculateCenter().x - this.game.camera.x;
+        let screenYCenter = this.calculateCenter().y - this.game.camera.y;
 
         // Draw the spin attack if the character is 'spinning'
         if (this.isSpinning) {
-            const spinAttackRadius = SPIN_ATTACK_RADIUS; // Adjust this value to change size of attack
-
-            // Placeholder for attacking sprite. A red see through circle is drawn for now. (could be used for damage later?)
             ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
             ctx.beginPath();
-            ctx.arc(screenXCenter, screenYCenter, spinAttackRadius, 0, Math.PI * 2);
+            ctx.arc(screenXCenter, screenYCenter, SPIN_ATTACK_RADIUS, 0, Math.PI * 2);
             ctx.fill();
 
             // Update spin attack duration
@@ -168,7 +173,6 @@ class Dude extends Entity{
 
         // Draw the attack cone if the character is attacking
         if (this.isAttacking) {
-
             // Placeholder for attacking sprite. A red see through cone is drawn for now. (could be used for damage later?)
             ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
             ctx.beginPath();
@@ -185,14 +189,6 @@ class Dude extends Entity{
             this.attackDuration -= this.game.clockTick;
             if (this.attackDuration <= 0) {
                 this.isAttacking = false;
-            }
-        }
-
-        // Draw the character if they are dashing
-        if (this.isDashing) {
-
-            if (this.dashDuration <= 0) {
-                this.isDashing = false;
             }
         }
     }

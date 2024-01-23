@@ -23,19 +23,22 @@ class GameEngine {
 
         // this.mapComplete = false; // Used to track when map is complete to load the upgrade screen
 
+        // Tracks the player object
+        this.player = null;
+
         // Options and the Details
         this.options = options || {
             debugging: false,
         };
         this.startTime = null;
         this.elapsedTime = 0;
-    };
+    }
 
     init(ctx) {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-    };
+    }
 
     initMap() {
         const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
@@ -65,14 +68,14 @@ class GameEngine {
     }
 
    start() {
-        this.running = true;
+        //this.running = true; // Not being used?
         this.startTime = Date.now();
         const gameLoop = () => {
             this.loop();
             requestAnimFrame(gameLoop, this.ctx.canvas);
         };
         gameLoop();
-    };
+    }
 
     startInput() {
         const getXandY = e => ({
@@ -96,7 +99,7 @@ class GameEngine {
 
         this.ctx.canvas.addEventListener("wheel", e => {
             if (this.options.debugging) {
-                console.log("WHEEL", getXandY(e), e.wheelDelta);
+                console.log("WHEEL", getXandY(e), e.deltaY);
             }
             e.preventDefault(); // Prevent Scrolling
             this.wheel = e;
@@ -112,14 +115,14 @@ class GameEngine {
 
         this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key] = true);
         this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key] = false);
-    };
+    }
 
     addEntity(entity) {
         if (entity instanceof Dude) {
             this.player = entity; // Keep a reference to the player for tracking
         }
         this.entities.push(entity);
-    };
+    }
 
     draw() {
         // Clear the canvas
@@ -127,17 +130,26 @@ class GameEngine {
 
         // Draw the grass texture behind the player
         this.drawMap();
-        
-        // Draw entities relative to the camera
-        for (let i = 0; i < this.entities.length; i++) {
-            // Adjust the position of each entitiy to the camera
-            this.entities[i].draw(this.ctx, this.camera.x, this.camera.y);
-        }
 
         // Draw the mouse tracker
         this.drawMouseTracker(this.ctx);
         this.drawTimer(this.ctx);
-    };
+
+        // If the player is dead
+        if (this.player.isDead) {
+            // Draw "You Died!" text in large red font at the center of the canvas
+            this.ctx.font = '75px Arial';
+            this.ctx.fillStyle = 'red';
+            this.ctx.textAlign = 'center'
+            this.ctx.fillText('You Died!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+        }
+
+        // Draw entities relative to the camera
+        for (let i = 0; i < this.entities.length; i++) {
+            // Adjust the position of each entity to the camera
+            this.entities[i].draw(this.ctx);
+        }
+    }
 
     drawTimer(ctx) {
         ctx.font = '20px Arial';
@@ -167,7 +179,7 @@ class GameEngine {
         for (let i = 0; i < entitiesCount; i++) {
             let entity = this.entities[i];
 
-            if (!entity.removeFromWorld) {
+            if (!this.entities[i].removeFromWorld) {
                 entity.update();
             }
         }
@@ -180,19 +192,40 @@ class GameEngine {
 
         this.elapsedTime = Date.now() - this.startTime;
 
-        if (this.elapsedTime % 10 === 0 && this.entities.length < 15) {
-            this.addEntity(new Enemy_Contact("Zombie", 15, this.entities.length, 1, gameEngine, 600, 300, 38, 56.66, "enemy", 50 + this.entities.length,
-                "./sprites/zombie-spritesheet-stand.png",
-                0, 0, 48, 55, 2, 0.5, 1.5));
+        if (this.entities.length < 100) {
+            let randomXNumber, randomYNumber;
+
+            do {
+                // Set min X = -(horizontal canvas resolution) * modifier
+                let minX = -(1440);
+                let maxX = minX * (-1);
+                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX; // Random x-coordinate between -700 and 700 units
+
+                // Set min Y = -(vertical canvas resolution) * modifier
+                let minY = -(810);
+                let maxY = minY * (-1);
+                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY; // Random y-coordinate between -405 and 405 units
+            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);
+
+            this.addEntity(new Enemy_Contact("Zombie", 15, 15, 1, gameEngine, randomXNumber, randomYNumber, 38, 56.66, "enemy", 37,
+                "./sprites/zombie-spritesheet-walk.png",
+                0, 0, 48, 55, 4, 0.35, 1.5));
         }
 
-    };
+
+        // Loop through entities and set removeFromWorld to true for each
+        for (let i = 0; i < this.entities.length; i++) {
+            if (this.entities[i].isDead) {
+                this.entities[i].removeFromWorld = true;
+            }
+        }
+    }
 
     loop() {
         this.clockTick = this.timer.tick();
         this.update();
         this.draw();
-    };
+    }
 
     //draws the mouse tracker
     drawMouseTracker(ctx) {
@@ -210,6 +243,6 @@ class GameEngine {
         }
     }
 
-};
+}
 
 // KV Le was here :)

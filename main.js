@@ -8,6 +8,7 @@ ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-stand.png");
 ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-stand-scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/dude-spritesheet-stand-scythe-CROSSTEST.png");
 ASSET_MANAGER.queueDownload("./sprites/zombie-spritesheet-stand.png");
+ASSET_MANAGER.queueDownload("./sprites/zombie-spritesheet-walk.png");
 ASSET_MANAGER.queueDownload("./sprites/map_grasslands.png");
 ASSET_MANAGER.queueDownload("./sprites/map_stone_border.png");
 
