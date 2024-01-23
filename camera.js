@@ -17,25 +17,15 @@ class Camera {
         this.height = canvasHeight;     // Height of the camera's viewport
     }
 
-    /**
-     * Gets the x-coordinate of the camera in the game world.
-     * The camera's x-coordinate is centered to the player.
-     *
-     * @returns {number} The x-coordinate of the camera.
-     */
     get x() {
         // Center the camera on the player horizontally
-        return this.player.worldX - this.width / 2;
+        const center = this.player.calculateCenter();
+        return center.x - this.width / 2 + 25;
     }
 
-    /**
-     * Gets the y-coordinate of the camera in the game world.
-     * The camera's y-coordinate is centered to the player.
-     *
-     * @returns {number} The y-coordinate of the camera.
-     */
     get y() {
         // Center the camera on the player vertically
-        return this.player.worldY - this.height / 2;
+        const center = this.player.calculateCenter();
+        return center.y - this.height / 2 + 15;
     }
 }

@@ -116,25 +116,28 @@ class Dude extends Entity{
 
     /* Calculates the angle toward the mouse click position and sets the attack angle
      Sets the flag indicating a primary attack has happened */
-    performPrimaryAttack() {
+     performPrimaryAttack() {
         const currentTime = this.game.timer.gameTime;
         if (this.game.leftClick && currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
             const clickPos = this.game.leftClick;
-
-            let screenXCenter = this.worldX - this.game.camera.x + this.animator.width * 1.5 / 2;
-            let screenYCenter = this.worldY - this.game.camera.y + this.animator.height * 1.5 / 2;
-
+    
+            // Calculate the center position of the Dude character
+            const center = this.calculateCenter();
+            const screenXCenter = center.x - this.game.camera.x;
+            const screenYCenter = center.y - this.game.camera.y;
+    
             // Calculate the angle towards the click position
             const dx = clickPos.x - screenXCenter;
             const dy = clickPos.y - screenYCenter;
             this.attackAngle = Math.atan2(dy, dx);
-
+    
             this.isAttacking = true; // Set the isAttacking flag to true
             this.attackDuration = 0.25; // Duration of the attack animation
             this.game.leftClick = null; // Reset the left-click
             this.lastPrimaryAttackTime = currentTime;
         }
     }
+w    
 
     draw(ctx, game) {
         // Draw the character in the center of the canvas with the direction and offset the character up or down via the yOffset
