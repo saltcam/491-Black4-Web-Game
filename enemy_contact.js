@@ -18,6 +18,8 @@ class Enemy_Contact extends Entity {
 
     // this is the movement pattern for enemies that just approach the player
     update() {
+        super.update();
+
         // If health hits 0 or below, this entity is declared dead
         if (this.currHP <= 0)
         {

@@ -27,6 +27,8 @@ class Dude extends Entity {
     };
 
     update() {
+        super.update();
+
         // If health hits 0 or below, this entity is declared dead
         if (this.currHP <= 0) {
             this.isDead = true;
@@ -93,14 +95,7 @@ class Dude extends Entity {
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
         }
 
-        // Calculate the scaled center of the sprite
-        const scaledCenterX = this.worldX + (this.animator.width) / 2;
-        const scaledCenterY = this.worldY + (this.animator.height) / 2;
 
-        // Update the bounding box to be centered around the scaled sprite
-        const boxWidth = this.boundingBox.width; // You might want to scale these too
-        const boxHeight = this.boundingBox.height; // You might want to scale these too
-        this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
     };
 
     // Sets the flag indicating a spin attack has happened

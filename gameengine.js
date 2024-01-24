@@ -199,24 +199,26 @@ class GameEngine {
 
         this.elapsedTime = Date.now() - this.startTime;
 
+        // Spawn 100 zombies
         if (this.entities.length < 100) {
             let randomXNumber, randomYNumber;
 
             do {
-                // Set min X = -(horizontal canvas resolution) * modifier
+                // Set min X = -(horizontal canvas resolution)
                 let minX = -(1440);
                 let maxX = minX * (-1);
-                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX; // Random x-coordinate between -700 and 700 units
+                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
 
-                // Set min Y = -(vertical canvas resolution) * modifier
+                // Set min Y = -(vertical canvas resolution)
                 let minY = -(810);
                 let maxY = minY * (-1);
-                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY; // Random y-coordinate between -405 and 405 units
+                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
             } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);
 
             this.addEntity(new Enemy_Contact("Zombie", 15, 15, 1, gameEngine, randomXNumber, randomYNumber, 38, 56.66, "enemy", 37,
                 "./sprites/zombie-spritesheet-walk.png",
-                0, 0, 48, 55, 4, 0.35, 1.5));
+                0, 0, 48, 55, 4, 0.35, 1.5
+            ));
         }
 
 

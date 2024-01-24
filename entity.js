@@ -36,6 +36,15 @@ class Entity {
         this.isDead = false;
     }
 
+        update() {
+            // Calculate the scaled center of the sprite
+            const scaledCenterX = this.worldX + (this.animator.width) / 2;
+            const scaledCenterY = this.worldY + (this.animator.height) / 2;
+
+            // Update the bounding box to be centered around the scaled sprite
+            this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
+        }
+
         // Method to find the center of the entity
         calculateCenter() {
             return {
