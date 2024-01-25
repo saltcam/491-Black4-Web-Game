@@ -153,6 +153,7 @@ class Dude extends Entity {
         let screenYCenter = this.calculateCenter().y - this.game.camera.y;
 
         // Draw the spin attack if the character is 'spinning'
+        // This will just draw a circle around the player that will detect enemy collisions
         if (this.isSpinning) {
             ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
             ctx.beginPath();
@@ -167,16 +168,19 @@ class Dude extends Entity {
         }
 
         // Draw the attack cone if the character is attacking
+        // This will draw a smaller circle with one side of the circle originating
+        // from the center of the player and the other side ending at the mouse click
+        // but only up to a specific diameter size
         if (this.isAttacking) {
-            // Placeholder for attacking sprite. A red see through cone is drawn for now. (could be used for damage later?)
-            ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+            // Calculate the angle of the attack towards the mouse position
+            let attackAngle = this.attackAngle;
+            const coneAngle = Math.PI / 4; // Half-angle of the attack cone, adjust as needed
+
+            // Draw the attack circle
+            ctx.fillStyle = "rgba(255, 0, 0, 0.2)"; // Semi-transparent red color
             ctx.beginPath();
             ctx.moveTo(screenXCenter, screenYCenter);
-
-            // Draw the attack cone
-            const coneRadius = CONE_ATTACK_RADIUS; // Radius for the attack cone
-            const coneAngle = Math.PI / 3; // Defines the spread of the attack cone
-            ctx.arc(screenXCenter, screenYCenter, coneRadius, this.attackAngle - coneAngle / 2, this.attackAngle + coneAngle / 2); // Draw a consistent arc for the attack cone
+            ctx.arc(screenXCenter, screenYCenter, CONE_ATTACK_RADIUS, attackAngle - coneAngle, attackAngle + coneAngle);
             ctx.closePath();
             ctx.fill();
 
