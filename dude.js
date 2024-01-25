@@ -1,5 +1,5 @@
-var SPIN_ATTACK_RADIUS = 115; // Default value
-var CONE_ATTACK_RADIUS = 135; // Default value
+var SECONDARY_ATTACK_RADIUS = 115; // Default value
+var PRIMARY_ATTACK_RADIUS = 135; // Default value
 
 /* Dude is our main character. He can move up down left and right on the map.
    For unarmed walk, use width of 48, height of 55, frameCount of 4, and frameDuration of 0.2
@@ -123,9 +123,6 @@ class Dude extends Entity {
         const currentTime = this.game.timer.gameTime;
         if (this.game.leftClick && currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
             const clickPos = this.game.leftClick;
-
-            // Debug: Show left click position
-            //console.log(clickPos);
 
             // Calculate the center of the character
             const center = this.calculateCenter();

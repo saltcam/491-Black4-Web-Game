@@ -11,6 +11,8 @@ ASSET_MANAGER.queueDownload("./sprites/zombie-spritesheet-stand.png");
 ASSET_MANAGER.queueDownload("./sprites/zombie-spritesheet-walk.png");
 ASSET_MANAGER.queueDownload("./sprites/map_grasslands.png");
 ASSET_MANAGER.queueDownload("./sprites/map_stone_border.png");
+ASSET_MANAGER.queueDownload("./sprites/portal.png");
+ASSET_MANAGER.queueDownload("./sprites/grass.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");

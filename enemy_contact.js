@@ -64,5 +64,4 @@ class Enemy_Contact extends Entity {
         this.boundingBox.draw(ctx, this.game);
         this.drawHealth(ctx);
     }
-
 }

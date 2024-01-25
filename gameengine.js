@@ -21,7 +21,26 @@ class GameEngine {
         // Initialize the Camera
         this.camera = null;
 
+        // What is the current map?
+        // 0 == Rest Area
+        // 1 == Grasslands
+        // 2 == Cave
+        // 3 == Space?
+        this.currMap = 1
+
+        // Define the scaling factors for each map
+        this.mapZeroScaleFactor = 0.25;
+        this.mapOneScaleFactor = 0.25;
+        this.mapTwoScaleFactor = 0.25;
+        this.mapThreeScaleFactor = 0.25;
+
         // this.mapComplete = false; // Used to track when map is complete to load the upgrade screen
+
+        // Tracks how many enemies are spawned
+        this.enemyCount = 0;
+
+        // Flag to tell whether the current round is over.
+        this.roundOver = false;
 
         // Tracks the player object
         this.player = null;
@@ -38,23 +57,58 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
+        this.initEnemySpawns();
+    }
+
+    initEnemySpawns() {
+        // Spawn 50 zombies
+        while (this.enemyCount < 5) {
+            let randomXNumber, randomYNumber;
+
+            do {
+                // Set min X = -(horizontal canvas resolution)
+                let minX = -(1440);
+                let maxX = minX * (-1);
+                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+
+                // Set min Y = -(vertical canvas resolution)
+                let minY = -(810);
+                let maxY = minY * (-1);
+                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);
+
+            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 38, 56.66, "enemy", 270,
+                "./sprites/zombie-spritesheet-walk.png",
+                0, 0, 48, 55, 4, 0.35, 1.5
+            ));
+
+            this.enemyCount++;
+        }
     }
 
     initMap() {
-        const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
-        this.mapWidth = map.width;
-        this.mapHeight = map.height;
-
-        // Assuming the player is already created and added to the entities list
-        if(!this.entities.find(entity => entity instanceof Dude)) {
-            console.log("gameengine.initMaP(): Player not found!");
-        }
-        else {
-            // Center the map behind the player
-            this.mapX = -this.mapWidth / 2 + this.player.animator.width / 2;
-            this.mapY = -this.mapHeight / 2 + this.player.animator.height / 2;
-        }
+        // const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
+        //
+        // // Store original map dimensions
+        // this.mapWidth = map.width;
+        // this.mapHeight = map.height;
+        //
+        // // Calculate the scaled dimensions of the map
+        // const scaledMapWidth = this.mapWidth * this.mapOneScaleFactor;
+        // const scaledMapHeight = this.mapHeight * this.mapOneScaleFactor;
+        //
+        // // Assuming the player is already created and added to the entities list
+        // if (!this.entities.find(entity => entity instanceof Dude)) {
+        //     console.log("gameengine.initMap(): Player not found!");
+        // } else {
+        //     const player = this.entities.find(entity => entity instanceof Dude);
+        //
+        //     // Set the initial map position to center the scaled map under the player
+        //     this.mapX = player.worldX - scaledMapWidth / 2;
+        //     this.mapY = player.worldY - scaledMapHeight / 2;
+        // }
     }
+
 
     initCamera() {
         // Assuming the player is already created and added to the entities list
@@ -155,7 +209,17 @@ class GameEngine {
             this.ctx.closePath();
         }
 
-
+        // // If the defeated all enemies, display 'You Won!'
+        // if (this.enemyCount <= 0) {
+        //     this.ctx.beginPath();
+        //
+        //     // Draw "You Won!" text in large yellow font at the center of the canvas
+        //     this.ctx.font = '75px Arial';
+        //     this.ctx.fillStyle = 'yellow';
+        //     this.ctx.textAlign = 'center'
+        //     this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+        //     this.ctx.closePath();
+        // }
     }
 
     drawTimer(ctx) {
@@ -169,19 +233,42 @@ class GameEngine {
     }
 
     drawMap() {
-        const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
+        // If 0, then Rest Area Map is used
+        if (this.currMap === 0) {
 
-        // Adjust the position based on the camera
-        // Note: The map moves in the opposite direction of the camera to simulate player movement
-        const screenX = this.mapX - this.camera.x;
-        const screenY = this.mapY - this.camera.y;
+        }
+        // If 1, then Grasslands Map is used
+        else if (this.currMap === 1) {
+            const map = ASSET_MANAGER.getAsset("./sprites/grass.png");
+            this.mapWidth = map.width;
+            this.mapHeight = map.height;
 
-        // Draw the map
-        this.ctx.drawImage(map, screenX, screenY, this.mapWidth, this.mapHeight);
+            // Calculate the scaled width and height of the map
+            const scaledWidth = this.mapWidth * this.mapOneScaleFactor;
+            const scaledHeight = this.mapHeight * this.mapOneScaleFactor;
+
+            // Draw the scaled map centered on the canvas
+            this.ctx.drawImage(map, 0, 0, scaledWidth, scaledHeight);
+        }
+        // If 2, then Cave Map is used
+        else if (this.currMap === 2){
+
+        }
+        // If 3, then Space Map is used
+        else if (this.currMap === 3){
+
+        }
     }
 
     update() {
         let entitiesCount = this.entities.length;
+
+        // Check if all enemies have been defeated
+        // If so, spawn the portal to the next area
+        if (this.enemyCount <= 0 && !this.roundOver) {
+            this.addEntity(new Portal(this, this.player.worldX + 200, this.player.worldY));
+            this.roundOver = true;
+        }
 
         for (let i = 0; i < entitiesCount; i++) {
             let entity = this.entities[i];
@@ -199,33 +286,12 @@ class GameEngine {
 
         this.elapsedTime = Date.now() - this.startTime;
 
-        // Spawn 100 zombies
-        if (this.entities.length < 100) {
-            let randomXNumber, randomYNumber;
-
-            do {
-                // Set min X = -(horizontal canvas resolution)
-                let minX = -(1440);
-                let maxX = minX * (-1);
-                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
-
-                // Set min Y = -(vertical canvas resolution)
-                let minY = -(810);
-                let maxY = minY * (-1);
-                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
-            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);
-
-            this.addEntity(new Enemy_Contact("Zombie", 15, 15, 1, gameEngine, randomXNumber, randomYNumber, 38, 56.66, "enemy", 37,
-                "./sprites/zombie-spritesheet-walk.png",
-                0, 0, 48, 55, 4, 0.35, 1.5
-            ));
-        }
-
-
-        // Loop through entities and set removeFromWorld to true for each
+        // Loop through entities and set removeFromWorld flags
         for (let i = 0; i < this.entities.length; i++) {
-            if (this.entities[i].isDead) {
+            // If dead Zombie
+            if (this.entities[i].name === "Zombie" && this.entities[i].isDead) {
                 this.entities[i].removeFromWorld = true;
+                this.enemyCount--;
             }
 
             // Removes any playerAttack attack circles if their duration is depleted
@@ -233,6 +299,16 @@ class GameEngine {
                 this.entities[i].removeFromWorld = true;
             }
         }
+
+        // // This is for testing purposes.
+        // // It will kill all zombies in the game to force the player to 'Win' after 30 seconds
+        // if (this.elapsedTime >= 5000) {
+        //     for (let i = 0; i < this.entities.length; i++) {
+        //         if (this.entities[i].name === "Zombie") {
+        //             this.entities[i].currHP = 0;
+        //         }
+        //     }
+        // }
     }
 
     loop() {
