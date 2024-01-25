@@ -106,6 +106,11 @@ class Dude extends Entity {
             this.isSpinning = true; // Set the isSpinning flag to true
             this.spinAttackDuration = 0.1; // Duration of the spin attack in seconds
             this.lastSpinAttackTime = currentTime;
+            this.game.addEntity(new AttackCirc(this.game, this,
+                SECONDARY_ATTACK_RADIUS,
+                'playerAttack',
+                0, 0,
+                this.spinAttackDuration));
         }
     }
 
@@ -125,14 +130,23 @@ class Dude extends Entity {
             const screenYCenter = center.y - this.game.camera.y;
 
             // Calculate the angle towards the click position
-            const dx = clickPos.x - screenXCenter;
-            const dy = clickPos.y - screenYCenter;
+            let dx = clickPos.x - screenXCenter;
+            let dy = clickPos.y - screenYCenter;
             this.attackAngle = Math.atan2(dy, dx);
+            //
+            const offsetDistance = PRIMARY_ATTACK_RADIUS * 0.6;
+            dx = Math.cos(this.attackAngle) * offsetDistance;
+            dy = Math.sin(this.attackAngle) * offsetDistance;
 
             this.isAttacking = true; // Set the isAttacking flag to true
             this.attackDuration = 0.1; // Duration of the attack animation
             this.game.leftClick = null; // Reset the left-click
             this.lastPrimaryAttackTime = currentTime;
+            this.game.addEntity(new AttackCirc(this.game, this,
+                PRIMARY_ATTACK_RADIUS/2,
+                'playerAttack',
+                dx, dy,
+                this.attackDuration));
         }
     }
 
@@ -154,41 +168,41 @@ class Dude extends Entity {
 
         // Draw the spin attack if the character is 'spinning'
         // This will just draw a circle around the player that will detect enemy collisions
-        if (this.isSpinning) {
-            ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
-            ctx.beginPath();
-            ctx.arc(screenXCenter, screenYCenter, SPIN_ATTACK_RADIUS, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Update spin attack duration
-            this.spinAttackDuration -= this.game.clockTick;
-            if (this.spinAttackDuration <= 0) {
-                this.isSpinning = false;
-            }
-        }
-
-        // Draw the attack cone if the character is attacking
-        // This will draw a smaller circle with one side of the circle originating
-        // from the center of the player and the other side ending at the mouse click
-        // but only up to a specific diameter size
-        if (this.isAttacking) {
-            // Calculate the angle of the attack towards the mouse position
-            let attackAngle = this.attackAngle;
-            const coneAngle = Math.PI / 4; // Half-angle of the attack cone, adjust as needed
-
-            // Draw the attack circle
-            ctx.fillStyle = "rgba(255, 0, 0, 0.2)"; // Semi-transparent red color
-            ctx.beginPath();
-            ctx.moveTo(screenXCenter, screenYCenter);
-            ctx.arc(screenXCenter, screenYCenter, CONE_ATTACK_RADIUS, attackAngle - coneAngle, attackAngle + coneAngle);
-            ctx.closePath();
-            ctx.fill();
-
-            // Update attack duration
-            this.attackDuration -= this.game.clockTick;
-            if (this.attackDuration <= 0) {
-                this.isAttacking = false;
-            }
-        }
+        // if (this.isSpinning) {
+        //     ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+        //     ctx.beginPath();
+        //     ctx.arc(screenXCenter, screenYCenter, SECONDARY_ATTACK_RADIUS, 0, Math.PI * 2);
+        //     ctx.fill();
+        //
+        //     // Update spin attack duration
+        //     this.spinAttackDuration -= this.game.clockTick;
+        //     if (this.spinAttackDuration <= 0) {
+        //         this.isSpinning = false;
+        //     }
+        // }
+        //
+        // // Draw the attack cone if the character is attacking
+        // // This will draw a smaller circle with one side of the circle originating
+        // // from the center of the player and the other side ending at the mouse click
+        // // but only up to a specific diameter size
+        // if (this.isAttacking) {
+        //     // Set the offset distance from the player to spawn the circle attack
+        //     const offsetDistance = PRIMARY_ATTACK_RADIUS * 0.6; // Adjust this to make the circle attack spawn farther from the player
+        //
+        //     // Calculate the center position of the attack circle
+        //     let attackCircleX = screenXCenter + Math.cos(this.attackAngle) * offsetDistance;
+        //     let attackCircleY = screenYCenter + Math.sin(this.attackAngle) * offsetDistance;
+        //
+        //     ctx.fillStyle = "rgba(255, 0, 0, 0.2)"; // Semi-transparent red color for the attack area
+        //     ctx.beginPath();
+        //     ctx.arc(attackCircleX, attackCircleY, PRIMARY_ATTACK_RADIUS / 2, 0, Math.PI * 2);
+        //     ctx.fill();
+        //
+        //     // Update attack duration
+        //     this.attackDuration -= this.game.clockTick;
+        //     if (this.attackDuration <= 0) {
+        //         this.isAttacking = false;
+        //     }
+        // }
     }
 }

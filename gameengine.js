@@ -227,6 +227,11 @@ class GameEngine {
             if (this.entities[i].isDead) {
                 this.entities[i].removeFromWorld = true;
             }
+
+            // Removes any playerAttack attack circles if their duration is depleted
+            if(this.entities[i].type === "playerAttack" && this.entities[i].duration <= 0){
+                this.entities[i].removeFromWorld = true;
+            }
         }
     }
 

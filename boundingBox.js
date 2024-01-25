@@ -6,10 +6,7 @@ class BoundingBox {
      * @param height the distance from top to bottom of box
      * @param type 'player': take damage when colliding with 'enemy' or 'enemyAttack'.
      *             'enemy': take damage when colliding with 'playerAttack'.
-     *             'enemyAttack': boxes labeled 'player' take damage upon collision.
-     *             'playerAttack': boxes labeled 'enemy' take damage upon collision.
      */
-    //TODO is there a better way to handle box types?
     constructor(x, y, width, height, type) {
         this.left = x;
         this.top = y;
