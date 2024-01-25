@@ -10,9 +10,9 @@ var CONE_ATTACK_RADIUS = 135; // Default value
 class Dude extends Entity {
     constructor(game) {
         super(1000, 1000, 10, game, 0, 0,
-            38, 56.66, "player", 200,
-            "./sprites/dude-spritesheet-stand-scythe.png",
-            0, 0, 92, 55, 2, 0.5, 1.5);
+            20, 25, "player", 200,
+            "./sprites/McIdle.png",
+            0, 0, 30, 40, 2, 0.5, 2.2);
 
         // Animation settings
         this.lastMove = "right"; // Default direction
@@ -32,6 +32,9 @@ class Dude extends Entity {
         // If health hits 0 or below, this entity is declared dead
         if (this.currHP <= 0) {
             this.isDead = true;
+            this.currentAnimation = "Dead";
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McDead.png"),
+                0, 0, 32, 40, 8, 0.1);
         }
 
         // Debug World Coordinates
@@ -89,10 +92,10 @@ class Dude extends Entity {
         // TODO: Check if the player has the scythe or a different weapon equipped and change the spritesheet accordingly
         if (this.isMoving && this.currentAnimation !== "walking") {
             this.currentAnimation = "walking";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-walk-scythe.png"), 0, 0, 92, 55, 4, 0.2);
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McWalk.png"), 0, 0, 32, 40, 8, 0.1);
         } else if (!this.isMoving && this.currentAnimation !== "standing") {
             this.currentAnimation = "standing";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/dude-spritesheet-stand-scythe.png"), 0, 0, 92, 55, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McIdle.png"), 0, 0, 30, 40, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
         }
 
 
