@@ -15,30 +15,67 @@ class GameEngine {
         this.wheel = null;
         this.keys = {};
 
-        // World position
-        this.worldX = 0;
-        this.worldY = 0;
+        // this.worldX = 0;
+        // this.worldY = 0;
+
+        // Initialize the Camera
+        this.camera = null;
+
+        // this.mapComplete = false; // Used to track when map is complete to load the upgrade screen
+
+        // Tracks the player object
+        this.player = null;
 
         // Options and the Details
         this.options = options || {
             debugging: false,
         };
-    };
+        this.startTime = null;
+        this.elapsedTime = 0;
+    }
 
     init(ctx) {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-    };
+    }
 
-    start() {
-        this.running = true;
+    initMap() {
+        const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
+        this.mapWidth = map.width;
+        this.mapHeight = map.height;
+
+        // Assuming the player is already created and added to the entities list
+        if(!this.entities.find(entity => entity instanceof Dude)) {
+            console.log("gameengine.initMaP(): Player not found!");
+        }
+        else {
+            // Center the map behind the player
+            this.mapX = -this.mapWidth / 2 + this.player.animator.width / 2;
+            this.mapY = -this.mapHeight / 2 + this.player.animator.height / 2;
+        }
+    }
+
+    initCamera() {
+        // Assuming the player is already created and added to the entities list
+        if(!this.entities.find(entity => entity instanceof Dude)) {
+            console.log("gameengine.initCamera(): Player not found!");
+        }
+        else {
+            const player = this.entities.find(entity => entity instanceof Dude);
+            this.camera = new Camera(player, this.ctx.canvas.width, this.ctx.canvas.height);
+        }
+    }
+
+   start() {
+        //this.running = true; // Not being used?
+        this.startTime = Date.now();
         const gameLoop = () => {
             this.loop();
             requestAnimFrame(gameLoop, this.ctx.canvas);
         };
         gameLoop();
-    };
+    }
 
     startInput() {
         const getXandY = e => ({
@@ -55,65 +92,93 @@ class GameEngine {
 
         this.ctx.canvas.addEventListener("click", e => {
             if (this.options.debugging) {
-                console.log("CLICK", getXandY(e));
+                console.log("LEFT_CLICK", getXandY(e));
             }
-            this.click = getXandY(e);
+            this.leftClick = getXandY(e);
         });
 
         this.ctx.canvas.addEventListener("wheel", e => {
             if (this.options.debugging) {
-                console.log("WHEEL", getXandY(e), e.wheelDelta);
+                console.log("WHEEL", getXandY(e), e.deltaY);
             }
             e.preventDefault(); // Prevent Scrolling
             this.wheel = e;
         });
 
         this.ctx.canvas.addEventListener("contextmenu", e => {
+            e.preventDefault(); // Prevent the default context menu
             if (this.options.debugging) {
                 console.log("RIGHT_CLICK", getXandY(e));
             }
-            e.preventDefault(); // Prevent Context Menu
-            this.rightclick = getXandY(e);
+            this.rightClick = true; // Set the right-click flag
         });
 
         this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key] = true);
         this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key] = false);
-    };
+    }
 
     addEntity(entity) {
+        if (entity instanceof Dude) {
+            this.player = entity; // Keep a reference to the player for tracking
+        }
         this.entities.push(entity);
-    };
+    }
 
     draw() {
         // Clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        // Get the grass texture and define the scale factor
-        const grass = ASSET_MANAGER.getAsset("./sprites/grass.png");
-        const scaleFactor = 2;  // Define the scale factor of the ground texture (e.g., 2 for twice as large)
-        const tileWidth = grass.width * scaleFactor;
-        const tileHeight = grass.height * scaleFactor;
+        // Draw the grass texture behind the player
+        this.drawMap();
 
-        // Calculate the starting point for drawing tiles
-        let startX = -(this.worldX % tileWidth);
-        if (this.worldX < 0) startX -= tileWidth;
-        let startY = -(this.worldY % tileHeight);
-        if (this.worldY < 0) startY -= tileHeight;
+        // Draw the mouse tracker
+        this.drawMouseTracker(this.ctx);
+        this.drawTimer(this.ctx);
 
-        // Draw the grass tiles with pixel snapping
-        for (let x = startX; x < this.ctx.canvas.width; x += tileWidth) {
-            for (let y = startY; y < this.ctx.canvas.height; y += tileHeight) {
-                // Math.round(x) and Math.round(y) are used to ensure that the position of each tile is rounded to the nearest integer,
-                // which prevents the tiles from blurring when the world position is not an integer. (fixes a tile edge flickering issue).
-                this.ctx.drawImage(grass, 0, 0, grass.width, grass.height, Math.round(x), Math.round(y), tileWidth, tileHeight);
-            }
+        // Draw entities relative to the camera
+        for (let i = 0; i < this.entities.length; i++) {
+            // Adjust the position of each entity to the camera
+            this.entities[i].draw(this.ctx);
         }
 
-        // Draw game entities
-        for (let i = this.entities.length - 1; i >= 0; i--) {
-            this.entities[i].draw(this.ctx, this);
+        // If the player is dead
+        if (this.player.isDead) {
+            this.ctx.beginPath();
+
+            this.ctx.fillStyle = "black";
+            this.ctx.fillRect(this.ctx.canvas.width / 2 - 175, this.ctx.canvas.height / 2 - 75, 350, 95);
+            // Draw "You Died!" text in large red font at the center of the canvas
+            this.ctx.font = '75px Arial';
+            this.ctx.fillStyle = 'red';
+            this.ctx.textAlign = 'center'
+            this.ctx.fillText('You Died!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+            this.ctx.closePath();
         }
-    };
+
+
+    }
+
+    drawTimer(ctx) {
+        ctx.font = '20px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center'
+        const minutes = Math.floor(this.elapsedTime / 60000);
+        const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
+        const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
+    }
+
+    drawMap() {
+        const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
+
+        // Adjust the position based on the camera
+        // Note: The map moves in the opposite direction of the camera to simulate player movement
+        const screenX = this.mapX - this.camera.x;
+        const screenY = this.mapY - this.camera.y;
+
+        // Draw the map
+        this.ctx.drawImage(map, screenX, screenY, this.mapWidth, this.mapHeight);
+    }
 
     update() {
         let entitiesCount = this.entities.length;
@@ -121,7 +186,7 @@ class GameEngine {
         for (let i = 0; i < entitiesCount; i++) {
             let entity = this.entities[i];
 
-            if (!entity.removeFromWorld) {
+            if (!this.entities[i].removeFromWorld) {
                 entity.update();
             }
         }
@@ -131,14 +196,62 @@ class GameEngine {
                 this.entities.splice(i, 1);
             }
         }
-    };
+
+        this.elapsedTime = Date.now() - this.startTime;
+
+        // Spawn 100 zombies
+        if (this.entities.length < 100) {
+            let randomXNumber, randomYNumber;
+
+            do {
+                // Set min X = -(horizontal canvas resolution)
+                let minX = -(1440);
+                let maxX = minX * (-1);
+                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+
+                // Set min Y = -(vertical canvas resolution)
+                let minY = -(810);
+                let maxY = minY * (-1);
+                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);
+
+            this.addEntity(new Enemy_Contact("Zombie", 15, 15, 1, gameEngine, randomXNumber, randomYNumber, 38, 56.66, "enemy", 37,
+                "./sprites/zombie-spritesheet-walk.png",
+                0, 0, 48, 55, 4, 0.35, 1.5
+            ));
+        }
+
+
+        // Loop through entities and set removeFromWorld to true for each
+        for (let i = 0; i < this.entities.length; i++) {
+            if (this.entities[i].isDead) {
+                this.entities[i].removeFromWorld = true;
+            }
+        }
+    }
 
     loop() {
         this.clockTick = this.timer.tick();
         this.update();
         this.draw();
-    };
+    }
 
-};
+    //draws the mouse tracker
+    drawMouseTracker(ctx) {
+        if (this.mouse) {
+            const crossSize = 10; // Size of the cross
+            ctx.strokeStyle = 'white'; // Color of the cross
+            ctx.beginPath();
+            // Draw horizontal line
+            ctx.moveTo(this.mouse.x - crossSize, this.mouse.y);
+            ctx.lineTo(this.mouse.x + crossSize, this.mouse.y);
+            // Draw vertical line
+            ctx.moveTo(this.mouse.x, this.mouse.y - crossSize);
+            ctx.lineTo(this.mouse.x, this.mouse.y + crossSize);
+            ctx.stroke();
+        }
+    }
+
+}
 
 // KV Le was here :)
