@@ -10,9 +10,9 @@ var PRIMARY_ATTACK_RADIUS = 135; // Default value
 class Dude extends Entity {
     constructor(game) {
         super(1000, 1000, 10, game, 0, 0,
-            20, 25, "player", 200,
+            17, 29, "player", 200,
             "./sprites/McIdle.png",
-            0, 0, 30, 40, 2, 0.5, 2.2);
+            0, 0, 32, 28, 2, 0.5, 2.2);
 
         // Animation settings
         this.lastMove = "right"; // Default direction
@@ -92,10 +92,10 @@ class Dude extends Entity {
         // TODO: Check if the player has the scythe or a different weapon equipped and change the spritesheet accordingly
         if (this.isMoving && this.currentAnimation !== "walking") {
             this.currentAnimation = "walking";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McWalk.png"), 0, 0, 32, 40, 8, 0.1);
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McWalk.png"), 0, 0, 32, 28, 8, 0.1);
         } else if (!this.isMoving && this.currentAnimation !== "standing") {
             this.currentAnimation = "standing";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McIdle.png"), 0, 0, 30, 40, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McIdle.png"), 0, 0, 32, 28, 2, 0.5);    // We use 2 and 0.5 here because the standing spritesheet only has 2 frames and we want them to last 0.5 sec each
         }
 
 
@@ -151,6 +151,13 @@ class Dude extends Entity {
     }
 
     draw(ctx) {
+        // Check if the camera is initialized.
+        // This is necessary as it is needed for this method, but may not be initialized on the first few calls
+        // at the start of the game.
+        if (!this.game.camera) {
+            console.log("dude.draw(): Camera not found! Not drawing player!");
+            return; // Skip drawing the player if the camera is not initialized
+        }
 
         //this.animator.drawFrame(this.game.clockTick, ctx,this.worldX, this.worldY, this.lastMove);
         let screenX = this.worldX - this.game.camera.x;

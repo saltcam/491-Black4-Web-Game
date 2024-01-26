@@ -30,9 +30,14 @@ class GameEngine {
 
         // Define the scaling factors for each map
         this.mapZeroScaleFactor = 0.25;
-        this.mapOneScaleFactor = 0.25;
+        this.mapOneScaleFactor = 0.3;
         this.mapTwoScaleFactor = 0.25;
         this.mapThreeScaleFactor = 0.25;
+
+        this.initialized = false; // To check if initial positions are set
+        this.textureOffsetX = 0; // Initial horizontal offset for the grass texture
+        this.textureOffsetY = 0; // Initial vertical offset for the grass texture
+
 
         // this.mapComplete = false; // Used to track when map is complete to load the upgrade screen
 
@@ -42,8 +47,17 @@ class GameEngine {
         // Flag to tell whether the current round is over.
         this.roundOver = false;
 
-        // Tracks the player object
+        // Tracks object entities
+        this.objects = [];
+
+        // Tracks enemy entities
+        this.enemies = [];
+
+        // Tracks the player entity
         this.player = null;
+
+        // Tracks the portal entity (with this setup - there should only ever be ONE portal active at once)
+        this.portal = null;
 
         // Options and the Details
         this.options = options || {
@@ -57,7 +71,7 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-        this.initEnemySpawns();
+        //this.initEnemySpawns();
     }
 
     initEnemySpawns() {
@@ -86,38 +100,13 @@ class GameEngine {
         }
     }
 
-    initMap() {
-        // const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
-        //
-        // // Store original map dimensions
-        // this.mapWidth = map.width;
-        // this.mapHeight = map.height;
-        //
-        // // Calculate the scaled dimensions of the map
-        // const scaledMapWidth = this.mapWidth * this.mapOneScaleFactor;
-        // const scaledMapHeight = this.mapHeight * this.mapOneScaleFactor;
-        //
-        // // Assuming the player is already created and added to the entities list
-        // if (!this.entities.find(entity => entity instanceof Dude)) {
-        //     console.log("gameengine.initMap(): Player not found!");
-        // } else {
-        //     const player = this.entities.find(entity => entity instanceof Dude);
-        //
-        //     // Set the initial map position to center the scaled map under the player
-        //     this.mapX = player.worldX - scaledMapWidth / 2;
-        //     this.mapY = player.worldY - scaledMapHeight / 2;
-        // }
-    }
-
-
     initCamera() {
         // Assuming the player is already created and added to the entities list
-        if(!this.entities.find(entity => entity instanceof Dude)) {
+        if(!this.player) {
             console.log("gameengine.initCamera(): Player not found!");
         }
         else {
-            const player = this.entities.find(entity => entity instanceof Dude);
-            this.camera = new Camera(player, this.ctx.canvas.width, this.ctx.canvas.height);
+            this.camera = new Camera(this.player, this.ctx.canvas.width, this.ctx.canvas.height);
         }
     }
 
@@ -172,28 +161,67 @@ class GameEngine {
     }
 
     addEntity(entity) {
-        if (entity instanceof Dude) {
-            this.player = entity; // Keep a reference to the player for tracking
+        // if (entity instanceof Dude) {
+        //     this.player = entity; // Keep a reference to the player for tracking
+        // }
+        // this.entities.push(entity);
+
+        // New way of adding entities
+        // This allows us to do a performance friendly draw() method
+        // Which lets us layer the most important entities over the less important ones (ex: player will be drawn over EVERYTHING)
+        if (entity.boundingBox.type === "player") {
+            this.player = entity;
+        } else if (entity.boundingBox.type === "portal") {
+            this.portal = entity;
+        } else if (entity.boundingBox.type === "enemy") {
+            this.enemies.push(entity);
+        } else if (entity.boundingBox.type === "object") {
+            this.objects.push(entity);
         }
-        this.entities.push(entity);
+        // Everything else is stored in entities list
+        else {
+            this.entities.push(entity);
+        }
     }
 
     draw() {
         // Clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
+        // Draw the background of the canvas
+        this.drawBackground('./sprites/map_space_background.png', 1);
+
         // Draw the grass texture behind the player
         this.drawMap();
+
+        // Draw 'other' entities
+        for (let entity of this.entities) {
+            entity.draw(this.ctx);
+        }
+
+        // Draw objects
+        for (let object of this.objects) {
+            object.draw(this.ctx);
+        }
+
+        // Draw enemies
+        for (let enemy of this.enemies) {
+            enemy.draw(this.ctx);
+        }
+
+        // Draw portal
+        if (this.portal) {
+            this.portal.draw(this.ctx);
+        }
+
+        // Draw player
+        if (this.player) {
+            this.player.draw(this.ctx);
+        }
 
         // Draw the mouse tracker
         this.drawMouseTracker(this.ctx);
         this.drawTimer(this.ctx);
-
-        // Draw entities relative to the camera
-        for (let i = 0; i < this.entities.length; i++) {
-            // Adjust the position of each entity to the camera
-            this.entities[i].draw(this.ctx);
-        }
 
         // If the player is dead
         if (this.player.isDead) {
@@ -233,22 +261,41 @@ class GameEngine {
     }
 
     drawMap() {
+        // Check if the camera and player are initialized
+        // This is necessary as they are needed, but may not be initialized on the first few calls of this method
+        // at the start of the game.
+        if (!this.camera || !this.player) {
+            return; // Skip drawing the map if the camera or player is not initialized
+        }
+
         // If 0, then Rest Area Map is used
         if (this.currMap === 0) {
 
         }
         // If 1, then Grasslands Map is used
         else if (this.currMap === 1) {
-            const map = ASSET_MANAGER.getAsset("./sprites/grass.png");
+            const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
+
             this.mapWidth = map.width;
             this.mapHeight = map.height;
 
-            // Calculate the scaled width and height of the map
+            // Calculate the scaled width and height of the textures
             const scaledWidth = this.mapWidth * this.mapOneScaleFactor;
             const scaledHeight = this.mapHeight * this.mapOneScaleFactor;
 
-            // Draw the scaled map centered on the canvas
-            this.ctx.drawImage(map, 0, 0, scaledWidth, scaledHeight);
+            // If the map has not been centered yet, initialize its position
+            if (!this.initialized) {
+                this.textureOffsetX = this.player.worldX - scaledWidth / 2 + this.player.animator.width / 2;
+                this.textureOffsetY = this.player.worldY - scaledHeight / 2 + this.player.animator.height / 2;
+                this.initialized = true;
+            }
+
+            // Adjust the texture's position to move inversely to the player's movement
+            const textureX = this.textureOffsetX - this.camera.x;
+            const textureY = this.textureOffsetY - this.camera.y;
+
+            // Draw the scaled texture centered on the player's position accounting for the camera
+            this.ctx.drawImage(map, textureX, textureY, scaledWidth, scaledHeight);
         }
         // If 2, then Cave Map is used
         else if (this.currMap === 2){
@@ -260,22 +307,70 @@ class GameEngine {
         }
     }
 
+    drawBackground(spritePath, scaleFactor) {
+        const texture = ASSET_MANAGER.getAsset(spritePath);
+        const textureWidth = Math.round(texture.width * scaleFactor);
+        const textureHeight = Math.round(texture.height * scaleFactor);
+
+        // Calculate how many times the texture needs to be repeated horizontally and vertically
+        const timesToRepeatHorizontally = Math.ceil(this.ctx.canvas.width / textureWidth);
+        const timesToRepeatVertically = Math.ceil(this.ctx.canvas.height / textureHeight);
+
+        // Use two nested loops to draw the image multiple times across the canvas
+        for (let x = 0; x < timesToRepeatHorizontally; x++) {
+            for (let y = 0; y < timesToRepeatVertically; y++) {
+                this.ctx.drawImage(texture, x * textureWidth, y * textureHeight, textureWidth, textureHeight);
+            }
+        }
+    }
+
     update() {
         let entitiesCount = this.entities.length;
 
-        // Check if all enemies have been defeated
-        // If so, spawn the portal to the next area
-        if (this.enemyCount <= 0 && !this.roundOver) {
-            this.addEntity(new Portal(this, this.player.worldX + 200, this.player.worldY));
-            this.roundOver = true;
-        }
+        // // Check if all enemies have been defeated
+        // // If so, spawn the portal to the next area
+        // if (this.enemyCount <= 0 && !this.roundOver) {
+        //     this.addEntity(new Portal(this, this.player.worldX + 200, this.player.worldY));
+        //     this.roundOver = true;
+        // }
 
+        // The original way to update all entities
+        // for (let i = 0; i < entitiesCount; i++) {
+        //     let entity = this.entities[i];
+        //
+        //     if (!this.entities[i].removeFromWorld) {
+        //         entity.update();
+        //     }
+        // }
+
+        // New way of updating all entities
+        // Update 'other' entities
         for (let i = 0; i < entitiesCount; i++) {
             let entity = this.entities[i];
 
             if (!this.entities[i].removeFromWorld) {
                 entity.update();
             }
+        }
+
+        // Update object entities
+        for (let i = 0; i < this.objects.length; i++) {
+            this.objects[i].update();
+        }
+
+        // Update enemy entities
+        for (let i = 0; i < this.enemies.length; i++) {
+            this.enemies[i].update();
+        }
+
+        // Update portal entity
+        if (this.portal && !this.portal.removeFromWorld) {
+            this.portal.update();
+        }
+
+        // Update player entity
+        if (this.player && !this.player.removeFromWorld) {
+            this.player.update();
         }
 
         for (let i = this.entities.length - 1; i >= 0; --i) {
