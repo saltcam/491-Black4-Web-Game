@@ -15,8 +15,6 @@ class BoundingBox {
         this.type = type;
     }
 
-
-
     get right() {
         return this.left + this.width;
     }
@@ -41,26 +39,35 @@ class BoundingBox {
     }
 
     draw(ctx, game) {
+        // Check if the game instance is valid and if debug mode is enabled
+        if (!game || !game.debugMode) {
+            return; // If game instance is not valid or debug mode is off, do nothing
+        }
+
+        // If camera is not initialized, do nothing because we need it here.
+        if (!game.camera) {
+            return;
+        }
 
         // draws the box for you to see
         ctx.beginPath();
-        switch (this.type){
+        switch (this.type) {
             case "player":
                 ctx.strokeStyle = 'Blue';
                 break;
             case "enemy":
                 ctx.strokeStyle = 'Red';
                 break;
-            default: ctx.strokeStyle = 'White';
-            break;
+            default:
+                ctx.strokeStyle = 'White';
+                break;
         }
 
-            ctx.strokeRect(
-                this.left - game.camera.x,
-                this.top - game.camera.y,
-                this.width,
-                this.height);
-            ctx.closePath();
-
+        ctx.strokeRect(
+            this.left - game.camera.x,
+            this.top - game.camera.y,
+            this.width,
+            this.height);
+        ctx.closePath();
     }
 }

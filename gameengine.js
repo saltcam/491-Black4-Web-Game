@@ -1,5 +1,4 @@
-// This game shell was happily modified from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
-
+/** This game shell was happily modified from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011. */
 class GameEngine {
     constructor(options) {
         /** What you will use to draw (HTML Canvas).
@@ -37,31 +36,56 @@ class GameEngine {
          * 0 == Rest Area
          * 1 == Grasslands
          * 2 == Cave
-         * 3 == Space?
+         * 3 == Space
          */
         this.currMap = 1
 
-        // Define the scaling factors for each map
+        // Map Scaling Variables
+        /** Map scale for map 0 (Rest Area) */
         this.mapZeroScaleFactor = 0.25;
+        /** Map scale for map 1 (Grasslands Map) */
         this.mapOneScaleFactor = 0.3;
+        /** Map scale for map 2 (Cave Map) */
         this.mapTwoScaleFactor = 0.25;
+        /** Map scale for map 3 (Space Map) */
         this.mapThreeScaleFactor = 0.25;
 
-        this.mapInitialized = false; // To check if initial positions are set
-        this.mapTextureOffsetX = 0; // Initial horizontal offset for the grass texture
-        this.mapTextureOffsetY = 0; // Initial vertical offset for the grass texture
+        /**
+         * Tracks whether the map has been initialized.
+         * Set to true once we set the position of the map directly behind the player.
+         */
+        this.mapInitialized = false;
+        /** Initial horizontal offset for the grass texture. */
+        this.mapTextureOffsetX = 0;
+        /** Initial vertical offset for the grass texture. */
+        this.mapTextureOffsetY = 0;
 
-        // Flag to tell whether the current round is over.
+        /** Tracks map boundaries. */
+        this.mapBoundaries = {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0
+        };
+
+        /** An offset of how close the player can get to the map's boundaries. */
+        this.mapBoundaryOffset = 100;
+
+        /** Flag to tell whether the current round is over. */
         this.roundOver = false;
 
-        // Options and the Details
+        /** Options and the Details. */
         this.options = options || {
             debugging: false,
         };
 
-        // Initialize clock/timers
+        /** Initialize the startTime. */
         this.startTime = null;
+        /** Initialize the elapsedTime. */
         this.elapsedTime = 0;
+
+        /** Toggle to enable debug mode features. */
+        this.debugMode = false;
     }
 
     /**
@@ -76,34 +100,33 @@ class GameEngine {
         this.initEnemySpawns();
     }
 
-    /**
-     * Call this method to spawn some initial enemies.
-     */
+    /** Call this method to spawn some initial enemies. */
     initEnemySpawns() {
         while (this.enemies.length < 10) {
             let randomXNumber, randomYNumber;
 
             do {
-                // Set min X = -(horizontal canvas resolution)
+                // Set min X = -(horizontal canvas resolution).
                 let minX = -(1440);
                 let maxX = minX * (-1);
                 randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
 
-                // Set min Y = -(vertical canvas resolution)
+                // Set min Y = -(vertical canvas resolution).
                 let minY = -(810);
                 let maxY = minY * (-1);
                 randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
             } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
 
-            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 38, 56.66, "enemy", 125,
+            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 38/2, 56.66/2, "enemy", 125,
                 "./sprites/zombie-spritesheet-walk.png",
                 0, 0, 48, 55, 4, 0.35, 1.5
             ));
         }
     }
 
+    /** Call this method to initialize the camera at the start of the game. */
     initCamera() {
-        // Assuming the player is already created and added to the entities list
+        // Assuming the player is already created and added to the entities list.
         if(!this.player) {
             console.log("gameengine.initCamera(): Player not found!");
         }
@@ -112,8 +135,9 @@ class GameEngine {
         }
     }
 
+    /** Starts the time game engine's clock and looped methods. */
    start() {
-        //this.running = true; // Not being used?
+        this.running = true; // Store this in-case we need to check later if the game engine is actually running.
         this.startTime = Date.now();
         const gameLoop = () => {
             this.loop();
@@ -122,6 +146,7 @@ class GameEngine {
         gameLoop();
     }
 
+    /** Starts user input tracking/event listeners. */
     startInput() {
         const getXandY = e => ({
             x: e.clientX - this.ctx.canvas.getBoundingClientRect().left,
@@ -139,38 +164,54 @@ class GameEngine {
             if (this.options.debugging) {
                 console.log("LEFT_CLICK", getXandY(e));
             }
-            this.leftClick = getXandY(e);
+        });
+
+        this.ctx.canvas.addEventListener("mousedown", e => {
+            if (e.button === 0) { // Left mouse button.
+                this.leftMouseDown = true;
+            } else if (e.button === 2) { // Right mouse button.
+                this.rightMouseDown = true;
+            }
+        });
+
+        this.ctx.canvas.addEventListener("mouseup", e => {
+            if (e.button === 0) { // Left mouse button.
+                this.leftMouseDown = false;
+            } else if (e.button === 2) { // Right mouse button.
+                this.rightMouseDown = false;
+            }
         });
 
         this.ctx.canvas.addEventListener("wheel", e => {
             if (this.options.debugging) {
                 console.log("WHEEL", getXandY(e), e.deltaY);
             }
-            e.preventDefault(); // Prevent Scrolling
+            e.preventDefault(); // Prevent Scrolling.
             this.wheel = e;
         });
 
         this.ctx.canvas.addEventListener("contextmenu", e => {
-            e.preventDefault(); // Prevent the default context menu
+            e.preventDefault(); // Prevent the default context menu.
             if (this.options.debugging) {
                 console.log("RIGHT_CLICK", getXandY(e));
             }
-            this.rightClick = true; // Set the right-click flag
+            this.rightClick = true; // Set the right-click flag.
         });
 
         this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key] = true);
         this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key] = false);
     }
 
+    /**
+     * This method is what we call whenever we add entities to our game, whether it's spawning the player, an enemy, or
+     * an object in the world.
+     *
+     * @param entity    The entity being added.
+     */
     addEntity(entity) {
-        // if (entity instanceof Dude) {
-        //     this.player = entity; // Keep a reference to the player for tracking
-        // }
-        // this.entities.push(entity);
-
-        // New way of adding entities
-        // This allows us to do a performance friendly draw() method
-        // Which lets us layer the most important entities over the less important ones (ex: player will be drawn over EVERYTHING)
+        // New way of adding entities.
+        // This allows us to do a performance friendly draw() method.
+        // Which lets us layer the most important entities over the less important ones (ex: player will be drawn over EVERYTHING.)
         if (entity.boundingBox.type === "player") {
             this.player = entity;
         } else if (entity.boundingBox.type === "portal") {
@@ -180,53 +221,79 @@ class GameEngine {
         } else if (entity.boundingBox.type === "object") {
             this.objects.push(entity);
         }
-        // Everything else is stored in entities list
+        // Everything else is stored in entities list (Attack collision objects etc.)
         else {
             this.entities.push(entity);
         }
     }
 
+    /** Call this method on every frame to draw each entity or UI elements on the canvas. */
     draw() {
-        // Clear the canvas
+        // Clear the canvas.
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        // Draw the background of the canvas
+        // Draw the background of the map.
         this.drawBackground('./sprites/map_space_background.png', 1);
 
-        // Draw the grass texture behind the player
+        // Draw the map texture.
         this.drawMap();
 
-        // Draw 'other' entities
+        // Draw 'other' entities.
         for (let entity of this.entities) {
-            entity.draw(this.ctx);
+            entity.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode && entity instanceof Entity) {
+                entity.drawHealth(this.ctx);
+            }
         }
 
-        // Draw objects
+        // Draw 'object' entities.
         for (let object of this.objects) {
-            object.draw(this.ctx);
+            object.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode) {
+                object.drawHealth(this.ctx);
+            }
         }
 
-        // Draw enemies
+        // Draw 'enemy' entities.
         for (let enemy of this.enemies) {
-            enemy.draw(this.ctx);
+            enemy.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode) {
+                enemy.drawHealth(this.ctx);
+            }
         }
 
-        // Draw portal
+        // Draw 'portal' entity.
         if (this.portal) {
-            this.portal.draw(this.ctx);
+            this.portal.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode) {
+                this.portal.drawHealth(this.ctx);
+            }
         }
 
-        // Draw player
+        // Draw 'player' entity.
         if (this.player) {
-            this.player.draw(this.ctx);
+            this.player.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode) {
+                //this.player.drawHealth(this.ctx); // We don't need to call this, it is already always called in dude.draw().
+            }
         }
 
-        // Draw the mouse tracker
+        // Draw the mouse tracker.
         this.drawMouseTracker(this.ctx);
         this.drawTimer(this.ctx);
 
-        // If the player is dead
-        if (this.player.isDead) {
+        // If the player is dead, display 'You Died!' text.
+        if (this.player && this.player.isDead) {
             this.ctx.beginPath();
 
             this.ctx.fillStyle = "black";
@@ -239,8 +306,8 @@ class GameEngine {
             this.ctx.closePath();
         }
 
-        // // If the defeated all enemies, display 'You Won!'
-        // if (this.enemyCount <= 0) {
+        // If the defeated all enemies, display 'You Won!' text.
+        // if (this.enemies.length <= 0) {
         //     this.ctx.beginPath();
         //
         //     // Draw "You Won!" text in large yellow font at the center of the canvas
@@ -252,6 +319,7 @@ class GameEngine {
         // }
     }
 
+    /** Draws the game-time tracker on top of the game screen. */
     drawTimer(ctx) {
         ctx.font = '20px Arial';
         ctx.fillStyle = 'white';
@@ -262,63 +330,79 @@ class GameEngine {
         ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
     }
 
+    /** Called in gameengine.draw() to draw the map textures. */
     drawMap() {
-        // Check if the camera and player are initialized
-        // This is necessary as they are needed, but may not be initialized on the first few calls of this method
-        // at the start of the game.
+        // Check if the camera and player are initialized.
+        // This is necessary as they are needed, but may not be initialized during the first few calls of this method.
         if (!this.camera || !this.player) {
-            return; // Skip drawing the map if the camera or player is not initialized
+            return; // Skip drawing the map if the camera or player is not initialized.
         }
 
-        // If 0, then Rest Area Map is used
+        // If 0, then Rest Area Map is used.
         if (this.currMap === 0) {
 
         }
-        // If 1, then Grasslands Map is used
+        // If 1, then Grasslands Map is used.
         else if (this.currMap === 1) {
             const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
 
             this.mapWidth = map.width;
             this.mapHeight = map.height;
 
-            // Calculate the scaled width and height of the textures
+            // Calculate the scaled width and height of the textures.
             const scaledWidth = this.mapWidth * this.mapOneScaleFactor;
             const scaledHeight = this.mapHeight * this.mapOneScaleFactor;
 
-            // If the map has not been centered yet, initialize its position
+            // If the map has not been centered yet, initialize its position.
             if (!this.mapInitialized) {
                 this.mapTextureOffsetX = this.player.worldX - scaledWidth / 2 + this.player.animator.width / 2;
                 this.mapTextureOffsetY = this.player.worldY - scaledHeight / 2 + this.player.animator.height / 2;
                 this.mapInitialized = true;
             }
 
-            // Adjust the texture's position to move inversely to the player's movement
+            // Adjust the texture's position to move inversely to the player's movement.
             const textureX = this.mapTextureOffsetX - this.camera.x;
             const textureY = this.mapTextureOffsetY - this.camera.y;
 
-            // Draw the scaled texture centered on the player's position accounting for the camera
+            // Draw the scaled texture centered on the player's position accounting for the camera.
             this.ctx.drawImage(map, textureX, textureY, scaledWidth, scaledHeight);
+
+            // Calculate the actual boundaries considering the scaling
+            this.mapBoundaries = {
+                left: -((this.mapWidth - this.mapBoundaryOffset) * this.mapOneScaleFactor)/2,
+                top: -((this.mapHeight - this.mapBoundaryOffset) * this.mapOneScaleFactor)/2,
+                right: ((this.mapWidth - this.mapBoundaryOffset) * this.mapOneScaleFactor)/2,
+                bottom: ((this.mapHeight - this.mapBoundaryOffset) * this.mapOneScaleFactor)/2
+            };
         }
-        // If 2, then Cave Map is used
+        // If 2, then Cave Map is used.
         else if (this.currMap === 2){
 
         }
-        // If 3, then Space Map is used
+        // If 3, then Space Map is used.
         else if (this.currMap === 3){
 
         }
     }
 
+    /**
+     * Draws the background of the map (Out of bounds area).
+     * This is drawn in a way where it moves with the camera/player, thus it does not simulate traversal
+     * like the gameengine.drawMap() method does.
+     *
+     * @param spritePath    The path of the sprite we are drawing.
+     * @param scaleFactor   The scale of the sprite we want to use.
+     */
     drawBackground(spritePath, scaleFactor) {
         const texture = ASSET_MANAGER.getAsset(spritePath);
         const textureWidth = Math.round(texture.width * scaleFactor);
         const textureHeight = Math.round(texture.height * scaleFactor);
 
-        // Calculate how many times the texture needs to be repeated horizontally and vertically
+        // Calculate how many times the texture needs to be repeated horizontally and vertically.
         const timesToRepeatHorizontally = Math.ceil(this.ctx.canvas.width / textureWidth);
         const timesToRepeatVertically = Math.ceil(this.ctx.canvas.height / textureHeight);
 
-        // Use two nested loops to draw the image multiple times across the canvas
+        // Use two nested loops to draw the image multiple times across the canvas.
         for (let x = 0; x < timesToRepeatHorizontally; x++) {
             for (let y = 0; y < timesToRepeatVertically; y++) {
                 this.ctx.drawImage(texture, x * textureWidth, y * textureHeight, textureWidth, textureHeight);
@@ -326,106 +410,136 @@ class GameEngine {
         }
     }
 
+    /** This method is called every tick to update all entities etc. */
     update() {
         let entitiesCount = this.entities.length;
 
-        // // Check if all enemies have been defeated
-        // // If so, spawn the portal to the next area
-        // if (this.enemyCount <= 0 && !this.roundOver) {
-        //     this.addEntity(new Portal(this, this.player.worldX + 200, this.player.worldY));
-        //     this.roundOver = true;
-        // }
+        // Check if all enemies have been defeated
+        // If so, spawn the portal to the next area
+        if (this.enemies.length <= 0 && !this.portal) {
+            this.addEntity(new Portal(this, this.player.worldX + 200, this.player.worldY));
+        }
 
-        // The original way to update all entities
-        // for (let i = 0; i < entitiesCount; i++) {
-        //     let entity = this.entities[i];
-        //
-        //     if (!this.entities[i].removeFromWorld) {
-        //         entity.update();
-        //     }
-        // }
-
-        // New way of updating all entities
-        // Update 'other' entities
+        // Update 'other' entities.
         for (let i = 0; i < entitiesCount; i++) {
-            let entity = this.entities[i];
-
             if (!this.entities[i].removeFromWorld) {
-                entity.update();
+                this.entities[i].update();
             }
         }
 
-        // Update object entities
+        // Update 'object' entities.
         for (let i = 0; i < this.objects.length; i++) {
-            this.objects[i].update();
+            if (!this.objects[i].removeFromWorld) {
+                this.objects[i].update();
+            }
         }
 
-        // Update enemy entities
+        // Update 'enemy' entities.
         for (let i = 0; i < this.enemies.length; i++) {
-            this.enemies[i].update();
+            if (!this.enemies[i].removeFromWorld) {
+                this.enemies[i].update();
+            }
         }
 
-        // Update portal entity
+        // Update 'portal' entity.
         if (this.portal && !this.portal.removeFromWorld) {
             this.portal.update();
         }
 
-        // Update player entity
+        // Update 'player' entity.
         if (this.player && !this.player.removeFromWorld) {
             this.player.update();
         }
 
+        // Remove 'other' entities that are marked for deletion.
         for (let i = this.entities.length - 1; i >= 0; --i) {
             if (this.entities[i].removeFromWorld) {
                 this.entities.splice(i, 1);
             }
         }
 
+        // Remove 'object' entities that are marked for deletion.
+        for (let i = this.objects.length - 1; i >= 0; --i) {
+            if (this.objects[i].removeFromWorld) {
+                this.objects.splice(i, 1);
+            }
+        }
+
+        // Remove 'enemy' entities that are marked for deletion.
+        for (let i = this.enemies.length - 1; i >= 0; --i) {
+            if (this.enemies[i].removeFromWorld) {
+                this.enemies.splice(i, 1);
+            }
+        }
+
+        // Remove 'portal' entity if marked for deletion.
+        if (this.portal && this.portal.removeFromWorld) {
+            this.portal = null;
+        }
+
+        // Remove 'player' entity if marked for deletion.
+        if (this.player && this.player.removeFromWorld) {
+            //this.player = null;   // If this is commented out, we don't delete the player entity on death.
+        }
+
+        // Update the elapsed time.
         this.elapsedTime = Date.now() - this.startTime;
 
-        // Loop through entities and set removeFromWorld flags
+        // Loop through 'other' entities and set removeFromWorld flags.
         for (let i = 0; i < this.entities.length; i++) {
-            // If dead Zombie
-            if (this.entities[i].name === "Zombie" && this.entities[i].isDead) {
-                this.entities[i].removeFromWorld = true;
-                this.enemyCount--;
-            }
-
-            // Removes any playerAttack attack circles if their duration is depleted
+            // Removes any playerAttack attack circles if their duration is depleted.
             if(this.entities[i].type === "playerAttack" && this.entities[i].duration <= 0){
                 this.entities[i].removeFromWorld = true;
             }
         }
 
-        // // This is for testing purposes.
-        // // It will kill all zombies in the game to force the player to 'Win' after 30 seconds
+        // Loop through 'enemy' entities and set removeFromWorld flags.
+        for (let i = 0; i < this.enemies.length; i++) {
+            // If dead Zombie, mark for deletion.
+            if (this.enemies[i].isDead) {
+                this.enemies[i].removeFromWorld = true;
+            }
+        }
+
+        // Check if player is dead, if so: mark player for deletion.
+        if (this.player && this.player.isDead) {
+            this.player.removeFromWorld = true;
+        }
+
+        // This is for testing purposes.
+        // It will kill all zombies in the game to force the player to 'Win' after 30 seconds
         // if (this.elapsedTime >= 5000) {
         //     for (let i = 0; i < this.entities.length; i++) {
-        //         if (this.entities[i].name === "Zombie") {
+        //         if (this.enemies[i].length > 0) {
         //             this.entities[i].currHP = 0;
         //         }
         //     }
         // }
     }
 
+    /** Starts the game engine loop system. This makes the update and draw methods loop. */
     loop() {
         this.clockTick = this.timer.tick();
         this.update();
         this.draw();
     }
 
-    //draws the mouse tracker
+    /** Draws the mouse tracks on the screen. */
     drawMouseTracker(ctx) {
         if (this.mouse) {
             const crossSize = 10; // Size of the cross
             ctx.strokeStyle = 'white'; // Color of the cross
+
             ctx.beginPath();
+
             // Draw horizontal line
             ctx.moveTo(this.mouse.x - crossSize, this.mouse.y);
             ctx.lineTo(this.mouse.x + crossSize, this.mouse.y);
+
             // Draw vertical line
             ctx.moveTo(this.mouse.x, this.mouse.y - crossSize);
             ctx.lineTo(this.mouse.x, this.mouse.y + crossSize);
+
             ctx.stroke();
         }
     }

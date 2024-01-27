@@ -11,7 +11,5 @@ class Portal extends Entity {
 
         // Draw the player at the calculated screen position
         this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
-        this.boundingBox.draw(ctx, this.game);
-        this.drawHealth(ctx);
     }
 }

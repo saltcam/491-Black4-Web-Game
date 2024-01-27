@@ -38,14 +38,13 @@ class AttackCirc {
         // reduce duration by 1 frame
         this.duration--;
 
-        //no idea why this works, ask Chris
-        var that = this;
-        this.game.entities.forEach(function (entity) {
-            if(entity.boundingBox.type === 'enemy' && that.collisionDetection(entity.boundingBox)) {
+        // NOTE from Nick: Found a cleaner way to implement the 'that' variable, without having a 'that' variable.
+        // Iterate through the list of enemies and see if we are detecting a collision with their bounding box.
+        this.game.enemies.forEach((enemy) => {
+            if(this.collisionDetection(enemy.boundingBox)) {
                 console.log("COLLIDE!");
-                entity.takeDamage(50);
+                enemy.takeDamage(50);
             }
-
         });
 
         //damaging any enemies colliding with this attackCirc
