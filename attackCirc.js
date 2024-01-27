@@ -23,6 +23,9 @@ class AttackCirc {
         this.type = type;
         //60 equates to 1 second, when setting duration, set the amount of seconds you want.
         this.duration = duration * 60;
+
+        //dummy box so collision doesn't get mad.
+        this.boundingBox = new BoundingBox(0,0,0,0,'attack');
     }
 
 
@@ -35,15 +38,25 @@ class AttackCirc {
         // reduce duration by 1 frame
         this.duration--;
 
-        //damaging any enemies colliding with this attackCirc
-        for (let i = 0; i < this.game.entities.length - 1; i++) {
-            console.log("i: " + i);
-            console.log("length: " + this.game.entities.length);
-            if(this.game.entities[i].boundingBox.type === 'enemy' && this.collisionDetection(this.game.entities[i].boundingBox)) {
+        //no idea why this works, ask Chris
+        var that = this;
+        this.game.entities.forEach(function (entity) {
+            if(entity.boundingBox.type === 'enemy' && that.collisionDetection(entity.boundingBox)) {
                 console.log("COLLIDE!");
-                this.game.entities[i].takeDamage(50);
+                entity.takeDamage(50);
             }
-        }
+
+        });
+
+        //damaging any enemies colliding with this attackCirc
+        // for (let i = 0; i < this.game.entities.length - 1; i++) {
+        //     console.log("i: " + i);
+        //     console.log("length: " + this.game.entities.length);
+        //     if(this.game.entities[i].boundingBox.type === 'enemy' && this.collisionDetection(this.game.entities[i].boundingBox)) {
+        //         console.log("COLLIDE!");
+        //         this.game.entities[i].takeDamage(50);
+        //     }
+        // }
 
     }
 

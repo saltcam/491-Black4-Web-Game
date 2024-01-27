@@ -2,30 +2,43 @@
 
 class GameEngine {
     constructor(options) {
-        // What you will use to draw
-        // Documentation: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
+        /** What you will use to draw (HTML Canvas).
+         * Documentation: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
+         */
         this.ctx = null;
 
-        // Everything that will be updated and drawn each frame
+        // The fields below is where we will be storing all our different types of entities
+        /** Everything else aka 'other entities'. */
         this.entities = [];
+        /** Tracks object entities. */
+        this.objects = [];
+        /** Tracks enemy entities. */
+        this.enemies = [];
+        /** Tracks the portal entity (with this setup - there should only ever be ONE portal active at once). */
+        this.portal = null;
+        /** Tracks the player entity. */
+        this.player = null;
 
         // Information on the input
+        /** Tracks clicks. */
         this.click = null;
+        /** Tracks the mouse. */
         this.mouse = null;
+        /** Tracks the mouse wheel. */
         this.wheel = null;
+        /** Tracks the keyboard keys. */
         this.keys = {};
 
-        // this.worldX = 0;
-        // this.worldY = 0;
-
-        // Initialize the Camera
+        /** Stores a reference to the camera. */
         this.camera = null;
 
-        // What is the current map?
-        // 0 == Rest Area
-        // 1 == Grasslands
-        // 2 == Cave
-        // 3 == Space?
+        /**
+         * Stores an int for what map we are on.
+         * 0 == Rest Area
+         * 1 == Grasslands
+         * 2 == Cave
+         * 3 == Space?
+         */
         this.currMap = 1
 
         // Define the scaling factors for each map
@@ -34,49 +47,40 @@ class GameEngine {
         this.mapTwoScaleFactor = 0.25;
         this.mapThreeScaleFactor = 0.25;
 
-        this.initialized = false; // To check if initial positions are set
-        this.textureOffsetX = 0; // Initial horizontal offset for the grass texture
-        this.textureOffsetY = 0; // Initial vertical offset for the grass texture
-
-
-        // this.mapComplete = false; // Used to track when map is complete to load the upgrade screen
-
-        // Tracks how many enemies are spawned
-        this.enemyCount = 0;
+        this.mapInitialized = false; // To check if initial positions are set
+        this.mapTextureOffsetX = 0; // Initial horizontal offset for the grass texture
+        this.mapTextureOffsetY = 0; // Initial vertical offset for the grass texture
 
         // Flag to tell whether the current round is over.
         this.roundOver = false;
-
-        // Tracks object entities
-        this.objects = [];
-
-        // Tracks enemy entities
-        this.enemies = [];
-
-        // Tracks the player entity
-        this.player = null;
-
-        // Tracks the portal entity (with this setup - there should only ever be ONE portal active at once)
-        this.portal = null;
 
         // Options and the Details
         this.options = options || {
             debugging: false,
         };
+
+        // Initialize clock/timers
         this.startTime = null;
         this.elapsedTime = 0;
     }
 
+    /**
+     * This method initializes the game engine, and calls other necessary initialization methods.
+     *
+     * @param ctx   The canvas being passed from the HTML page.
+     */
     init(ctx) {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-        //this.initEnemySpawns();
+        this.initEnemySpawns();
     }
 
+    /**
+     * Call this method to spawn some initial enemies.
+     */
     initEnemySpawns() {
-        // Spawn 50 zombies
-        while (this.enemyCount < 5) {
+        while (this.enemies.length < 10) {
             let randomXNumber, randomYNumber;
 
             do {
@@ -89,14 +93,12 @@ class GameEngine {
                 let minY = -(810);
                 let maxY = minY * (-1);
                 randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
-            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);
+            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
 
-            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 38, 56.66, "enemy", 270,
+            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 38, 56.66, "enemy", 125,
                 "./sprites/zombie-spritesheet-walk.png",
                 0, 0, 48, 55, 4, 0.35, 1.5
             ));
-
-            this.enemyCount++;
         }
     }
 
@@ -284,15 +286,15 @@ class GameEngine {
             const scaledHeight = this.mapHeight * this.mapOneScaleFactor;
 
             // If the map has not been centered yet, initialize its position
-            if (!this.initialized) {
-                this.textureOffsetX = this.player.worldX - scaledWidth / 2 + this.player.animator.width / 2;
-                this.textureOffsetY = this.player.worldY - scaledHeight / 2 + this.player.animator.height / 2;
-                this.initialized = true;
+            if (!this.mapInitialized) {
+                this.mapTextureOffsetX = this.player.worldX - scaledWidth / 2 + this.player.animator.width / 2;
+                this.mapTextureOffsetY = this.player.worldY - scaledHeight / 2 + this.player.animator.height / 2;
+                this.mapInitialized = true;
             }
 
             // Adjust the texture's position to move inversely to the player's movement
-            const textureX = this.textureOffsetX - this.camera.x;
-            const textureY = this.textureOffsetY - this.camera.y;
+            const textureX = this.mapTextureOffsetX - this.camera.x;
+            const textureY = this.mapTextureOffsetY - this.camera.y;
 
             // Draw the scaled texture centered on the player's position accounting for the camera
             this.ctx.drawImage(map, textureX, textureY, scaledWidth, scaledHeight);
