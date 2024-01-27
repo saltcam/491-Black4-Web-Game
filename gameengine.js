@@ -117,10 +117,30 @@ class GameEngine {
                 randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
             } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
 
-            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 38/2, 56.66/2, "enemy", 125,
+            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 38/2, 56.66/2, "enemy", 75,
                 "./sprites/zombie-spritesheet-walk.png",
                 0, 0, 48, 55, 4, 0.35, 1.5
             ));
+        }
+
+        while (this.enemies.length < 17) {
+            let randomXNumber, randomYNumber;
+
+            do {
+                // Set min X = -(horizontal canvas resolution).
+                let minX = -(1440);
+                let maxX = minX * (-1);
+                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+
+                // Set min Y = -(vertical canvas resolution).
+                let minY = -(810);
+                let maxY = minY * (-1);
+                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
+
+            gameEngine.addEntity(new Enemy_Contact("Slime", 5, 5, 1, gameEngine, randomXNumber, randomYNumber, 30/2, 20/2, "enemy", 50,
+                "./sprites/SlimeMove.png",
+                0, 0, 32, 18, 8, 0.1, 2));
         }
     }
 
@@ -307,16 +327,16 @@ class GameEngine {
         }
 
         // If the defeated all enemies, display 'You Won!' text.
-        // if (this.enemies.length <= 0) {
-        //     this.ctx.beginPath();
-        //
-        //     // Draw "You Won!" text in large yellow font at the center of the canvas
-        //     this.ctx.font = '75px Arial';
-        //     this.ctx.fillStyle = 'yellow';
-        //     this.ctx.textAlign = 'center'
-        //     this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
-        //     this.ctx.closePath();
-        // }
+        if (this.enemies.length <= 0) {
+            this.ctx.beginPath();
+
+            // Draw "You Won!" text in large yellow font at the center of the canvas
+            this.ctx.font = '75px Arial';
+            this.ctx.fillStyle = 'yellow';
+            this.ctx.textAlign = 'center'
+            this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+            this.ctx.closePath();
+        }
     }
 
     /** Draws the game-time tracker on top of the game screen. */
