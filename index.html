@@ -5,13 +5,15 @@
     <title>Guy with Scythe</title>
   
     <script type="text/javascript" src="./assetmanager.js"></script>
+    <script type="text/javascript" src="./entity.js"></script>
     <script type="text/javascript" src="./timer.js"></script>
     <script type="text/javascript" src="./gameengine.js"></script>
     <script type="text/javascript" src="./util.js"></script>
     <script type="text/javascript" src="./main.js"></script>
     <script type="text/javascript" src="./camera.js"></script>
     <script type="text/javascript" src="./boundingBox.js"></script>
-    <script type="text/javascript" src="./entity.js"></script>
+    <script type="text/javascript" src="./attackCirc.js"></script>
+    <script type="text/javascript" src="./portal.js"></script>
     <script type="text/javascript" src="./enemy_contact.js"></script>
     <script type="text/javascript" src="./dude.js"></script>
     <script type="text/javascript" src="./animator.js"></script>
@@ -61,7 +63,7 @@
             debugCheckbox.addEventListener('change', function() {
                 if (debugCheckbox.checked) {
                     debugInfo.style.display = 'block';
-                    // Assuming gameEngine is your game engine instance and player is the Dude instance
+                    gameEngine.debugMode = true; // Enable debug mode in the game engine
                     setInterval(() => {
                         if (gameEngine.player) {
                             playerPosition.textContent = `${gameEngine.player.worldX}x, ${gameEngine.player.worldY}y`;
@@ -69,6 +71,7 @@
                     }, 100); // Update every 100 milliseconds
                 } else {
                     debugInfo.style.display = 'none';
+                    gameEngine.debugMode = false; // Disable debug mode in the game engine
                 }
             });
         });

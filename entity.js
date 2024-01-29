@@ -34,6 +34,7 @@ class Entity {
         this.worldX = worldX;
         this.worldY = worldY;
         this.isDead = false;
+        this.drawHealthBar = false;
     }
 
         update() {
@@ -95,5 +96,4 @@ class Entity {
             this.currHP = 0;
         }
     }
-
 }

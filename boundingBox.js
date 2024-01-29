@@ -6,10 +6,7 @@ class BoundingBox {
      * @param height the distance from top to bottom of box
      * @param type 'player': take damage when colliding with 'enemy' or 'enemyAttack'.
      *             'enemy': take damage when colliding with 'playerAttack'.
-     *             'enemyAttack': boxes labeled 'player' take damage upon collision.
-     *             'playerAttack': boxes labeled 'enemy' take damage upon collision.
      */
-    //TODO is there a better way to handle box types?
     constructor(x, y, width, height, type) {
         this.left = x;
         this.top = y;
@@ -17,8 +14,6 @@ class BoundingBox {
         this.height = height;
         this.type = type;
     }
-
-
 
     get right() {
         return this.left + this.width;
@@ -44,26 +39,35 @@ class BoundingBox {
     }
 
     draw(ctx, game) {
+        // Check if the game instance is valid and if debug mode is enabled
+        if (!game || !game.debugMode) {
+            return; // If game instance is not valid or debug mode is off, do nothing
+        }
+
+        // If camera is not initialized, do nothing because we need it here.
+        if (!game.camera) {
+            return;
+        }
 
         // draws the box for you to see
         ctx.beginPath();
-        switch (this.type){
+        switch (this.type) {
             case "player":
                 ctx.strokeStyle = 'Blue';
                 break;
             case "enemy":
                 ctx.strokeStyle = 'Red';
                 break;
-            default: ctx.strokeStyle = 'White';
-            break;
+            default:
+                ctx.strokeStyle = 'White';
+                break;
         }
 
-            ctx.strokeRect(
-                this.left - game.camera.x,
-                this.top - game.camera.y,
-                this.width,
-                this.height);
-            ctx.closePath();
-
+        ctx.strokeRect(
+            this.left - game.camera.x,
+            this.top - game.camera.y,
+            this.width,
+            this.height);
+        ctx.closePath();
     }
 }
