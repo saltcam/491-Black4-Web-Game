@@ -7,14 +7,10 @@ class Enemy_Contact extends Entity {
         this.isMoving = false;  // Is the character currently moving?
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
         this.boundingBox.drawBoundingBox = false;
-    }
 
-    checkCollisionAndDealDamage() {
-        const player = this.game.player;
-        if (this.boundingBox.isColliding(player.boundingBox)) {
-            player.takeDamage(this.atkPow);
-        }
-
+        // Properties to track cooldown of being able to damage the player
+        this.attackCooldown = 1;    // in seconds
+        this.lastAttackTime = 0;    // time since last attack
     }
 
     // this is the movement pattern for enemies that just approach the player
@@ -73,6 +69,17 @@ class Enemy_Contact extends Entity {
         this.checkCollisionAndDealDamage();
     }
 
+    checkCollisionAndDealDamage() {
+        const player = this.game.player;
+        const currentTime = this.game.timer.gameTime;
+
+        // Check collision and cooldown
+        if (this.boundingBox.isColliding(player.boundingBox) && currentTime - this.lastAttackTime >= this.attackCooldown) {
+            player.takeDamage(this.atkPow);
+            this.lastAttackTime = currentTime; // Update last attack time
+        }
+    }
+
     respondToCollision(enemy1, enemy2) {
         // Calculate the direction vector between the two enemies
         const directionX = enemy1.worldX - enemy2.worldX;
@@ -92,9 +99,9 @@ class Enemy_Contact extends Entity {
         enemy2.worldX -= normalizedDirectionX * bounceDistance;
         enemy2.worldY -= normalizedDirectionY * bounceDistance;
 
-        // Update the bounding boxes to reflect the new positions
-        enemy1.boundingBox.updateCentered(enemy1.worldX, enemy1.worldY, enemy1.boundingBox.width, enemy1.boundingBox.height);
-        enemy2.boundingBox.updateCentered(enemy2.worldX, enemy2.worldY, enemy2.boundingBox.width, enemy2.boundingBox.height);
+        // Immediately update bounding boxes after changing positions
+        enemy1.updateBoundingBox();
+        enemy2.updateBoundingBox();
     }
 
     draw(ctx, game) {

@@ -14,7 +14,7 @@ const PRIMARY_ATTACK_RADIUS = 135; // Default value
  */
 class Dude extends Entity {
     constructor(game) {
-        super(1000, 1000, 10, game, 0, 0,
+        super(100, 100, 0, game, 0, 0,
             17, 29, "player", 200,
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2);
@@ -52,10 +52,6 @@ class Dude extends Entity {
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McDead.png"),
                 0, 0, 32, 40, 8, 0.1);
         }
-
-        // Debug World Coordinates
-        //console.log(this.worldX);
-        //console.log(this.worldY);
 
         // Calculate the delta time which is defined as the time passed in seconds since the last frame.
         // We will use this to calculate how much we should move the character on this frame.
@@ -109,17 +105,27 @@ class Dude extends Entity {
             moveY /= length;
         }
 
-        // Check and adjust the position to stay within the map boundaries
-        let newWorldX = this.worldX + moveX * delta;
-        let newWorldY = this.worldY + moveY * delta;
+        // Calculate intended new position
+        let intendedX = this.worldX + moveX * delta;
+        let intendedY = this.worldY + moveY * delta;
 
-        // Constrain to map boundaries
-        newWorldX = Math.max(this.game.mapBoundaries.left, Math.min(this.game.mapBoundaries.right, newWorldX));
-        newWorldY = Math.max(this.game.mapBoundaries.top, Math.min(this.game.mapBoundaries.bottom, newWorldY));
+        // We are now going to detect X and Y collisions of map objects so that the player can still 'slide' on the surface of their bounding boxes.
+        // Without doing it this way, the player kind of just got 'stuck' in place when colliding with map objects.
+        // Check collisions with map objects for X-axis
+        let collisionX = this.game.objects.some(mapObject =>
+            this.checkCollisionWithMapObject(intendedX, this.worldY, mapObject));
 
-        // Update the world position
-        this.worldX = newWorldX;
-        this.worldY = newWorldY;
+        // Check collisions with map objects for Y-axis
+        let collisionY = this.game.objects.some(mapObject =>
+            this.checkCollisionWithMapObject(this.worldX, intendedY, mapObject));
+
+        // Update position based on collision detection
+        if (!collisionX) {
+            this.worldX = Math.max(this.game.mapBoundaries.left, Math.min(this.game.mapBoundaries.right, intendedX));
+        }
+        if (!collisionY) {
+            this.worldY = Math.max(this.game.mapBoundaries.top, Math.min(this.game.mapBoundaries.bottom, intendedY));
+        }
 
         // Check if the animation state needs to be switched
         // TODO: Check if the player has the scythe or a different weapon equipped and change the spritesheet accordingly
@@ -140,7 +146,43 @@ class Dude extends Entity {
         if (this.game.keys[" "] && this.currentDashCooldown === 0) {
             this.performDash();
         }
+
+        // Check for collisions with enemies and push them back
+        this.game.enemies.forEach(enemy => {
+            if (this.boundingBox.isColliding(enemy.boundingBox)) {
+                this.respondToCollisionWithEnemy(enemy);
+            }
+        });
     };
+
+    checkCollisionWithMapObject(intendedX, intendedY, mapObject) {
+        // Create a temporary bounding box for the intended position
+        let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
+
+        // Check if this temporary bounding box collides with the map object's bounding box
+        return tempBoundingBox.isColliding(mapObject.boundingBox);
+    }
+
+    respondToCollisionWithEnemy(enemy) {
+        // Calculate the direction vector between the player and the enemy
+        const directionX = enemy.worldX - this.worldX;
+        const directionY = enemy.worldY - this.worldY;
+
+        // Normalize the direction vector
+        const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
+        const normalizedDirectionX = directionX / magnitude;
+        const normalizedDirectionY = directionY / magnitude;
+
+        // Set the pushback distance
+        const pushbackDistance = 1; // Adjust this value as needed
+
+        // Move the enemy away from the player by the pushback distance
+        enemy.worldX += normalizedDirectionX * pushbackDistance;
+        enemy.worldY += normalizedDirectionY * pushbackDistance;
+
+        // Update the enemy's bounding box to reflect the new position
+        enemy.updateBoundingBox();
+    }
 
     // called when the user has a valid dash and presses space bar
     performDash() {

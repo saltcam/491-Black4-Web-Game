@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="">  <!-- I was getting a warning when there was no lang="" here, so I added it. (Nick) -->
 <head>
     <meta charset="utf-8">
     <title>Guy with Scythe</title>
@@ -17,6 +17,7 @@
     <script type="text/javascript" src="./enemy_contact.js"></script>
     <script type="text/javascript" src="./dude.js"></script>
     <script type="text/javascript" src="./animator.js"></script>
+    <script type="text/javascript" src="./map_object.js"></script>
 
     <style>
         body {
@@ -42,7 +43,11 @@
     </style>
 </head>
 <body>
-    <canvas id="gameWorld" width="1440" height="810" style="background: white; border: 1px solid black" tabindex="0" autofocus></canvas>
+    <!-- Setting the rendering to pixelated allows us to have a non-blurry fullscreen. -->
+    <canvas id="gameWorld" width="1440" height="810" style="background: white; border: 1px solid black; image-rendering: pixelated;" tabindex="0"></canvas>
+
+    <!-- Fullscreen button -->
+    <button id="fullscreenButton">Fullscreen</button>
 
     <!-- Debug Mode Section -->
     <div id="debugModeSection">
@@ -53,7 +58,31 @@
         </div>
     </div>
 
-    <!-- Additional script for debug mode -->
+    <!-- Script to fullscreen the game. -->
+    <script>
+        const canvas = document.getElementById('gameWorld');
+        const fullscreenButton = document.getElementById('fullscreenButton');
+
+        // Function to toggle fullscreen mode
+        const toggleFullscreen = () => {
+            if (document.fullscreenElement) {
+                // If already in fullscreen, exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            } else {
+                // If not in fullscreen, request fullscreen
+                if (canvas.requestFullscreen) {
+                    canvas.requestFullscreen();
+                }
+            }
+        };
+
+        // Add click event listener to the fullscreen button
+        fullscreenButton.addEventListener('click', toggleFullscreen);
+    </script>
+
+    <!-- Script for debug mode. -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const debugCheckbox = document.getElementById('debugModeCheckbox');
@@ -73,6 +102,14 @@
                     debugInfo.style.display = 'none';
                     gameEngine.debugMode = false; // Disable debug mode in the game engine
                 }
+            });
+
+            // Set focus to the canvas when the page loads
+            canvas.focus();
+
+            // Prevent the canvas from losing focus
+            canvas.addEventListener('blur', () => {
+                canvas.focus();
             });
         });
     </script>

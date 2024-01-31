@@ -34,62 +34,73 @@ class Entity {
         this.worldX = worldX;
         this.worldY = worldY;
         this.isDead = false;
-        this.drawHealthBar = false;
     }
 
-        update() {
-            // Calculate the scaled center of the sprite
-            const scaledCenterX = this.worldX + (this.animator.width) / 2;
-            const scaledCenterY = this.worldY + (this.animator.height) / 2;
+    update() {
+        // Calculate the scaled center of the sprite
+        const scaledCenterX = this.worldX + (this.animator.width) / 2;
+        const scaledCenterY = this.worldY + (this.animator.height) / 2;
 
-            // Update the bounding box to be centered around the scaled sprite
-            this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
+        // Update the bounding box to be centered around the scaled sprite
+        this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
+    }
+
+    // Method to find the center of the entity
+    calculateCenter() {
+        return {
+            x: this.worldX + this.animator.width / 2,
+            y: this.worldY + this.animator.height / 2
+        };
+    }
+
+    drawHealth(ctx) {
+        // If this is a 0 health entity, we can ignore drawing the healthbar.
+        if (this.maxHP === 0) {
+            return;
         }
+        //draw the max healthbar
+        ctx.beginPath();
+        ctx.fillStyle = "Black";
+        ctx.fillRect(this.boundingBox.left - this.game.camera.x,
+            this.boundingBox.top + this.boundingBox.height - this.game.camera.y,
+            this.boundingBox.width, 10);
+        ctx.closePath();
 
-        // Method to find the center of the entity
-        calculateCenter() {
+        //draw the current healthbar
+        ctx.beginPath();
+        ctx.fillStyle = "Red";
+        ctx.fillRect(this.boundingBox.left - this.game.camera.x,
+            this.boundingBox.top + this.boundingBox.height - this.game.camera.y,
+            this.boundingBox.width * (this.currHP / this.maxHP), 10);
+        ctx.closePath();
+    }
+
+    // Method to calculate the angle between the entity and a target (The player usually)
+    calcTargetAngle(target) {
+        if (target) {
+            const targetCenter = target.calculateCenter();
+            const selfCenter = this.calculateCenter();
+
+            // Calculate direction vector towards the target's center
+            const dirX = targetCenter.x + 16 - selfCenter.x;
+            const dirY = targetCenter.y - selfCenter.y;
+
+            // Normalize the direction
+            const length = Math.sqrt(dirX * dirX + dirY * dirY);
             return {
-                x: this.worldX + this.animator.width / 2,
-                y: this.worldY + this.animator.height / 2
+                x: length > 0 ? dirX / length : 0,
+                y: length > 0 ? dirY / length : 0
             };
         }
+    }
 
-        drawHealth(ctx) {
-            //draw the max healthbar
-            ctx.beginPath();
-            ctx.fillStyle = "Black";
-            ctx.fillRect(this.boundingBox.left - this.game.camera.x,
-                this.boundingBox.top + this.boundingBox.height - this.game.camera.y,
-                this.boundingBox.width, 10);
-            ctx.closePath();
+    // This is used for collision made position changes
+    updateBoundingBox() {
+        const scaledCenterX = this.worldX + (this.animator.width) / 2;
+        const scaledCenterY = this.worldY + (this.animator.height) / 2;
+        this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
+    }
 
-            //draw the current healthbar
-            ctx.beginPath();
-            ctx.fillStyle = "Red";
-            ctx.fillRect(this.boundingBox.left - this.game.camera.x,
-                this.boundingBox.top + this.boundingBox.height - this.game.camera.y,
-                this.boundingBox.width * (this.currHP / this.maxHP), 10);
-            ctx.closePath();
-        }
-
-        // Method to calculate the angle between the entity and a target (The player usually)
-        calcTargetAngle(target) {
-            if (target) {
-                const targetCenter = target.calculateCenter();
-                const selfCenter = this.calculateCenter();
-    
-                // Calculate direction vector towards the target's center
-                const dirX = targetCenter.x + 16 - selfCenter.x;
-                const dirY = targetCenter.y - selfCenter.y;
-    
-                // Normalize the direction
-                const length = Math.sqrt(dirX * dirX + dirY * dirY);
-                return {
-                    x: length > 0 ? dirX / length : 0,
-                    y: length > 0 ? dirY / length : 0
-                };
-            }
-        }
     takeDamage(amount) {
         this.currHP -= amount;
         if (this.currHP <= 0) {

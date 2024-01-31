@@ -44,7 +44,7 @@ class GameEngine {
         /** Map scale for map 0 (Rest Area) */
         this.mapZeroScaleFactor = 0.25;
         /** Map scale for map 1 (Grasslands Map) */
-        this.mapOneScaleFactor = 0.3;
+        this.mapOneScaleFactor = 2;
         /** Map scale for map 2 (Cave Map) */
         this.mapTwoScaleFactor = 0.25;
         /** Map scale for map 3 (Space Map) */
@@ -69,7 +69,10 @@ class GameEngine {
         };
 
         /** An offset of how close the player can get to the map's boundaries. */
-        this.mapBoundaryOffset = 100;
+        this.mapBoundaryOffset = 25;
+
+        /** Tracks if the map objects for the current map have been placed/initialized. */
+        this.mapObjectsInitialized = false;
 
         /** Flag to tell whether the current round is over. */
         this.roundOver = false;
@@ -117,7 +120,7 @@ class GameEngine {
                 randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
             } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
 
-            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 38/2, 56.66/2, "enemy", 75,
+            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 10, this, randomXNumber, randomYNumber, 38/2, 56.66/2, "enemy", 75,
                 "./sprites/zombie-spritesheet-walk.png",
                 0, 0, 48, 55, 4, 0.35, 1.5
             ));
@@ -138,10 +141,16 @@ class GameEngine {
                 randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
             } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
 
-            gameEngine.addEntity(new Enemy_Contact("Slime", 5, 5, 1, gameEngine, randomXNumber, randomYNumber, 30/2, 20/2, "enemy", 50,
+            this.addEntity(new Enemy_Contact("Slime", 5, 5, 5, this, randomXNumber, randomYNumber, 30/2, 20/2, "enemy", 50,
                 "./sprites/SlimeMove.png",
                 0, 0, 32, 18, 8, 0.1, 2));
         }
+    }
+
+    /** Call this to initialize the grassmands (Map #1) objects. */
+    initGrasslandsObjects() {
+        this.addEntity(new Map_object(this, -250, 0, 86, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        this.mapObjectsInitialized = true;
     }
 
     /** Call this method to initialize the camera at the start of the game. */
@@ -275,6 +284,7 @@ class GameEngine {
             // If debug mode, then draw debug features.
             if (this.debugMode) {
                 object.drawHealth(this.ctx);
+                object.boundingBox.draw(this.ctx, this);
             }
         }
 
@@ -364,6 +374,10 @@ class GameEngine {
         }
         // If 1, then Grasslands Map is used.
         else if (this.currMap === 1) {
+            // Initialize the map objects if we haven't already
+            if (!this.mapObjectsInitialized) {
+                this.initGrasslandsObjects();
+            }
             const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
 
             this.mapWidth = map.width;
@@ -389,10 +403,10 @@ class GameEngine {
 
             // Calculate the actual boundaries considering the scaling
             this.mapBoundaries = {
-                left: -((this.mapWidth - this.mapBoundaryOffset) * this.mapOneScaleFactor)/2,
-                top: -((this.mapHeight - this.mapBoundaryOffset) * this.mapOneScaleFactor)/2,
-                right: ((this.mapWidth - this.mapBoundaryOffset) * this.mapOneScaleFactor)/2,
-                bottom: ((this.mapHeight - this.mapBoundaryOffset) * this.mapOneScaleFactor)/2
+                left: -((this.mapWidth) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset,
+                top: -((this.mapHeight) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset,
+                right: ((this.mapWidth) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset,
+                bottom: ((this.mapHeight) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset
             };
         }
         // If 2, then Cave Map is used.

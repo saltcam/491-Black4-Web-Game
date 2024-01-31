@@ -26,26 +26,35 @@ class AttackCirc {
 
         //dummy box so collision doesn't get mad.
         this.boundingBox = new BoundingBox(0,0,0,0,'attack');
+
+        // Properties to track cooldown of being able to damage the player
+        this.attackCooldown = 1;    // in seconds
+        this.lastAttackTime = 0;    // time since last attack
     }
 
 
     // changes world position to match its attached entity, offset by dx and dy values.
     update() {
-
         this.worldX = this.entity.calculateCenter().x + this.dx;
         this.worldY = this.entity.calculateCenter().y + this.dy;
 
         // reduce duration by 1 frame
         this.duration--;
 
-        // NOTE from Nick: Found a cleaner way to implement the 'that' variable, without having a 'that' variable.
-        // Iterate through the list of enemies and see if we are detecting a collision with their bounding box.
-        this.game.enemies.forEach((enemy) => {
-            if(this.collisionDetection(enemy.boundingBox)) {
-                console.log("COLLIDE!");
-                enemy.takeDamage(50);
-            }
-        });
+        // Only do damage if a second has passed since damaging the enemy list last time
+        const currentTime = this.game.timer.gameTime;
+
+        if(currentTime - this.lastAttackTime >= this.attackCooldown) {
+            // NOTE from Nick: Found a cleaner way to implement the 'that' variable, without having a 'that' variable.
+            // Iterate through the list of enemies and see if we are detecting a collision with their bounding box.
+            this.game.enemies.forEach((enemy) => {
+                if (this.collisionDetection(enemy.boundingBox)) {
+                    console.log("COLLIDE!");
+                    enemy.takeDamage(50);
+                    this.lastAttackTime = currentTime; // Update last attack time
+                }
+            });
+        }
 
         //damaging any enemies colliding with this attackCirc
         // for (let i = 0; i < this.game.entities.length - 1; i++) {
