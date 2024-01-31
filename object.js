@@ -1,4 +1,4 @@
-class Portal extends Entity {
+class Object extends Entity {
     constructor(game, worldX, worldY) {
         super(1, 1, 0, game, worldX, worldY, 24, 58, "portal", 0,
             "./sprites/portal.png",

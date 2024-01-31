@@ -27,8 +27,14 @@ class Dude extends Entity {
         // Attack cooldown and Last time the attack was used
         this.primaryAttackCooldown = 1;
         this.spinAttackCooldown = 2;
-        this.lastPrimaryAttackTime = -1;
-        this.lastSpinAttackTime = -2;
+        this.lastPrimaryAttackTime = 0;
+        this.lastSpinAttackTime = 0;
+
+        // Dash implementation
+        this.defaultDashCooldown = 1;   // This is the actual cooldown of dash that will be used each time we dash
+        this.currentDashCooldown = this.defaultDashCooldown;    // This holds the current time left till we can dash again
+        this.dashSpeedMultiplier = 3;
+        this.dashDuration = .5;
     };
 
     update() {
@@ -124,7 +130,30 @@ class Dude extends Entity {
             this.currentAnimation = "standing";
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McIdle.png"), 0, 0, 32, 28, 2, 0.5);
         }
+
+        // decrements dash cooldown
+        this.currentDashCooldown -= this.game.clockTick;
+        if (this.currentDashCooldown < 0) {
+            this.currentDashCooldown = 0;
+        }
+        // checks if space bar has been pressed and the dash is not on cooldown
+        if (this.game.keys[" "] && this.currentDashCooldown === 0) {
+            this.performDash();
+        }
     };
+
+    // called when the user has a valid dash and presses space bar
+    performDash() {
+        this.currentDashCooldown = this.defaultDashCooldown; // reset dash cooldown to the default
+
+        this.movementSpeed *= this.dashSpeedMultiplier; // increase movement speed
+
+        // timeout function to reset movement speed after desired time
+        setTimeout(() => {
+            this.movementSpeed /= this.dashSpeedMultiplier;
+        }, this.dashDuration * 1000); // convert dashDuration from seconds to milliseconds for accurate timeout
+
+    }
 
     // Sets the flag indicating a spin attack has happened
     performSpinAttack() {
