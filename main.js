@@ -15,6 +15,7 @@ ASSET_MANAGER.queueDownload("./sprites/map_space_background.png");
 ASSET_MANAGER.queueDownload("./sprites/map_space_background2.gif");
 ASSET_MANAGER.queueDownload("./sprites/portal.png");
 ASSET_MANAGER.queueDownload("./sprites/grass.png");
+ASSET_MANAGER.queueDownload("./sprites/map_rock_object.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");
