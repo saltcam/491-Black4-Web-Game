@@ -4,7 +4,6 @@ const SECONDARY_ATTACK_RADIUS = 115; // Default value
 class Scythe extends Weapon{
     constructor(game, name, primaryCool, secondCool) {
         super(game, name, primaryCool, secondCool);
-
     }
 
     performPrimaryAttack(player){

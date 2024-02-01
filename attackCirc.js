@@ -14,6 +14,7 @@ class AttackCirc {
      */
     constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath) {
         this.game = game;
+        // the entity the circle will attach to
         this.entity = entity;
         this.dx = dx;
         this.dy = dy;

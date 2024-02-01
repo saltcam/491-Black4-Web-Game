@@ -271,7 +271,7 @@ class GameEngine {
      * @param entity    The entity being added.
      */
     addEntity(entity) {
-        console.log("Reached gameengine.addEntity()");
+        //console.log("Reached gameengine.addEntity()");
         // New way of adding entities.
         // This allows us to do a performance friendly draw() method.
         // Which lets us layer the most important entities over the less important ones (ex: player will be drawn over EVERYTHING.)
