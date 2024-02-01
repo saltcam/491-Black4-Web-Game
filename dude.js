@@ -17,7 +17,7 @@ class Dude extends Entity {
         super(100, 100, 0, game, 0, 0,
             17, 29, "player", 200,
             "./sprites/McIdle.png",
-            0, 0, 32, 28, 2, 0.5, 2.2);
+            0, 0, 32, 28, 2, 0.5, 2.2, 0);
 
         // Animation settings
         this.lastMove = "right"; // Default direction
@@ -35,6 +35,8 @@ class Dude extends Entity {
         this.currentDashCooldown = this.defaultDashCooldown;    // This holds the current time left till we can dash again
         this.dashSpeedMultiplier = 3;
         this.dashDuration = .5;
+
+        this.level = 1;
     };
 
     update() {
@@ -248,6 +250,39 @@ class Dude extends Entity {
         }
     }
 
+    gainExp(exp) {
+        console.log("Exp: " + this.exp + " + " + exp + " = " + (this.exp + exp));
+        this.exp += exp;
+
+        // level up!
+        if (this.exp >= this.level * 10) {
+            this.exp -= (this.level * 10);
+            this.level++;
+        }
+    }
+
+    drawExp(ctx) {
+        ctx.beginPath();
+        ctx.fillStyle = "Black";
+        ctx.fillRect(this.boundingBox.left - this.game.camera.x,
+            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 10,
+            this.boundingBox.width, 10);
+        ctx.closePath();
+
+        //draw the current exp value
+        ctx.beginPath();
+        ctx.fillStyle = "Yellow";
+        let meter = ((this.exp) / (this.level * 10));
+        // prevents exp bar from going too far in any direction
+        if (meter > 1) {
+            meter = 1;
+        }
+        ctx.fillRect(this.boundingBox.left - this.game.camera.x,
+            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 10,
+            this.boundingBox.width * meter, 10);
+        ctx.closePath();
+    }
+
     draw(ctx, game) {
         // Check if the camera is initialized.
         // This is necessary as it is needed for this method, but may not be initialized on the first few calls
@@ -266,7 +301,7 @@ class Dude extends Entity {
 
         // Force the super class to draw the health bar for our player
         this.drawHealth(ctx);
-
+        this.drawExp(ctx);
         this.boundingBox.draw(ctx, game);
     }
 }

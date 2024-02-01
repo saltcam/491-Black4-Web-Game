@@ -22,12 +22,14 @@ class Entity {
      * @param animFCount
      * @param animFDur
      * @param scale The scale of the entity's sprite. 1.0 is normal size.
+     * @param exp   the amount of exp the entity gives when killed
      */
-    constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale){
+    constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp){
         this.maxHP = maxHP;
         this.currHP = currHP;
         this.atkPow = atkPow;
         this.game = game;
+        this.exp = exp;
         this.boundingBox = new BoundingBox(worldX, worldY, boxWidth * scale, boxHeight * scale, boxType);
         this.animator = new Animator(ASSET_MANAGER.getAsset(spritePath), animXStart, animYStart, animW, animH, animFCount, animFDur, scale);
         this.movementSpeed = speed;
@@ -99,6 +101,13 @@ class Entity {
         const scaledCenterX = this.worldX + (this.animator.width) / 2;
         const scaledCenterY = this.worldY + (this.animator.height) / 2;
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
+    }
+
+    makeElite() {
+        this.maxHP *= 2;
+        this.currHP = this.maxHP;
+        this.atkPow *= 2;
+        this.scale *= 2;
     }
 
     takeDamage(amount) {

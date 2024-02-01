@@ -89,6 +89,18 @@ class GameEngine {
 
         /** Toggle to enable debug mode features. */
         this.debugMode = false;
+
+        this.enemyTypes = [
+            { name: "Zombie", maxHP: 100, currHP: 100, atkPow: 1, worldX: 0, worldY: 0, boxWidth: 19/2,
+                boxHeight: 28/2, boxType: "enemy", speed: 100, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
+                animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: 5},
+            { name: "Slime", maxHP: 5, currHP: 5, atkPow: 1, worldX: 0, worldY: 0, boxWidth: 19/2,
+                boxHeight: 28/2, boxType: "enemy", speed: 100, spritePath: "./sprites/SlimeMove.png", animXStart: 0,
+                animYStart: 0, animW: 32, animH: 18, animFCount: 8, animFDur: 0.1, scale: 2, exp: 1},
+            { name: "Floating Eye", maxHP: 100, currHP: 100, atkPow: 1, worldX: 0, worldY: 0,
+                boxWidth: 19/2, boxHeight: 28/2, boxType: "enemy", speed: 100, spritePath: "./sprites/FloatingEye.png",
+                animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: 2}
+        ];
     }
 
     /**
@@ -120,9 +132,9 @@ class GameEngine {
                 randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
             } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
 
-            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 10, this, randomXNumber, randomYNumber, 38/2, 56.66/2, "enemy", 75,
-                "./sprites/zombie-spritesheet-walk.png",
-                0, 0, 48, 55, 4, 0.35, 1.5
+            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 19/2, 28/2, "enemy", 100,
+                "./sprites/Zombie_Run.png",
+                0, 0, 34, 27, 8, 0.2, 3, 5
             ));
         }
 
@@ -143,7 +155,28 @@ class GameEngine {
 
             this.addEntity(new Enemy_Contact("Slime", 5, 5, 5, this, randomXNumber, randomYNumber, 30/2, 20/2, "enemy", 50,
                 "./sprites/SlimeMove.png",
-                0, 0, 32, 18, 8, 0.1, 2));
+                0, 0, 32, 18, 8, 0.1, 2, 2));
+        }
+
+        while (this.enemies.length < 24) {
+            let randomXNumber, randomYNumber;
+
+            do {
+                // Set min X = -(horizontal canvas resolution).
+                let minX = -(1440);
+                let maxX = minX * (-1);
+                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+
+                // Set min Y = -(vertical canvas resolution).
+                let minY = -(810);
+                let maxY = minY * (-1);
+                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
+
+            this.addEntity(new Enemy_Contact("Floating Eye", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 19/2, 28/2, "enemy", 100,
+                "./sprites/FloatingEye.png",
+                -3, 0, 128, 128, 80, 0.05, 2, 5
+            ));
         }
     }
 
@@ -256,6 +289,14 @@ class GameEngine {
         }
     }
 
+    spawnRandomEnemy() {
+        if (this.enemies.length >= 50) {
+            //return;
+        }
+
+        //const randomEnemyType =  this.enemyTypes
+    }
+
     /** Call this method on every frame to draw each entity or UI elements on the canvas. */
     draw() {
         // Clear the canvas.
@@ -304,7 +345,8 @@ class GameEngine {
 
             // If debug mode, then draw debug features.
             if (this.debugMode) {
-                this.portal.drawHealth(this.ctx);
+                //this.portal.drawHealth(this.ctx);
+                this.portal.boundingBox.draw(this.ctx, this);
             }
         }
 
@@ -502,6 +544,7 @@ class GameEngine {
         // Remove 'enemy' entities that are marked for deletion.
         for (let i = this.enemies.length - 1; i >= 0; --i) {
             if (this.enemies[i].removeFromWorld) {
+                this.addEntity(new Exp_Orb(this, this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].exp));
                 this.enemies.splice(i, 1);
             }
         }
@@ -539,6 +582,12 @@ class GameEngine {
         if (this.player && this.player.isDead) {
             this.player.removeFromWorld = true;
         }
+
+        // if(this.elapsedTime > 5000) {
+        //     if (Math.random() < 0.01) {
+        //
+        //     }
+        // }
 
         // This is for testing purposes.
         // It will kill all zombies in the game to force the player to 'Win' after 30 seconds
@@ -580,4 +629,3 @@ class GameEngine {
 
 }
 
-// KV Le was here :)

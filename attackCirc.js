@@ -91,13 +91,11 @@ class AttackCirc {
 
     // for debugging
     draw(ctx) {
-
         ctx.beginPath();
         ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
         ctx.arc(
             this.worldX - this.game.camera.x,
             this.worldY - this.game.camera.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
-
     }
 }
