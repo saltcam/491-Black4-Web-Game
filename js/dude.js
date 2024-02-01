@@ -21,12 +21,6 @@ class Dude extends Entity {
         this.isMoving = false;  // Is the character currently moving?
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
 
-        // Attack cooldown and Last time the attack was used
-        // this.primaryAttackCooldown = 1;
-        // this.spinAttackCooldown = 2;
-        // this.lastPrimaryAttackTime = 0;
-        // this.lastSpinAttackTime = 0;
-
         // Dash implementation
         this.defaultDashCooldown = 1;   // This is the actual cooldown of dash that will be used each time we dash
         this.currentDashCooldown = this.defaultDashCooldown;    // This holds the current time left till we can dash again
@@ -39,6 +33,8 @@ class Dude extends Entity {
                         new Bow(game, "Bow", 0.1, 5)];
         // index for current weapon: Scythe = 0; Bow = 1; Tome = 2;
         this.currentWeapon = 0;
+        this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching
+        this.lastWeaponSwitchTime = 0;
     };
 
     update() {
@@ -79,14 +75,16 @@ class Dude extends Entity {
             this.lastMove = "right";    // Remember the last direction the character moved
         }
 
-        // NOTE from Nick: I've changed the left and right click detection to instead detect for holding the clickers
-        // down, so we can hold click and attack off cooldown (good for not having to spam click when attack speed
-        // gets higher).
-
         // Perform attacks if mouse buttons are held down and the attacks are off cooldown.
         // To achieve this store the current game time and subtract it to the time since last attack to see
         // if we are ready to trigger another attack.
         const currentTime = this.game.timer.gameTime;
+
+        // Allows the user to switch weapons on a cooldown
+        if (this.game.keys["q"] && currentTime - this.lastWeaponSwitchTime >= this.weaponSwitchCooldown) {
+            this.currentWeapon = (this.currentWeapon + 1) % this.weapons.length;
+            this.lastWeaponSwitchTime = currentTime;
+        }
 
         //asks current weapon if it can attack
         if (this.game.leftMouseDown && currentTime - this.weapons[this.currentWeapon].lastPrimaryAttackTime >= this.weapons[this.currentWeapon].primaryCool) {

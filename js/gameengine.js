@@ -15,6 +15,8 @@ class GameEngine {
         this.enemies = [];
         /** Tracks the portal entity (with this setup - there should only ever be ONE portal active at once). */
         this.portal = null;
+        /** Tracks the attack entities like projectiles and attackCirc. */
+        this.attacks = [];
         /** Tracks the player entity. */
         this.player = null;
 
@@ -282,6 +284,8 @@ class GameEngine {
             this.portal = entity;
         } else if (entity.boundingBox.type === "enemy") {
             this.enemies.push(entity);
+        } else if (entity.boundingBox.type === "attack") {
+            this.attacks.push(entity);
         } else if (entity.boundingBox.type === "object") {
             this.objects.push(entity);
         }
@@ -363,6 +367,21 @@ class GameEngine {
             }
         }
 
+        // Define a threshold for sorting (e.g., 5 pixels)
+        const sortingThreshold = 5;
+
+        // Sort enemies based on their worldY position with a threshold
+        this.enemies.sort((a, b) => {
+            // Calculate the difference in worldY positions
+            const diff = a.worldY - b.worldY;
+
+            // Only consider them different if the difference exceeds the threshold
+            if (Math.abs(diff) < sortingThreshold) {
+                return 0; // Consider them as equal for sorting purposes
+            }
+            return diff;
+        });
+
         // Draw 'enemy' entities.
         for (let enemy of this.enemies) {
             enemy.draw(this.ctx, this);
@@ -370,6 +389,17 @@ class GameEngine {
             // If debug mode, then draw debug features.
             if (this.debugMode) {
                 enemy.drawHealth(this.ctx);
+            }
+        }
+
+        // Draw 'attack' entities.
+        for (let attack of this.attacks) {
+            attack.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode) {
+                //attack.drawHealth(this.ctx);
+                attack.boundingBox.draw(this.ctx, this);
             }
         }
 
@@ -551,6 +581,13 @@ class GameEngine {
             }
         }
 
+        // Update 'attack' entities.
+        for (let i = 0; i < this.attacks.length; i++) {
+            if (!this.attacks[i].removeFromWorld) {
+                this.attacks[i].update();
+            }
+        }
+
         // Update 'portal' entity.
         if (this.portal && !this.portal.removeFromWorld) {
             this.portal.update();
@@ -583,6 +620,14 @@ class GameEngine {
             }
         }
 
+        // Remove 'attack' entities that are marked for deletion.
+        for (let i = this.attacks.length - 1; i >= 0; --i) {
+            if (this.attacks[i].removeFromWorld) {
+                this.addEntity(new Exp_Orb(this, this.attacks[i].worldX, this.attacks[i].worldY, this.attacks[i].exp));
+                this.attacks.splice(i, 1);
+            }
+        }
+
         // Remove 'portal' entity if marked for deletion.
         if (this.portal && this.portal.removeFromWorld) {
             this.portal = null;
@@ -597,18 +642,23 @@ class GameEngine {
         this.elapsedTime = Date.now() - this.startTime;
 
         // Loop through 'other' entities and set removeFromWorld flags.
-        for (let i = 0; i < this.entities.length; i++) {
-            // Removes any playerAttack attack circles if their duration is depleted.
-            if(this.entities[i].type === "playerAttack" && this.entities[i].duration <= 0){
-                this.entities[i].removeFromWorld = true;
-            }
-        }
+        // for (let i = 0; i < this.entities.length; i++) {
+        //
+        // }
 
         // Loop through 'enemy' entities and set removeFromWorld flags.
         for (let i = 0; i < this.enemies.length; i++) {
             // If dead Zombie, mark for deletion.
             if (this.enemies[i].isDead) {
                 this.enemies[i].removeFromWorld = true;
+            }
+        }
+
+        // Loop through 'attack' entities and set removeFromWorld flags.
+        for (let i = 0; i < this.attacks.length; i++) {
+            // Removes any playerAttack attack circles if their duration is depleted.
+            if((this.attacks[i].type === "playerAttack" || this.attacks[i].type === "enemyAttack" || this.attacks[i].type === "attack") && this.attacks[i].duration <= 0){
+                this.attacks[i].removeFromWorld = true;
             }
         }
 
@@ -620,22 +670,6 @@ class GameEngine {
         if(this.elapsedTime % 1000 < 100) {
             this.spawnRandomEnemy();
         }
-
-        // if(this.elapsedTime > 5000) {
-        //     if (Math.random() < 0.01) {
-        //
-        //     }
-        // }
-
-        // This is for testing purposes.
-        // It will kill all zombies in the game to force the player to 'Win' after 30 seconds
-        // if (this.elapsedTime >= 5000) {
-        //     for (let i = 0; i < this.entities.length; i++) {
-        //         if (this.enemies[i].length > 0) {
-        //             this.entities[i].currHP = 0;
-        //         }
-        //     }
-        // }
     }
 
     /** Starts the game engine loop system. This makes the update and draw methods loop. */

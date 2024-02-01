@@ -11,11 +11,31 @@ class Enemy_Contact extends Entity {
         // Properties to track cooldown of being able to damage the player
         this.attackCooldown = 1;    // in seconds
         this.lastAttackTime = 0;    // time since last attack
+
+        this.pushbackVector = { x: 0, y: 0 };
+        this.pushbackDecay = 0.9; // Determines how quickly the pushback force decays
+    }
+
+    applyPushback(forceX, forceY) {
+        this.pushbackVector.x += forceX;
+        this.pushbackVector.y += forceY;
     }
 
     // this is the movement pattern for enemies that just approach the player
     update() {
         super.update();
+
+        // Apply pushback
+        this.worldX += this.pushbackVector.x;
+        this.worldY += this.pushbackVector.y;
+
+        // Decay the pushback force
+        this.pushbackVector.x *= this.pushbackDecay;
+        this.pushbackVector.y *= this.pushbackDecay;
+
+        // If pushback is very small, reset it to 0 to stop movement
+        if (Math.abs(this.pushbackVector.x) < 0.1) this.pushbackVector.x = 0;
+        if (Math.abs(this.pushbackVector.y) < 0.1) this.pushbackVector.y = 0;
 
         // Early exit if the player does not exist or enemy is dead
         if (!this.game.player || this.isDead) {

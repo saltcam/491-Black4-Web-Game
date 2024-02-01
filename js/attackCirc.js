@@ -11,13 +11,21 @@ class AttackCirc {
      * @param dy    y-offset from parent entity
      * @param duration  How long in frames the attack animation stays on screen
      * @param attackSpritePath  The path of the attack sprite to overlay on this attackCirc
+     * @param attackDamage  The damage done to targets.
+     * @param damagePushbackForce    The pushback force applied to enemies that are hit by the attack.
+     * @param spriteRotationSpeed   This should be defaulted to '0' if we don't want the sprite to be 'spinning' while drawn.
      */
-    constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath) {
+    constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath, attackDamage, damagePushbackForce, spriteRotationSpeed) {
         this.game = game;
         // the entity the circle will attach to
         this.entity = entity;
         this.dx = dx;
         this.dy = dy;
+
+        this.attackDamage = attackDamage;
+        this.damagePushbackForce = damagePushbackForce;
+        this.spriteRotationSpeed = spriteRotationSpeed;
+        this.currentRotationAngle = 0; // Initial rotation angle
 
         // where the circle exists in the world
         this.worldX = this.entity.calculateCenter().x + this.dx;
@@ -36,12 +44,22 @@ class AttackCirc {
             this.attackSpritePath = null;
         }
 
+        // Store the initial duration for transparency calculation
+        this.initialDuration = duration * 60;
+
         //dummy box so collision doesn't get mad.
         this.boundingBox = new BoundingBox(0,0,0,0,'attack');
 
         // Properties to track cooldown of being able to damage the player
         this.attackCooldown = 1;    // in seconds
         this.lastAttackTime = 0;    // time since last attack
+
+        // Set the initial fixed rotation angle based on the player's current angle (this prevents a bug where attack sprites rotate with the player character's movement input)
+        if (spriteRotationSpeed) {
+            this.fixedRotationAngle = Math.atan2(this.worldY - this.entity.calculateCenter().y, this.worldX - this.entity.calculateCenter().x) + Math.PI / 2;
+        } else {
+            this.fixedRotationAngle = 0;
+        }
     }
 
 
@@ -57,27 +75,36 @@ class AttackCirc {
         const currentTime = this.game.timer.gameTime;
 
         if(currentTime - this.lastAttackTime >= this.attackCooldown) {
-            // NOTE from Nick: Found a cleaner way to implement the 'that' variable, without having a 'that' variable.
-            // Iterate through the list of enemies and see if we are detecting a collision with their bounding box.
             this.game.enemies.forEach((enemy) => {
                 if (this.collisionDetection(enemy.boundingBox)) {
-                    //console.log("COLLIDE!");
-                    enemy.takeDamage(50);
-                    this.lastAttackTime = currentTime; // Update last attack time
+                    // Push the enemy away
+                    this.pushEnemy(enemy);
+                    enemy.takeDamage(this.attackDamage); // example damage value
+                    this.lastAttackTime = currentTime;
                 }
             });
         }
 
-        //damaging any enemies colliding with this attackCirc
-        // for (let i = 0; i < this.game.entities.length - 1; i++) {
-        //     console.log("i: " + i);
-        //     console.log("length: " + this.game.entities.length);
-        //     if(this.game.entities[i].boundingBox.type === 'enemy' && this.collisionDetection(this.game.entities[i].boundingBox)) {
-        //         console.log("COLLIDE!");
-        //         this.game.entities[i].takeDamage(50);
-        //     }
-        // }
+        // Update rotation angle for spinning sprites
+        if (this.spriteRotationSpeed) {
+            this.currentRotationAngle += this.spriteRotationSpeed;
+        }
+    }
 
+    pushEnemy(enemy) {
+        const pushDirection = {
+            x: enemy.worldX - this.entity.worldX,
+            y: enemy.worldY - this.entity.worldY
+        };
+
+        // Normalize the push direction
+        const magnitude = Math.sqrt(pushDirection.x * pushDirection.x + pushDirection.y * pushDirection.y);
+        pushDirection.x /= magnitude;
+        pushDirection.y /= magnitude;
+
+        // Apply the pushback
+        const pushbackForce = this.damagePushbackForce;
+        enemy.applyPushback(pushDirection.x * pushbackForce, pushDirection.y * pushbackForce);
     }
 
     /**
@@ -96,43 +123,52 @@ class AttackCirc {
         if (distY <= (rect.height/2)) { return true; }
 
         // also test for corner collisions
-        var dx=distX-rect.width/2;
-        var dy=distY-rect.height/2;
+        var dx= distX-rect.width / 2;
+        var dy= distY-rect.height / 2;
         return (dx*dx+dy*dy<=(this.radius*this.radius));
     }
 
     // for debugging
     draw(ctx) {
-        // Draw the circle indicator attacks if no sprite
-        if (1) {
+        // Draw the circle indicator for attacks if no sprite
+        if (!this.attackSpritePath || this.game.debugMode) {
             ctx.beginPath();
             ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
-            ctx.arc(
-                this.worldX - this.game.camera.x,
-                this.worldY - this.game.camera.y, this.radius, 0, Math.PI * 2);
+            ctx.arc(this.worldX - this.game.camera.x, this.worldY - this.game.camera.y, this.radius, 0, Math.PI * 2);
             ctx.fill();
         }
-        // Otherwise, no indicator circle, just draw the sprite
-        if (this.attackSpritePath) {
+        // Draw the attack sprite if it exists
+        if (this.attackSpritePath || this.game.debugMode) {
             const spriteWidth = this.radius * 2;
             const spriteHeight = this.radius * 2;
-            const spriteX = this.worldX - this.game.camera.x - this.radius;
-            const spriteY = this.worldY - this.game.camera.y - this.radius;
-
-            // Calculate the angle towards the player
-            const playerCenter = this.entity.calculateCenter();
-            const angle = Math.atan2(spriteY - playerCenter.y, spriteX - playerCenter.x);
 
             // Save the current state of the canvas context
             ctx.save();
 
-            // Translate the context to the sprite's position and rotate it
-            ctx.translate(spriteX, spriteY);
-            ctx.rotate(angle);
+            // Calculate and set transparency based on remaining duration
+            ctx.globalAlpha = this.duration / this.initialDuration;
 
-            ctx.drawImage(this.attackSpritePath, spriteX, spriteY, spriteWidth, spriteHeight);
+            // Translate context
+            ctx.translate(this.worldX - this.game.camera.x, this.worldY - this.game.camera.y);
 
-            // Restore the context to its original state
+            let rotationAngle;
+
+            // Check if sprite should spin
+            if (this.spriteRotationSpeed === 0) {
+                // Rotate based on mouse and player location/direction
+                rotationAngle = Math.atan2(this.worldY - this.entity.calculateCenter().y, this.worldX - this.entity.calculateCenter().x) + Math.PI / 2;
+            } else {
+                // Rotate based on fixed rotation plus current rotation angle for spinning sprites
+                rotationAngle = this.fixedRotationAngle + this.currentRotationAngle;
+            }
+
+            // Apply rotation
+            ctx.rotate(rotationAngle);
+
+            // Draw the sprite
+            ctx.drawImage(this.attackSpritePath, -spriteWidth / 2, -spriteHeight / 2, spriteWidth, spriteHeight);
+
+            // Restore the context
             ctx.restore();
         }
     }

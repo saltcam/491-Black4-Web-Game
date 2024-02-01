@@ -1,9 +1,18 @@
-const PRIMARY_ATTACK_RADIUS = 135; // Default value
-const SECONDARY_ATTACK_RADIUS = 115; // Default value
-
 class Scythe extends Weapon{
     constructor(game, name, primaryCool, secondCool) {
         super(game, name, primaryCool, secondCool);
+
+        this.primaryAttackDamage = 15;
+        this.secondaryAttackDamage = 30;
+
+        this.primaryAttackPushbackForce = 9;
+        this.secondaryAttackPushbackForce = 14;
+
+        this.primaryAttackRadius = 110;
+        this.secondaryAttackRadius = 115;
+
+        this.primaryAttackDuration = 0.6; // Duration of the attack animation
+        this.secondaryAttackDuration = 0.85; // Duration of the spin attack in seconds
     }
 
     performPrimaryAttack(player){
@@ -23,19 +32,20 @@ class Scythe extends Weapon{
             let dy = clickPos.y - screenYCenter;
             this.attackAngle = Math.atan2(dy, dx);
 
-            const offsetDistance = PRIMARY_ATTACK_RADIUS * 0.6;
+            const offsetDistance = this.primaryAttackRadius * 0.45;
             dx = Math.cos(this.attackAngle) * offsetDistance;
             dy = Math.sin(this.attackAngle) * offsetDistance;
 
-
-            this.attackDuration = 0.1; // Duration of the attack animation
             this.lastPrimaryAttackTime = currentTime;
             this.game.addEntity(new AttackCirc(this.game, player,
-                PRIMARY_ATTACK_RADIUS/2,
+                this.primaryAttackRadius / 2,
                 'playerAttack',
                 dx, dy,
-                this.attackDuration,
-                "./sprites/scythe_attack_slash.png"));
+                this.primaryAttackDuration,
+                "./sprites/weapon_scythe_primaryattack.png",
+                this.primaryAttackDamage,
+                this.primaryAttackPushbackForce,
+                0));
         }
 
     }
@@ -45,19 +55,16 @@ class Scythe extends Weapon{
 
         // Removed the click check and just use the cooldown check
         if (currentTime - this.lastSecondAttackTime >= this.secondCool) {
-            this.secondAttackDuration = 0.1; // Duration of the spin attack in seconds
             this.lastSecondAttackTime = currentTime;
             this.game.addEntity(new AttackCirc(this.game, player,
-                SECONDARY_ATTACK_RADIUS,
+                this.secondaryAttackRadius,
                 'playerAttack',
                 0, 0,
-                this.secondAttackDuration,
-                null));
+                this.secondaryAttackDuration,
+                "./sprites/weapon_scythe_secondaryattack.png",
+                this.secondaryAttackDamage,
+                this.secondaryAttackPushbackForce,
+                0.1));
         }
-
     }
-
-
-
-
 }

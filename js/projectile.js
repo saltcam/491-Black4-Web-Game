@@ -1,15 +1,18 @@
 class Projectile extends Entity{
-    constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, angleX, angleY, duration) {
+    constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, angleX, angleY, duration, attackDamage, pushbackForce, spriteRotationSpeed) {
         super(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, 0);
         this.angleX = angleX;
         this.angleY = angleY;
         this.duration = duration;
         this.game.addEntity(new AttackCirc(this.game, this,
-            PRIMARY_ATTACK_RADIUS/2,
+            25,
             'playerAttack',
             0, 0,
             this.duration,
-            "./sprites/scythe_attack_slash.png"));
+            spritePath,
+            attackDamage,
+            pushbackForce,
+            spriteRotationSpeed));
     }
 
     //TODO how to remove after off screen or duration is over?

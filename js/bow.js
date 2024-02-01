@@ -1,6 +1,18 @@
 class Bow extends Weapon {
     constructor(game, name, primaryCool, secondCool) {
         super(game, name, primaryCool, secondCool);
+
+        this.primaryAttackDamage = 15;
+        this.secondaryAttackDamage = 30;
+
+        this.primaryAttackPushbackForce = 9;
+        this.secondaryAttackPushbackForce = 14;
+
+        this.primaryAttackRadius = 110;
+        this.secondaryAttackRadius = 115;
+
+        this.primaryAttackDuration = 0.6; // Duration of the attack animation
+        this.secondaryAttackDuration = 0.85; // Duration of the spin attack in seconds
     }
 
     performPrimaryAttack(player){
@@ -21,17 +33,17 @@ class Bow extends Weapon {
             let dy = clickPos.y - screenYCenter;
             this.attackAngle = Math.atan2(dy, dx);
 
-            const offsetDistance = PRIMARY_ATTACK_RADIUS * 0.6;
+            const offsetDistance = this.primaryAttackRadius * 0.6;
             dx = Math.cos(this.attackAngle) * offsetDistance;
             dy = Math.sin(this.attackAngle) * offsetDistance;
 
 
-            this.attackDuration = 0.5; // Duration of the attack animation
             this.lastPrimaryAttackTime = currentTime;
             this.game.addEntity(new Projectile(1, 1, 50, this.game,
-                player.worldX, player.worldY, 10, 10, "playerAttack", 5,
+                player.worldX, player.worldY, 10, 10, "playerAttack", 20,
                 "./sprites/exp_orb.png",
-                0, 0, 17, 17, 3, 0.2, 1, dx, dy));
+                0, 0, 17, 17, 3, 0.2, 1, dx, dy,
+                this.primaryAttackDamage, this.primaryAttackPushbackForce, 0));
         }
 
     }
@@ -44,11 +56,13 @@ class Bow extends Weapon {
             this.secondAttackDuration = 0.1; // Duration of the spin attack in seconds
             this.lastSecondAttackTime = currentTime;
             this.game.addEntity(new AttackCirc(this.game, player,
-                SECONDARY_ATTACK_RADIUS,
+                this.secondaryAttackRadius,
                 'playerAttack',
                 0, 0,
                 this.secondAttackDuration,
-                null));
+                null,
+                this.secondaryAttackDamage,
+                this.secondaryAttackPushbackForce));
         }
 
     }

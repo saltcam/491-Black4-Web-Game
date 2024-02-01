@@ -108,7 +108,7 @@ class Entity {
         this.currHP = this.maxHP;
         this.atkPow *= 2;
         this.scale *= 2;
-        console.log(this.name + " has become an elite!");
+        //console.log(this.name + " has become an elite!");
     }
 
     takeDamage(amount) {
