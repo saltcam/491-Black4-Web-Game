@@ -95,10 +95,10 @@ class GameEngine {
                 boxHeight: 28/2, boxType: "enemy", speed: 100, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
                 animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: 5},
             { name: "Slime", maxHP: 5, currHP: 5, atkPow: 1, worldX: 0, worldY: 0, boxWidth: 19/2,
-                boxHeight: 28/2, boxType: "enemy", speed: 100, spritePath: "./sprites/SlimeMove.png", animXStart: 0,
+                boxHeight: 28/2, boxType: "enemy", speed: 75, spritePath: "./sprites/SlimeMove.png", animXStart: 0,
                 animYStart: 0, animW: 32, animH: 18, animFCount: 8, animFDur: 0.1, scale: 2, exp: 1},
-            { name: "Floating Eye", maxHP: 100, currHP: 100, atkPow: 1, worldX: 0, worldY: 0,
-                boxWidth: 19/2, boxHeight: 28/2, boxType: "enemy", speed: 100, spritePath: "./sprites/FloatingEye.png",
+            { name: "Floating Eye", maxHP: 5, currHP: 5, atkPow: 1, worldX: 0, worldY: 0,
+                boxWidth: 19/2, boxHeight: 28/2, boxType: "enemy", speed: 150, spritePath: "./sprites/FloatingEye.png",
                 animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: 2}
         ];
     }
@@ -296,7 +296,38 @@ class GameEngine {
             return;
         }
 
-        //const randomEnemyType =  this.enemyTypes
+        let randomXNumber, randomYNumber;
+
+        do {
+            // Set min X = -(horizontal canvas resolution).
+            let minX = -(1440);
+            let maxX = minX * (-1);
+            randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+
+            // Set min Y = -(vertical canvas resolution).
+            let minY = -(810);
+            let maxY = minY * (-1);
+            randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+        } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);
+
+        //Selects a random enemy from the enemyTypes array
+        const randomEnemyType =  this.enemyTypes[Math.floor(Math.random() * this.enemyTypes.length)];
+
+        //Creates the new random enemy at a random location
+        const newEnemy = new Enemy_Contact(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
+            randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
+            randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
+            randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
+            randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
+
+        // After 5 seconds there is a 50% chance for a new enemy to spawn as an elite
+        if(this.elapsedTime > 5000) {
+            if (Math.random() < 0.1) {
+                newEnemy.makeElite();
+            }
+        }
+        //Add the new enemy into the game
+        this.addEntity(newEnemy);
     }
 
     /** Call this method on every frame to draw each entity or UI elements on the canvas. */
@@ -584,6 +615,10 @@ class GameEngine {
         // Check if player is dead, if so: mark player for deletion.
         if (this.player && this.player.isDead) {
             this.player.removeFromWorld = true;
+        }
+
+        if(this.elapsedTime % 1000 < 100) {
+            this.spawnRandomEnemy();
         }
 
         // if(this.elapsedTime > 5000) {
