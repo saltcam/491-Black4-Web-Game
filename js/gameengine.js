@@ -623,7 +623,7 @@ class GameEngine {
         // Remove 'attack' entities that are marked for deletion.
         for (let i = this.attacks.length - 1; i >= 0; --i) {
             if (this.attacks[i].removeFromWorld) {
-                this.addEntity(new Exp_Orb(this, this.attacks[i].worldX, this.attacks[i].worldY, this.attacks[i].exp));
+                //this.addEntity(new Exp_Orb(this, this.attacks[i].worldX, this.attacks[i].worldY, this.attacks[i].exp));
                 this.attacks.splice(i, 1);
             }
         }

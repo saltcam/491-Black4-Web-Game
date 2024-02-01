@@ -204,7 +204,8 @@ class Dude extends Entity {
         this.exp += exp;
 
         // level up!
-        if (this.exp >= this.level * 10) {
+        if (this.exp >= (this.level * 10)) {
+            //console.log("level");
             this.exp -= (this.level * 10);
             this.level++;
         }
@@ -220,7 +221,7 @@ class Dude extends Entity {
 
         //draw the current exp value
         ctx.beginPath();
-        ctx.fillStyle = "Yellow";
+        ctx.fillStyle = "Blue";
         let meter = ((this.exp) / (this.level * 10));
         // prevents exp bar from going too far in any direction
         if (meter > 1) {
