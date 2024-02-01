@@ -271,10 +271,12 @@ class GameEngine {
      * @param entity    The entity being added.
      */
     addEntity(entity) {
+        console.log("Reached gameengine.addEntity()");
         // New way of adding entities.
         // This allows us to do a performance friendly draw() method.
         // Which lets us layer the most important entities over the less important ones (ex: player will be drawn over EVERYTHING.)
         if (entity.boundingBox.type === "player") {
+            console.log("Adding player to gameengine!");
             this.player = entity;
         } else if (entity.boundingBox.type === "portal") {
             this.portal = entity;
@@ -291,7 +293,7 @@ class GameEngine {
 
     spawnRandomEnemy() {
         if (this.enemies.length >= 50) {
-            //return;
+            return;
         }
 
         //const randomEnemyType =  this.enemyTypes
@@ -314,7 +316,8 @@ class GameEngine {
 
             // If debug mode, then draw debug features.
             if (this.debugMode && entity instanceof Entity) {
-                entity.drawHealth(this.ctx);
+                //entity.drawHealth(this.ctx);
+                entity.boundingBox.draw(this.ctx, this);
             }
         }
 

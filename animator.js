@@ -16,18 +16,18 @@ class Animator {
         if (this.elapsedTime > this.totalTime) this.elapsedTime -= this.totalTime;
 
         // Get the current frame
-        const frame = this.currentFrame();  
+        const frame = this.currentFrame();
 
         // Save the current context state 
         ctx.save();
 
-         // Calculate scale adjustments
-         const scaledWidth = this.width * this.scale;
-         const scaledHeight = this.height * this.scale;
- 
-         // Adjust x and y to center the sprite based on the new scaled size
-         x = x - (scaledWidth - this.width) / 2;
-         y = y - (scaledHeight - this.height) / 2;
+        // Calculate scale adjustments
+        const scaledWidth = this.width * this.scale;
+        const scaledHeight = this.height * this.scale;
+
+        // Adjust x and y to center the sprite based on the new scaled size
+        x = x - (scaledWidth - this.width) / 2;
+        y = y - (scaledHeight - this.height) / 2;
 
         // Flip the canvas context horizontally if the direction is left
         if (direction === "left") {

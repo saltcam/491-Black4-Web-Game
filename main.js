@@ -17,6 +17,7 @@ ASSET_MANAGER.queueDownload("./sprites/portal.png");
 ASSET_MANAGER.queueDownload("./sprites/grass.png");
 ASSET_MANAGER.queueDownload("./sprites/map_rock_object.png");
 ASSET_MANAGER.queueDownload("./sprites/exp_orb.png");
+ASSET_MANAGER.queueDownload("./sprites/scythe_attack_slash.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");

@@ -10,19 +10,30 @@ class AttackCirc {
      * @param dx    x-offset from parent entity
      * @param dy    y-offset from parent entity
      * @param duration  How long in frames the attack animation stays on screen
+     * @param attackSpritePath  The path of the attack sprite to overlay on this attackCirc
      */
-    constructor(game, entity, radius, type, dx, dy, duration) {
+    constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath) {
         this.game = game;
         this.entity = entity;
         this.dx = dx;
         this.dy = dy;
+
         // where the circle exists in the world
         this.worldX = this.entity.calculateCenter().x + this.dx;
         this.worldY = this.entity.calculateCenter().y + this.dy;
         this.radius = radius;
         this.type = type;
+
         //60 equates to 1 second, when setting duration, set the amount of seconds you want.
         this.duration = duration * 60;
+
+        // Assign an attack sprite if we were passed one
+        if (attackSpritePath) {
+            this.attackSpritePath = ASSET_MANAGER.getAsset(attackSpritePath);
+        }
+        else {
+            this.attackSpritePath = null;
+        }
 
         //dummy box so collision doesn't get mad.
         this.boundingBox = new BoundingBox(0,0,0,0,'attack');
@@ -49,7 +60,7 @@ class AttackCirc {
             // Iterate through the list of enemies and see if we are detecting a collision with their bounding box.
             this.game.enemies.forEach((enemy) => {
                 if (this.collisionDetection(enemy.boundingBox)) {
-                    console.log("COLLIDE!");
+                    //console.log("COLLIDE!");
                     enemy.takeDamage(50);
                     this.lastAttackTime = currentTime; // Update last attack time
                 }
@@ -91,11 +102,37 @@ class AttackCirc {
 
     // for debugging
     draw(ctx) {
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
-        ctx.arc(
-            this.worldX - this.game.camera.x,
-            this.worldY - this.game.camera.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
+        // Draw the circle indicator attacks if no sprite
+        if (1) {
+            ctx.beginPath();
+            ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+            ctx.arc(
+                this.worldX - this.game.camera.x,
+                this.worldY - this.game.camera.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        // Otherwise, no indicator circle, just draw the sprite
+        if (this.attackSpritePath) {
+            const spriteWidth = this.radius * 2;
+            const spriteHeight = this.radius * 2;
+            const spriteX = this.worldX - this.game.camera.x - this.radius;
+            const spriteY = this.worldY - this.game.camera.y - this.radius;
+
+            // Calculate the angle towards the player
+            const playerCenter = this.entity.calculateCenter();
+            const angle = Math.atan2(spriteY - playerCenter.y, spriteX - playerCenter.x);
+
+            // Save the current state of the canvas context
+            ctx.save();
+
+            // Translate the context to the sprite's position and rotate it
+            ctx.translate(spriteX, spriteY);
+            ctx.rotate(angle);
+
+            ctx.drawImage(this.attackSpritePath, spriteX, spriteY, spriteWidth, spriteHeight);
+
+            // Restore the context to its original state
+            ctx.restore();
+        }
     }
 }

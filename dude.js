@@ -200,58 +200,59 @@ class Dude extends Entity {
     }
 
     // Sets the flag indicating a spin attack has happened
-    performSpinAttack() {
-        const currentTime = this.game.timer.gameTime;
-
-        // Removed the click check and just use the cooldown check
-        if (currentTime - this.lastSpinAttackTime >= this.spinAttackCooldown) {
-            this.isSpinning = true; // Set the isSpinning flag to true
-            this.spinAttackDuration = 0.1; // Duration of the spin attack in seconds
-            this.lastSpinAttackTime = currentTime;
-            this.game.addEntity(new AttackCirc(this.game, this,
-                SECONDARY_ATTACK_RADIUS,
-                'playerAttack',
-                0, 0,
-                this.spinAttackDuration));
-        }
-    }
+    // performSpinAttack() {
+    //     const currentTime = this.game.timer.gameTime;
+    //
+    //     // Removed the click check and just use the cooldown check
+    //     if (currentTime - this.lastSpinAttackTime >= this.spinAttackCooldown) {
+    //         this.isSpinning = true; // Set the isSpinning flag to true
+    //         this.spinAttackDuration = 0.1; // Duration of the spin attack in seconds
+    //         this.lastSpinAttackTime = currentTime;
+    //         this.game.addEntity(new AttackCirc(this.game, this,
+    //             SECONDARY_ATTACK_RADIUS,
+    //             'playerAttack',
+    //             0, 0,
+    //             this.spinAttackDuration,
+    //             null));
+    //     }
+    // }
 
     /* Calculates the angle toward the mouse click position and sets the attack angle
      Sets the flag indicating a primary attack has happened */
-    performPrimaryAttack() {
-        const currentTime = this.game.timer.gameTime;
-
-        // Removed the click check and just use the cooldown check
-        if (currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
-            const clickPos = this.game.mouse; // Use the current mouse position instead of the click position
-
-            // Calculate the center of the character
-            const center = this.calculateCenter();
-            const screenXCenter = center.x - this.game.camera.x;
-            const screenYCenter = center.y - this.game.camera.y;
-
-            // Calculate the angle towards the mouse position
-            let dx = clickPos.x - screenXCenter;
-            let dy = clickPos.y - screenYCenter;
-            this.attackAngle = Math.atan2(dy, dx);
-
-            const offsetDistance = PRIMARY_ATTACK_RADIUS * 0.6;
-            dx = Math.cos(this.attackAngle) * offsetDistance;
-            dy = Math.sin(this.attackAngle) * offsetDistance;
-
-            this.isAttacking = true; // Set the isAttacking flag to true
-            this.attackDuration = 0.1; // Duration of the attack animation
-            this.lastPrimaryAttackTime = currentTime;
-            this.game.addEntity(new AttackCirc(this.game, this,
-                PRIMARY_ATTACK_RADIUS/2,
-                'playerAttack',
-                dx, dy,
-                this.attackDuration));
-        }
-    }
+    // performPrimaryAttack() {
+    //     const currentTime = this.game.timer.gameTime;
+    //
+    //     // Removed the click check and just use the cooldown check
+    //     if (currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
+    //         const clickPos = this.game.mouse; // Use the current mouse position instead of the click position
+    //
+    //         // Calculate the center of the character
+    //         const center = this.calculateCenter();
+    //         const screenXCenter = center.x - this.game.camera.x;
+    //         const screenYCenter = center.y - this.game.camera.y;
+    //
+    //         // Calculate the angle towards the mouse position
+    //         let dx = clickPos.x - screenXCenter;
+    //         let dy = clickPos.y - screenYCenter;
+    //         this.attackAngle = Math.atan2(dy, dx);
+    //
+    //         const offsetDistance = PRIMARY_ATTACK_RADIUS * 0.6;
+    //         dx = Math.cos(this.attackAngle) * offsetDistance;
+    //         dy = Math.sin(this.attackAngle) * offsetDistance;
+    //
+    //         this.attackDuration = 0.1; // Duration of the attack animation
+    //         this.lastPrimaryAttackTime = currentTime;
+    //         this.game.addEntity(new AttackCirc(this.game, this,
+    //             PRIMARY_ATTACK_RADIUS/2,
+    //             'playerAttack',
+    //             dx, dy,
+    //             this.attackDuration,
+    //             "./sprites/scythe_attack_slash.png"));
+    //     }
+    // }
 
     gainExp(exp) {
-        console.log("Exp: " + this.exp + " + " + exp + " = " + (this.exp + exp));
+        //console.log("Exp: " + this.exp + " + " + exp + " = " + (this.exp + exp));
         this.exp += exp;
 
         // level up!
