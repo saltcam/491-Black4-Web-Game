@@ -34,7 +34,6 @@ class Dude extends Entity {
         this.dashDuration = .5;
 
         this.level = 1;
-
         // weapon handling
         this.weapons = [new Scythe(game, "Scythe", 1, 2),
                         new Bow(game, "Bow", 0.1, 5)];
