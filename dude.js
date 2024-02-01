@@ -1,6 +1,3 @@
-const SECONDARY_ATTACK_RADIUS = 115; // Default value
-const PRIMARY_ATTACK_RADIUS = 135; // Default value
-
 /**
  * Dude is our main character. He can move up down left and right on the map.
  * Dude will be able to perform primary (left click) attacks, and secondary (right click) attacks.
@@ -25,10 +22,10 @@ class Dude extends Entity {
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
 
         // Attack cooldown and Last time the attack was used
-        this.primaryAttackCooldown = 1;
-        this.spinAttackCooldown = 2;
-        this.lastPrimaryAttackTime = 0;
-        this.lastSpinAttackTime = 0;
+        // this.primaryAttackCooldown = 1;
+        // this.spinAttackCooldown = 2;
+        // this.lastPrimaryAttackTime = 0;
+        // this.lastSpinAttackTime = 0;
 
         // Dash implementation
         this.defaultDashCooldown = 1;   // This is the actual cooldown of dash that will be used each time we dash
@@ -37,6 +34,10 @@ class Dude extends Entity {
         this.dashDuration = .5;
 
         this.level = 1;
+
+        //weapon handling
+        this.weapons = [new Scythe(game, "Scythe", 1, 2)];
+        this.currentWeapon = 0;
     };
 
     update() {
@@ -86,14 +87,19 @@ class Dude extends Entity {
         // if we are ready to trigger another attack.
         const currentTime = this.game.timer.gameTime;
 
-        // Perform the primary attack off cooldown as long as left click is held.
-        if (this.game.leftMouseDown && currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
-            this.performPrimaryAttack();
+        //asks current weapon if it can attack
+        if (this.game.leftMouseDown && currentTime - this.weapons[this.currentWeapon].lastPrimaryAttackTime >= this.weapons[this.currentWeapon].primaryCool) {
+            this.weapons[this.currentWeapon].performPrimaryAttack(this);
         }
 
+        // Perform the primary attack off cooldown as long as left click is held.
+        // if (this.game.leftMouseDown && currentTime - this.lastPrimaryAttackTime >= this.primaryAttackCooldown) {
+        //     this.performPrimaryAttack();
+        // }
+
         // Perform the secondary attack off cooldown as long as right click is held.
-        if (this.game.rightMouseDown && currentTime - this.lastSpinAttackTime >= this.spinAttackCooldown) {
-            this.performSpinAttack();
+        if (this.game.rightMouseDown && currentTime - this.weapons[this.currentWeapon].lastSecondAttackTime >= this.weapons[this.currentWeapon].secondCool) {
+            this.weapons[this.currentWeapon].performSecondaryAttack(this);
         }
 
         // Check if the character is moving

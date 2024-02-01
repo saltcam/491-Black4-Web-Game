@@ -2,7 +2,7 @@ class Exp_Orb extends Entity {
     constructor(game, worldX, worldY, exp) {
         let size = 0.3 * exp;
         super(1, 1, 0, game, worldX, worldY,
-            5, 5, "orb", 0,
+            17, 17, "orb", 0,
             "./sprites/exp_orb.png",
             0, 0, 17, 17, 3, 0.2, size, exp);
         this.dist = 350;

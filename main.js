@@ -25,7 +25,7 @@ ASSET_MANAGER.downloadAll(() => {
 	ctx.imageSmoothingEnabled = false;	// Prevents the image from blurring when scaled
 
 	gameEngine.init(ctx);	// Initialize the game engine given the canvas context
-
+	console.log("About to add Dude to game");
 	gameEngine.addEntity(new Dude(gameEngine));	// Add the player character 'Dude' to the game engine
 	gameEngine.initCamera();
 
