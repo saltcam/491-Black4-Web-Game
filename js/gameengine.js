@@ -92,6 +92,8 @@ class GameEngine {
         /** Toggle to enable debug mode features. */
         this.debugMode = false;
 
+        this.totalEnemiesSpawned = 0;
+
         this.enemyTypes = [
             { name: "Zombie", maxHP: 100, currHP: 100, atkPow: 1, worldX: 0, worldY: 0, boxWidth: 19/2,
                 boxHeight: 28/2, boxType: "enemy", speed: 100, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
@@ -302,23 +304,22 @@ class GameEngine {
     }
 
     spawnRandomEnemy() {
-        if (this.enemies.length >= 50) {
+        if (this.enemies.length >= 50 || this.totalEnemiesSpawned >=  50) {
             return;
         }
 
         let randomXNumber, randomYNumber;
+        const buffer = 100;
 
-        do {
-            // Set min X = -(horizontal canvas resolution).
-            let minX = -(1440);
-            let maxX = minX * (-1);
-            randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+        //Enemies Spawn outside the player camera + an offset
+        if(Math.random() < 0.5) {
+           randomXNumber = Math.random() < 0.5 ? this.camera.x - buffer : this.camera.x + this.camera.width + buffer;
+           randomYNumber = Math.random() * (this.camera.height) + this.camera.y;
+        } else {
+           randomXNumber = Math.random() * (this.camera.width) + this.camera.x;
+           randomYNumber = Math.random() < 0.5 ? this.camera.y - buffer : this.camera.y + this.camera.height + buffer;
+        }
 
-            // Set min Y = -(vertical canvas resolution).
-            let minY = -(810);
-            let maxY = minY * (-1);
-            randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
-        } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);
 
         //Selects a random enemy from the enemyTypes array
         const randomEnemyType =  this.enemyTypes[Math.floor(Math.random() * this.enemyTypes.length)];
@@ -330,12 +331,14 @@ class GameEngine {
             randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
             randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
 
-        // After 5 seconds there is a 50% chance for a new enemy to spawn as an elite
+        // After 5 seconds there is a 10% chance for a new enemy to spawn as an elite
         if(this.elapsedTime > 5000) {
             if (Math.random() < 0.1) {
                 newEnemy.makeElite();
             }
         }
+
+        this.totalEnemiesSpawned++;
         //Add the new enemy into the game
         this.addEntity(newEnemy);
     }
