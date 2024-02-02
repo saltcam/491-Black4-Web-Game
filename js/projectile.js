@@ -27,7 +27,6 @@ class Projectile extends Entity{
         if (this.currHP <= 0) {
             this.removeFromWorld = true;
         }
-
     }
 
 

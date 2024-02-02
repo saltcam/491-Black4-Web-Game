@@ -7,10 +7,10 @@
 class BossOne extends Entity {
     /** Default Constructor - Only needs to be passed the gameengine and worldX and Y coords. */
     constructor(game, worldX, worldY) {
-        super(1500, 1500, 35,
+        super(1500, 1500, 1,
             game, worldX, worldY,
             20, 35, "enemyBoss",
-            150,
+            600,
             "./sprites/boss_knight_stand.png",
             0, 0, 41, 84, 4, 0.25, 3.5,
             20);
@@ -25,7 +25,7 @@ class BossOne extends Entity {
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
         /** For debugging purposes, default is off (false). */
         this.boundingBox.drawBoundingBox = false;
-        /** The cooldown of how often this entity can damage the player with it's attacks. */
+        /** The cooldown of how often this entity can damage the player with its attacks. */
         this.attackCooldown = 1;    // in seconds
         /** The time since this entity last damaged the player. */
         this.lastAttackTime = 0;    // time since last attack
@@ -43,14 +43,18 @@ class BossOne extends Entity {
             0,
             "./sprites/debug_marker.png",
             0, 0, 91, 91, 1, 1, 1, 0));
-        /** Flag to track whether we need to keep updating the target marker. */
-        this.trackingMode = true;
-        /** Last time we checked for trackingMode change (Preparation to enter charge mode when trackingMode is set to false). */
+        /** Flag to track whether this boss is going to enter charge mode. */
+        this.enterChargeMode = false;
+        /** Last time we checked for enterChargeMode change (Preparation to enter charge mode when enterChargeMode is set to false). */
         this.lastCheckTime = 0;
         /** How often to check if we are going to enter charging mode. */
         this.checkInterval = 5;
+        /** Flag to track whether we are still going to track the target marker to the player. */
+        this.trackMode = true;
         /** Tracks what the initial default speed of this entity was. */
         this.defaultSpeed = this.movementSpeed;
+        /** Set the move speed to zero as he will not be a walking type enemy, only move via charge. */
+        this.movementSpeed = 0;
 
         // Stuff for boss health bar calculations
         /** The rate at which the recent damage decays per second after 1 sec of no new damage. */
@@ -79,8 +83,7 @@ class BossOne extends Entity {
         }
 
         // If health hits 0 or below, this entity is declared dead
-        if (this.currHP <= 0)
-        {
+        if (this.currHP <= 0) {
             this.isDead = true;
         }
 
@@ -108,43 +111,110 @@ class BossOne extends Entity {
         if (Math.abs(this.pushbackVector.y) < 0.1) this.pushbackVector.y = 0;
 
         // Determine the direction to face based on the player's position
-        if (this.game.player.worldX < this.worldX) {
+        if (this.targetMarker.worldX < this.worldX) {
             // Player is to the left, face left
             this.lastMove = "left";
-        } else if (this.game.player.worldX > this.worldX) {
+        } else if (this.targetMarker.worldX > this.worldX) {
             // Player is to the right, face right
             this.lastMove = "right";
         }
 
-        // Check if it's time to potentially change trackingMode
-        if (currentTime - this.lastCheckTime >= this.checkInterval) {
+        // Check if it's time to potentially change enterChargeMode
+        if (this.currentAnimation === "standing" && currentTime - this.lastCheckTime >= this.checkInterval) {
             // Perform RNG check
-            if (Math.random() < 0.5) { // 50% chance
-                this.trackingMode = false;
+            if (Math.random() < 0.75) { // decimal is the % chance (0.5 = 50%)
+                this.enterChargeMode = true;
             }
 
             // Regardless of the outcome, update lastCheckTime to schedule next check
             this.lastCheckTime = currentTime;
         }
 
-        //let targetDirection = null;
+        const targetDirection = this.calcTargetAngle(this.targetMarker);
 
-        // // If tracking mode has been switch off, that means it time to prepare the boss for a charge towards the marker location.
-        // if (!this.trackingMode) {
-        //     // Stop boss's movement
+        if (this.enterChargeMode) {
+            // Stop boss's movement
+            this.movementSpeed = 0;
+
+            // Set dash preparation stance sprite
+            this.currentAnimation = "preparingCharge";
+
+            // // After 2 seconds stop tracking for the target marker.
+            // setTimeout(() => {
+            //     this.trackMode = false;
+            // }, 2000);
+
+            // After 1 second CHARGE the player
+            setTimeout(() => {
+                // Give the entity it's charge speed
+                this.movementSpeed = this.defaultSpeed;
+
+                // Set dash sprite
+                this.currentAnimation = "charging";
+
+                this.enterChargeMode = false;
+            }, 3000);
+        }
+
+        // Track marker location to player's center location
+        if (this.trackMode && this.targetMarker) {
+            this.targetMarker.worldX = this.game.player.worldX - (this.game.player.animator.width);
+            this.targetMarker.worldY = this.game.player.worldY - (this.game.player.animator.height);
+        }
+
+        // Apply proper animation sprites depending on currentAnimation
+        if (this.currentAnimation === "standing") {
+            if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/boss_knight_stand.png")) {
+                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_stand.png"), 0, 0, 41, 84, 4, 0.25);
+            }
+
+            this.trackMode = true;
+            this.movementSpeed = 0;
+        }
+        if (this.currentAnimation === "preparingCharge") {
+            if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png") || this.animator.frameCount !== 1) {
+                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png"), 0, 0, 61, 84, 1, 1);
+            }
+
+            this.trackMode = true;
+            this.movementSpeed = 0;
+        }
+        if (this.currentAnimation === "charging") {
+            if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png")) {
+                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png"), 61, 0, 61, 84, 2, 0.2);
+            }
+
+            this.trackMode = false;
+
+            // Set him back to standing if he arrives at the target marker
+            const distanceX = Math.abs(this.worldX - this.targetMarker.worldX);
+            const distanceY = Math.abs(this.worldY - this.targetMarker.worldY);
+            const proximity = 50;
+
+            // Check if in proximity
+            console.log("If distX(" + distanceX + ") AND distY(" + distanceY + ") < prox(" + proximity + ")");
+            if (distanceX < proximity && distanceY < proximity) {
+                console.log("STOPPING BOSS CHARGE!");
+
+                this.currentAnimation = "standing";
+            }
+        }
+
+        // Set him back to standing if he arrives at the target marker
+        // if ((this.worldX >= this.targetMarker.worldX - 25 && this.worldX <= this.targetMarker.worldX + 25) &&
+        //     (this.worldY >= this.targetMarker.worldY - 25 && this.worldY <= this.targetMarker.worldY + 25) &&
+        //     this.movementSpeed > 0) {
+        //     console.log("STOPPING BOSS CHARGE!");
+        //     // Make sure he's not moving/charging anymore.
         //     this.movementSpeed = 0;
         //
-        //     // Set dash preparation stance sprite
-        //     this.animator.changeSpritesheet("./sprites/boss_knight_dash.png", 0, 0, 61, 84, 1, 1);
+        //     // Enable tracking mode again, look for a chance to charge again
+        //     this.trackMode = true;
         //
-        //     targetDirection = this.calcTargetAngle(this.targetMarker);
-        // }
-        // // Otherwise keep walking towards player
-        // else {
-        //     targetDirection = this.calcTargetAngle(this.game.player);
+        //     // Set him back to standing
+        //     this.currentAnimation = "standing";
         // }
 
-        const targetDirection = this.calcTargetAngle(this.game.player);
 
         // Apply movement based on the direction and the zombie's speed
         this.worldX += targetDirection.x * this.movementSpeed * this.game.clockTick;
@@ -160,14 +230,6 @@ class BossOne extends Entity {
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
 
         this.checkCollisionAndDealDamage();
-
-        // Track marker location to player's center location
-        if (this.targetMarker && this.trackingMode) {
-            this.targetMarker.worldX = this.game.player.worldX - (this.game.player.animator.width);
-            this.targetMarker.worldY = this.game.player.worldY - (this.game.player.animator.height);
-        }
-
-
     }
 
     checkCollisionAndDealDamage() {

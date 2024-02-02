@@ -116,78 +116,12 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-        //this.initEnemySpawns();
         this.spawnBossOne();
     }
 
     /** Call this method to spawn boss one (Knight - Orange Bro). This was made to be a test method. */
     spawnBossOne() {
         this.addEntity(new BossOne(this, 250, 0));
-    }
-
-    /** Call this method to spawn some initial enemies. */
-    initEnemySpawns() {
-        while (this.enemies.length < 10) {
-            let randomXNumber, randomYNumber;
-
-            do {
-                // Set min X = -(horizontal canvas resolution).
-                let minX = -(1440);
-                let maxX = minX * (-1);
-                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
-
-                // Set min Y = -(vertical canvas resolution).
-                let minY = -(810);
-                let maxY = minY * (-1);
-                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
-            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
-
-            this.addEntity(new Enemy_Contact("Zombie", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 19/2, 28/2, "enemy", 100,
-                "./sprites/Zombie_Run.png",
-                0, 0, 34, 27, 8, 0.2, 3, 5
-            ));
-        }
-
-        while (this.enemies.length < 17) {
-            let randomXNumber, randomYNumber;
-
-            do {
-                // Set min X = -(horizontal canvas resolution).
-                let minX = -(1440);
-                let maxX = minX * (-1);
-                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
-
-                // Set min Y = -(vertical canvas resolution).
-                let minY = -(810);
-                let maxY = minY * (-1);
-                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
-            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
-
-            this.addEntity(new Enemy_Contact("Slime", 5, 5, 5, this, randomXNumber, randomYNumber, 30/2, 20/2, "enemy", 50,
-                "./sprites/SlimeMove.png",
-                0, 0, 32, 18, 8, 0.1, 2, 2));
-        }
-
-        while (this.enemies.length < 24) {
-            let randomXNumber, randomYNumber;
-
-            do {
-                // Set min X = -(horizontal canvas resolution).
-                let minX = -(1440);
-                let maxX = minX * (-1);
-                randomXNumber = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
-
-                // Set min Y = -(vertical canvas resolution).
-                let minY = -(810);
-                let maxY = minY * (-1);
-                randomYNumber = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
-            } while (Math.abs(randomXNumber) <= 1440/1.8 && Math.abs(randomYNumber) <= 810/1.5);    // Used a divider of 1.8 and 1.5 here as they seem like the perfect offset to spawn enemies just offscreen.
-
-            this.addEntity(new Enemy_Contact("Floating Eye", 100, 100, 1, gameEngine, randomXNumber, randomYNumber, 19/2, 28/2, "enemy", 100,
-                "./sprites/FloatingEye.png",
-                -3, 0, 128, 128, 80, 0.05, 2, 5
-            ));
-        }
     }
 
     /** Call this to initialize the grassmands (Map #1) objects. */
@@ -721,11 +655,11 @@ class GameEngine {
         const bounceDistance = 1; // Adjust this value as needed
 
         // Move each enemy away from the other by the bounce distance
-        if (enemy1.boundingBox.type !== "enemyBoss") {
+        if (enemy1.boundingBox.type !== "enemyBoss" && enemy1.boundingBox.type !== "player") {
             enemy1.worldX += normalizedDirectionX * bounceDistance;
             enemy1.worldY += normalizedDirectionY * bounceDistance;
         }
-        if (enemy2.boundingBox.type !== "enemyBoss") {
+        if (enemy2.boundingBox.type !== "enemyBoss" && enemy2.boundingBox.type !== "player") {
             enemy2.worldX -= normalizedDirectionX * bounceDistance;
             enemy2.worldY -= normalizedDirectionY * bounceDistance;
 

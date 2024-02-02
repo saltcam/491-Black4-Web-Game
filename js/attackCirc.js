@@ -165,8 +165,10 @@ class AttackCirc {
             // Apply rotation
             ctx.rotate(rotationAngle);
 
-            // Draw the sprite
-            ctx.drawImage(this.attackSpritePath, -spriteWidth / 2, -spriteHeight / 2, spriteWidth, spriteHeight);
+            // Draw the attack sprite if it has one
+            if (this.attackSpritePath) {
+                ctx.drawImage(this.attackSpritePath, -spriteWidth / 2, -spriteHeight / 2, spriteWidth, spriteHeight);
+            }
 
             // Restore the context
             ctx.restore();
