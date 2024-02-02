@@ -114,7 +114,13 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-        this.initEnemySpawns();
+        //this.initEnemySpawns();
+        this.spawnBossOne();
+    }
+
+    /** Call this method to spawn boss one (Knight - Orange Bro). This was made to be a test method. */
+    spawnBossOne() {
+        this.addEntity(new BossOne(this, 250, 0));
     }
 
     /** Call this method to spawn some initial enemies. */
@@ -273,16 +279,14 @@ class GameEngine {
      * @param entity    The entity being added.
      */
     addEntity(entity) {
-        //console.log("Reached gameengine.addEntity()");
         // New way of adding entities.
         // This allows us to do a performance friendly draw() method.
         // Which lets us layer the most important entities over the less important ones (ex: player will be drawn over EVERYTHING.)
         if (entity.boundingBox.type === "player") {
-            console.log("Adding player to gameengine!");
             this.player = entity;
         } else if (entity.boundingBox.type === "portal") {
             this.portal = entity;
-        } else if (entity.boundingBox.type === "enemy") {
+        } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss") {
             this.enemies.push(entity);
         } else if (entity.boundingBox.type === "attack") {
             this.attacks.push(entity);
@@ -293,6 +297,8 @@ class GameEngine {
         else {
             this.entities.push(entity);
         }
+
+        return entity;
     }
 
     spawnRandomEnemy() {
@@ -382,6 +388,9 @@ class GameEngine {
             return diff;
         });
 
+        // Track if there is a boss spawned
+        let bossEnemy = null;
+
         // Draw 'enemy' entities.
         for (let enemy of this.enemies) {
             enemy.draw(this.ctx, this);
@@ -389,6 +398,10 @@ class GameEngine {
             // If debug mode, then draw debug features.
             if (this.debugMode) {
                 enemy.drawHealth(this.ctx);
+            }
+
+            if (enemy.boundingBox.type === "enemyBoss") {
+                bossEnemy = enemy;
             }
         }
 
@@ -422,6 +435,12 @@ class GameEngine {
             if (this.debugMode) {
                 //this.player.drawHealth(this.ctx); // We don't need to call this, it is already always called in dude.draw().
             }
+        }
+
+        // Draw UI elemnts
+        // Boss health bar
+        if (bossEnemy) {
+            bossEnemy.drawBossHealthBar(this.ctx);
         }
 
         // Draw the mouse tracker.
@@ -646,6 +665,19 @@ class GameEngine {
         //
         // }
 
+        // Update enemy collisions
+        // Check for collisions between enemies
+        for (let i = 0; i < this.enemies.length; i++) {
+            for (let j = i + 1; j < this.enemies.length; j++) {
+                let enemy1 = this.enemies[i];
+                let enemy2 = this.enemies[j];
+
+                if (enemy1.boundingBox.isColliding(enemy2.boundingBox)) {
+                    this.respondToCollision(enemy1, enemy2);
+                }
+            }
+        }
+
         // Loop through 'enemy' entities and set removeFromWorld flags.
         for (let i = 0; i < this.enemies.length; i++) {
             // If dead Zombie, mark for deletion.
@@ -670,6 +702,35 @@ class GameEngine {
         if(this.elapsedTime % 1000 < 100) {
             this.spawnRandomEnemy();
         }
+    }
+
+    respondToCollision(enemy1, enemy2) {
+        // Calculate the direction vector between the two enemies
+        const directionX = enemy1.worldX - enemy2.worldX;
+        const directionY = enemy1.worldY - enemy2.worldY;
+
+        // Normalize the direction vector
+        const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
+        const normalizedDirectionX = directionX / magnitude;
+        const normalizedDirectionY = directionY / magnitude;
+
+        // Set a small bounce distance
+        const bounceDistance = 1; // Adjust this value as needed
+
+        // Move each enemy away from the other by the bounce distance
+        if (enemy1.boundingBox.type !== "enemyBoss") {
+            enemy1.worldX += normalizedDirectionX * bounceDistance;
+            enemy1.worldY += normalizedDirectionY * bounceDistance;
+        }
+        if (enemy2.boundingBox.type !== "enemyBoss") {
+            enemy2.worldX -= normalizedDirectionX * bounceDistance;
+            enemy2.worldY -= normalizedDirectionY * bounceDistance;
+
+        }
+
+        // Immediately update bounding boxes after changing positions
+        enemy1.updateBoundingBox();
+        enemy2.updateBoundingBox();
     }
 
     /** Starts the game engine loop system. This makes the update and draw methods loop. */

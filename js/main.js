@@ -20,6 +20,9 @@ ASSET_MANAGER.queueDownload("./sprites/exp_orb.png");
 ASSET_MANAGER.queueDownload("./sprites/scythe_attack_slash.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_primaryattack.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_secondaryattack.png");
+ASSET_MANAGER.queueDownload("./sprites/boss_knight_stand.png");
+ASSET_MANAGER.queueDownload("./sprites/boss_knight_dash.png");
+ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");
@@ -27,7 +30,6 @@ ASSET_MANAGER.downloadAll(() => {
 	ctx.imageSmoothingEnabled = false;	// Prevents the image from blurring when scaled
 
 	gameEngine.init(ctx);	// Initialize the game engine given the canvas context
-	console.log("About to add Dude to game");
 	gameEngine.addEntity(new Dude(gameEngine));	// Add the player character 'Dude' to the game engine
 	gameEngine.initCamera();
 

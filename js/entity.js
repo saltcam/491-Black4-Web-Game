@@ -36,6 +36,10 @@ class Entity {
         this.worldX = worldX;
         this.worldY = worldY;
         this.isDead = false;
+
+        // This stuff is really just for boss health bar calculations
+        this.recentDamage = 0;
+        this.lastDamageTime = 0;
     }
 
     update() {
@@ -77,6 +81,17 @@ class Entity {
         ctx.closePath();
     }
 
+    // Override takeDamage to track recent damage and last damage time
+    takeDamage(amount) {
+        this.currHP -= amount;
+        if (this.currHP <= 0) {
+            this.currHP = 0;
+        }
+
+        this.recentDamage += amount;
+        this.lastDamageTime = this.game.timer.gameTime;
+    }
+
     // Method to calculate the angle between the entity and a target (The player usually)
     calcTargetAngle(target) {
         if (target) {
@@ -111,10 +126,13 @@ class Entity {
         //console.log(this.name + " has become an elite!");
     }
 
-    takeDamage(amount) {
-        this.currHP -= amount;
-        if (this.currHP <= 0) {
-            this.currHP = 0;
-        }
+    draw(ctx, game) {
+        let screenX = this.worldX - this.game.camera.x;
+        let screenY = this.worldY - this.game.camera.y;
+
+        // Draw the player at the calculated screen position
+        this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+
+        this.boundingBox.draw(ctx, game);
     }
 }

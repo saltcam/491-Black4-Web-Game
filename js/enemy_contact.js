@@ -61,18 +61,6 @@ class Enemy_Contact extends Entity {
 
         const targetDirection = this.calcTargetAngle(player);
 
-        // Check for collisions between enemies
-        for (let i = 0; i < this.game.enemies.length; i++) {
-            for (let j = i + 1; j < this.game.enemies.length; j++) {
-                let enemy1 = this.game.enemies[i];
-                let enemy2 = this.game.enemies[j];
-
-                if (enemy1.boundingBox.isColliding(enemy2.boundingBox)) {
-                    this.respondToCollision(enemy1, enemy2);
-                }
-            }
-        }
-
         // Apply movement based on the direction and the zombie's speed
         this.worldX += targetDirection.x * this.movementSpeed * this.game.clockTick;
         this.worldY += targetDirection.y * this.movementSpeed * this.game.clockTick;
@@ -98,39 +86,5 @@ class Enemy_Contact extends Entity {
             player.takeDamage(this.atkPow);
             this.lastAttackTime = currentTime; // Update last attack time
         }
-    }
-
-    respondToCollision(enemy1, enemy2) {
-        // Calculate the direction vector between the two enemies
-        const directionX = enemy1.worldX - enemy2.worldX;
-        const directionY = enemy1.worldY - enemy2.worldY;
-
-        // Normalize the direction vector
-        const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
-        const normalizedDirectionX = directionX / magnitude;
-        const normalizedDirectionY = directionY / magnitude;
-
-        // Set a small bounce distance
-        const bounceDistance = 1; // Adjust this value as needed
-
-        // Move each enemy away from the other by the bounce distance
-        enemy1.worldX += normalizedDirectionX * bounceDistance;
-        enemy1.worldY += normalizedDirectionY * bounceDistance;
-        enemy2.worldX -= normalizedDirectionX * bounceDistance;
-        enemy2.worldY -= normalizedDirectionY * bounceDistance;
-
-        // Immediately update bounding boxes after changing positions
-        enemy1.updateBoundingBox();
-        enemy2.updateBoundingBox();
-    }
-
-    draw(ctx, game) {
-        let screenX = this.worldX - this.game.camera.x;
-        let screenY = this.worldY - this.game.camera.y;
-
-        // Draw the player at the calculated screen position
-        this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
-
-        this.boundingBox.draw(ctx, game);
     }
 }
