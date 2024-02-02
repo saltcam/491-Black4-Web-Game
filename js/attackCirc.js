@@ -14,6 +14,7 @@ class AttackCirc {
      * @param attackDamage  The damage done to targets.
      * @param damagePushbackForce    The pushback force applied to enemies that are hit by the attack.
      * @param spriteRotationSpeed   This should be defaulted to '0' if we don't want the sprite to be 'spinning' while drawn.
+     * @param attackTick    How often this circle will tick damage to the things inside of it.
      */
     constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath, attackDamage, damagePushbackForce, spriteRotationSpeed, attackTick) {
         this.game = game;
@@ -32,6 +33,9 @@ class AttackCirc {
         this.worldY = this.entity.calculateCenter().y + this.dy;
         this.radius = radius;
         this.type = type;
+
+        // Do we draw the debug circle?
+        this.drawCircle = false;
 
         //60 equates to 1 second, when setting duration, set the amount of seconds you want.
         this.duration = duration * 60;
@@ -74,15 +78,21 @@ class AttackCirc {
         // Only do damage if a second has passed since damaging the enemy list last time
         const currentTime = this.game.timer.gameTime;
 
-        if(currentTime - this.lastAttackTime >= this.attackCooldown) {
-            this.game.enemies.forEach((enemy) => {
-                if (this.collisionDetection(enemy.boundingBox)) {
-                    // Push the enemy away
-                    this.pushEnemy(enemy);
-                    enemy.takeDamage(this.attackDamage); // example damage value
-                    this.lastAttackTime = currentTime;
-                }
-            });
+        if (this.type === "playerAttack") {
+            if (currentTime - this.lastAttackTime >= this.attackCooldown) {
+                this.game.enemies.forEach((enemy) => {
+                    if (this.collisionDetection(enemy.boundingBox)) {
+                        // Push the enemy away
+                        this.pushEnemy(enemy);
+                        enemy.takeDamage(this.attackDamage); // example damage value
+                        this.lastAttackTime = currentTime;
+                    }
+                });
+            }
+        }
+        else if ((currentTime - this.lastAttackTime >= this.attackCooldown) && this.type === "enemyAttack" && this.collisionDetection(this.game.player.boundingBox)) {
+            this.game.player.takeDamage(this.attackDamage);
+            this.lastAttackTime = currentTime;
         }
 
         // Update rotation angle for spinning sprites
@@ -131,9 +141,23 @@ class AttackCirc {
     // for debugging
     draw(ctx) {
         // Draw the circle indicator for attacks if no sprite
-        if (/*!this.attackSpritePath ||*/ this.game.debugMode) {
+        if (this.game.debugMode || this.drawCircle) {
+            // Calculate opacity based on remaining duration, starting from 0.2 and fading to 0
+            const opacity = (this.duration / this.initialDuration) * 0.2;
+
             ctx.beginPath();
-            ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+            // If this attack circle actually deals damage on collision, draw it as red
+            if (this.attackDamage > 0) {
+                ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
+            }
+            // Otherwise if zero, draw it white to indicate it does no damage
+            else if (this.attackDamage === 0) {
+                ctx.fillStyle = `rgba(255, 255, 255, 0.2)`; // Always 0.2 alpha because white (warning area) circles should not fade out
+            }
+            // Otherwise if below zero, draw it green to indicate it actually might heal?
+            else if (this.attackDamage === 0) {
+                ctx.fillStyle = `rgba(0, 255, 0, ${opacity})`;
+            }
             ctx.arc(this.worldX - this.game.camera.x, this.worldY - this.game.camera.y, this.radius, 0, Math.PI * 2);
             ctx.fill();
         }

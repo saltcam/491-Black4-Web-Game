@@ -45,7 +45,6 @@ class Weapon_tome extends Weapon {
                 0, 0, 17, 17, 3, 0.2, 2, dx, dy,
                 this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 1));
         }
-
     }
 
     performSecondaryAttack(player){

@@ -23,6 +23,8 @@ ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_primaryattack.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_secondaryattack.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_knight_stand.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_knight_dash.png");
+ASSET_MANAGER.queueDownload("./sprites/boss_knight_backdash.png");
+ASSET_MANAGER.queueDownload("./sprites/boss_knight_groundsmash.png");
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
 
 ASSET_MANAGER.downloadAll(() => {

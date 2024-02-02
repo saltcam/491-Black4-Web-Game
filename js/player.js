@@ -2,10 +2,6 @@
  * Player is our main character. He can move up down left and right on the map.
  * Player will be able to perform primary (left click) attacks, and secondary (right click) attacks.
  * Player can also dash using spacebar.
- * For dude-spritesheet-walk.png, use width of 48, height of 55, frameCount of 4, and frameDuration of 0.2, scale 1.5
- * For dude-spritesheet-walk-scythe.png, use width of 92, height of 55, frameCount of 4, and frameDuration of 0.2, scale 1.5
- * For dude-spritesheet-stand.png, use width of 48, height of 55, frameCount of 2, and frameDuration of 0.5, scale 1.5
- * For dude-spritesheet-stand-scythe.png, use width of 92, height of 55, frameCount of 2, and frameDuration of 0.5, scale 1.5
  * For McIdle.png, use width of 32, height of 28, frameCount of 2, and frameDuration of 0.5, scale 2.2
  * For McWalk.png, use width of 32, height of 28, frameCount of 8, and frameDuration of 0.1, scale 2.2
  */
