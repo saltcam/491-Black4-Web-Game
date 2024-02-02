@@ -637,7 +637,7 @@ class GameEngine {
         }
 
         if(this.elapsedTime % 1000 < 100) {
-            //this.spawnRandomEnemy();
+            this.spawnRandomEnemy();
         }
     }
 
