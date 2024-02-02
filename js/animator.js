@@ -1,4 +1,4 @@
-// This is the animator class for dude.js. It is used to animate the character spritesheet and allows the spritesheet to be changed on the fly.
+// This is the animator class for player.js. It is used to animate the character spritesheet and allows the spritesheet to be changed on the fly.
 class Animator {
     constructor(spritesheet, xStart, yStart, width, height, frameCount, frameDuration, scale) {
         Object.assign(this, { spritesheet, xStart, yStart, width, height, frameCount, frameDuration }); // Copy the parameters into the object

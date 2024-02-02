@@ -15,7 +15,7 @@ class AttackCirc {
      * @param damagePushbackForce    The pushback force applied to enemies that are hit by the attack.
      * @param spriteRotationSpeed   This should be defaulted to '0' if we don't want the sprite to be 'spinning' while drawn.
      */
-    constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath, attackDamage, damagePushbackForce, spriteRotationSpeed) {
+    constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath, attackDamage, damagePushbackForce, spriteRotationSpeed, attackTick) {
         this.game = game;
         // the entity the circle will attach to
         this.entity = entity;
@@ -51,7 +51,7 @@ class AttackCirc {
         this.boundingBox = new BoundingBox(0,0,0,0,'attack');
 
         // Properties to track cooldown of being able to damage the player
-        this.attackCooldown = 1;    // in seconds
+        this.attackCooldown = attackTick;    // in seconds
         this.lastAttackTime = 0;    // time since last attack
 
         // Set the initial fixed rotation angle based on the player's current angle (this prevents a bug where attack sprites rotate with the player character's movement input)
@@ -131,7 +131,7 @@ class AttackCirc {
     // for debugging
     draw(ctx) {
         // Draw the circle indicator for attacks if no sprite
-        if (!this.attackSpritePath || this.game.debugMode) {
+        if (/*!this.attackSpritePath ||*/ this.game.debugMode) {
             ctx.beginPath();
             ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
             ctx.arc(this.worldX - this.game.camera.x, this.worldY - this.game.camera.y, this.radius, 0, Math.PI * 2);

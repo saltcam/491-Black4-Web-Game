@@ -4,7 +4,7 @@ class upgradeScreen {
         this.game = game;
         // Change background to whatever we want for the upgrade screen
         ASSET_MANAGER.queueDownload("./");
-        this.dude = new Dude(game);
+        this.dude = new Player(game);
         this.game.addEntity(this.dude);
         this.game.addEntity(this.dude);
     }

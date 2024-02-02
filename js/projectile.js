@@ -1,21 +1,22 @@
 class Projectile extends Entity{
-    constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, angleX, angleY, duration, attackDamage, pushbackForce, spriteRotationSpeed) {
-        super(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, 0);
+    constructor(game, atkPow, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, angleX, angleY, duration, radius, pushbackForce, spriteRotationSpeed, attackTick) {
+        super(duration*60, duration*60, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, 0);
         this.angleX = angleX;
         this.angleY = angleY;
         this.duration = duration;
         this.game.addEntity(new AttackCirc(this.game, this,
-            25,
-            'playerAttack',
+            radius,
+            boxType,
             0, 0,
             this.duration,
-            spritePath,
-            attackDamage,
+            null,
+            atkPow,
             pushbackForce,
-            spriteRotationSpeed));
+            spriteRotationSpeed, attackTick));
+
     }
 
-    //TODO how to remove after off screen or duration is over?
+
     update() {
         super.update();
         this.worldX += this.angleX * this.movementSpeed * this.game.clockTick;
@@ -24,13 +25,10 @@ class Projectile extends Entity{
         this.currHP--;
 
         if (this.currHP <= 0) {
-            this.isDead = true;
+            this.removeFromWorld = true;
         }
 
     }
 
-    draw() {
-
-    }
 
 }

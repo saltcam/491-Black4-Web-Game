@@ -17,6 +17,7 @@ ASSET_MANAGER.queueDownload("./sprites/portal.png");
 ASSET_MANAGER.queueDownload("./sprites/grass.png");
 ASSET_MANAGER.queueDownload("./sprites/map_rock_object.png");
 ASSET_MANAGER.queueDownload("./sprites/exp_orb.png");
+ASSET_MANAGER.queueDownload("./sprites/arrow.png");
 ASSET_MANAGER.queueDownload("./sprites/scythe_attack_slash.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_primaryattack.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_secondaryattack.png");
@@ -30,7 +31,7 @@ ASSET_MANAGER.downloadAll(() => {
 	ctx.imageSmoothingEnabled = false;	// Prevents the image from blurring when scaled
 
 	gameEngine.init(ctx);	// Initialize the game engine given the canvas context
-	gameEngine.addEntity(new Dude(gameEngine));	// Add the player character 'Dude' to the game engine
+	gameEngine.addEntity(new Player(gameEngine));	// Add the player character 'Player' to the game engine
 	gameEngine.initCamera();
 
 	//gameEngine.addEntity(new upgradeScreen(gameEngine)); // Add upgrade screen to the game engine

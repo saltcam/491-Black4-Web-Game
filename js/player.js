@@ -1,7 +1,7 @@
 /**
- * Dude is our main character. He can move up down left and right on the map.
- * Dude will be able to perform primary (left click) attacks, and secondary (right click) attacks.
- * Dude can also dash using spacebar.
+ * Player is our main character. He can move up down left and right on the map.
+ * Player will be able to perform primary (left click) attacks, and secondary (right click) attacks.
+ * Player can also dash using spacebar.
  * For dude-spritesheet-walk.png, use width of 48, height of 55, frameCount of 4, and frameDuration of 0.2, scale 1.5
  * For dude-spritesheet-walk-scythe.png, use width of 92, height of 55, frameCount of 4, and frameDuration of 0.2, scale 1.5
  * For dude-spritesheet-stand.png, use width of 48, height of 55, frameCount of 2, and frameDuration of 0.5, scale 1.5
@@ -9,7 +9,7 @@
  * For McIdle.png, use width of 32, height of 28, frameCount of 2, and frameDuration of 0.5, scale 2.2
  * For McWalk.png, use width of 32, height of 28, frameCount of 8, and frameDuration of 0.1, scale 2.2
  */
-class Dude extends Entity {
+class Player extends Entity {
     constructor(game) {
         super(100, 100, 0, game, 0, 0,
             17, 29, "player", 200,
@@ -29,9 +29,9 @@ class Dude extends Entity {
 
         this.level = 1;
         // weapon handling
-        this.weapons = [new Scythe(game, "Scythe", 1, 2),
-                        new Bow(game, "Bow", 0.1, 5)];
-        // index for current weapon: Scythe = 0; Bow = 1; Tome = 2;
+        this.weapons = [new Weapon_scythe(game, "Scythe", 1, 2),
+                        new Weapon_tome(game, "Tome", 1, 10)];
+        // index for current weapon: Weapon_scythe = 0; Weapon_tome = 1; Tome = 2;
         this.currentWeapon = 0;
         this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching
         this.lastWeaponSwitchTime = 0;
@@ -148,13 +148,6 @@ class Dude extends Entity {
         if (this.game.keys[" "] && this.currentDashCooldown === 0) {
             this.performDash();
         }
-
-        // Check for collisions with enemies and push them back
-        this.game.enemies.forEach(enemy => {
-            if (this.boundingBox.isColliding(enemy.boundingBox)) {
-                this.respondToCollisionWithEnemy(enemy);
-            }
-        });
     };
 
     checkCollisionWithMapObject(intendedX, intendedY, mapObject) {
@@ -163,27 +156,6 @@ class Dude extends Entity {
 
         // Check if this temporary bounding box collides with the map object's bounding box
         return tempBoundingBox.isColliding(mapObject.boundingBox);
-    }
-
-    respondToCollisionWithEnemy(enemy) {
-        // Calculate the direction vector between the player and the enemy
-        const directionX = enemy.worldX - this.worldX;
-        const directionY = enemy.worldY - this.worldY;
-
-        // Normalize the direction vector
-        const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
-        const normalizedDirectionX = directionX / magnitude;
-        const normalizedDirectionY = directionY / magnitude;
-
-        // Set the pushback distance
-        const pushbackDistance = 1; // Adjust this value as needed
-
-        // Move the enemy away from the player by the pushback distance
-        enemy.worldX += normalizedDirectionX * pushbackDistance;
-        enemy.worldY += normalizedDirectionY * pushbackDistance;
-
-        // Update the enemy's bounding box to reflect the new position
-        enemy.updateBoundingBox();
     }
 
     // called when the user has a valid dash and presses space bar
@@ -221,7 +193,7 @@ class Dude extends Entity {
 
         //draw the current exp value
         ctx.beginPath();
-        ctx.fillStyle = "Blue";
+        ctx.fillStyle = "Yellow";
         let meter = ((this.exp) / (this.level * 10));
         // prevents exp bar from going too far in any direction
         if (meter > 1) {

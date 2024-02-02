@@ -1,6 +1,9 @@
 class Exp_Orb extends Entity {
     constructor(game, worldX, worldY, exp) {
         let size = 0.3 * exp;
+        if (size < 1) {
+            size = 1;
+        }
         super(1, 1, 0, game, worldX, worldY,
             17, 17, "orb", 0,
             "./sprites/exp_orb.png",
@@ -19,7 +22,10 @@ class Exp_Orb extends Entity {
         const dirY = targetCenter.y - selfCenter.y;
 
         this.dist = Math.sqrt(dirX * dirX + dirY * dirY);
-        const speed = 350 - this.dist;
+        let speed = 350 - this.dist;
+        if (this.game.enemies.length === 0) {
+            speed = 750;
+        }
 
         if (speed > 0) {
             this.movementSpeed = speed;
@@ -55,16 +61,5 @@ class Exp_Orb extends Entity {
             this.game.player.gainExp(this.exp);
         }
 
-    }
-
-
-    draw(ctx, game) {
-        let screenX = this.worldX - this.game.camera.x;
-        let screenY = this.worldY - this.game.camera.y;
-
-        // Draw the player at the calculated screen position
-        this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
-
-        this.boundingBox.draw(ctx, game);
     }
 }
