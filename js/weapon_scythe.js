@@ -1,18 +1,11 @@
 class Weapon_scythe extends Weapon{
-    constructor(game, name, primaryCool, secondCool) {
-        super(game, name, primaryCool, secondCool);
-
-        this.primaryAttackDamage = 30;
-        this.secondaryAttackDamage = 60;
-
-        this.primaryAttackPushbackForce = 9;
-        this.secondaryAttackPushbackForce = 14;
-
-        this.primaryAttackRadius = 110;
-        this.secondaryAttackRadius = 115;
-
-        this.primaryAttackDuration = 0.6; // Duration of the attack animation
-        this.secondaryAttackDuration = 0.85; // Duration of the spin attack in seconds
+    constructor(game, spritePath) {
+        super(game, "Scythe", 1, 2,
+            30, 60,
+            9, 14,
+            110, 115,
+            0.6, 0.85,
+            spritePath);
     }
 
     performPrimaryAttack(player){

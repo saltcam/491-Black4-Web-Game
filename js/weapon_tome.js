@@ -1,18 +1,23 @@
 class Weapon_tome extends Weapon {
-    constructor(game, name, primaryCool, secondCool) {
-        super(game, name, primaryCool, secondCool);
-
-        this.primaryAttackDamage = 15;
-        this.secondaryAttackDamage = 15;
-
-        this.primaryAttackPushbackForce = 9;
-        this.secondaryAttackPushbackForce = 1;
-
-        this.primaryAttackRadius = 20;
-        this.secondaryAttackRadius = 115;
-
-        this.primaryAttackDuration = 2; // Duration of the attack animation
-        this.secondaryAttackDuration = 5; // Duration of the attack in seconds
+    constructor(game, spritePath) {
+        super(game, "Tome", 1, 2,
+            15, 15,
+            5, 1,
+            20, 115,
+            2, 5,
+            spritePath);
+        //
+        // this.primaryAttackDamage = 15;
+        // this.secondaryAttackDamage = 15;
+        //
+        // this.primaryAttackPushbackForce = 9;
+        // this.secondaryAttackPushbackForce = 1;
+        //
+        // this.primaryAttackRadius = 20;
+        // this.secondaryAttackRadius = 115;
+        //
+        // this.primaryAttackDuration = 2; // Duration of the attack animation
+        // this.secondaryAttackDuration = 5; // Duration of the attack in seconds
     }
 
     performPrimaryAttack(player){

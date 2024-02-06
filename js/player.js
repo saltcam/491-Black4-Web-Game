@@ -25,8 +25,7 @@ class Player extends Entity {
 
         this.level = 1;
         // weapon handling
-        this.weapons = [new Weapon_scythe(game, "Scythe", 1, 2),
-                        new Weapon_tome(game, "Tome", 1, 10)];
+        this.weapons = [new Weapon_scythe(game, "./sprites/scythe.png"), new Weapon_tome(game, "./sprites/Tome.png")];
         // index for current weapon: Weapon_scythe = 0; Weapon_tome = 1; Tome = 2;
         this.currentWeapon = 0;
         this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching
@@ -201,6 +200,12 @@ class Player extends Entity {
         ctx.closePath();
     }
 
+    drawWeaponUI(ctx) {
+        for (let i = 0; i < this.weapons.length; i++) {
+            this.weapons[i].draw(ctx, i);
+        }
+    }
+
     draw(ctx, game) {
         // Check if the camera is initialized.
         // This is necessary as it is needed for this method, but may not be initialized on the first few calls
@@ -220,6 +225,7 @@ class Player extends Entity {
         // Force the super class to draw the health bar for our player
         this.drawHealth(ctx);
         this.drawExp(ctx);
+        this.drawWeaponUI(ctx);
         this.boundingBox.draw(ctx, game);
     }
 }
