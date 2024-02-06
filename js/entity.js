@@ -118,14 +118,6 @@ class Entity {
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
     }
 
-    makeElite() {
-        this.maxHP *= 2;
-        this.currHP = this.maxHP;
-        this.atkPow *= 2;
-        this.scale *= 2;
-        //console.log(this.name + " has become an elite!");
-    }
-
     draw(ctx, game) {
         let screenX = this.worldX - this.game.camera.x;
         let screenY = this.worldY - this.game.camera.y;

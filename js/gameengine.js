@@ -238,7 +238,7 @@ class GameEngine {
     }
 
     spawnRandomEnemy() {
-        if (this.enemies.length >= 50 || this.totalEnemiesSpawned >=  50) {
+        if (this.enemies.length >= 15 || this.totalEnemiesSpawned >= 15 || this.currMap === 0) {
             return;
         }
 
@@ -268,7 +268,15 @@ class GameEngine {
         // After 5 seconds there is a 10% chance for a new enemy to spawn as an elite
         if(this.elapsedTime > 5000) {
             if (Math.random() < 0.1) {
-                newEnemy.makeElite();
+                newEnemy.maxHP *= 2;
+                newEnemy.currHP = newEnemy.maxHP;
+                newEnemy.atkPow *= 2;
+                newEnemy.speed += 25;
+                newEnemy.exp *= 2;
+                newEnemy.animator.scale *= 1.5;
+                newEnemy.boundingBox.width *= 1.5;
+                newEnemy.boundingBox.height *= 1.5;
+                //console.log(newEnemy.name + "Elite Scale = " + newEnemy.animator.scale);
             }
         }
 
@@ -733,7 +741,7 @@ class GameEngine {
             this.player.removeFromWorld = true;
         }
 
-        if(this.elapsedTime % 1000 < 100) {
+        if(this.elapsedTime % 3000 < 100) {
             this.spawnRandomEnemy();
         }
     }
