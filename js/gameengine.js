@@ -44,7 +44,7 @@ class GameEngine {
 
         // Map Scaling Variables
         /** Map scale for map 0 (Rest Area) */
-        this.mapZeroScaleFactor = 0.25;
+        this.mapZeroScaleFactor = 1.5;
         /** Map scale for map 1 (Grasslands Map) */
         this.mapOneScaleFactor = 2;
         /** Map scale for map 2 (Cave Map) */
@@ -399,7 +399,7 @@ class GameEngine {
         }
 
         // If the defeated all enemies, display 'You Won!' text.
-        if (this.enemies.length <= 0) {
+        if (this.enemies.length <= 0 && this.currMap === 3) {
             this.ctx.beginPath();
 
             // Draw "You Won!" text in large yellow font at the center of the canvas
@@ -424,6 +424,7 @@ class GameEngine {
 
     /** Called in gameengine.draw() to draw the map textures. */
     drawMap() {
+
         // Check if the camera and player are initialized.
         // This is necessary as they are needed, but may not be initialized during the first few calls of this method.
         if (!this.camera || !this.player) {
@@ -432,15 +433,62 @@ class GameEngine {
 
         // If 0, then Rest Area Map is used.
         if (this.currMap === 0) {
+            //console.log("Drawing Rest Area Map...");
 
+            // Spawn a new portal once all enemies are defeated
+            if (this.enemies.length === 0 && !this.portal) {
+                this.addEntity(new Portal(this, this.player.worldX + 350, this.player.worldY, 2));
+            }
+
+            const spawnOffsetX = 170;
+            const spawnOffsetY = 60;
+
+            const map = ASSET_MANAGER.getAsset("./sprites/map_rest_area.png");
+
+            this.mapWidth = map.width;
+            this.mapHeight = map.height;
+
+            // Calculate the scaled width and height of the textures.
+            const scaledWidth = this.mapWidth * this.mapZeroScaleFactor;
+            const scaledHeight = this.mapHeight * this.mapZeroScaleFactor;
+
+            // If the map has not been centered yet, initialize its position.
+            if (!this.mapInitialized) {
+                this.mapTextureOffsetX = this.player.worldX - scaledWidth / 2 + this.player.animator.width / 2;
+                this.mapTextureOffsetY = this.player.worldY - scaledHeight / 2 + this.player.animator.height / 2;
+                this.mapInitialized = true;
+            }
+
+            // Adjust the texture's position to move inversely to the player's movement.
+            const textureX = this.mapTextureOffsetX - this.camera.x + spawnOffsetX;
+            const textureY = this.mapTextureOffsetY - this.camera.y - spawnOffsetY;
+
+            // Draw the scaled texture centered on the player's position accounting for the camera.
+            this.ctx.drawImage(map, textureX, textureY, scaledWidth, scaledHeight);
+
+            // Calculate the actual boundaries considering the scaling
+            this.mapBoundaries = {
+                left: -((this.mapWidth) * this.mapZeroScaleFactor)/2 + this.mapBoundaryOffset * 2 + spawnOffsetX,
+                top: -((this.mapHeight) * this.mapZeroScaleFactor)/2 + this.mapBoundaryOffset * 7 - spawnOffsetY,
+                right: ((this.mapWidth) * this.mapZeroScaleFactor)/2 - this.mapBoundaryOffset * 2 + spawnOffsetX,
+                bottom: ((this.mapHeight) * this.mapZeroScaleFactor)/2 - this.mapBoundaryOffset * 1.75 - spawnOffsetY
+            };
+
+            //this.loadRestAreaMap = false;
         }
         // If 1, then Grasslands Map is used.
         else if (this.currMap === 1) {
+            // console.log("Drawing grass map!")
             // Initialize the map objects if we haven't already
-            if (!this.mapObjectsInitialized) {
-                this.initGrasslandsObjects();
-            }
+            // if (!this.mapObjectsInitialized) {
+            //     this.initGrasslandsObjects();
+            // }
             const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
+
+            // Spawn a new portal once all enemies are defeated
+            if (this.enemies.length === 0 && !this.portal) {
+                this.addEntity(new Portal(this, this.player.worldX + 350, this.player.worldY, 0));
+            }
 
             this.mapWidth = map.width;
             this.mapHeight = map.height;
@@ -473,7 +521,40 @@ class GameEngine {
         }
         // If 2, then Cave Map is used.
         else if (this.currMap === 2){
+            // Initialize the map objects if we haven't already
+            // if (!this.mapObjectsInitialized) {
+            //     this.initGrasslandsObjects();
+            // }
+            const map = ASSET_MANAGER.getAsset("./sprites/map_stone_background.png");
 
+            this.mapWidth = map.width;
+            this.mapHeight = map.height;
+
+            // Calculate the scaled width and height of the textures.
+            const scaledWidth = this.mapWidth * this.mapOneScaleFactor;
+            const scaledHeight = this.mapHeight * this.mapOneScaleFactor;
+
+            // If the map has not been centered yet, initialize its position.
+            if (!this.mapInitialized) {
+                this.mapTextureOffsetX = this.player.worldX - scaledWidth / 2 + this.player.animator.width / 2;
+                this.mapTextureOffsetY = this.player.worldY - scaledHeight / 2 + this.player.animator.height / 2;
+                this.mapInitialized = true;
+            }
+
+            // Adjust the texture's position to move inversely to the player's movement.
+            const textureX = this.mapTextureOffsetX - this.camera.x;
+            const textureY = this.mapTextureOffsetY - this.camera.y;
+
+            // Draw the scaled texture centered on the player's position accounting for the camera.
+            this.ctx.drawImage(map, textureX, textureY, scaledWidth, scaledHeight);
+
+            // Calculate the actual boundaries considering the scaling
+            this.mapBoundaries = {
+                left: -((this.mapWidth) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset,
+                top: -((this.mapHeight) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset,
+                right: ((this.mapWidth) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset,
+                bottom: ((this.mapHeight) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset
+            };
         }
         // If 3, then Space Map is used.
         else if (this.currMap === 3){
@@ -513,7 +594,8 @@ class GameEngine {
         // Check if all enemies have been defeated
         // If so, spawn the portal to the next area
         if (this.enemies.length <= 0 && !this.portal) {
-            this.addEntity(new Portal(this, this.player.worldX + 200, this.player.worldY));
+            // Spawn a portal to rest area
+            this.addEntity(new Portal(this, this.player.worldX + 200, this.player.worldY, 0));
         }
 
         // Update 'other' entities.
@@ -551,7 +633,22 @@ class GameEngine {
 
         // Update 'player' entity.
         if (this.player && !this.player.removeFromWorld) {
+            //console.log("Player exists, checking for portal interaction...");
+            // Check if player has collided with portal
+            if (this.portal) {
+                //console.log("Portal exists, handling player interaction...");
+                // Call a method in the portal to handle player interaction (if needed)
+                this.portal.handlePlayerInteraction(this.player);
+            }
+
+            // // Check if player's bounding box is colliding with the portal's bounding box
+            // if (this.portal && this.portal.boundingBox.isColliding(this.player.boundingBox)) {
+            //     //console.log("Player colliding with portal, removing player from world...");
+            //     this.currMap = 0;
+            // }
             this.player.update();
+        } else {
+            //console.log("No player or player removed from world.");
         }
 
         // Remove 'other' entities that are marked for deletion.
