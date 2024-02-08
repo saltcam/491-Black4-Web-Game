@@ -15,12 +15,35 @@ class Portal extends Entity {
         if (this.collidesWithPlayer(player)) {
             // Tell the game engine to switch to the map of the teleport index
             this.game.currMap = this.teleportIndex;
-            
+
+            // Delete old map stuff
+            // Delete 'other' entities
+            for (let i = 0; i < this.game.entities.length; i++) {
+                this.game.entities[i].removeFromWorld = true;
+            }
+
+            // Delete 'object' entities
+            for (let i = 0; i < this.game.objects.length; i++) {
+                this.game.objects[i].removeFromWorld = true;
+            }
+
+            // Delete 'enemy' entities (there shouldn't be any at this point, but just in-case
+            for (let i = 0; i < this.game.enemies.length; i++) {
+                this.game.enemies[i].removeFromWorld = true;
+            }
+
+            // Delete 'attack' entities
+            for (let i = 0; i < this.game.attacks.length; i++) {
+                this.game.attacks[i].removeFromWorld = true;
+            }
+
+            // Place player at world center
             this.game.player.worldX = 0;
             this.game.player.worldY = 0;
+
+            // Reset map stuff
             this.game.mapInitialized = false;
-
-
+            this.game.mapObjectsInitialized = false;
 
             // Remove the portal from the game after entering it
             this.removeFromWorld = true;

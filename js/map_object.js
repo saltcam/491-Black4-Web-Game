@@ -3,6 +3,10 @@ class Map_object extends Entity {
         super(0, 0, 0, game, worldX, worldY, boxWidth, boxHeight, "object", 0, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale);
     }
 
+    openChest() {
+        this.animator.pauseAtFrame(24); // Passing a -1 essentially unpauses the animator.
+    }
+
     draw(ctx) {
         let screenX = this.worldX - this.game.camera.x;
         let screenY = this.worldY - this.game.camera.y;

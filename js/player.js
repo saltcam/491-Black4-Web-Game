@@ -146,11 +146,24 @@ class Player extends Entity {
     };
 
     checkCollisionWithMapObject(intendedX, intendedY, mapObject) {
-        // Create a temporary bounding box for the intended position
-        let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
+        // Check collision with map objects ONLY if it is a map object type
+        if (mapObject.boundingBox.type === "object") {
+            // Create a temporary bounding box for the intended position
+            let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
 
-        // Check if this temporary bounding box collides with the map object's bounding box
-        return tempBoundingBox.isColliding(mapObject.boundingBox);
+            // Check if this temporary bounding box collides with the map object's bounding box
+            return tempBoundingBox.isColliding(mapObject.boundingBox);
+        }
+        // If we collide with a chest, open the chest
+        else if (mapObject.boundingBox.type === "chest") {
+            // Create a temporary bounding box for the intended position
+            let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
+
+            // Check if this temporary bounding box collides with the map object's bounding box
+            if (tempBoundingBox.isColliding(mapObject.boundingBox)) {
+                mapObject.openChest();
+            }
+        }
     }
 
     // called when the user has a valid dash and presses space bar

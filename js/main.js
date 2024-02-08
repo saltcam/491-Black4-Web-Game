@@ -29,6 +29,10 @@ ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
 ASSET_MANAGER.queueDownload("./sprites/scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/Tome.png");
 ASSET_MANAGER.queueDownload("./sprites/map_rest_area.png");
+ASSET_MANAGER.queueDownload("./sprites/object_treasure_chest.png");
+
+//sounds
+ASSET_MANAGER.queueDownload("./sounds/SE_1.mp3");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");

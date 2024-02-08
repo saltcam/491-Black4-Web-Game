@@ -17,6 +17,8 @@ class GameEngine {
         this.portal = null;
         /** Tracks the attack entities like projectiles and attackCirc. */
         this.attacks = [];
+        /** Tracks the items on the map. */
+        this.items = [];
         /** Tracks the player entity. */
         this.player = null;
 
@@ -220,6 +222,8 @@ class GameEngine {
         // Which lets us layer the most important entities over the less important ones (ex: player will be drawn over EVERYTHING.)
         if (entity.boundingBox.type === "player") {
             this.player = entity;
+        } else if (entity.boundingBox.type === "item") {
+            this.items.push(entity);
         } else if (entity.boundingBox.type === "portal") {
             this.portal = entity;
         } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss") {
@@ -276,7 +280,11 @@ class GameEngine {
                 newEnemy.animator.scale *= 1.5;
                 newEnemy.boundingBox.width *= 1.5;
                 newEnemy.boundingBox.height *= 1.5;
+                newEnemy.isElite = true;
                 //console.log(newEnemy.name + "Elite Scale = " + newEnemy.animator.scale);
+            }
+            else {
+                newEnemy.isElite = false;
             }
         }
 
@@ -372,6 +380,16 @@ class GameEngine {
             }
         }
 
+        // Draw 'item' entities.
+        for (let item of this.items) {
+            item.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode) {
+                item.boundingBox.draw(this.ctx, this);
+            }
+        }
+
         // Draw 'player' entity.
         if (this.player) {
             this.player.draw(this.ctx, this);
@@ -441,7 +459,10 @@ class GameEngine {
 
         // If 0, then Rest Area Map is used.
         if (this.currMap === 0) {
-            //console.log("Drawing Rest Area Map...");
+            // Initialize the map objects if we haven't already
+            if (!this.mapObjectsInitialized) {
+                this.initRestAreaObjects();
+            }
 
             // Spawn a new portal once all enemies are defeated
             if (this.enemies.length === 0 && !this.portal) {
@@ -486,11 +507,11 @@ class GameEngine {
         }
         // If 1, then Grasslands Map is used.
         else if (this.currMap === 1) {
-            // console.log("Drawing grass map!")
             // Initialize the map objects if we haven't already
-            // if (!this.mapObjectsInitialized) {
-            //     this.initGrasslandsObjects();
-            // }
+            if (!this.mapObjectsInitialized) {
+                this.initGrasslandsObjects();
+            }
+
             const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
 
             // Spawn a new portal once all enemies are defeated
@@ -597,8 +618,6 @@ class GameEngine {
 
     /** This method is called every tick to update all entities etc. */
     update() {
-        let entitiesCount = this.entities.length;
-
         // Check if all enemies have been defeated
         // If so, spawn the portal to the next area
         if (this.enemies.length <= 0 && !this.portal) {
@@ -607,7 +626,7 @@ class GameEngine {
         }
 
         // Update 'other' entities.
-        for (let i = 0; i < entitiesCount; i++) {
+        for (let i = 0; i < this.entities.length; i++) {
             if (!this.entities[i].removeFromWorld) {
                 this.entities[i].update();
             }
@@ -639,24 +658,22 @@ class GameEngine {
             this.portal.update();
         }
 
+        // Update 'item' entities.
+        for (let i = 0; i < this.items.length; i++) {
+            if (!this.items[i].removeFromWorld) {
+                this.items[i].update();
+            }
+        }
+
         // Update 'player' entity.
         if (this.player && !this.player.removeFromWorld) {
-            //console.log("Player exists, checking for portal interaction...");
+            this.player.update();
+
             // Check if player has collided with portal
             if (this.portal) {
-                //console.log("Portal exists, handling player interaction...");
                 // Call a method in the portal to handle player interaction (if needed)
                 this.portal.handlePlayerInteraction(this.player);
             }
-
-            // // Check if player's bounding box is colliding with the portal's bounding box
-            // if (this.portal && this.portal.boundingBox.isColliding(this.player.boundingBox)) {
-            //     //console.log("Player colliding with portal, removing player from world...");
-            //     this.currMap = 0;
-            // }
-            this.player.update();
-        } else {
-            //console.log("No player or player removed from world.");
         }
 
         // Remove 'other' entities that are marked for deletion.
@@ -676,7 +693,22 @@ class GameEngine {
         // Remove 'enemy' entities that are marked for deletion.
         for (let i = this.enemies.length - 1; i >= 0; --i) {
             if (this.enemies[i].removeFromWorld) {
-                this.addEntity(new Exp_Orb(this, this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].exp));
+                // Spawn Exp orb at the removed enemy
+                if (this.enemies[i].boundingBox.type !== "enemyBoss") {
+                    this.addEntity(new Exp_Orb(this, this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].exp));
+                    let stone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.02, 1.25);
+                    stone.boundingBox.type = "tombstone";
+                    this.addEntity(stone);
+                }
+
+                // If elite or boss, drop a weapon upgrade chest
+                if (this.enemies[i].isElite || this.enemies[i].boundingBox.type === "enemyBoss") {
+                    let chest = this.addEntity(new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.02, 1.25));
+                    chest.boundingBox.type = "chest";
+                    chest.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
+                }
+
+                // Delete this enemy
                 this.enemies.splice(i, 1);
             }
         }
@@ -684,7 +716,6 @@ class GameEngine {
         // Remove 'attack' entities that are marked for deletion.
         for (let i = this.attacks.length - 1; i >= 0; --i) {
             if (this.attacks[i].removeFromWorld) {
-                //this.addEntity(new Exp_Orb(this, this.attacks[i].worldX, this.attacks[i].worldY, this.attacks[i].exp));
                 this.attacks.splice(i, 1);
             }
         }
@@ -694,6 +725,13 @@ class GameEngine {
             this.portal = null;
         }
 
+        // Remove 'item' entities that are marked for deletion.
+        for (let i = this.items.length - 1; i >= 0; --i) {
+            if (this.items[i].removeFromWorld) {
+                this.items.splice(i, 1);
+            }
+        }
+
         // Remove 'player' entity if marked for deletion.
         if (this.player && this.player.removeFromWorld) {
             //this.player = null;   // If this is commented out, we don't delete the player entity on death.
@@ -701,11 +739,6 @@ class GameEngine {
 
         // Update the elapsed time.
         this.elapsedTime = Date.now() - this.startTime;
-
-        // Loop through 'other' entities and set removeFromWorld flags.
-        // for (let i = 0; i < this.entities.length; i++) {
-        //
-        // }
 
         // Update enemy collisions
         // Check for collisions between enemies

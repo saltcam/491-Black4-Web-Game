@@ -6,7 +6,14 @@ class Animator {
         this.elapsedTime = 0;
         this.totalTime = this.frameCount * this.frameDuration;
         this.scale = scale;
+        this.pauseFrame = -1;
     };
+
+    // Call this to tell the animator to pause at the given frame.
+    // Pass this method a -1 to unpause.
+    pauseAtFrame(frameNumber) {
+        this.pauseFrame = frameNumber;
+    }
 
     drawFrame(tick, ctx, x, y, direction) {
         // Update the elapsed time
@@ -35,19 +42,39 @@ class Animator {
             x = -x - (this.width * this.scale); // Adjust the x position when flipped
         }
 
-        // Draw the current frame with scaling
-        ctx.drawImage(this.spritesheet,
-            this.xStart + (this.width * frame),
-            this.yStart,
-            this.width,
-            this.height,
-            x,
-            y,
-            scaledWidth,
-            scaledHeight);
+        // If flag is set to true, pause the animation to the first frame
+        if (this.pauseFrame >= 0) {
+            // Draw only the last frame
+            ctx.drawImage(this.spritesheet,
+                this.xStart + (this.width * this.pauseFrame),
+                this.yStart,
+                this.width,
+                this.height,
+                x,
+                y,
+                scaledWidth,
+                scaledHeight);
 
-        // Restore the context to its original state
-        ctx.restore();
+                ctx.restore();
+
+            return;
+        }
+        else {
+            //console.log("SHOULD NOT BE REACHED!");
+            // Draw the current frame with scaling
+            ctx.drawImage(this.spritesheet,
+                this.xStart + (this.width * frame),
+                this.yStart,
+                this.width,
+                this.height,
+                x,
+                y,
+                scaledWidth,
+                scaledHeight);
+
+            // Restore the context to its original state
+            ctx.restore();
+        }
     };
 
     currentFrame() {

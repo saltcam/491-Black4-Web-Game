@@ -40,6 +40,7 @@ class Entity {
         // This stuff is really just for boss health bar calculations
         this.recentDamage = 0;
         this.lastDamageTime = 0;
+        this.isElite = false;
     }
 
     update() {
