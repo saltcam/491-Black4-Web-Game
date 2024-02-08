@@ -5,7 +5,8 @@ class Weapon_tome extends Weapon {
             5, 1,
             20, 115,
             2, 5,
-            "./sprites/Tome.png", "./sounds/SE_1.mp3", "./sounds/SE_1.mp3", 40, 40);
+            "./sprites/Tome.png",
+            "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40);
 
     }
 

@@ -34,7 +34,12 @@ ASSET_MANAGER.queueDownload("./sprites/map_rest_area.png");
 ASSET_MANAGER.queueDownload("./sprites/object_treasure_chest.png");
 
 //sounds
-ASSET_MANAGER.queueDownload("./sounds/SE_1.mp3");
+ASSET_MANAGER.queueDownload("./sounds/SE_scythe_primary.mp3");
+ASSET_MANAGER.queueDownload("./sounds/SE_scythe_secondary.mp3");
+ASSET_MANAGER.queueDownload("./sounds/SE_tome_primary.mp3");
+ASSET_MANAGER.queueDownload("./sounds/SE_tome_secondary.mp3");
+ASSET_MANAGER.queueDownload("./sounds/SE_staff_primary.mp3");
+ASSET_MANAGER.queueDownload("./sounds/SE_staff_secondary.mp3");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");

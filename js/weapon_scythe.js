@@ -5,7 +5,8 @@ class Weapon_scythe extends Weapon{
             9, 14,
             110, 115,
             0.6, 0.85,
-            "./sprites/weapon_scythe.png", "./sounds/SE_1.mp3", "./sounds/SE_1.mp3", 30, 50);
+            "./sprites/weapon_scythe.png",
+            "./sounds/SE_scythe_primary.mp3", "./sounds/SE_scythe_secondary.mp3", 30, 50);
     }
 
     performPrimaryAttack(player){
