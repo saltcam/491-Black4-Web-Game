@@ -5,7 +5,7 @@ class Weapon_staff extends Weapon {
             15, 15,
             115, 115,
             1, 1,
-            "./sprites/Tome_alt.png", "./sounds/SE_1.mp3", "./sounds/SE_1.mp3", 40, 40);
+            "./sprites/NecromancyStaff.png", "./sounds/SE_1.mp3", "./sounds/SE_1.mp3", 26, 70);
 
     }
 

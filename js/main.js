@@ -29,7 +29,7 @@ ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
 ASSET_MANAGER.queueDownload("./sprites/scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/Tome.png");
-ASSET_MANAGER.queueDownload("./sprites/Tome_alt.png");
+ASSET_MANAGER.queueDownload("./sprites/NecromancyStaff.png");
 ASSET_MANAGER.queueDownload("./sprites/map_rest_area.png");
 ASSET_MANAGER.queueDownload("./sprites/object_treasure_chest.png");
 
