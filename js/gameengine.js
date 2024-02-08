@@ -703,8 +703,8 @@ class GameEngine {
                 if (this.enemies[i].boundingBox.type !== "enemyBoss") {
                     this.addEntity(new Exp_Orb(this, this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].exp));
                     let stone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.02, 1.25);
-                    stone.boundingBox.type = "tombstone";
                     this.addEntity(stone);
+                    stone.boundingBox.type = "tombstone";
                 }
 
                 // If elite or boss, drop a weapon upgrade chest
@@ -769,8 +769,14 @@ class GameEngine {
 
         // Loop through 'attack' entities and set removeFromWorld flags.
         for (let i = 0; i < this.attacks.length; i++) {
-            // Removes any playerAttack attack circles if their duration is depleted.
-            if((this.attacks[i].type === "playerAttack" || this.attacks[i].type === "enemyAttack" || this.attacks[i].type === "attack") && this.attacks[i].duration <= 0){
+            //TODO do we need to check for specific types? We should be able to just check duration
+
+            // Removes any attack circles if their duration is depleted.
+            if(/*this.attacks[i].boundingBox.type === "attack"this.attacks[i].type === "playerAttack" ||
+                this.attacks[i].type === "enemyAttack" ||
+                this.attacks[i].boundingBox.type === "attack" ||
+                this.attacks[i].type === "necromancyAttack" ||
+                this.attacks[i].type === "explosionAttack") && */ this.attacks[i].duration <= 0){
                 this.attacks[i].removeFromWorld = true;
             }
         }

@@ -19,7 +19,7 @@ class Projectile extends Entity{
 
     update() {
         super.update();
-        console.log("projectile worldX: " + this.worldX + " projectile worldY: " + this.worldY);
+        //console.log("projectile worldX: " + this.worldX + " projectile worldY: " + this.worldY);
         this.worldX += this.angleX * this.movementSpeed * this.game.clockTick;
         this.worldY += this.angleY * this.movementSpeed * this.game.clockTick;
         //effectively lose a duration

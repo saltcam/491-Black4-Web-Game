@@ -7,7 +7,7 @@ class AttackCirc {
      * @param radius    The radius of the attack
      * @param type 'playerAttack': does damage when colliding with enemy boundingBox
      *              'enemyAttack': does damage when colliding with player boundingBox
-     *              'necromancyAttack': does damage when colliding with tombstone boundingBox
+     *              'necromancyAttack': does damage when colliding with tombstone and enemy boundingBox
      * @param dx    x-offset from parent entity
      * @param dy    y-offset from parent entity
      * @param duration  How long in frames the attack animation stays on screen
@@ -79,14 +79,39 @@ class AttackCirc {
         // Only do damage if a second has passed since damaging the enemy list last time
         const currentTime = this.game.timer.gameTime;
 
-        if (this.type === "playerAttack") {
+        if (this.type === "playerAttack" || this.type === "necromancyAttack" || this.type === "explosionAttack") {
             if (currentTime - this.lastAttackTime >= this.attackCooldown) {
+                //iterates through all enemies and deals damage to them if the attack is of player origin.
                 this.game.enemies.forEach((enemy) => {
                     if (this.collisionDetection(enemy.boundingBox)) {
                         // Push the enemy away
                         this.pushEnemy(enemy);
                         enemy.takeDamage(this.attackDamage); // example damage value
                         this.lastAttackTime = currentTime;
+                    }
+                });
+                // iterates through all tombstones and deletes them if the attack is from the staff weapon or an explosion.
+                this.game.objects.forEach((object) => {
+                    if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
+
+                        switch(this.type) {
+                            case "necromancyAttack":
+                                //TODO create allies
+                                object.removeFromWorld = true;
+                                this.lastAttackTime = currentTime;
+                                break;
+                            case "explosionAttack":
+                                // TODO create explosions
+                                object.removeFromWorld = true;
+                                this.lastAttackTime = currentTime;
+                                break;
+                            default:
+                                console.log("Tombstone hit with something else");
+                        }
+                        //console.log("necromancy!");
+                        // Push the enemy away
+                        //this.pushEnemy(enemy);
+
                     }
                 });
             }

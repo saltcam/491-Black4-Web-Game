@@ -36,17 +36,17 @@ class Weapon_staff extends Weapon {
             dx = Math.cos(this.attackAngle) * offsetDistance;
             dy = Math.sin(this.attackAngle) * offsetDistance;
 
+            let xWorld = this.game.player.worldX + dx;
+            let yWorld = this.game.player.worldY + dy;
+
             this.lastPrimaryAttackTime = currentTime;
 
-            this.game.addEntity(new AttackCirc(this.game, player,
-                this.primaryAttackRadius / 2,
-                'necromancyAttack',
-                dx, dy,
-                this.primaryAttackDuration,
-                "./sprites/weapon_scythe_primaryattack.png",
-                this.primaryAttackDamage,
-                this.primaryAttackPushbackForce,
-                0, 0.1));
+            this.game.addEntity(new Projectile(this.game, this.primaryAttackDamage,
+                xWorld + 7, yWorld + 7, 10, 10, "necromancyAttack", 0,
+                "./sprites/exp_orb.png",
+                0, 0, 17, 17, 3, 0.2, 10, 0, 0,
+                this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 1));
+
         }
     }
 
@@ -68,17 +68,24 @@ class Weapon_staff extends Weapon {
             let dy = clickPos.y - screenYCenter;
             this.attackAngle = Math.atan2(dy, dx);
 
-            const offsetDistance = this.secondaryAttackRadius * 0.6;
+            let distX = clickPos.x - canvas.width/2;
+            let distY = clickPos.y - canvas.height/2;
+            //width="1440" height="810"
+
+            const offsetDistance = Math.sqrt(distX*distX + distY*distY);
             dx = Math.cos(this.attackAngle) * offsetDistance;
             dy = Math.sin(this.attackAngle) * offsetDistance;
 
+            let xWorld = this.game.player.worldX + dx;
+            let yWorld = this.game.player.worldY + dy;
 
             this.lastSecondAttackTime = currentTime;
+
             this.game.addEntity(new Projectile(this.game, this.secondaryAttackDamage,
-                player.worldX, player.worldY, 10, 10, "playerAttack", 2,
+                xWorld + 7, yWorld + 7, 10, 10, "explosionAttack", 0,
                 "./sprites/exp_orb.png",
-                0, 0, 17, 17, 3, 0.2, 10, dx, dy,
-                this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 0.3));
+                0, 0, 17, 17, 3, 0.2, 10, 0, 0,
+                this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 1));
         }
 
 
