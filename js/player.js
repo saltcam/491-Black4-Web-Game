@@ -219,6 +219,30 @@ class Player extends Entity {
         }
     }
 
+    drawWeapon(ctx) {
+        if (this.currentWeapon === 0) {
+            const scytheSprite = ASSET_MANAGER.getAsset("./sprites/weapon_scythe.png");
+
+            const scale = 2;
+            const scaledWidth = scytheSprite.width * scale;
+            const scaledHeight = scytheSprite.height * scale;
+
+            // Calculate position for the scythe, adjusting for player's mouse position and camera
+            const playerCenter = this.calculateCenter();
+
+            const scytheX = playerCenter.x - this.game.camera.x + 50;
+            const scytheY = playerCenter.y - this.game.camera.y;
+
+            ctx.save();
+            ctx.translate(scytheX, scytheY);
+            ctx.scale(-1, 1);
+
+            ctx.drawImage(scytheSprite, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+
+            ctx.restore();
+        }
+    }
+
     draw(ctx, game) {
         // Check if the camera is initialized.
         // This is necessary as it is needed for this method, but may not be initialized on the first few calls
@@ -239,6 +263,7 @@ class Player extends Entity {
         this.drawHealth(ctx);
         this.drawExp(ctx);
         this.drawWeaponUI(ctx);
+        this.drawWeapon(ctx)
         this.boundingBox.draw(ctx, game);
     }
 }
