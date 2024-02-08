@@ -132,6 +132,12 @@ class GameEngine {
         this.mapObjectsInitialized = true;
     }
 
+    /** Call this to initialize the Rest Area (Map #0) objects. */
+    initRestAreaObjects() {
+        this.addEntity(new Map_object(this, 150, -50, 40, 20, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 1));
+        this.mapObjectsInitialized = true;
+    }
+
     /** Call this method to initialize the camera at the start of the game. */
     initCamera() {
         // Assuming the player is already created and added to the entities list.
