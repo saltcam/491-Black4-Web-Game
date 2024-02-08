@@ -6,6 +6,7 @@ class BoundingBox {
      * @param height the distance from top to bottom of box
      * @param type 'player': take damage when colliding with 'enemy' or 'enemyAttack'.
      *             'enemy': take damage when colliding with 'playerAttack'.
+     *             'tombstone': take damage when colliding with playerAttack
      */
     constructor(x, y, width, height, type) {
         this.left = x;

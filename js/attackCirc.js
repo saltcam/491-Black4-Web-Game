@@ -7,6 +7,7 @@ class AttackCirc {
      * @param radius    The radius of the attack
      * @param type 'playerAttack': does damage when colliding with enemy boundingBox
      *              'enemyAttack': does damage when colliding with player boundingBox
+     *              'necromancyAttack': does damage when colliding with tombstone boundingBox
      * @param dx    x-offset from parent entity
      * @param dy    y-offset from parent entity
      * @param duration  How long in frames the attack animation stays on screen

@@ -1,18 +1,19 @@
 class Weapon_scythe extends Weapon{
-    constructor(game, spritePath) {
+    constructor(game) {
         super(game, "Scythe", 1, 2,
             30, 60,
             9, 14,
             110, 115,
             0.6, 0.85,
-            spritePath);
+            "./sprites/weapon_scythe.png", "./sounds/SE_1.mp3", "./sounds/SE_1.mp3", 30, 50);
     }
 
     performPrimaryAttack(player){
         const currentTime = this.game.timer.gameTime;
 
-        // Removed the click check and just use the cooldown check
+        // if true, perform the attack
         if (currentTime - this.lastPrimaryAttackTime >= this.primaryCool) {
+            ASSET_MANAGER.playAsset(this.primarySound);
             const clickPos = this.game.mouse; // Use the current mouse position instead of the click position
 
             // Calculate the center of the character
@@ -46,8 +47,9 @@ class Weapon_scythe extends Weapon{
     performSecondaryAttack(player){
         const currentTime = this.game.timer.gameTime;
 
-        // Removed the click check and just use the cooldown check
+        // if true, perform the attack
         if (currentTime - this.lastSecondAttackTime >= this.secondCool) {
+            ASSET_MANAGER.playAsset(this.secondarySound);
             this.lastSecondAttackTime = currentTime;
             this.game.addEntity(new AttackCirc(this.game, player,
                 this.secondaryAttackRadius,

@@ -4,7 +4,7 @@ class Weapon {
                 primaryAttackPushbackForce, secondaryAttackPushbackForce,
                 primaryAttackRadius, secondaryAttackRadius,
                 primaryAttackDuration, secondaryAttackDuration,
-                spritePath) {
+                spritePath, primarySound, secondarySound, spriteW, spriteH) {
         this.game = game;
         this.name = name;
         this.primaryCool = primaryCool;
@@ -22,12 +22,15 @@ class Weapon {
         this.primaryAttackDuration = primaryAttackDuration; // Duration of the attack animation
         this.secondaryAttackDuration = secondaryAttackDuration; // Duration of the spin attack in seconds
 
+        this.primarySound = primarySound;
+        this.secondarySound = secondarySound;
+
         // For whatever reason, having huge negatives numbers here allows the player to use their attacks immediately as
         // soon as the game starts. Without this the attack cooldowns are on cooldown as soon as the game starts.
         this.lastPrimaryAttackTime = -100;
         this.lastSecondAttackTime = -100;
 
-        this.animator = new Animator(ASSET_MANAGER.getAsset(spritePath), 0, 0, 40, 40, 1, 60, 1);
+        this.animator = new Animator(ASSET_MANAGER.getAsset(spritePath), 0, 0, spriteW, spriteH, 1, 60, 1);
     }
 
     draw(ctx, slotNum){

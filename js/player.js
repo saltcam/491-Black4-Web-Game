@@ -25,7 +25,7 @@ class Player extends Entity {
 
         this.level = 1;
         // weapon handling
-        this.weapons = [new Weapon_scythe(game, "./sprites/scythe.png"), new Weapon_tome(game, "./sprites/Tome.png")];
+        this.weapons = [new Weapon_scythe(game), new Weapon_tome(game), new Weapon_staff(game)];
         // index for current weapon: Weapon_scythe = 0; Weapon_tome = 1; Tome = 2;
         this.currentWeapon = 0;
         this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching

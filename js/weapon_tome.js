@@ -1,31 +1,21 @@
 class Weapon_tome extends Weapon {
-    constructor(game, spritePath) {
+    constructor(game) {
         super(game, "Tome", 1, 2,
             15, 15,
             5, 1,
             20, 115,
             2, 5,
-            spritePath);
-        //
-        // this.primaryAttackDamage = 15;
-        // this.secondaryAttackDamage = 15;
-        //
-        // this.primaryAttackPushbackForce = 9;
-        // this.secondaryAttackPushbackForce = 1;
-        //
-        // this.primaryAttackRadius = 20;
-        // this.secondaryAttackRadius = 115;
-        //
-        // this.primaryAttackDuration = 2; // Duration of the attack animation
-        // this.secondaryAttackDuration = 5; // Duration of the attack in seconds
+            "./sprites/Tome.png", "./sounds/SE_1.mp3", "./sounds/SE_1.mp3", 40, 40);
+
     }
 
     performPrimaryAttack(player){
 
         const currentTime = this.game.timer.gameTime;
 
-        // Removed the click check and just use the cooldown check
+        // if true, perform the attack
         if (currentTime - this.lastPrimaryAttackTime >= this.primaryCool) {
+            ASSET_MANAGER.playAsset(this.primarySound);
             const clickPos = this.game.mouse; // Use the current mouse position instead of the click position
 
             // Calculate the center of the character
@@ -55,8 +45,9 @@ class Weapon_tome extends Weapon {
     performSecondaryAttack(player){
         const currentTime = this.game.timer.gameTime;
 
-        // Removed the click check and just use the cooldown check
+        // if true, perform the attack
         if (currentTime - this.lastSecondAttackTime >= this.secondCool) {
+            ASSET_MANAGER.playAsset(this.secondarySound);
             const clickPos = this.game.mouse; // Use the current mouse position instead of the click position
 
             // Calculate the center of the character
