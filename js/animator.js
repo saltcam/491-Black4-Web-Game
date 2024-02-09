@@ -62,59 +62,45 @@ class Animator {
                 scaledWidth,
                 scaledHeight);
 
-                ctx.restore();
-
-            return;
-        }
-        else {
-            if (!this.beingDamaged) {
-                let newSpritesheetPath = this.spritesheet.src;
-                newSpritesheetPath = newSpritesheetPath.replace("http://localhost:63342/491-Black4-Web-Game", "."); // Uhh not sure if this will be the case on everyone else's machine?
-                newSpritesheetPath = newSpritesheetPath.replace("https://saltcam.github.io/491-Black4-Web-Game", ".");
-
-                // Draw the current frame with scaling
-                ctx.drawImage(ASSET_MANAGER.getAsset(newSpritesheetPath),
-                    this.xStart + (this.width * frame),
-                    this.yStart,
-                    this.width,
-                    this.height,
-                    x,
-                    y,
-                    scaledWidth,
-                    scaledHeight);
-
-                // Restore the context to its original state
-                ctx.restore();
-            } else {
-                let newSpritesheetPath = this.spritesheet.src;
-                newSpritesheetPath = newSpritesheetPath.replace("http://localhost:63342/491-Black4-Web-Game", ".");
-                newSpritesheetPath = newSpritesheetPath.replace("https://saltcam.github.io/491-Black4-Web-Game", ".");
-                newSpritesheetPath = newSpritesheetPath.replace(".png", "_DAMAGED.png");
-
-                // Draw the current frame with scaling
-                ctx.drawImage(ASSET_MANAGER.getAsset(newSpritesheetPath),
-                    this.xStart + (this.width * frame),
-                    this.yStart,
-                    this.width,
-                    this.height,
-                    x,
-                    y,
-                    scaledWidth,
-                    scaledHeight);
-
-                // Restore the context to its original state
-                ctx.restore();
+            ctx.restore();
+        } else {
+            // Determine the path for the spritesheet
+            let newSpritesheetPath = this.spritesheet.src;
+            // Find the index of "/sprites/"
+            const spritesIndex = newSpritesheetPath.indexOf("/sprites/");
+            // Ensure the path starts with "./sprites/" by reconstructing it if "/sprites/" is found
+            if (spritesIndex !== -1) {
+                newSpritesheetPath = "." + newSpritesheetPath.substring(spritesIndex);
             }
+
+            // Apply "_DAMAGED" suffix if in damaged mode
+            if (this.beingDamaged) {
+                newSpritesheetPath = newSpritesheetPath.replace(".png", "_DAMAGED.png");
+            }
+
+            // Draw the current frame with scaling
+            ctx.drawImage(ASSET_MANAGER.getAsset(newSpritesheetPath),
+                this.xStart + (this.width * frame),
+                this.yStart,
+                this.width,
+                this.height,
+                x,
+                y,
+                scaledWidth,
+                scaledHeight);
+
+            // Restore the context to its original state
+            ctx.restore();
         }
-    };
+    }
 
     currentFrame() {
         return Math.floor(this.elapsedTime / this.frameDuration);
-    };
+    }
 
     isDone() {
         return (this.elapsedTime >= this.totalTime);
-    };
+    }
 
     changeSpritesheet(newSpritesheet, newXStart, newYStart, newWidth, newHeight, newFrameCount, newFrameDuration) {
         this.spritesheet = newSpritesheet;  // Change the spritesheet
