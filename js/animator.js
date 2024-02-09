@@ -70,6 +70,7 @@ class Animator {
             if (!this.beingDamaged) {
                 let newSpritesheetPath = this.spritesheet.src;
                 newSpritesheetPath = newSpritesheetPath.replace("http://localhost:63342/491-Black4-Web-Game", "."); // Uhh not sure if this will be the case on everyone else's machine?
+                newSpritesheetPath = newSpritesheetPath.replace("https://saltcam.github.io/491-Black4-Web-Game", ".");
 
                 // Draw the current frame with scaling
                 ctx.drawImage(ASSET_MANAGER.getAsset(newSpritesheetPath),
@@ -86,7 +87,8 @@ class Animator {
                 ctx.restore();
             } else {
                 let newSpritesheetPath = this.spritesheet.src;
-                newSpritesheetPath = newSpritesheetPath.replace("http://localhost:63342/491-Black4-Web-Game", "."); // Uhh not sure if this will be the case on everyone else's machine?
+                newSpritesheetPath = newSpritesheetPath.replace("http://localhost:63342/491-Black4-Web-Game", ".");
+                newSpritesheetPath = newSpritesheetPath.replace("https://saltcam.github.io/491-Black4-Web-Game", ".");
                 newSpritesheetPath = newSpritesheetPath.replace(".png", "_DAMAGED.png");
 
                 // Draw the current frame with scaling
