@@ -106,6 +106,10 @@ class GameEngine {
                 animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: 2}
         ];
 
+        /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
+        this.baseEnemySpawnInterval = 1.2;
+        /** How many enemies  can be on the map at once (this automatically increases as time goes on). */
+        this.baseMaxEnemies = 30;
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
@@ -269,7 +273,7 @@ class GameEngine {
         let intervals = Math.floor(this.elapsedTime / 60000);
 
         // Calculate the maximum number of enemies based on elapsed time
-        let maxEnemies = 15 + (15 * intervals); // Start with 15 and add 15 for each interval
+        let maxEnemies = this.baseMaxEnemies + (this.baseMaxEnemies * intervals); // Start with 15 and add 15 for each interval
 
         console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
 
@@ -909,7 +913,6 @@ class GameEngine {
         }
 
         // Calculate spawn rate based on elapsed time
-        let baseSpawnInterval = 3000; // Base interval of 3 seconds for spawning
         const elapsedTimeInMinutes = this.elapsedTime / 60000; // Convert elapsed time to minutes
 
         // Calculate the spawn rate multiplier exponentially
@@ -918,7 +921,7 @@ class GameEngine {
 
         // Calculate the current spawn interval based on the multiplier
         // No explicit minimum interval, but you could enforce one if needed
-        let currentSpawnInterval = baseSpawnInterval * spawnRateMultiplier;
+        let currentSpawnInterval = (this.baseEnemySpawnInterval * 1000) * spawnRateMultiplier;
 
         // Check if it's time to spawn an enemy based on current spawn interval
         if (this.elapsedTime > 0 && this.elapsedTime % currentSpawnInterval < this.clockTick * 1000) {
