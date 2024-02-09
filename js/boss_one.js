@@ -9,7 +9,7 @@
 class BossOne extends Entity {
     /** Default Constructor - Only needs to be passed the gameengine and worldX and Y coords. */
     constructor(game, worldX, worldY) {
-        super(1, 1, 25,
+        super(1500, 1500, 25,
             game, worldX, worldY,
             20, 35, "enemyBoss",
             600,
@@ -112,6 +112,12 @@ class BossOne extends Entity {
         // If health hits 0 or below, this entity is declared dead
         if (this.currHP <= 0) {
             this.isDead = true;
+
+            // Spawn a portal to rest area (because map is completed once boss is dead)
+            this.game.spawnPortal(this.worldX, this.worldY,0);
+
+            // Set the gameengine to roundOver
+            this.game.roundOver = true;
 
             // Be sure to send the target marker entity to the garbage collector
             this.targetMarker.removeFromWorld = true;

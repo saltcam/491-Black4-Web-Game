@@ -1,12 +1,19 @@
 // This is the animator class for player.js. It is used to animate the character spritesheet and allows the spritesheet to be changed on the fly.
 class Animator {
     constructor(spritesheet, xStart, yStart, width, height, frameCount, frameDuration, scale) {
-        Object.assign(this, { spritesheet, xStart, yStart, width, height, frameCount, frameDuration }); // Copy the parameters into the object
+        this.spritesheet = spritesheet;
+        this.xStart = xStart;
+        this.yStart = yStart;
+        this.width = width;
+        this.height = height;
+        this.frameCount = frameCount;
+        this.frameDuration = frameDuration;
 
         this.elapsedTime = 0;
         this.totalTime = this.frameCount * this.frameDuration;
         this.scale = scale;
         this.pauseFrame = -1;
+        this.beingDamaged = false;  // Is the sprite currently in damaged mode?
     };
 
     // Call this to tell the animator to pause at the given frame.
@@ -60,20 +67,42 @@ class Animator {
             return;
         }
         else {
-            //console.log("SHOULD NOT BE REACHED!");
-            // Draw the current frame with scaling
-            ctx.drawImage(this.spritesheet,
-                this.xStart + (this.width * frame),
-                this.yStart,
-                this.width,
-                this.height,
-                x,
-                y,
-                scaledWidth,
-                scaledHeight);
+            if (!this.beingDamaged) {
+                let newSpritesheetPath = this.spritesheet.src;
+                newSpritesheetPath = newSpritesheetPath.replace("http://localhost:63342/491-Black4-Web-Game", "."); // Uhh not sure if this will be the case on everyone else's machine?
 
-            // Restore the context to its original state
-            ctx.restore();
+                // Draw the current frame with scaling
+                ctx.drawImage(ASSET_MANAGER.getAsset(newSpritesheetPath),
+                    this.xStart + (this.width * frame),
+                    this.yStart,
+                    this.width,
+                    this.height,
+                    x,
+                    y,
+                    scaledWidth,
+                    scaledHeight);
+
+                // Restore the context to its original state
+                ctx.restore();
+            } else {
+                let newSpritesheetPath = this.spritesheet.src;
+                newSpritesheetPath = newSpritesheetPath.replace("http://localhost:63342/491-Black4-Web-Game", "."); // Uhh not sure if this will be the case on everyone else's machine?
+                newSpritesheetPath = newSpritesheetPath.replace(".png", "_DAMAGED.png");
+
+                // Draw the current frame with scaling
+                ctx.drawImage(ASSET_MANAGER.getAsset(newSpritesheetPath),
+                    this.xStart + (this.width * frame),
+                    this.yStart,
+                    this.width,
+                    this.height,
+                    x,
+                    y,
+                    scaledWidth,
+                    scaledHeight);
+
+                // Restore the context to its original state
+                ctx.restore();
+            }
         }
     };
 
@@ -96,4 +125,15 @@ class Animator {
         this.totalTime = this.frameCount * this.frameDuration; // Recalculate the total time
         this.elapsedTime = 0;  // Reset animation timing
     }
-};
+
+    // Method to switch to the damaged sprite and then switch back after a duration
+    damageSprite(damageDuration) {
+        if (!this.beingDamaged) {
+            this.beingDamaged = true;
+
+            setTimeout(() => {
+                this.beingDamaged = false;
+            }, damageDuration);
+        }
+    }
+}

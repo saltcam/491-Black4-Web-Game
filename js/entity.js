@@ -84,6 +84,9 @@ class Entity {
 
     // Override takeDamage to track recent damage and last damage time
     takeDamage(amount) {
+        // Apply the damage sprite to this entity
+        this.animator.damageSprite(250);
+
         this.currHP -= amount;
         if (this.currHP <= 0) {
             this.currHP = 0;

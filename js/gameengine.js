@@ -21,6 +21,8 @@ class GameEngine {
         this.items = [];
         /** Tracks the player entity. */
         this.player = null;
+        /** Tracks the currently spawned boss. */
+        this.boss = null;
 
         // Information on the input
         /** Tracks clicks. */
@@ -78,9 +80,6 @@ class GameEngine {
         /** Tracks if the map objects for the current map have been placed/initialized. */
         this.mapObjectsInitialized = false;
 
-        /** Flag to tell whether the current round is over. */
-        this.roundOver = false;
-
         /** Options and the Details. */
         this.options = options || {
             debugging: false,
@@ -94,19 +93,37 @@ class GameEngine {
         /** Toggle to enable debug mode features. */
         this.debugMode = false;
 
-        this.totalEnemiesSpawned = 0;
-
+        /** An array of all potential (non-boss) enemy types. */
         this.enemyTypes = [
-            { name: "Zombie", maxHP: 100, currHP: 100, atkPow: 1, worldX: 0, worldY: 0, boxWidth: 19/2,
+            { name: "Zombie", maxHP: 47, currHP: 47, atkPow: 8, worldX: 0, worldY: 0, boxWidth: 19/2,
                 boxHeight: 28/2, boxType: "enemy", speed: 100, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
                 animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: 5},
-            { name: "Slime", maxHP: 5, currHP: 5, atkPow: 1, worldX: 0, worldY: 0, boxWidth: 19/2,
+            { name: "Slime", maxHP: 62, currHP: 62, atkPow: 10, worldX: 0, worldY: 0, boxWidth: 19/2,
                 boxHeight: 28/2, boxType: "enemy", speed: 75, spritePath: "./sprites/SlimeMove.png", animXStart: 0,
                 animYStart: 0, animW: 32, animH: 18, animFCount: 8, animFDur: 0.1, scale: 2, exp: 1},
-            { name: "Floating Eye", maxHP: 5, currHP: 5, atkPow: 1, worldX: 0, worldY: 0,
-                boxWidth: 19/2, boxHeight: 28/2, boxType: "enemy", speed: 150, spritePath: "./sprites/FloatingEye.png",
+            { name: "Floating Eye", maxHP: 30, currHP: 30, atkPow: 6, worldX: 0, worldY: 0,
+                boxWidth: 19/2, boxHeight: 28/2, boxType: "enemy", speed: 165, spritePath: "./sprites/FloatingEye.png",
                 animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: 2}
         ];
+
+        /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
+        this.spawnElite = false;
+        /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
+        this.eliteSpawnTimer = 120;
+        /** Tracks how long it has been since we last spawned an elite. */
+        this.lastEliteSpawnTime = 0;
+        /** Tracks if the round is over. */
+        this.roundOver = false;
+
+        // Screen fade-to-black variables
+        /** The current fade-to-black state of the screen. Ex: 'in', 'out', or 'none' */
+        this.fadeState = 'none';
+        /** The duration in seconds of fade-to-black animation. */
+        this.fadeDuration = 0.8;
+        /** The elapsed time since the fade-to-black animation started. */
+        this.fadeElapsed = 0;
+        /** Whether we are fading to or from black. */
+        this.fadeToBlack = false;
     }
 
     /**
@@ -118,12 +135,12 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-        this.spawnBossOne();
+        //this.spawnBossOne();
     }
 
     /** Call this method to spawn boss one (Knight - Orange Bro). This was made to be a test method. */
     spawnBossOne() {
-        this.addEntity(new BossOne(this, 250, 0));
+        this.boss = this.addEntity(new BossOne(this, 250, 0));
     }
 
     /** Call this to initialize the grassmands (Map #1) objects. */
@@ -248,7 +265,15 @@ class GameEngine {
     }
 
     spawnRandomEnemy() {
-        if (this.enemies.length >= 15 || this.totalEnemiesSpawned >= 15 || this.currMap === 0) {
+        // Calculate how many full 60-second intervals have passed
+        let intervals = Math.floor(this.elapsedTime / 60000);
+
+        // Calculate the maximum number of enemies based on elapsed time
+        let maxEnemies = 15 + (15 * intervals); // Start with 15 and add 15 for each interval
+
+        console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
+
+        if (this.enemies.length > maxEnemies || this.currMap === 0) {
             return;
         }
 
@@ -264,7 +289,6 @@ class GameEngine {
            randomYNumber = Math.random() < 0.5 ? this.camera.y - buffer : this.camera.y + this.camera.height + buffer;
         }
 
-
         //Selects a random enemy from the enemyTypes array
         const randomEnemyType =  this.enemyTypes[Math.floor(Math.random() * this.enemyTypes.length)];
 
@@ -275,28 +299,38 @@ class GameEngine {
             randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
             randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
 
-        // After 5 seconds there is a 10% chance for a new enemy to spawn as an elite
-        if(this.elapsedTime > 5000) {
-            if (Math.random() < 0.1) {
-                newEnemy.maxHP *= 2;
+        // Spawn an elite every 2 minutes (120 seconds or 120000 milliseconds)
+        if(this.spawnElite) {
+            if (Math.random() < 1) {    // Can make it a chance if we lower the 1 to something < 1 (ex: 0.1 === 10% chance)
+                newEnemy.maxHP *= 8;
                 newEnemy.currHP = newEnemy.maxHP;
                 newEnemy.atkPow *= 2;
-                newEnemy.speed += 25;
-                newEnemy.exp *= 2;
+                newEnemy.speed *= 0.75; //+= 25;
+                newEnemy.exp *= 5;
                 newEnemy.animator.scale *= 1.5;
                 newEnemy.boundingBox.width *= 1.5;
                 newEnemy.boundingBox.height *= 1.5;
                 newEnemy.isElite = true;
+                this.spawnElite = false;
                 //console.log(newEnemy.name + "Elite Scale = " + newEnemy.animator.scale);
+                console.log(newEnemy.name + " has become elite!");
             }
             else {
                 newEnemy.isElite = false;
             }
         }
 
-        this.totalEnemiesSpawned++;
         //Add the new enemy into the game
         this.addEntity(newEnemy);
+        console.log("ENEMY SPAWNED!");
+    }
+
+    /** This will be called to let the portal execute map switching code only when the game engine is mid-fade-to-black. */
+    performPostFadeInActions() {
+        if (this.fadeInCompleteAction) {
+            this.fadeInCompleteAction();
+            this.fadeInCompleteAction = null; // Clear the action to ensure it's only performed once
+        }
     }
 
     /** Call this method on every frame to draw each entity or UI elements on the canvas. */
@@ -305,7 +339,7 @@ class GameEngine {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
         // Draw the background of the map.
-        this.drawBackground('./sprites/map_space_background.png', 1);
+        this.drawBackground('./sprites/map_space_background.png', 1, true);
 
         // Draw the map texture.
         this.drawMap();
@@ -321,6 +355,21 @@ class GameEngine {
             }
         }
 
+        // Define a threshold for sorting (e.g., 5 pixels)
+        const sortingThreshold = 5;
+
+        // Sort enemies based on their worldY position with a threshold
+        this.objects.sort((a, b) => {
+            // Calculate the difference in worldY positions
+            const diff = a.worldY - b.worldY;
+
+            // Only consider them different if the difference exceeds the threshold
+            if (Math.abs(diff) < sortingThreshold) {
+                return 0; // Consider them as equal for sorting purposes
+            }
+            return diff;
+        });
+
         // Draw 'object' entities.
         for (let object of this.objects) {
             object.draw(this.ctx, this);
@@ -331,9 +380,6 @@ class GameEngine {
                 object.boundingBox.draw(this.ctx, this);
             }
         }
-
-        // Define a threshold for sorting (e.g., 5 pixels)
-        const sortingThreshold = 5;
 
         // Sort enemies based on their worldY position with a threshold
         this.enemies.sort((a, b) => {
@@ -414,7 +460,11 @@ class GameEngine {
 
         // Draw the mouse tracker.
         this.drawMouseTracker(this.ctx);
-        this.drawTimer(this.ctx);
+
+        // Draw the timer if we are no in rest area.
+        if (this.currMap !== 0) {
+            this.drawTimer(this.ctx);
+        }
 
         // If the player is dead, display 'You Died!' text.
         if (this.player && this.player.isDead) {
@@ -441,6 +491,42 @@ class GameEngine {
             this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
             this.ctx.closePath();
         }
+
+        // Handle fade-to-black screen effect
+        if (this.fadeState !== 'none') {
+            const alpha = this.fadeElapsed / this.fadeDuration;
+            this.ctx.globalAlpha = this.fadeToBlack ? Math.min(1, alpha) : Math.max(0, 1 - alpha);
+
+            // Cover the canvas with black
+            if (this.fadeToBlack || this.fadeState === 'out') {
+                this.ctx.fillStyle = 'black';
+                this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+            }
+
+            // Update fade state
+            this.fadeElapsed += this.clockTick;
+            if (this.fadeElapsed >= this.fadeDuration) {
+                if (this.fadeState === 'in' && this.fadeToBlack && this.fadeElapsed >= this.fadeDuration * 2) {
+                    // Fade in complete, now fade out
+                    this.fadeState = 'out';
+                    this.fadeElapsed = 0;
+                    this.fadeToBlack = false;
+
+                    this.performPostFadeInActions();
+                } else if (this.fadeState === 'out') {
+                    // Fade out complete, reset
+                    this.fadeState = 'none'; // Reset fade state to allow future fade-in
+                    this.fadeElapsed = 0; // Reset elapsed time
+                    this.fadeToBlack = false; // Ensure fadeToBlack is false to allow next fade-in
+
+                    // Re-enable player controls now that they are finished teleporting.
+                    this.player.controlsEnabled = true;
+                }
+            }
+        }
+
+        // Reset globalAlpha to ensure other drawing operations are unaffected
+        this.ctx.globalAlpha = 1;
     }
 
     /** Draws the game-time tracker on top of the game screen. */
@@ -454,9 +540,13 @@ class GameEngine {
         ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
     }
 
+    /** Call this method to spawn a portal to the next area. */
+    spawnPortal(worldX, worldY, mapIndex) {
+        this.addEntity(new Portal(this, worldX, worldY, mapIndex));
+    }
+
     /** Called in gameengine.draw() to draw the map textures. */
     drawMap() {
-
         // Check if the camera and player are initialized.
         // This is necessary as they are needed, but may not be initialized during the first few calls of this method.
         if (!this.camera || !this.player) {
@@ -470,8 +560,8 @@ class GameEngine {
                 this.initRestAreaObjects();
             }
 
-            // Spawn a new portal once all enemies are defeated
-            if (this.enemies.length === 0 && !this.portal) {
+            // Spawn the rest area exit portal at this precise location if we don't have a portal here already.
+            if (!this.portal) {
                 this.addEntity(new Portal(this, this.player.worldX + 350, this.player.worldY, 2));
             }
 
@@ -519,11 +609,6 @@ class GameEngine {
             }
 
             const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
-
-            // Spawn a new portal once all enemies are defeated
-            if (this.enemies.length === 0 && !this.portal) {
-                this.addEntity(new Portal(this, this.player.worldX + 350, this.player.worldY, 0));
-            }
 
             this.mapWidth = map.width;
             this.mapHeight = map.height;
@@ -604,31 +689,57 @@ class GameEngine {
      *
      * @param spritePath    The path of the sprite we are drawing.
      * @param scaleFactor   The scale of the sprite we want to use.
+     * @param enableParallax    If true, then apply parallax effect to the background based on player coordinates.
      */
-    drawBackground(spritePath, scaleFactor) {
+    drawBackground(spritePath, scaleFactor, enableParallax) {
         const texture = ASSET_MANAGER.getAsset(spritePath);
         const textureWidth = Math.round(texture.width * scaleFactor);
         const textureHeight = Math.round(texture.height * scaleFactor);
 
-        // Calculate how many times the texture needs to be repeated horizontally and vertically.
-        const timesToRepeatHorizontally = Math.ceil(this.ctx.canvas.width / textureWidth);
-        const timesToRepeatVertically = Math.ceil(this.ctx.canvas.height / textureHeight);
+        // Initialize offsets for parallax effect
+        let offsetX = 0;
+        let offsetY = 0;
 
-        // Use two nested loops to draw the image multiple times across the canvas.
-        for (let x = 0; x < timesToRepeatHorizontally; x++) {
-            for (let y = 0; y < timesToRepeatVertically; y++) {
-                this.ctx.drawImage(texture, x * textureWidth, y * textureHeight, textureWidth, textureHeight);
+        // Apply parallax effect if enabled
+        if (enableParallax && this.player) {
+            const parallaxFactorX = 0.15; // Adjusted lower for a more subtle effect
+            const parallaxFactorY = 0.15; // Adjusted lower for a more subtle effect
+            offsetX = Math.round(this.player.worldX * parallaxFactorX) % textureWidth;
+            offsetY = Math.round(this.player.worldY * parallaxFactorY) % textureHeight;
+        }
+
+        // Determine the number of times to repeat the texture, ensuring full coverage
+        const timesToRepeatHorizontally = Math.ceil(this.ctx.canvas.width / textureWidth) + 1;
+        const timesToRepeatVertically = Math.ceil(this.ctx.canvas.height / textureHeight) + 1;
+
+        // Draw the repeated texture tiles, adjusting for parallax offset
+        for (let x = -1; x <= timesToRepeatHorizontally; x++) {
+            for (let y = -1; y <= timesToRepeatVertically; y++) {
+                let drawX = x * textureWidth - offsetX;
+                let drawY = y * textureHeight - offsetY;
+
+                // Round positions to nearest pixel to avoid sub-pixel rendering issues
+                drawX = Math.round(drawX);
+                drawY = Math.round(drawY);
+
+                this.ctx.drawImage(texture, drawX, drawY, textureWidth, textureHeight);
             }
         }
     }
 
     /** This method is called every tick to update all entities etc. */
     update() {
-        // Check if all enemies have been defeated
-        // If so, spawn the portal to the next area
-        if (this.enemies.length <= 0 && !this.portal) {
-            // Spawn a portal to rest area
-            this.addEntity(new Portal(this, this.player.worldX + 200, this.player.worldY, 0));
+        // Handle elite spawn timer
+        // Check if this.eliteSpawnTimer time has passed since last elite spawn
+        if ((this.elapsedTime / 60000) - this.lastEliteSpawnTime >= (this.eliteSpawnTimer/60)) {
+            this.spawnElite = true;
+            this.lastEliteSpawnTime = this.elapsedTime / 60000; // Update last trigger time
+        }
+
+        // Handle boss spawn timer
+        // Spawn boss after 5 minutes
+        if ((this.elapsedTime / 60000) >= 5 && !this.roundOver && !this.boss) {
+            this.spawnBossOne();
         }
 
         // Update 'other' entities.
@@ -699,19 +810,30 @@ class GameEngine {
         // Remove 'enemy' entities that are marked for deletion.
         for (let i = this.enemies.length - 1; i >= 0; --i) {
             if (this.enemies[i].removeFromWorld) {
-                // Spawn Exp orb at the removed enemy
-                if (this.enemies[i].boundingBox.type !== "enemyBoss") {
+                // Only do the following if the enemy was actually 'killed' ex: currHP === 0
+                if (this.enemies[i].currHP === 0) {
+                    // Spawn XP Orb on killed enemies
                     this.addEntity(new Exp_Orb(this, this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].exp));
-                    let stone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.02, 1.25);
-                    this.addEntity(stone);
-                    stone.boundingBox.type = "tombstone";
+
+                    // Spawn Tombstones on killed enemies
+                    if (this.enemies[i].boundingBox.type !== "enemyBoss") {
+                        // Spawn Tombstone
+                        let tombstone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_tombstone.png", 0, 0, 80, 131, 1, 1, 0.35);
+                        this.addEntity(tombstone);
+                        tombstone.boundingBox.type = "tombstone";
+                    }
+
+                    // If elite or boss, drop a weapon upgrade chest
+                    if (this.enemies[i].isElite || this.enemies[i].boundingBox.type === "enemyBoss") {
+                        let chest = this.addEntity(new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.02, 1.25));
+                        chest.boundingBox.type = "chest";
+                        chest.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
+                    }
                 }
 
-                // If elite or boss, drop a weapon upgrade chest
-                if (this.enemies[i].isElite || this.enemies[i].boundingBox.type === "enemyBoss") {
-                    let chest = this.addEntity(new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.02, 1.25));
-                    chest.boundingBox.type = "chest";
-                    chest.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
+                if (this.enemies[i].boundingBox.type === "enemyBoss") {
+                    // Stop tracking this boss since we are deleting it
+                    this.boss = null;
                 }
 
                 // Delete this enemy
@@ -786,8 +908,24 @@ class GameEngine {
             this.player.removeFromWorld = true;
         }
 
-        if(this.elapsedTime % 3000 < 100) {
-            this.spawnRandomEnemy();
+        // Calculate spawn rate based on elapsed time
+        let baseSpawnInterval = 3000; // Base interval of 3 seconds for spawning
+        const elapsedTimeInMinutes = this.elapsedTime / 60000; // Convert elapsed time to minutes
+
+        // Calculate the spawn rate multiplier exponentially
+        // Halve the spawn interval for each minute passed
+        const spawnRateMultiplier = Math.pow(0.5, Math.floor(elapsedTimeInMinutes));
+
+        // Calculate the current spawn interval based on the multiplier
+        // No explicit minimum interval, but you could enforce one if needed
+        let currentSpawnInterval = baseSpawnInterval * spawnRateMultiplier;
+
+        // Check if it's time to spawn an enemy based on current spawn interval
+        if (this.elapsedTime > 0 && this.elapsedTime % currentSpawnInterval < this.clockTick * 1000) {
+            // Conditions to spawn enemies: no boss, round not over, not in rest area
+            if (!this.boss && !this.roundOver && this.currMap !== 0) {
+                this.spawnRandomEnemy();
+            }
         }
     }
 

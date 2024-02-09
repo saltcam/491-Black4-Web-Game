@@ -2,16 +2,14 @@ class Weapon_staff extends Weapon {
     constructor(game) {
         super(game, "Staff", 1, 2,
             10, 10,
-            15, 15,
+            5, 5,
             115, 115,
             1, 1,
             "./sprites/NecromancyStaff.png",
             "./sounds/SE_staff_primary.mp3", "./sounds/SE_staff_secondary.mp3", 26, 70);
-
     }
 
     performPrimaryAttack(player){
-
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack

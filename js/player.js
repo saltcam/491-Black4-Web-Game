@@ -30,6 +30,7 @@ class Player extends Entity {
         this.currentWeapon = 0;
         this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching
         this.lastWeaponSwitchTime = 0;
+        this.controlsEnabled = true;    // If false, player cannot input controls.
     };
 
     update() {
@@ -59,15 +60,17 @@ class Player extends Entity {
         let moveY = 0;
 
         // Update movement vector based on key presses
-        if (this.game.keys["w"]) moveY -= 1;
-        if (this.game.keys["s"]) moveY += 1;
-        if (this.game.keys["a"]) {
-            moveX -= 1;
-            this.lastMove = "left";     // Remember the last direction the character moved
-        }
-        if (this.game.keys["d"]) {
-            moveX += 1;
-            this.lastMove = "right";    // Remember the last direction the character moved
+        if (this.controlsEnabled) {
+            if (this.game.keys["w"]) moveY -= 1;
+            if (this.game.keys["s"]) moveY += 1;
+            if (this.game.keys["a"]) {
+                moveX -= 1;
+                this.lastMove = "left";     // Remember the last direction the character moved
+            }
+            if (this.game.keys["d"]) {
+                moveX += 1;
+                this.lastMove = "right";    // Remember the last direction the character moved
+            }
         }
 
         // Perform attacks if mouse buttons are held down and the attacks are off cooldown.
@@ -75,20 +78,22 @@ class Player extends Entity {
         // if we are ready to trigger another attack.
         const currentTime = this.game.timer.gameTime;
 
-        // Allows the user to switch weapons on a cooldown
-        if (this.game.keys["q"] && currentTime - this.lastWeaponSwitchTime >= this.weaponSwitchCooldown) {
-            this.currentWeapon = (this.currentWeapon + 1) % this.weapons.length;
-            this.lastWeaponSwitchTime = currentTime;
-        }
+        if (this.controlsEnabled) {
+            // Allows the user to switch weapons on a cooldown
+            if (this.game.keys["q"] && currentTime - this.lastWeaponSwitchTime >= this.weaponSwitchCooldown) {
+                this.currentWeapon = (this.currentWeapon + 1) % this.weapons.length;
+                this.lastWeaponSwitchTime = currentTime;
+            }
 
-        //asks current weapon if it can attack
-        if (this.game.leftMouseDown && currentTime - this.weapons[this.currentWeapon].lastPrimaryAttackTime >= this.weapons[this.currentWeapon].primaryCool) {
-            this.weapons[this.currentWeapon].performPrimaryAttack(this);
-        }
+            //asks current weapon if it can attack
+            if (this.game.leftMouseDown && currentTime - this.weapons[this.currentWeapon].lastPrimaryAttackTime >= this.weapons[this.currentWeapon].primaryCool) {
+                this.weapons[this.currentWeapon].performPrimaryAttack(this);
+            }
 
-        // Perform the secondary attack off cooldown as long as right click is held.
-        if (this.game.rightMouseDown && currentTime - this.weapons[this.currentWeapon].lastSecondAttackTime >= this.weapons[this.currentWeapon].secondCool) {
-            this.weapons[this.currentWeapon].performSecondaryAttack(this);
+            // Perform the secondary attack off cooldown as long as right click is held.
+            if (this.game.rightMouseDown && currentTime - this.weapons[this.currentWeapon].lastSecondAttackTime >= this.weapons[this.currentWeapon].secondCool) {
+                this.weapons[this.currentWeapon].performSecondaryAttack(this);
+            }
         }
 
         // Check if the character is moving
@@ -139,9 +144,11 @@ class Player extends Entity {
         if (this.currentDashCooldown < 0) {
             this.currentDashCooldown = 0;
         }
-        // checks if space bar has been pressed and the dash is not on cooldown
-        if (this.game.keys[" "] && this.currentDashCooldown === 0) {
-            this.performDash();
+        if (this.controlsEnabled) {
+            // checks if space bar has been pressed and the dash is not on cooldown
+            if (this.game.keys[" "] && this.currentDashCooldown === 0) {
+                this.performDash();
+            }
         }
     };
 
