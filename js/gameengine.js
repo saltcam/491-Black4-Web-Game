@@ -128,6 +128,10 @@ class GameEngine {
         this.fadeElapsed = 0;
         /** Whether we are fading to or from black. */
         this.fadeToBlack = false;
+        /** Tracks the time when the last frame was drawn. */
+        this.lastDrawTime = Date.now();
+        /** The calculated FPS value. */
+        this.fps = 0;
     }
 
     /**
@@ -531,6 +535,24 @@ class GameEngine {
 
         // Reset globalAlpha to ensure other drawing operations are unaffected
         this.ctx.globalAlpha = 1;
+
+        // Calculate and draw FPS if debugMode is true
+        if (this.debugMode) {
+            const currentTime = Date.now();
+            const timeDelta = currentTime - this.lastDrawTime;
+            this.lastDrawTime = currentTime;
+
+            // Avoid division by zero and calculate FPS
+            if (timeDelta > 0) {
+                this.fps = 1000 / timeDelta;
+            }
+
+            // Draw FPS counter on the screen
+            this.ctx.font = '20px Arial';
+            this.ctx.fillStyle = 'yellow';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(`FPS: ${this.fps.toFixed(2)}`, 10, 400);
+        }
     }
 
     /** Draws the game-time tracker on top of the game screen. */
