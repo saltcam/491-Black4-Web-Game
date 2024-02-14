@@ -23,6 +23,10 @@ ASSET_MANAGER.queueDownload("./sprites/map_rest_area.png");
 ASSET_MANAGER.queueDownload("./sprites/object_treasure_chest.png");
 ASSET_MANAGER.queueDownload("./sprites/object_tombstone.png");
 
+//ui
+ASSET_MANAGER.queueDownload("./sprites/menu_player_upgrade.png");
+ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade.png");
+
 //player
 ASSET_MANAGER.queueDownload("./sprites/McIdle.png");
 ASSET_MANAGER.queueDownload("./sprites/McIdle_DAMAGED.png");

@@ -1010,6 +1010,5 @@ class GameEngine {
             ctx.stroke();
         }
     }
-
 }
 
