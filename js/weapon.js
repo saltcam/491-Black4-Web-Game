@@ -31,6 +31,8 @@ class Weapon {
         this.lastSecondAttackTime = -100;
 
         this.animator = new Animator(ASSET_MANAGER.getAsset(spritePath), 0, 0, spriteW, spriteH, 1, 60, 1);
+
+        this.spritePath = spritePath;
     }
 
     draw(ctx, slotNum){

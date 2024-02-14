@@ -226,25 +226,53 @@ class Player extends Entity {
         }
     }
 
-    drawWeapon(ctx) {
-        if (this.currentWeapon === 0) {
-            const scytheSprite = ASSET_MANAGER.getAsset("./sprites/weapon_scythe.png");
+    drawWeapons(ctx) {
+        const weapon = this.weapons[this.currentWeapon];
+        const weaponSprite = ASSET_MANAGER.getAsset(weapon.spritePath);
 
-            const scale = 2;
-            const scaledWidth = scytheSprite.width * scale;
-            const scaledHeight = scytheSprite.height * scale;
+        // Make sure mouse position is available (In case it is off screen, will throw an error without this)
+        if (this.game.mouse) {
+            let scale = 2;
+            if (this.currentWeapon === 1) {
+                scale = 1.5; // Scale the book down slightly to fit better with the player sprite
+            }
 
-            // Calculate position for the scythe, adjusting for player's mouse position and camera
+            const scaledWidth = weaponSprite.width * scale;
+            const scaledHeight = weaponSprite.height * scale;
+
+            // Angle to mouse cursor for weapon orbiting
+            const mouseX = this.game.mouse.x + this.game.camera.x;
+            const mouseY = this.game.mouse.y + this.game.camera.y;
             const playerCenter = this.calculateCenter();
+            const angleToMouse = Math.atan2(mouseY - playerCenter.y, mouseX - playerCenter.x);
 
-            const scytheX = playerCenter.x - this.game.camera.x + 50;
-            const scytheY = playerCenter.y - this.game.camera.y;
+            // Radius for how far out from the player the weapon sits
+            const orbitRadius = 50;
+
+            // Weapon position based on angle and radius
+            const weaponX = playerCenter.x + Math.cos(angleToMouse) * orbitRadius - this.game.camera.x;
+            const weaponY = playerCenter.y + Math.sin(angleToMouse) * orbitRadius - this.game.camera.y;
 
             ctx.save();
-            ctx.translate(scytheX, scytheY);
-            ctx.scale(-1, 1);
+            ctx.translate(weaponX, weaponY);
 
-            ctx.drawImage(scytheSprite, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+            // Initially flip the scythe and staff to correct their default direction
+            const shouldInitiallyFlip = this.currentWeapon === 0 || this.currentWeapon === 2;
+
+            // Determine if the weapon should be flipped based on relative position to the player
+            const shouldFlipBasedOnPosition = Math.cos(angleToMouse) < 0;
+
+            /* Apply initial flip for scythe and staff since sprite is faced left by default,
+               then check if additional flip is needed based on side position */
+            if (shouldInitiallyFlip !== shouldFlipBasedOnPosition) {
+                ctx.scale(-1, 1);
+            }
+
+            // Adjust drawing position based on whether it is flipped or not
+            const drawX = shouldFlipBasedOnPosition ? scaledWidth / 2 : -scaledWidth / 2;
+            const drawY = -scaledHeight / 2;
+
+            ctx.drawImage(weaponSprite, drawX, drawY, scaledWidth * (shouldFlipBasedOnPosition ? -1 : 1), scaledHeight);
 
             ctx.restore();
         }
@@ -270,7 +298,7 @@ class Player extends Entity {
         this.drawHealth(ctx);
         this.drawExp(ctx);
         this.drawWeaponUI(ctx);
-        this.drawWeapon(ctx)
+        this.drawWeapons(ctx)
         this.boundingBox.draw(ctx, game);
     }
 }
