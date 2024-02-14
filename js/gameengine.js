@@ -114,6 +114,8 @@ class GameEngine {
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
         this.eliteSpawnTimer = 120;
+        /** Spawn the boss after this many seconds of game time. */
+        this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
         this.lastEliteSpawnTime = 0;
         /** Tracks if the round is over. */
@@ -143,7 +145,6 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-        //this.spawnBossOne();
     }
 
     /** Call this method to spawn boss one (Knight - Orange Bro). This was made to be a test method. */
@@ -763,8 +764,8 @@ class GameEngine {
         }
 
         // Handle boss spawn timer
-        // Spawn boss after 5 minutes
-        if ((this.elapsedTime / 60000) >= 5 && !this.roundOver && !this.boss) {
+        // Spawn boss after (this.bossSpawnTimer/60) minutes of game time
+        if ((this.elapsedTime / 60000) >= (this.bossSpawnTimer / 60) && !this.roundOver && !this.boss) {
             this.spawnBossOne();
         }
 
