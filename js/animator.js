@@ -1,6 +1,7 @@
 // This is the animator class for player.js. It is used to animate the character spritesheet and allows the spritesheet to be changed on the fly.
 class Animator {
-    constructor(spritesheet, xStart, yStart, width, height, frameCount, frameDuration, scale) {
+    constructor(game, spritesheet, xStart, yStart, width, height, frameCount, frameDuration, scale) {
+        this.game = game;
         this.spritesheet = spritesheet;
         this.xStart = xStart;
         this.yStart = yStart;
@@ -23,8 +24,10 @@ class Animator {
     }
 
     drawFrame(tick, ctx, x, y, direction) {
-        // Update the elapsed time
-        this.elapsedTime += tick;
+        // Update the elapsed time (only if we are not paused)
+        if (!this.game.pauseGame) {
+            this.elapsedTime += tick;
+        }
 
         // If the elapsed time is greater than the total time, reset the elapsed time
         if (this.elapsedTime > this.totalTime) this.elapsedTime -= this.totalTime;

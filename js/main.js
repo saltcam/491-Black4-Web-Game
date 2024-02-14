@@ -14,7 +14,6 @@ ASSET_MANAGER.queueDownload("./sprites/arrow.png");
 ASSET_MANAGER.queueDownload("./sprites/scythe_attack_slash.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_primaryattack.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_secondaryattack.png");
-ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
 ASSET_MANAGER.queueDownload("./sprites/scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/Tome.png");
@@ -24,8 +23,12 @@ ASSET_MANAGER.queueDownload("./sprites/object_treasure_chest.png");
 ASSET_MANAGER.queueDownload("./sprites/object_tombstone.png");
 
 //ui
+ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
+ASSET_MANAGER.queueDownload("./sprites/debug_warning.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_player_upgrade.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_size.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_reduce_cd.png");
 
 //player
 ASSET_MANAGER.queueDownload("./sprites/McIdle.png");

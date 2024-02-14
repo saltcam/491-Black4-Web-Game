@@ -31,7 +31,7 @@ class Entity {
         this.game = game;
         this.exp = exp;
         this.boundingBox = new BoundingBox(worldX, worldY, boxWidth * scale, boxHeight * scale, boxType);
-        this.animator = new Animator(ASSET_MANAGER.getAsset(spritePath), animXStart, animYStart, animW, animH, animFCount, animFDur, scale);
+        this.animator = new Animator(game, ASSET_MANAGER.getAsset(spritePath), animXStart, animYStart, animW, animH, animFCount, animFDur, scale);
         this.movementSpeed = speed;
         this.worldX = worldX;
         this.worldY = worldY;

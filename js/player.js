@@ -161,8 +161,8 @@ class Player extends Entity {
             // Check if this temporary bounding box collides with the map object's bounding box
             return tempBoundingBox.isColliding(mapObject.boundingBox);
         }
-        // If we collide with a chest, open the chest
-        else if (mapObject.boundingBox.type === "chest") {
+        // If we collide with an unopened chest, open the chest
+        else if (mapObject.boundingBox.type === "chest" && !mapObject.hasBeenOpened) {
             // Create a temporary bounding box for the intended position
             let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
 
@@ -287,7 +287,6 @@ class Player extends Entity {
             return; // Skip drawing the player if the camera is not initialized
         }
 
-        //this.animator.drawFrame(this.game.clockTick, ctx,this.worldX, this.worldY, this.lastMove);
         let screenX = this.worldX - this.game.camera.x;
         let screenY = this.worldY - this.game.camera.y;
 

@@ -107,13 +107,13 @@ class GameEngine {
         ];
 
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
-        this.baseEnemySpawnInterval = 1.2;
+        this.baseEnemySpawnInterval = 1.0;
         /** How many enemies  can be on the map at once (this automatically increases as time goes on). */
         this.baseMaxEnemies = 30;
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
-        this.eliteSpawnTimer = 120;
+        this.eliteSpawnTimer = 1;
         /** Spawn the boss after this many seconds of game time. */
         this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
@@ -134,6 +134,16 @@ class GameEngine {
         this.lastDrawTime = Date.now();
         /** The calculated FPS value. */
         this.fps = 0;
+
+        /** Tracks the Upgrade_System (handles player and weapon upgrade screens/interactions. */
+        this.UPGRADE_SYSTEM = new Upgrade_System(this);
+
+        /** If true, pauses all entities from moving/taking action. Also pauses the game timer.*/
+        this.pauseGame = false;
+        /** To record when the game was paused. */
+        this.pauseStartTime = 0;
+        /** To accumulate total paused duration. */
+        this.totalPausedTime = 0;
     }
 
     /**
@@ -145,6 +155,18 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
+    }
+
+    /** Call this to toggle the game pausing. */
+    togglePause() {
+        this.pauseGame = !this.pauseGame;
+        if (this.pauseGame) {
+            // Game is being paused; record the current timestamp
+            this.pauseStartTime = Date.now();
+        } else {
+            // Game is being un-paused; calculate the pause duration and add to totalPausedTime
+            this.totalPausedTime += Date.now() - this.pauseStartTime;
+        }
     }
 
     /** Call this method to spawn boss one (Knight - Orange Bro). This was made to be a test method. */
@@ -280,7 +302,7 @@ class GameEngine {
         // Calculate the maximum number of enemies based on elapsed time
         let maxEnemies = this.baseMaxEnemies + (this.baseMaxEnemies * intervals); // Start with 15 and add 15 for each interval
 
-        console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
+        //console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
 
         if (this.enemies.length > maxEnemies || this.currMap === 0) {
             return;
@@ -322,7 +344,7 @@ class GameEngine {
                 newEnemy.isElite = true;
                 this.spawnElite = false;
                 //console.log(newEnemy.name + "Elite Scale = " + newEnemy.animator.scale);
-                console.log(newEnemy.name + " has become elite!");
+                //console.log(newEnemy.name + " has become elite!");
             }
             else {
                 newEnemy.isElite = false;
@@ -331,7 +353,7 @@ class GameEngine {
 
         //Add the new enemy into the game
         this.addEntity(newEnemy);
-        console.log("ENEMY SPAWNED!");
+        //console.log("ENEMY SPAWNED!");
     }
 
     /** This will be called to let the portal execute map switching code only when the game engine is mid-fade-to-black. */
@@ -462,9 +484,14 @@ class GameEngine {
         }
 
         // Draw UI elemnts
-        // Boss health bar
+        // Draw boss health bar.
         if (bossEnemy) {
             bossEnemy.drawBossHealthBar(this.ctx);
+        }
+
+        // Draw weapon upgrade screen.
+        if (this.UPGRADE_SYSTEM) {
+            this.UPGRADE_SYSTEM.draw(this.ctx);
         }
 
         // Draw the mouse tracker.
@@ -769,55 +796,64 @@ class GameEngine {
             this.spawnBossOne();
         }
 
-        // Update 'other' entities.
-        for (let i = 0; i < this.entities.length; i++) {
-            if (!this.entities[i].removeFromWorld) {
-                this.entities[i].update();
+        // Update entities only while the game is un-paused.
+        if (!this.pauseGame) {
+            // Update 'other' entities.
+            for (let i = 0; i < this.entities.length; i++) {
+                if (!this.entities[i].removeFromWorld) {
+                    this.entities[i].update();
+                }
+            }
+
+            // Update 'object' entities.
+            for (let i = 0; i < this.objects.length; i++) {
+                if (!this.objects[i].removeFromWorld) {
+                    this.objects[i].update();
+                }
+            }
+
+            // Update 'enemy' entities.
+            for (let i = 0; i < this.enemies.length; i++) {
+                if (!this.enemies[i].removeFromWorld) {
+                    this.enemies[i].update();
+                }
+            }
+
+            // Update 'attack' entities.
+            for (let i = 0; i < this.attacks.length; i++) {
+                if (!this.attacks[i].removeFromWorld) {
+                    this.attacks[i].update();
+                }
+            }
+
+            // Update 'portal' entity.
+            if (this.portal && !this.portal.removeFromWorld) {
+                this.portal.update();
+            }
+
+            // Update 'item' entities.
+            for (let i = 0; i < this.items.length; i++) {
+                if (!this.items[i].removeFromWorld) {
+                    this.items[i].update();
+                }
+            }
+
+            // Update 'player' entity.
+            if (this.player && !this.player.removeFromWorld) {
+                this.player.update();
+
+                // Check if player has collided with portal
+                if (this.portal) {
+                    // Call a method in the portal to handle player interaction (if needed)
+                    this.portal.handlePlayerInteraction(this.player);
+                }
             }
         }
 
-        // Update 'object' entities.
-        for (let i = 0; i < this.objects.length; i++) {
-            if (!this.objects[i].removeFromWorld) {
-                this.objects[i].update();
-            }
-        }
-
-        // Update 'enemy' entities.
-        for (let i = 0; i < this.enemies.length; i++) {
-            if (!this.enemies[i].removeFromWorld) {
-                this.enemies[i].update();
-            }
-        }
-
-        // Update 'attack' entities.
-        for (let i = 0; i < this.attacks.length; i++) {
-            if (!this.attacks[i].removeFromWorld) {
-                this.attacks[i].update();
-            }
-        }
-
-        // Update 'portal' entity.
-        if (this.portal && !this.portal.removeFromWorld) {
-            this.portal.update();
-        }
-
-        // Update 'item' entities.
-        for (let i = 0; i < this.items.length; i++) {
-            if (!this.items[i].removeFromWorld) {
-                this.items[i].update();
-            }
-        }
-
-        // Update 'player' entity.
-        if (this.player && !this.player.removeFromWorld) {
-            this.player.update();
-
-            // Check if player has collided with portal
-            if (this.portal) {
-                // Call a method in the portal to handle player interaction (if needed)
-                this.portal.handlePlayerInteraction(this.player);
-            }
+        // UI Updates, this should happen even while the game is paused.
+        // Update Upgrade_System
+        if (this.UPGRADE_SYSTEM) {
+            this.UPGRADE_SYSTEM.update();
         }
 
         // Remove 'other' entities that are marked for deletion.
@@ -892,8 +928,10 @@ class GameEngine {
             //this.player = null;   // If this is commented out, we don't delete the player entity on death.
         }
 
-        // Update the elapsed time.
-        this.elapsedTime = Date.now() - this.startTime;
+        // Update the elapsed time. (only while un-paused)
+        if (!this.pauseGame) {
+            this.elapsedTime = (Date.now() - this.startTime) - this.totalPausedTime;
+        }
 
         // Update enemy collisions
         // Check for collisions between enemies
@@ -918,14 +956,8 @@ class GameEngine {
 
         // Loop through 'attack' entities and set removeFromWorld flags.
         for (let i = 0; i < this.attacks.length; i++) {
-            //TODO do we need to check for specific types? We should be able to just check duration
-
             // Removes any attack circles if their duration is depleted.
-            if(/*this.attacks[i].boundingBox.type === "attack"this.attacks[i].type === "playerAttack" ||
-                this.attacks[i].type === "enemyAttack" ||
-                this.attacks[i].boundingBox.type === "attack" ||
-                this.attacks[i].type === "necromancyAttack" ||
-                this.attacks[i].type === "explosionAttack") && */ this.attacks[i].duration <= 0){
+            if(this.attacks[i].duration <= 0) {
                 this.attacks[i].removeFromWorld = true;
             }
         }
