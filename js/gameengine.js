@@ -113,7 +113,7 @@ class GameEngine {
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
-        this.eliteSpawnTimer = 1;
+        this.eliteSpawnTimer = 120;
         /** Spawn the boss after this many seconds of game time. */
         this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
@@ -498,6 +498,9 @@ class GameEngine {
             bossEnemy.drawBossHealthBar(this.ctx);
         }
 
+        // Draw gold currency tracker UI
+        this.drawGoldTracker(this.ctx);
+
         // Draw weapon upgrade screen.
         if (this.UPGRADE_SYSTEM) {
             this.UPGRADE_SYSTEM.draw(this.ctx);
@@ -601,6 +604,28 @@ class GameEngine {
         const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
         const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
+    }
+
+    /** Draws the gold currency tracker onto the game screen. */
+    drawGoldTracker(ctx) {
+        // Draw the currency bar background
+        let scaleFactor = 0.75;    // How much to scale the image
+        let image = ASSET_MANAGER.getAsset("./sprites/menu_currency_bar.png");
+        let destWidth = image.width * scaleFactor; // scale factor < 1 to reduce size
+        let destHeight = image.height * scaleFactor; // scale factor < 1 to reduce size
+        ctx.drawImage(image, 1288, 0, destWidth, destHeight);
+
+        // Draw the coin sprite
+        scaleFactor = 0.5;    // How much to scale the image
+        image = ASSET_MANAGER.getAsset("./sprites/object_coin.png");
+        destWidth = image.width * scaleFactor; // scale factor < 1 to reduce size
+        destHeight = image.height * scaleFactor; // scale factor < 1 to reduce size
+        ctx.drawImage(image, 1293, 13, destWidth, destHeight);
+
+        ctx.font = '26px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'left'
+        ctx.fillText(this.player.gold, 1320, 34);
     }
 
     /** Call this method to spawn a portal to the next area. */
