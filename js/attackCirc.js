@@ -83,7 +83,7 @@ class AttackCirc {
             if (currentTime - this.lastAttackTime >= this.attackCooldown) {
                 //iterates through all enemies and deals damage to them if the attack is of player origin.
                 this.game.enemies.forEach((enemy) => {
-                    if (this.collisionDetection(enemy.boundingBox)) {
+                    if ((enemy.boundingBox.type === "enemy" || enemy.boundingBox.type === "enemyBoss") && this.collisionDetection(enemy.boundingBox)) {
                         // Push the enemy away
                         this.pushEnemy(enemy);
                         enemy.takeDamage(this.attackDamage); // example damage value
@@ -96,12 +96,17 @@ class AttackCirc {
 
                         switch(this.type) {
                             case "necromancyAttack":
-                                //TODO create allies
+                                this.game.addEntity(new Ally_Contact(
+                                    "Ally", 25, 25,
+                                    10, this.game, object.worldX, object.worldY, 19/2,
+                                    28/2, "ally", 115, "./sprites/Zombie_Run.png",
+                                    0, 0, 34, 27,
+                                    8, 0.2, 3, 1));
                                 object.removeFromWorld = true;
                                 this.lastAttackTime = currentTime;
                                 break;
                             case "explosionAttack":
-                                // TODO create explosions
+                                object.willExplode(this);
                                 object.removeFromWorld = true;
                                 this.lastAttackTime = currentTime;
                                 break;
@@ -164,7 +169,6 @@ class AttackCirc {
         return (dx*dx+dy*dy<=(this.radius*this.radius));
     }
 
-    // for debugging
     draw(ctx) {
         // Draw the circle indicator for attacks if no sprite
         if (this.game.debugMode || this.drawCircle) {

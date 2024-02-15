@@ -21,6 +21,7 @@ ASSET_MANAGER.queueDownload("./sprites/NecromancyStaff.png");
 ASSET_MANAGER.queueDownload("./sprites/map_rest_area.png");
 ASSET_MANAGER.queueDownload("./sprites/object_treasure_chest.png");
 ASSET_MANAGER.queueDownload("./sprites/object_tombstone.png");
+ASSET_MANAGER.queueDownload("./sprites/object_coin_bag.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");

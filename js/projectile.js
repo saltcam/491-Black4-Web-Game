@@ -13,12 +13,12 @@ class Projectile extends Entity{
             atkPow,
             pushbackForce,
             spriteRotationSpeed, attackTick));
-
     }
 
 
     update() {
         super.update();
+
         //console.log("projectile worldX: " + this.worldX + " projectile worldY: " + this.worldY);
         this.worldX += this.angleX * this.movementSpeed * this.game.clockTick;
         this.worldY += this.angleY * this.movementSpeed * this.game.clockTick;
@@ -29,6 +29,9 @@ class Projectile extends Entity{
             this.removeFromWorld = true;
         }
     }
+    // draw(ctx, game) {
+    // // hehehe there's nothing here...
+    // }
 
 
 }

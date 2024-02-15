@@ -14,6 +14,9 @@ class Upgrade_System {
         /** Tracks if we are still waiting for the player to make a selection. */
         this.waitingForSelection = false;
 
+        /** Stores the weapon choice. */
+        this.weaponChoice = 0;
+
         /**
          * Tracks what type of menu is currently open.
          * 0 === Weapon Upgrade Screen - Choose a Weapon to Upgrade
@@ -31,6 +34,8 @@ class Upgrade_System {
         this.selectionCooldown = 0.5;
         /** Tracks when the last selection key was pressed. Initialize with a negative value to allow immediate input. */
         this.lastKeyPressTime = -1;
+
+        this.player = null;
     }
 
     /** Called every tick. */
@@ -57,11 +62,36 @@ class Upgrade_System {
         if (currentTime - this.lastKeyPressTime >= this.selectionCooldown) {
             // Check for input on menu zero - 'Choose a Weapon to Upgrade'
             if (this.currentMenu === 0) {
+
                 if (this.game.keys["1"]) {
+                    this.weaponChoice = 0;
                     this.currentMenu = 1;
                     this.lastKeyPressTime = this.game.timer.gameTime;
                 } else if (this.game.keys["2"]) {
-                    //TODO This does nothing atm
+                    this.weaponChoice = 1;
+                    this.currentMenu = 1;
+                    this.lastKeyPressTime = this.game.timer.gameTime;
+                } else if (this.game.keys["3"]) {
+                    this.weaponChoice = 2;
+                    this.currentMenu = 1;
+                    this.lastKeyPressTime = this.game.timer.gameTime;
+                }
+            }
+            // Check for input on menu one - 'Choose a Scythe Upgrade'
+            else if (this.currentMenu === 1) {
+                let upgradeChoice = 0;
+
+
+                if (this.game.keys["1"]) {
+                    upgradeChoice = 1;
+                    this.waitingForSelection = false;
+                    if (this.game.pauseGame) {
+                        this.game.togglePause();
+                    }
+                    this.currentMenu = -1;
+                    this.lastKeyPressTime = this.game.timer.gameTime;
+                } else if (this.game.keys["2"]) {
+                    upgradeChoice = 2;
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -69,7 +99,7 @@ class Upgrade_System {
                     this.currentMenu = -1;
                     this.lastKeyPressTime = this.game.timer.gameTime;
                 } else if (this.game.keys["3"]) {
-                    //TODO This does nothing atm
+                    upgradeChoice = 3;
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -77,19 +107,26 @@ class Upgrade_System {
                     this.currentMenu = -1;
                     this.lastKeyPressTime = this.game.timer.gameTime;
                 }
+                //this.game.player.weapons[this.weaponChoice].upgrade(upgradeChoice);
             }
-            // Check for input on menu one - 'Choose a Scythe Upgrade'
-            else if (this.currentMenu === 1) {
+            // Check for input on player upgrade screen
+            else if (this.currentMenu === 4) {
                 if (this.game.keys["1"]) {
-                    this.upgradeScytheAttackSize();
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
                     }
                     this.currentMenu = -1;
                     this.lastKeyPressTime = this.game.timer.gameTime;
+                    // for (let object of this.game.objects) {
+                    //     console.log(object.boundingBox.type);
+                    //     if (object.boundingBox.type === "anvil") {
+                    //         setTimeout(() => {
+                    //             object.hasBeenOpened = false;
+                    //         }, 1000);
+                    //     }
+                    // }
                 } else if (this.game.keys["2"]) {
-                    this.upgradeScythePrimaryCD();
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -97,7 +134,6 @@ class Upgrade_System {
                     this.currentMenu = -1;
                     this.lastKeyPressTime = this.game.timer.gameTime;
                 } else if (this.game.keys["3"]) {
-                    this.upgradeScytheSecondaryCD();
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -109,23 +145,22 @@ class Upgrade_System {
         }
     }
 
-    /** Upgrades the player's Scythe attack size by +15%. */
-    upgradeScytheAttackSize() {
-        // TODO Beware! This is multiplicative, NOT additive! We might want to change this for balancing.
-        this.game.player.weapons[0].primaryAttackRadius *= 1.15;
-        this.game.player.weapons[0].secondaryAttackRadius *= 1.15;
+    /** Upgrade for player's base movement speed */
+    upgradePlayerMovementSpeed() {
+        this.player.movementSpeed += 1;
+    }
+    /** Upgrade for player's base health */
+    upgradePlayerHealth() {
+        this.player.maxHP += 100;
+    }
+    /** Upgrade for player's dash duration */
+    upgradeDashDuration() {
+        this.player.dashDuration += 1;
     }
 
-    /** Upgrades the player's Scythe primary by -10%. */
-    upgradeScythePrimaryCD() {
-        // TODO Beware! This is multiplicative, NOT subtractive! We might want to change this for balancing.
-        this.game.player.weapons[0].primaryCool *= 0.9;
-    }
+    /** Randomly choose 3 upgrades to show for a weapon upgrade screen. */
+    generateRandomUpgradeList() {
 
-    /** Upgrades the player's Scythe secondary by -10%. */
-    upgradeScytheSecondaryCD() {
-        // TODO Beware! This is multiplicative, NOT subtractive! We might want to change this for balancing.
-        this.game.player.weapons[0].secondCool *= 0.9;
     }
 
     /** Call this to pop up a weapon upgrade screen for the player. */
@@ -163,7 +198,7 @@ class Upgrade_System {
         }
 
         // Tell the upgrade system which menu type we are currently on (refer to the java doc for more info)
-        this.currentMenu = 2;
+        this.currentMenu = 4;
     }
 
     /** Returns a sprite for an upgrade text. */
@@ -241,7 +276,7 @@ class Upgrade_System {
         this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_weapon_upgrade.png"), 0, 0, 388, 413, 1, 1);
     }
 
-    /** Call this to draw menu #1 - 'Choose a Scythe Upgrade'. */
+    /** Call this to draw menu #1 - 'Choose a Weapon Upgrade'. */
     drawMenuOne(ctx) {
         // Draw menu title
         ctx.font = 'bold 24px Arial';
@@ -279,6 +314,53 @@ class Upgrade_System {
         this.animator.scale = 1;
     }
 
+    /** Call this to draw menu #0 - 'Choose a Weapon to Upgrade'. */
+    drawMenuFour(ctx) {
+        // Handle drawing the text to each upgrade menu entry
+        // Set text font properties
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        // Set shadow properties
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
+        ctx.shadowBlur = 0; // How much the shadow should be blurred
+        ctx.shadowOffsetX = 2; // Horizontal shadow offset
+        ctx.shadowOffsetY = 2; // Vertical shadow offset
+
+        // Draw menu title
+        ctx.font = 'bold 24px Arial';
+        ctx.fillText("Choose an Upgrade", (ctx.canvas.width / 2) - 15, 225);
+
+        // Draw the Scythe entry icon
+        this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_scythe.png"), 0, 0, 30, 50, 1, 1);
+        this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 110, 280);
+
+        // Draw the Scythe text entry
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText("Upgrade health", (ctx.canvas.width / 2) - 50, 318);
+
+        // Draw the Tome entry icon
+        this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/Tome.png"), 0, 0, 40, 40, 1, 1);
+        this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 110, 388);
+
+        // Draw the Tome text entry
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText("Upgrade speed", (ctx.canvas.width / 2) - 50, 418);
+
+        // Draw the Staff entry icon
+        this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/NecromancyStaff.png"), 0, 0, 26, 70, 1, 1);
+        this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 110, 473);
+
+        // Draw the Staff text entry
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText("Upgrade dash", (ctx.canvas.width / 2) - 50, 518);
+
+        // Set animator back to original menu sprite sheet
+        this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_player_upgrade.png"), 0, 0, 388, 413, 1, 1);
+    }
+
     /**
      * Call this every frame to draw the UI elements.
      * @param ctx The canvas context being passed in.
@@ -311,7 +393,10 @@ class Upgrade_System {
             this.drawMenuZero(ctx);
         } else if (this.currentMenu === 1) {
             this.drawMenuOne(ctx);
+        } else if(this.currentMenu === 4) {
+            this.drawMenuFour(ctx);
         }
+
 
         // Reset shadow properties to avoid affecting other drawings
         ctx.shadowColor = 'transparent';

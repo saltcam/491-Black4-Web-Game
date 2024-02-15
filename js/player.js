@@ -7,7 +7,7 @@
  */
 class Player extends Entity {
     constructor(game) {
-        super(100, 100, 0, game, 0, 0,
+        super(1000, 1000, 0, game, 0, 0,
             17, 29, "player", 200,
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
@@ -23,6 +23,11 @@ class Player extends Entity {
         this.dashSpeedMultiplier = 3;
         this.dashDuration = .5;
 
+        // Regen 1 health per this many seconds
+        this.healthRegenTime = 5;
+        this.timeSinceLastHealthRegen = 0;
+
+        this.gold = 0;
         this.level = 1;
         // weapon handling
         this.weapons = [new Weapon_scythe(game), new Weapon_tome(game), new Weapon_staff(game)];
@@ -77,6 +82,12 @@ class Player extends Entity {
         // To achieve this store the current game time and subtract it to the time since last attack to see
         // if we are ready to trigger another attack.
         const currentTime = this.game.timer.gameTime;
+
+        // Handle health regen
+        if ((currentTime - this.timeSinceLastHealthRegen >= this.healthRegenTime) && (this.currHP < this.maxHP)) {
+            this.currHP += 1;
+            this.timeSinceLastHealthRegen = currentTime;
+        }
 
         if (this.controlsEnabled) {
             // Allows the user to switch weapons on a cooldown
@@ -166,9 +177,30 @@ class Player extends Entity {
             // Create a temporary bounding box for the intended position
             let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
 
-            // Check if this temporary bounding box collides with the map object's bounding box
+            //Check if this temporary bounding box collides with the map object's bounding box
             if (tempBoundingBox.isColliding(mapObject.boundingBox)) {
                 mapObject.openChest();
+            }
+        }
+        // If we collide with an unopened chest, open the chest
+        else if (mapObject.boundingBox.type.includes("gold")) {
+            // Create a temporary bounding box for the intended position
+            let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
+
+            // Check if this temporary bounding box collides with the map object's bounding box
+            if (tempBoundingBox.isColliding(mapObject.boundingBox)) {
+                mapObject.collectGold();
+                mapObject.removeFromWorld = true;
+            }
+        }
+
+        else if (mapObject.boundingBox.type === "anvil" && !mapObject.hasBeenOpened) {
+            // Create a temporary bounding box for the intended position
+            let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
+
+            // Check if this temporary bounding box collides with the map object's bounding box
+            if (tempBoundingBox.isColliding(mapObject.boundingBox)) {
+            mapObject.openAnvil();
             }
         }
     }
@@ -195,6 +227,7 @@ class Player extends Entity {
             //console.log("level");
             this.exp -= (this.level * 10);
             this.level++;
+            this.game.UPGRADE_SYSTEM.showPlayerUpgradeScreen();
         }
     }
 
@@ -277,6 +310,27 @@ class Player extends Entity {
             ctx.restore();
         }
     }
+    
+    // Method to draw the attack indicator for the staff where the mouse is
+    drawStaffAttackIndicator(ctx) {
+        if (this.currentWeapon === 2) {
+            if (this.game.mouse) {
+                const attackRadius = this.weapons[this.currentWeapon].primaryAttackRadius
+                const mouseX = this.game.mouse.x;
+                const mouseY =  this.game.mouse.y;
+
+                ctx.beginPath();
+                ctx.arc(mouseX, mouseY, attackRadius, 0, 2 * Math.PI, false)
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'
+                ctx.fill();
+
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
+                ctx.stroke();
+                ctx.closePath();
+            }
+        }
+    }
 
     draw(ctx, game) {
         // Check if the camera is initialized.
@@ -298,6 +352,7 @@ class Player extends Entity {
         this.drawExp(ctx);
         this.drawWeaponUI(ctx);
         this.drawWeapons(ctx)
+        this.drawStaffAttackIndicator(ctx);
         this.boundingBox.draw(ctx, game);
     }
 }

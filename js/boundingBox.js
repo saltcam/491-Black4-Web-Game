@@ -4,7 +4,7 @@ class BoundingBox {
      * @param y the top of the box
      * @param width the distance from the left to right sides of box
      * @param height the distance from top to bottom of box
-     * @param type 'player': take damage when colliding with 'enemy' or 'enemyAttack'.
+     * @param type 'player' or 'ally': take damage when colliding with 'enemy' or 'enemyAttack'.
      *             'enemy': take damage when colliding with 'playerAttack'.
      *             'tombstone': take damage when colliding with playerAttack
      */
@@ -53,7 +53,7 @@ class BoundingBox {
         // draws the box for you to see
         ctx.beginPath();
         switch (this.type) {
-            case "player":
+            case ("player" || "ally"):
                 ctx.strokeStyle = 'Blue';
                 break;
             case "enemy":

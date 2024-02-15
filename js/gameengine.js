@@ -113,7 +113,7 @@ class GameEngine {
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
-        this.eliteSpawnTimer = 1;
+        this.eliteSpawnTimer = 60;
         /** Spawn the boss after this many seconds of game time. */
         this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
@@ -182,7 +182,8 @@ class GameEngine {
 
     /** Call this to initialize the Rest Area (Map #0) objects. */
     initRestAreaObjects() {
-        this.addEntity(new Map_object(this, 150, -50, 40, 20, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 1));
+        let anvil = this.addEntity(new Map_object(this, 150, -50, 40, 20, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 1));
+        anvil.boundingBox.type = "anvil";
         this.mapObjectsInitialized = true;
     }
 
@@ -280,7 +281,7 @@ class GameEngine {
             this.items.push(entity);
         } else if (entity.boundingBox.type === "portal") {
             this.portal = entity;
-        } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss") {
+        } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss" || entity.boundingBox.type === "allys") {
             this.enemies.push(entity);
         } else if (entity.boundingBox.type === "attack") {
             this.attacks.push(entity);
@@ -470,6 +471,14 @@ class GameEngine {
             // If debug mode, then draw debug features.
             if (this.debugMode) {
                 item.boundingBox.draw(this.ctx, this);
+            }
+        }
+
+        // Check collision with the rock object
+        for (let object of this.objects) {
+            // Check collision between player and rock
+            if (this.player && this.player.boundingBox && object.boundingBox && this.player.boundingBox.isColliding(object.boundingBox)) {
+                // this.UPGRADE_SYSTEM.drawMenuFour(this.ctx);
             }
         }
 
@@ -866,6 +875,8 @@ class GameEngine {
         // Remove 'object' entities that are marked for deletion.
         for (let i = this.objects.length - 1; i >= 0; --i) {
             if (this.objects[i].removeFromWorld) {
+                // internally checks if exploding and then does so if true.
+                this.objects[i].explode();
                 this.objects.splice(i, 1);
             }
         }
@@ -878,10 +889,10 @@ class GameEngine {
                     // Spawn XP Orb on killed enemies
                     this.addEntity(new Exp_Orb(this, this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].exp));
 
-                    // Spawn Tombstones on killed enemies
-                    if (this.enemies[i].boundingBox.type !== "enemyBoss") {
+                    // Spawn Tombstones on killed enemies (only % of the time)
+                    if (Math.random() < 0.5 && this.enemies[i].boundingBox.type !== "enemyBoss") {
                         // Spawn Tombstone
-                        let tombstone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_tombstone.png", 0, 0, 80, 131, 1, 1, 0.35);
+                        let tombstone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
                         this.addEntity(tombstone);
                         tombstone.boundingBox.type = "tombstone";
                     }
@@ -891,6 +902,13 @@ class GameEngine {
                         let chest = this.addEntity(new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.02, 1.25));
                         chest.boundingBox.type = "chest";
                         chest.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
+                    }
+
+                    // % Chance to drop gold (based off of health)
+                    if (Math.random() < 0.2) {
+                        let coinBag = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 17, 17, "./sprites/object_coin_bag.png", 0, 0, 34, 34, 1, 1, 1);
+                        this.addEntity(coinBag);
+                        coinBag.boundingBox.type = "gold" + Math.ceil(this.enemies[i].maxHP / 10);
                     }
                 }
 
