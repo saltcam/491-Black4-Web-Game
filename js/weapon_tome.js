@@ -1,12 +1,17 @@
 class Weapon_tome extends Weapon {
     constructor(game) {
+        let upgrades = [
+            new Upgrade("Tome1", "Description"),
+            new Upgrade("Tome2", "Description"),
+            new Upgrade("Tome3", "Description")];
+
         super(game, "Tome", 1, 2,
             15, 15,
             5, 1,
             20, 115,
             2, 5,
             "./sprites/Tome.png",
-            "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40);
+            "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40, upgrades);
 
     }
 

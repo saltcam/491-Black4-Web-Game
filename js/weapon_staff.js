@@ -1,12 +1,17 @@
 class Weapon_staff extends Weapon {
     constructor(game) {
+        let upgrades = [
+            new Upgrade("Staff1", "Description"),
+            new Upgrade("Staff2", "Description"),
+            new Upgrade("Staff3", "Description")];
+
         super(game, "Staff", 1, 2,
             10, 10,
             5, 5,
             115, 115,
             1, 1,
             "./sprites/NecromancyStaff.png",
-            "./sounds/SE_staff_primary.mp3", "./sounds/SE_staff_secondary.mp3", 26, 70);
+            "./sounds/SE_staff_primary.mp3", "./sounds/SE_staff_secondary.mp3", 26, 70, upgrades);
     }
 
     performPrimaryAttack(player){

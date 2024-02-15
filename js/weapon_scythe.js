@@ -1,12 +1,20 @@
 class Weapon_scythe extends Weapon{
     constructor(game) {
+        let upgrades = [
+            new Upgrade("Scythe1", "Description"),
+            new Upgrade("Scythe2", "Description"),
+            new Upgrade("Scythe3", "Description"),
+            new Upgrade("Scythe4", "Description"),
+            new Upgrade("Scythe5", "Description"),
+            new Upgrade("Scythe6", "Description")];
+
         super(game, "Scythe", 1, 2,
             30, 60,
             9, 14,
             110, 115,
             0.6, 0.85,
             "./sprites/weapon_scythe.png",
-            "./sounds/SE_scythe_primary.mp3", "./sounds/SE_scythe_secondary.mp3", 30, 50);
+            "./sounds/SE_scythe_primary.mp3", "./sounds/SE_scythe_secondary.mp3", 30, 50, upgrades);
     }
 
     performPrimaryAttack(player){

@@ -4,7 +4,7 @@ class Weapon {
                 primaryAttackPushbackForce, secondaryAttackPushbackForce,
                 primaryAttackRadius, secondaryAttackRadius,
                 primaryAttackDuration, secondaryAttackDuration,
-                spritePath, primarySound, secondarySound, spriteW, spriteH) {
+                spritePath, primarySound, secondarySound, spriteW, spriteH, upgradeList) {
         this.game = game;
         this.name = name;
         this.primaryCool = primaryCool;
@@ -34,6 +34,8 @@ class Weapon {
 
         this.spritePath = spritePath;
 
+        // list of all upgrade objects tied to the weapon
+        this.upgradeList = upgradeList;
     }
 
     draw(ctx, slotNum){
@@ -84,9 +86,35 @@ class Weapon {
             30 * (diff / this.secondCool), 10);
         ctx.closePath();
 
+        for (let i = 0; i < this.upgradeList.length; i++) {
+            console.log(this.upgradeList[i].name + ": " + this.upgradeList[i].active);
+        }
+
     }
 
-    upgrade(upgradeChoice){
+    /**
+     * Randomly choose 3 upgrades to show for a weapon upgrade screen.
+     * Returns a randomly generated array of size 3 (contains 3 random weapon upgrades from the this.genericWeaponUpgrades array)
+     * TODO still needs to handle what happens when you can't fill 3 slots
+     */
+    threeRandomUpgrades(){
+        // Check if the input array has less than 3 elements
+
+            let result = [];
+            let indexes = new Set(); // To keep track of already selected indexes
+            while (indexes.size < 3) {
+                let randomIndex = Math.floor(Math.random() * this.upgradeList.length);
+                console.log("CHOSE " + randomIndex);
+                if (!indexes.has(randomIndex) && !this.upgradeList[randomIndex].active) {
+                    indexes.add(randomIndex);
+                    result.push(this.upgradeList[randomIndex]);
+                }
+            }
+            return result;
+
+    }
+
+    genericUpgrade(upgradeChoice){
         switch (upgradeChoice){
             case 1:
                 this.primaryAttackRadius *= 1.15;
@@ -99,6 +127,10 @@ class Weapon {
             this.secondCool *= 0.9;
                 break;
         }
+    }
+
+    specialUpgrade(index){
+        this.upgradeList[index].active = true;
     }
 
 
