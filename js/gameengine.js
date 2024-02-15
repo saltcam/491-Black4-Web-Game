@@ -113,9 +113,9 @@ class GameEngine {
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
-        this.eliteSpawnTimer = 120;
+        this.eliteSpawnTimer = 100;
         /** Spawn the boss after this many seconds of game time. */
-        this.bossSpawnTimer = 0;
+        this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
         this.lastEliteSpawnTime = 0;
         /** Tracks if the round is over. */
@@ -283,7 +283,7 @@ class GameEngine {
             this.portal = entity;
         } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss" || entity.boundingBox.type === "allys") {
             this.enemies.push(entity);
-        } else if (entity.boundingBox.type === "attack") {
+        } else if (entity.boundingBox.type.includes("attack") || entity.boundingBox.type.includes("Attack")) {
             this.attacks.push(entity);
         } else if (entity.boundingBox.type === "object") {
             this.objects.push(entity);
@@ -425,6 +425,20 @@ class GameEngine {
             return diff;
         });
 
+        // Draw 'attack' entities that are labeled as choreographed ('CAR_').
+        for (let attack of this.attacks) {
+            if (!attack.type.includes("CAR_")) {
+                continue;
+            }
+            attack.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode) {
+                //attack.drawHealth(this.ctx);
+                attack.boundingBox.draw(this.ctx, this);
+            }
+        }
+
         // Track if there is a boss spawned
         let bossEnemy = null;
 
@@ -442,8 +456,11 @@ class GameEngine {
             }
         }
 
-        // Draw 'attack' entities.
+        // Draw 'attack' entities not labeled as choreographed ('CAR_').
         for (let attack of this.attacks) {
+            if (attack.type.includes("CAR_")) {
+                continue;
+            }
             attack.draw(this.ctx, this);
 
             // If debug mode, then draw debug features.
@@ -1003,6 +1020,7 @@ class GameEngine {
             if(this.attacks[i].duration <= 0) {
                 this.attacks[i].removeFromWorld = true;
             }
+
         }
 
         // Check if player is dead, if so: mark player for deletion.

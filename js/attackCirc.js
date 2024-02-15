@@ -40,8 +40,19 @@ class AttackCirc {
         // Do we draw the debug circle?
         this.drawCircle = false;
 
-        //60 equates to 1 second, when setting duration, set the amount of seconds you want.
-        this.duration = duration * 60;
+        // When this attack circle came to life
+        this.startTime = game.elapsedTime;
+
+        // Duration of the attack circle in seconds
+        this.duration = duration;
+
+        // Handle delayed attack logic
+        if (this.delayedAttackDamage !== 0) {
+            this.endTime = this.startTime + (duration * 1000);
+            this.delayedEndTime = this.endTime + (0.66 * 1000);
+        } else {
+            this.endTime = this.startTime + (duration * 1000);
+        }
 
         // Assign an attack sprite if we were passed one
         if (attackSpritePath) {
@@ -49,15 +60,6 @@ class AttackCirc {
         }
         else {
             this.attackSpritePath = null;
-        }
-
-        // Store the initial duration for transparency calculation
-        this.initialDuration = duration * 60;
-
-        // If we are doing a delayed attack, add one frame because of the logic we use
-        if (this.delayedAttackDamage !== 0) {
-            this.duration += 1;
-            this.initialDuration += 1;
         }
 
         //dummy box so collision doesn't get mad.
@@ -81,66 +83,47 @@ class AttackCirc {
         this.worldX = this.entity.calculateCenter().x + this.dx;
         this.worldY = this.entity.calculateCenter().y + this.dy;
 
-        // For warning attack circles (grey circles)
-        if (this.duration === 1 && this.delayedAttackDamage !== 0 && this.attackDamage === 0) {
-            this.attackDamage = this.delayedAttackDamage;
-            this.duration = 1 * 60;   // this means 0.5 sec hopefully?
-        }
+        const currentTime = this.game.elapsedTime;
 
-        // reduce duration by 1 frame
-        this.duration--;
-
-        // Only do damage if a second has passed since damaging the enemy list last time
-        const currentTime = this.game.timer.gameTime;
-
-        if (this.type === "playerAttack" || this.type === "necromancyAttack" || this.type === "explosionAttack") {
-            if (currentTime - this.lastAttackTime >= this.attackCooldown) {
-                //iterates through all enemies and deals damage to them if the attack is of player origin.
-                this.game.enemies.forEach((enemy) => {
-                    if ((enemy.boundingBox.type === "enemy" || enemy.boundingBox.type === "enemyBoss") && this.collisionDetection(enemy.boundingBox)) {
-                        // Push the enemy away
-                        this.pushEnemy(enemy);
-                        enemy.takeDamage(this.attackDamage); // example damage value
-                        this.lastAttackTime = currentTime;
-                    }
-                });
-                // iterates through all tombstones and deletes them if the attack is from the staff weapon or an explosion.
-                this.game.objects.forEach((object) => {
-                    if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
-
-                        switch(this.type) {
-                            case "necromancyAttack":
-                                this.game.addEntity(new Ally_Contact(
-                                    "Ally", 25, 25,
-                                    10, this.game, object.worldX, object.worldY, 19/2,
-                                    28/2, "ally", 115, "./sprites/Zombie_Run.png",
-                                    0, 0, 34, 27,
-                                    8, 0.2, 3, 1));
-                                object.removeFromWorld = true;
-                                this.lastAttackTime = currentTime;
-                                break;
-                            case "explosionAttack":
-                                object.willExplode(this);
-                                object.removeFromWorld = true;
-                                this.lastAttackTime = currentTime;
-                                break;
-                            default:
-                                console.log("Tombstone hit with something else");
-                        }
-                        //console.log("necromancy!");
-                        // Push the enemy away
-                        //this.pushEnemy(enemy);
-
-                    }
-                });
+        // Check for the end of duration
+        if (currentTime >= this.endTime) {
+            if (this.delayedAttackDamage !== 0 && this.attackDamage === 0 && currentTime < this.delayedEndTime) {
+                this.attackDamage = this.delayedAttackDamage;
+                this.endTime = this.delayedEndTime;
+                this.delayedAttackDamage = 0;
+            } else {
+                this.removeFromWorld = true;
+                return;
             }
         }
-        else if ((currentTime - this.lastAttackTime >= this.attackCooldown) && this.type === "enemyAttack" && this.collisionDetection(this.game.player.boundingBox)) {
-            this.game.player.takeDamage(this.attackDamage);
-            this.lastAttackTime = currentTime;
+
+        // Damage ticking logic
+        if (this.attackDamage !== 0 && (currentTime - this.lastAttackTime >= this.attackCooldown * 1000)) { // Convert attackCooldown to milliseconds
+            let damageDealt = false; // Flag to track if damage was dealt
+
+            // Handling different attack types
+            if (["playerAttack", "necromancyAttack", "explosionAttack"].includes(this.type)) {
+                this.game.enemies.forEach(enemy => {
+                    if (this.collisionDetection(enemy.boundingBox)) {
+                        enemy.takeDamage(this.attackDamage);
+                        this.pushEnemy(enemy);
+                        damageDealt = true; // Set flag as true since damage was dealt
+                    }
+                });
+
+                // Additional logic for specific types...
+            } else if (this.type.includes("enemyAttack") && this.collisionDetection(this.game.player.boundingBox)) {
+                this.game.player.takeDamage(this.attackDamage);
+                damageDealt = true;
+            }
+
+            // Update lastAttackTime if damage was dealt
+            if (damageDealt) {
+                this.lastAttackTime = currentTime;
+            }
         }
 
-        // Update rotation angle for spinning sprites
+        // Update rotation for spinning sprites
         if (this.spriteRotationSpeed) {
             this.currentRotationAngle += this.spriteRotationSpeed;
         }
@@ -184,11 +167,12 @@ class AttackCirc {
     }
 
     draw(ctx) {
+        const currentTime = this.game.elapsedTime;
+        const lifeProgress = (currentTime - this.startTime) / (this.endTime - this.startTime);
+        const opacity = Math.max(0, Math.min(1, 1 - lifeProgress)); // Ensure opacity is between 0 and 1
+
         // Draw the circle indicator for attacks if no sprite
         if (this.game.debugMode || this.drawCircle) {
-            // Calculate opacity based on remaining duration, starting from 0.2 and fading to 0
-            const opacity = (this.duration / this.initialDuration) * 0.2;
-
             ctx.beginPath();
             // If this attack circle actually deals damage on collision, draw it as red
             if (this.attackDamage > 0) {
@@ -199,7 +183,7 @@ class AttackCirc {
                 ctx.fillStyle = `rgba(255, 255, 255, 0.2)`; // Always 0.2 alpha because white (warning area) circles should not fade out
             }
             // Otherwise if below zero, draw it green to indicate it actually might heal?
-            else if (this.attackDamage === 0) {
+            else if (this.attackDamage < 0) {
                 ctx.fillStyle = `rgba(0, 255, 0, ${opacity})`;
             }
             ctx.arc(this.worldX - this.game.camera.x, this.worldY - this.game.camera.y, this.radius, 0, Math.PI * 2);
@@ -213,8 +197,8 @@ class AttackCirc {
             // Save the current state of the canvas context
             ctx.save();
 
-            // Calculate and set transparency based on remaining duration
-            ctx.globalAlpha = this.duration / this.initialDuration;
+            // Calculate and set transparency based on remaining durations
+            ctx.globalAlpha = opacity;
 
             // Translate context
             ctx.translate(this.worldX - this.game.camera.x, this.worldY - this.game.camera.y);
@@ -239,7 +223,7 @@ class AttackCirc {
             }
 
             // Restore the context
-            ctx.restore();
+            ctx.restore()
         }
     }
 }
