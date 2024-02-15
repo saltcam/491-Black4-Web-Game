@@ -33,6 +33,7 @@ class Weapon {
         this.animator = new Animator(game, ASSET_MANAGER.getAsset(spritePath), 0, 0, spriteW, spriteH, 1, 60, 1);
 
         this.spritePath = spritePath;
+
     }
 
     draw(ctx, slotNum){
@@ -99,8 +100,6 @@ class Weapon {
                 break;
         }
     }
-
-
 
 
 }

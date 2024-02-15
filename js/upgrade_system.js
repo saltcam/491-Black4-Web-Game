@@ -28,7 +28,7 @@ class Upgrade_System {
         this.currentMenu = -1;
 
         /** This array holds generic upgrade types for all weapons types. */
-        this.genericWeaponUpgrades = ["Attack Size +15%", "Primary CD -10%", "Secondary CD -10%"];
+        this.genericWeaponUpgrades = ["Attack Size +15%", "Primary CD -10%", "Secondary CD -10%", "Attack Size +15%", "Primary CD -10%", "Secondary CD -10%"];
 
         /** Cooldown in seconds of when the player can input another selection key. */
         this.selectionCooldown = 0.5;
@@ -80,8 +80,6 @@ class Upgrade_System {
             // Check for input on menu one - 'Choose a Scythe Upgrade'
             else if (this.currentMenu === 1) {
                 let upgradeChoice = 0;
-
-
                 if (this.game.keys["1"]) {
                     upgradeChoice = 1;
                     this.waitingForSelection = false;
@@ -158,9 +156,27 @@ class Upgrade_System {
         this.player.dashDuration += 1;
     }
 
-    /** Randomly choose 3 upgrades to show for a weapon upgrade screen. */
+    /**
+     * Randomly choose 3 upgrades to show for a weapon upgrade screen.
+     * Returns a randomly generated array of size 3 (contains 3 random weapon upgrades from the this.genericWeaponUpgrades array)
+     */
     generateRandomUpgradeList() {
-
+        // Check if the input array has less than 3 elements
+        if (this.genericWeaponUpgrades.length <= 3) {
+            return this.genericWeaponUpgrades.slice(); // Return a shallow copy of the array
+        } else {
+            let result = [];
+            let indexes = new Set(); // To keep track of already selected indexes
+            while (indexes.size < 3) {
+                let randomIndex = Math.floor(Math.random() * this.genericWeaponUpgrades.length);
+                console.log("CHOSE " + randomIndex);
+                if (!indexes.has(randomIndex)) {
+                    indexes.add(randomIndex);
+                    result.push(this.genericWeaponUpgrades[randomIndex]);
+                }
+            }
+            return result;
+        }
     }
 
     /** Call this to pop up a weapon upgrade screen for the player. */
@@ -278,36 +294,39 @@ class Upgrade_System {
 
     /** Call this to draw menu #1 - 'Choose a Weapon Upgrade'. */
     drawMenuOne(ctx) {
+        // Generate a random array of 3 different upgrades
+        let upgrades = this.generateRandomUpgradeList();
+
         // Draw menu title
         ctx.font = 'bold 24px Arial';
         ctx.fillText("Choose a Scythe Upgrade", (ctx.canvas.width / 2) - 15, 225);
 
         // Draw the first upgrade entry icon
-        this.setUpgradeSprite(ctx, this.genericWeaponUpgrades[0], 0);
+        this.setUpgradeSprite(ctx, upgrades[0], 0);
         //this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width), 270 - (this.animator.height/3.8));
 
         // Draw the first upgrade text entry
         ctx.font = '20px Arial';
         ctx.textAlign = 'left';
-        ctx.fillText(this.genericWeaponUpgrades[0], (ctx.canvas.width / 2) - 50, 318);
+        ctx.fillText(upgrades[0], (ctx.canvas.width / 2) - 50, 318);
 
         // Draw the second upgrade entry icon
-        this.setUpgradeSprite(ctx, this.genericWeaponUpgrades[1], 1);
+        this.setUpgradeSprite(ctx, upgrades[1], 1);
         //this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 130, 370);
 
         // Draw the second upgrade text entry
         ctx.font = '20px Arial';
         ctx.textAlign = 'left';
-        ctx.fillText(this.genericWeaponUpgrades[1], (ctx.canvas.width / 2) - 50, 418);
+        ctx.fillText(upgrades[1], (ctx.canvas.width / 2) - 50, 418);
 
         // Draw the third upgrade entry icon
-        this.setUpgradeSprite(ctx, this.genericWeaponUpgrades[2], 2);
+        this.setUpgradeSprite(ctx, upgrades[2], 2);
         //this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 130, 470);
 
         // Draw the third upgrade text entry
         ctx.font = '20px Arial';
         ctx.textAlign = 'left';
-        ctx.fillText(this.genericWeaponUpgrades[2], (ctx.canvas.width / 2) - 50, 518);
+        ctx.fillText(upgrades[2], (ctx.canvas.width / 2) - 50, 518);
 
         // Set animator back to original menu sprite sheet
         this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_weapon_upgrade.png"), 0, 0, 388, 413, 1, 1);
