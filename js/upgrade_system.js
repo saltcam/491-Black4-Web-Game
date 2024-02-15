@@ -66,17 +66,28 @@ class Upgrade_System {
             // Check for input on menu zero - 'Choose a Weapon to Upgrade'
             if (this.currentMenu === 0) {
 
+                // there MUST be a better way...
                 if (this.game.keys["1"]) {
                     this.weaponChoice = 0;
+                    this.currentMenu = 1;
+                    this.lastKeyPressTime = this.game.timer.gameTime;
+                    // makes a list of 3 random upgrades available to the chosen weapon
+                    this.upgradeOptions = this.game.player.weapons[this.weaponChoice].threeRandomUpgrades();
                 } else if (this.game.keys["2"]) {
                     this.weaponChoice = 1;
+                    this.currentMenu = 1;
+                    this.lastKeyPressTime = this.game.timer.gameTime;
+                    // makes a list of 3 random upgrades available to the chosen weapon
+                    this.upgradeOptions = this.game.player.weapons[this.weaponChoice].threeRandomUpgrades();
                 } else if (this.game.keys["3"]) {
                     this.weaponChoice = 2;
+                    this.currentMenu = 1;
+                    this.lastKeyPressTime = this.game.timer.gameTime;
+                    // makes a list of 3 random upgrades available to the chosen weapon
+                    this.upgradeOptions = this.game.player.weapons[this.weaponChoice].threeRandomUpgrades();
                 }
-                this.currentMenu = 1;
-                this.lastKeyPressTime = this.game.timer.gameTime;
-                // makes a list of 3 random upgrades available to the chosen weapon
-                this.upgradeOptions = this.game.player.weapons[this.weaponChoice].threeRandomUpgrades();
+
+
             }
             // Check for input on menu one - 'Choose a Weapon Upgrade'
             else if (this.currentMenu === 1) {
@@ -264,17 +275,10 @@ class Upgrade_System {
 
     /** Call this to draw menu #1 - 'Choose a Weapon Upgrade'. */
     drawMenuOne(ctx) {
-        // Generate a random array of 3 different upgrades
-
-        // debug
-        // let upgrades = [
-        //     new Upgrade("Scythe1", "Description"),
-        //     new Upgrade("Scythe2", "Description"),
-        //     new Upgrade("Scythe3", "Description")];
 
         // Draw menu title
         ctx.font = 'bold 24px Arial';
-        ctx.fillText("Choose a Scythe Upgrade", (ctx.canvas.width / 2) - 15, 225);
+        ctx.fillText("Choose a " + this.game.player.weapons[this.weaponChoice].name + " Upgrade", (ctx.canvas.width / 2) - 15, 225);
 
         for (let i = 0; i < 3; i++) {
             ctx.textAlign = 'left';
@@ -290,6 +294,7 @@ class Upgrade_System {
     }
 
     /** Call this to draw menu #0 - 'Choose a Weapon to Upgrade'. */
+    //TODO reconsider structuring this like the other menu
     drawMenuFour(ctx) {
         // Handle drawing the text to each upgrade menu entry
         // Set text font properties
