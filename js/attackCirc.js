@@ -13,11 +13,12 @@ class AttackCirc {
      * @param duration  How long in frames the attack animation stays on screen
      * @param attackSpritePath  The path of the attack sprite to overlay on this attackCirc
      * @param attackDamage  The damage done to targets.
+     * @param delayedAttackDamage   The damage that is used if at the end of the duration if this was a warning attack circle (grey circle aka no damage)
      * @param damagePushbackForce    The pushback force applied to enemies that are hit by the attack.
      * @param spriteRotationSpeed   This should be defaulted to '0' if we don't want the sprite to be 'spinning' while drawn.
      * @param attackTick    How often this circle will tick damage to the things inside of it.
      */
-    constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath, attackDamage, damagePushbackForce, spriteRotationSpeed, attackTick) {
+    constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath, attackDamage, delayedAttackDamage, damagePushbackForce, spriteRotationSpeed, attackTick) {
         this.game = game;
         // the entity the circle will attach to
         this.entity = entity;
@@ -25,6 +26,7 @@ class AttackCirc {
         this.dy = dy;
 
         this.attackDamage = attackDamage;
+        this.delayedAttackDamage = delayedAttackDamage;
         this.damagePushbackForce = damagePushbackForce;
         this.spriteRotationSpeed = spriteRotationSpeed;
         this.currentRotationAngle = 0; // Initial rotation angle
@@ -52,6 +54,12 @@ class AttackCirc {
         // Store the initial duration for transparency calculation
         this.initialDuration = duration * 60;
 
+        // If we are doing a delayed attack, add one frame because of the logic we use
+        if (this.delayedAttackDamage !== 0) {
+            this.duration += 1;
+            this.initialDuration += 1;
+        }
+
         //dummy box so collision doesn't get mad.
         this.boundingBox = new BoundingBox(0,0,0,0,'attack');
 
@@ -72,6 +80,12 @@ class AttackCirc {
     update() {
         this.worldX = this.entity.calculateCenter().x + this.dx;
         this.worldY = this.entity.calculateCenter().y + this.dy;
+
+        // For warning attack circles (grey circles)
+        if (this.duration === 1 && this.delayedAttackDamage !== 0 && this.attackDamage === 0) {
+            this.attackDamage = this.delayedAttackDamage;
+            this.duration = 1 * 60;   // this means 0.5 sec hopefully?
+        }
 
         // reduce duration by 1 frame
         this.duration--;

@@ -38,7 +38,7 @@ class Weapon_scythe extends Weapon{
                 dx, dy,
                 this.primaryAttackDuration,
                 "./sprites/weapon_scythe_primaryattack.png",
-                this.primaryAttackDamage,
+                this.primaryAttackDamage, 0,
                 this.primaryAttackPushbackForce,
                 0, 1));
         }
@@ -58,7 +58,7 @@ class Weapon_scythe extends Weapon{
                 0, 0,
                 this.secondaryAttackDuration,
                 "./sprites/weapon_scythe_secondaryattack.png",
-                this.secondaryAttackDamage,
+                this.secondaryAttackDamage, 0,
                 this.secondaryAttackPushbackForce,
                 0.3, 1));
         }
