@@ -56,7 +56,7 @@ class Exp_Orb extends Entity {
         const boxHeight = this.boundingBox.height;
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
 
-        if (this.dist <= 5) {
+        if (this.dist <= 16) {
             this.removeFromWorld = true;
             this.game.player.gainExp(this.exp);
         }
