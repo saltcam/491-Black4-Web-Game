@@ -109,7 +109,7 @@ class GameEngine {
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
         this.baseEnemySpawnInterval = 1.0;
         /** How many enemies  can be on the map at once (this automatically increases as time goes on). */
-        this.baseMaxEnemies = 30;
+        this.baseMaxEnemies = 15;
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
@@ -160,6 +160,8 @@ class GameEngine {
     /** Call this to toggle the game pausing. */
     togglePause() {
         this.pauseGame = !this.pauseGame;
+        this.timer.togglePause(); // Use the Timer's togglePause method
+
         if (this.pauseGame) {
             // Game is being paused; record the current timestamp
             this.pauseStartTime = Date.now();
@@ -177,10 +179,18 @@ class GameEngine {
     /** Call this to initialize the grassmands (Map #1) objects. */
     initGrasslandsObjects() {
         // Visible Objects
-        let newEntity = this.addEntity(new Map_object(this, -250, 0, 86, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        // Rocks
+        let newEntity = this.addEntity(new Map_object(this, -250, 0, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -1100, 255, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -1210, 2670, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -2765, -2250, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 2605, -730, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+
+        // Debris
         newEntity = this.addEntity(new Map_object(this, -1950, -2120, 185, 160, "./sprites/object_wall_debris.png", 0, 0, 215, 192, 1, 1, 1));
-        newEntity = this.addEntity(new Map_object(this, 1710, 2641, 170, 80, "./sprites/object_wall_debris2.png", 0, 0, 215, 192+50, 1, 1, 1));
-        newEntity = this.addEntity(new Map_object(this, 500, 0, 0, 80, "./sprites/object_pillar_debris.png", 0, 0, 215, 192+50, 1, 1, 1));
+        newEntity = this.addEntity(new Map_object(this, 1710, 2641, 170, 80, "./sprites/object_wall_debris2.png", 0, 0, 215, 242, 1, 1, 1));
+        newEntity = this.addEntity(new Map_object(this, 1125, 2270, 50, 90, "./sprites/object_pillar_debris.png", 0, 0, 50, 164, 1, 1, 1));
+        newEntity = this.addEntity(new Map_object(this, -1620, -1210, 50, 90, "./sprites/object_pillar_debris.png", 0, 0, 50, 164, 1, 1, 1));
 
         // Invisible Objects
         // Center Hole
@@ -334,10 +344,12 @@ class GameEngine {
 
     spawnRandomEnemy() {
         // Calculate how many full 60-second intervals have passed
-        let intervals = Math.floor(this.elapsedTime / 60000);
+        let intervals = Math.floor(this.elapsedTime / 15000);
 
         // Calculate the maximum number of enemies based on elapsed time
         let maxEnemies = this.baseMaxEnemies + (this.baseMaxEnemies * intervals); // Start with 15 and add 15 for each interval
+
+        console.log("Max enemies = " + maxEnemies + ". Curr enemies = " + this.enemies.length);
 
         //console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
 
@@ -524,14 +536,6 @@ class GameEngine {
             // If debug mode, then draw debug features.
             if (this.debugMode) {
                 item.boundingBox.draw(this.ctx, this);
-            }
-        }
-
-        // Check collision with the rock object
-        for (let object of this.objects) {
-            // Check collision between player and rock
-            if (this.player && this.player.boundingBox && object.boundingBox && this.player.boundingBox.isColliding(object.boundingBox)) {
-                // this.UPGRADE_SYSTEM.drawMenuFour(this.ctx);
             }
         }
 
@@ -939,9 +943,9 @@ class GameEngine {
 
         // UI Updates, this should happen even while the game is paused.
         // Update Upgrade_System
-        if (this.UPGRADE_SYSTEM) {
-            this.UPGRADE_SYSTEM.update();
-        }
+        // if (this.UPGRADE_SYSTEM) {
+        //     this.UPGRADE_SYSTEM.update();
+        // }
 
         // Remove 'other' entities that are marked for deletion.
         for (let i = this.entities.length - 1; i >= 0; --i) {
@@ -1085,6 +1089,11 @@ class GameEngine {
     }
 
     respondToCollision(enemy1, enemy2) {
+        // We should not respond to collisions while game is paused
+        if (this.pauseGame) {
+            return;
+        }
+
         // Calculate the direction vector between the two enemies
         const directionX = enemy1.worldX - enemy2.worldX;
         const directionY = enemy1.worldY - enemy2.worldY;
@@ -1115,9 +1124,27 @@ class GameEngine {
 
     /** Starts the game engine loop system. This makes the update and draw methods loop. */
     loop() {
+        // Always check for pause toggle input
+        this.checkPauseInput();
+
+
+        // Calculate the time passed since the last frame
         this.clockTick = this.timer.tick();
-        this.update();
+
+        // If the game is not paused, update game logic
+        if (!this.pauseGame) {
+            this.update();
+        }
+
+        // Draw the game state regardless of pause state
+        // This allows drawing a pause menu or other pause-related graphics
         this.draw();
+    }
+
+    /** Contains code that still needs to be run every tick while game is paused. */
+    checkPauseInput() {
+        // Be sure to allow update system to capture the needed input while the game is paused
+        this.UPGRADE_SYSTEM.update();
     }
 
     /** Draws the mouse tracks on the screen. */

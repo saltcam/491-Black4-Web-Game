@@ -43,7 +43,7 @@ class Exp_Orb extends Entity {
 
         this.updateMoveSpeed();
 
-// Apply movement based on the direction and the zombie's speed
+        // Apply movement based on the direction and the zombie's speed
         this.worldX += targetDirection.x * this.movementSpeed * this.game.clockTick;
         this.worldY += targetDirection.y * this.movementSpeed * this.game.clockTick;
 
@@ -56,7 +56,7 @@ class Exp_Orb extends Entity {
         const boxHeight = this.boundingBox.height;
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
 
-        if (this.dist <= 16) {
+        if (this.dist <= 25) {
             this.removeFromWorld = true;
             this.game.player.gainExp(this.exp);
         }

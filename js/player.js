@@ -7,7 +7,7 @@
  */
 class Player extends Entity {
     constructor(game) {
-        super(100, 100, 0, game, 0, 0,
+        super(100, 100, 30, game, 0, 0,
             17, 29, "player", 200,
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
@@ -219,12 +219,10 @@ class Player extends Entity {
     }
 
     gainExp(exp) {
-        //console.log("Exp: " + this.exp + " + " + exp + " = " + (this.exp + exp));
         this.exp += exp;
 
         // level up!
         if (this.exp >= (this.level * 10)) {
-            //console.log("level");
             this.exp -= (this.level * 10);
             this.level++;
             this.game.UPGRADE_SYSTEM.showPlayerUpgradeScreen();

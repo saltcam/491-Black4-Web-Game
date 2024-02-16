@@ -1,13 +1,13 @@
 class Weapon_staff extends Weapon {
     constructor(game) {
         let upgrades = [
-            new Upgrade("Attack Size +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
-            new Upgrade("Primary CD -10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Secondary CD -10%", "Stackable, Multiplicative.", false,"./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Knockback +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png")];
+            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png")];
 
         super(game, "Staff", 1, 2,
-            10, 10,
+            0, 0,
             5, 5,
             115, 115,
             1, 1,
@@ -15,7 +15,7 @@ class Weapon_staff extends Weapon {
             "./sounds/SE_staff_primary.mp3", "./sounds/SE_staff_secondary.mp3", 26, 70, upgrades);
     }
 
-    performPrimaryAttack(player){
+    performPrimaryAttack(player) {
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -33,11 +33,11 @@ class Weapon_staff extends Weapon {
             let dy = clickPos.y - screenYCenter;
             this.attackAngle = Math.atan2(dy, dx);
 
-            let distX = clickPos.x - canvas.width/2;
-            let distY = clickPos.y - canvas.height/2;
+            let distX = clickPos.x - canvas.width / 2;
+            let distY = clickPos.y - canvas.height / 2;
             //width="1440" height="810"
 
-            const offsetDistance = Math.sqrt(distX*distX + distY*distY);
+            const offsetDistance = Math.sqrt(distX * distX + distY * distY);
             dx = Math.cos(this.attackAngle) * offsetDistance;
             dy = Math.sin(this.attackAngle) * offsetDistance;
 
@@ -46,16 +46,17 @@ class Weapon_staff extends Weapon {
 
             this.lastPrimaryAttackTime = currentTime;
 
-            this.game.addEntity(new Projectile(this.game, this.primaryAttackDamage,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 3,
                 xWorld + 7, yWorld + 7, 10, 10, "necromancyAttack", 0,
                 "./sprites/exp_orb.png",
                 0, 0, 17, 17, 3, 0.2, 10, 0, 0,
                 this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 1));
+            newProjectile.attackCirc.pulsatingDamage = true;
 
         }
     }
 
-    performSecondaryAttack(player){
+    performSecondaryAttack(player) {
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -73,11 +74,11 @@ class Weapon_staff extends Weapon {
             let dy = clickPos.y - screenYCenter;
             this.attackAngle = Math.atan2(dy, dx);
 
-            let distX = clickPos.x - canvas.width/2;
-            let distY = clickPos.y - canvas.height/2;
+            let distX = clickPos.x - canvas.width / 2;
+            let distY = clickPos.y - canvas.height / 2;
             //width="1440" height="810"
 
-            const offsetDistance = Math.sqrt(distX*distX + distY*distY);
+            const offsetDistance = Math.sqrt(distX * distX + distY * distY);
             dx = Math.cos(this.attackAngle) * offsetDistance;
             dy = Math.sin(this.attackAngle) * offsetDistance;
 
@@ -86,22 +87,21 @@ class Weapon_staff extends Weapon {
 
             this.lastSecondAttackTime = currentTime;
 
-            this.game.addEntity(new Projectile(this.game, this.secondaryAttackDamage,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 3,
                 xWorld + 7, yWorld + 7, 10, 10, "explosionAttack", 0,
                 "./sprites/exp_orb.png",
                 0, 0, 17, 17, 3, 0.2, 10, 0, 0,
                 this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 1));
+            newProjectile.attackCirc.pulsatingDamage = true;
         }
-
-
-
     }
 
-    genericUpgrade(){
-
+    // Handles code for turning on upgrades (Generic and Specific)
+    handleUpgrade() {
         for (let i = 0; i < this.upgradeList.length; i++) {
-            if(this.upgradeList[i].active && !this.upgradeList[i].special){
-                switch (this.upgradeList[i].name){
+            // If generic has been turned on
+            if (this.upgradeList[i].active && !this.upgradeList[i].special) {
+                switch (this.upgradeList[i].name) {
                     case "Attack Size +10%":
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
@@ -112,12 +112,14 @@ class Weapon_staff extends Weapon {
                     case "Secondary CD -10%":
                         this.secondCool *= 0.9;
                         break;
+                    case "Knockback +10%":
+                        this.primaryAttackPushbackForce *= 1.1;
+                        this.secondaryAttackPushbackForce *= 1.1;
+                        break;
                 }
+                // Set generic to not active so it can be re-used/activated in the future
                 this.upgradeList[i].active = false;
             }
-
         }
-
     }
-
 }

@@ -2,16 +2,16 @@ class Weapon_scythe extends Weapon{
     constructor(game) {
         //"./sprites/upgrade_size.png"
         let upgrades = [
-            new Upgrade("Attack Size +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
-            new Upgrade("Primary CD -10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Secondary CD -10%", "Stackable, Multiplicative.", false,"./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Knockback +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
-            new Upgrade("Blood Scythe", "Unique: Scythe Attack Life Leech +15%.", true, "./sprites/upgrade_size.png"),
-            new Upgrade("Dual Blade", "Unique: Primary Scythe attack hits behind you as well.", true, "./sprites/upgrade_size.png")];
+            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false,"./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png"),
+            new Upgrade("Blood Scythe", "(Unique) Life Leech +15%.", true, "./sprites/upgrade_blood_scythe.png"),
+            new Upgrade("Dual Blade", "(Unique) Primary attack behind too.", true, "./sprites/upgrade_dual_blade.png")];
 
         super(game, "Scythe", 1, 2,
-            30, 60,
-            9, 14,
+            0, 0,
+            5, 10,
             110, 115,
             0.6, 0.85,
             "./sprites/weapon_scythe.png",
@@ -47,11 +47,10 @@ class Weapon_scythe extends Weapon{
                 dx, dy,
                 this.primaryAttackDuration,
                 "./sprites/weapon_scythe_primaryattack.png",
-                this.primaryAttackDamage, 0,
+                this.game.player.atkPow, 0,
                 this.primaryAttackPushbackForce,
                 0, 1));
         }
-
     }
 
     performSecondaryAttack(player){
@@ -67,16 +66,16 @@ class Weapon_scythe extends Weapon{
                 0, 0,
                 this.secondaryAttackDuration,
                 "./sprites/weapon_scythe_secondaryattack.png",
-                this.secondaryAttackDamage, 0,
+                this.game.player.atkPow*2, 0,
                 this.secondaryAttackPushbackForce,
                 0.3, 1));
         }
     }
 
-    // handles generic upgrades, add a switch case for the index of your
-    genericUpgrade(){
-
+    // Handles code for turning on upgrades (Generic and Specific)
+    handleUpgrade(){
         for (let i = 0; i < this.upgradeList.length; i++) {
+            // If generic has been turned on
             if(this.upgradeList[i].active && !this.upgradeList[i].special){
                 switch (this.upgradeList[i].name){
                     case "Attack Size +10%":
@@ -89,10 +88,49 @@ class Weapon_scythe extends Weapon{
                     case "Secondary CD -10%":
                         this.secondCool *= 0.9;
                         break;
+                    case "Knockback +10%":
+                        this.primaryAttackPushbackForce *= 1.1;
+                        this.secondaryAttackPushbackForce *= 1.1;
+                        break;
                 }
+                // Set generic to not active so it can be re-used/activated in the future
                 this.upgradeList[i].active = false;
             }
-
+            else if(this.upgradeList[i].active && this.upgradeList[i].special){
+                switch (this.upgradeList[i].name){
+                    case "Blood Scythe":
+                        // Switch weapon to blood scythe sprite
+                        this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe.png"), 0, 0, 30, 50, 1, 1);
+                        this.spritePath = "./sprites/weapon_blood_scythe.png";
+                        // Set upgrade sprites to their relevant blood scythe variants
+                        this.upgradeList.forEach(upgrade => {
+                            if (upgrade.name === "Dual Blade" && upgrade.active) {
+                                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
+                                this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
+                            }
+                            else if (upgrade.name === "Dual Blade" && !upgrade.active){
+                                upgrade.sprite = "./sprites/upgrade_dual_blade(blood).png";
+                                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe.png"), 0, 0, 41, 49, 1, 1);
+                                this.spritePath = "./sprites/weapon_blood_scythe.png";
+                            }
+                        });
+                        break;
+                    case "Dual Blade":
+                        // Set upgrade sprites to their relevant blood scythe variants
+                        this.upgradeList.forEach(upgrade => {
+                            if (upgrade.name === "Blood Scythe" && upgrade.active) {
+                                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
+                                this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
+                            }
+                            else if (upgrade.name === "Blood Scythe" && !upgrade.active){
+                                upgrade.sprite = "./sprites/upgrade_blood_scythe(dual).png";
+                                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
+                                this.spritePath = "./sprites/weapon_scythe_dual.png";
+                            }
+                        });
+                        break;
+                }
+            }
         }
 
     }

@@ -5,9 +5,14 @@ class Timer {
         this.gameTime = 0;
         this.maxStep = 0.05;
         this.lastTimestamp = 0;
+        this.isPaused = false;
     }
 
     tick() {
+        if (this.isPaused) {
+            return 0; // No time advancement if paused
+        }
+
         const current = Date.now();
         const delta = (current - this.lastTimestamp) / 1000;
         this.lastTimestamp = current;
@@ -16,4 +21,12 @@ class Timer {
         this.gameTime += gameDelta;
         return gameDelta;
     }
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        if (!this.isPaused) {
+            this.lastTimestamp = Date.now(); // Reset lastTimestamp to avoid jump in gameTime
+        }
+    }
 }
+

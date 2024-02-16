@@ -1,23 +1,32 @@
 class Weapon_tome extends Weapon {
     constructor(game) {
         let upgrades = [
-            new Upgrade("Attack Size +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
-            new Upgrade("Primary CD -10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Secondary CD -10%", "Stackable, Multiplicative.", false,"./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Knockback +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png")];
+            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png"),
+            new Upgrade("Primary Piercing +1", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png")];
 
         super(game, "Tome", 1, 2,
-            15, 15,
-            5, 1,
-            20, 115,
-            2, 5,
+            0, 0,
+            3, 1,
+            10, 90,
+            3, 5,
             "./sprites/Tome.png",
             "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40, upgrades);
 
+        // Save these values for calculations later
+        this.initialPrimaryAttackRadius = this.primaryAttackRadius;
+        this.initialSecondaryAttackRadius = this.secondaryAttackRadius;
+
+        // Effectively acts as max pierced targets before deleting projectiles
+        this.maxPrimaryHits = 1;
+        this.maxSecondaryHits = -1; // -1 Means infinite pierce
+        this.primaryProjectileMovementSpeed = 75;
+        this.secondaryProjectileMovementSpeed = 2;
     }
 
-    performPrimaryAttack(player){
-
+    performPrimaryAttack(player) {
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -41,15 +50,16 @@ class Weapon_tome extends Weapon {
 
 
             this.lastPrimaryAttackTime = currentTime;
-            this.game.addEntity(new Projectile(this.game, this.primaryAttackDamage,
-                player.worldX, player.worldY, 10, 10, "playerAttack", 30,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 2,
+                player.worldX, player.worldY, 10, 10, "playerAttack", this.primaryProjectileMovementSpeed,
                 "./sprites/exp_orb.png",
-                0, 0, 17, 17, 3, 0.2, 2, dx, dy,
-                this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 1));
+                0, 0, 17, 17, 3, 0.2, 2.2 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), dx, dy,
+                this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 0.3));
+            newProjectile.maxHits = this.maxPrimaryHits; // Apply max pierce
         }
     }
 
-    performSecondaryAttack(player){
+    performSecondaryAttack(player) {
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -73,25 +83,31 @@ class Weapon_tome extends Weapon {
 
 
             this.lastSecondAttackTime = currentTime;
-            this.game.addEntity(new Projectile(this.game, this.secondaryAttackDamage,
-                player.worldX, player.worldY, 10, 10, "playerAttack", 2,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 2,
+                player.worldX, player.worldY, 10, 10, "playerAttack", this.secondaryProjectileMovementSpeed,
                 "./sprites/exp_orb.png",
-                0, 0, 17, 17, 3, 0.2, 10, dx, dy,
+                0, 0, 17, 17, 3, 0.2, 10 * (this.secondaryAttackRadius/this.initialSecondaryAttackRadius), dx, dy,
                 this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 0.3));
+            newProjectile.maxHits = this.maxSecondaryHits; // Apply max pierce
+            newProjectile.attackCirc.pulsatingDamage = true; // Tell the projectile that this attack pulsates damage.
         }
-
-
-
     }
 
-    genericUpgrade(){
-
+    // Handles code for turning on upgrades (Generic and Specific)
+    handleUpgrade() {
         for (let i = 0; i < this.upgradeList.length; i++) {
-            if(this.upgradeList[i].active && !this.upgradeList[i].special){
-                switch (this.upgradeList[i].name){
+            // If generic has been turned on
+            if (this.upgradeList[i].active && !this.upgradeList[i].special) {
+                switch (this.upgradeList[i].name) {
                     case "Attack Size +10%":
+                        console.log("REACHED!");
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
+
+                        // Fixes a bug where size affected movement speed
+                        // TODO THIS IS NOT A PERFECT BUG-FIX, need to find the real issue!!!
+                        this.primaryProjectileMovementSpeed *= 0.9;
+                        this.secondaryProjectileMovementSpeed *= 0.9;
                         break;
                     case "Primary CD -10%":
                         this.primaryCool *= 0.9;
@@ -99,12 +115,17 @@ class Weapon_tome extends Weapon {
                     case "Secondary CD -10%":
                         this.secondCool *= 0.9;
                         break;
+                    case "Knockback +10%":
+                        this.primaryAttackPushbackForce *= 1.1;
+                        this.secondaryAttackPushbackForce *= 1.1;
+                        break;
+                    case "Primary Piercing +1":
+                        this.maxPrimaryHits += 1;
+                        break;
                 }
+                // Set generic to 'not active' so it can be re-used/activated in the future
                 this.upgradeList[i].active = false;
             }
-
         }
-
     }
-
 }

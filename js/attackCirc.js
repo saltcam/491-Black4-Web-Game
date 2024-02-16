@@ -75,6 +75,16 @@ class AttackCirc {
         } else {
             this.fixedRotationAngle = 0;
         }
+
+        // Is this a normal attack or pulsating damage attack?
+        // If normal, hit all enemies in collision but ONLY ONE time per enemy
+        // If pulsating, then hit all enemies in collision on every 'attackTick'
+        this.pulsatingDamage = false;
+
+        // Initialization for normal attack functionality
+        this.hitEntities = new Set(); // Tracks entities already hit if pulsatingDamage is false
+
+        this.damageDealt = false;
     }
 
 
@@ -97,17 +107,50 @@ class AttackCirc {
             }
         }
 
-        // Damage ticking logic
-        if (this.attackDamage !== 0 && (currentTime - this.lastAttackTime >= this.attackCooldown * 1000)) { // Convert attackCooldown to milliseconds
-            let damageDealt = false; // Flag to track if damage was dealt
+        // Normal attack logic logic for player vs enemy
+        if (!this.type.includes("enemy") && !this.pulsatingDamage && this.attackDamage > 0) {
+            this.game.enemies.forEach(enemy => {
+                if (!this.hitEntities.has(enemy) && this.collisionDetection(enemy.boundingBox)) {
+                    enemy.takeDamage(this.attackDamage);
+                    this.pushEnemy(enemy);
+                    this.hitEntities.add(enemy);
 
-            // Handling different attack types
+                    // If we are attacking via a projectile, then --maxHits to track pierced targets
+                    if (this.entity instanceof Projectile) {
+                        this.entity.maxHits -= 1;
+                    }
+                }
+            });
+        }
+        // Enemy vs player
+        else if (this.type.includes("enemy") && !this.pulsatingDamage && this.attackDamage > 0) {
+            if (!this.damageDealt && this.collisionDetection(this.game.player.boundingBox)) {
+                this.game.player.takeDamage(this.attackDamage);
+
+                // If we are attacking via a projectile, then --maxHits to track pierced targets
+                if (this.entity instanceof Projectile) {
+                    this.entity.maxHits -= 1;
+                }
+
+                this.damageDealt = true;
+            }
+        }
+        // Attack ticking logic (pulsating damage, ex: Tome Secondary Attack)
+        else if (this.attackDamage !== 0 && (currentTime - this.lastAttackTime >= this.attackCooldown * 1000)) { // Convert attackCooldown to milliseconds
+            this.damageDealt = false; // Flag to track if damage was dealt
+
+            // Handling different player attack types
             if (["playerAttack", "necromancyAttack", "explosionAttack"].includes(this.type)) {
                 this.game.enemies.forEach(enemy => {
                     if (this.collisionDetection(enemy.boundingBox)) {
                         enemy.takeDamage(this.attackDamage);
                         this.pushEnemy(enemy);
-                        damageDealt = true; // Set flag as true since damage was dealt
+                        this.damageDealt = true; // Set flag as true since damage was dealt
+
+                        // If we are attacking via a projectile, then --maxHits to track pierced targets
+                        if (this.entity instanceof Projectile) {
+                            this.entity.maxHits -= 1;
+                        }
                     }
                 });
 
@@ -143,11 +186,11 @@ class AttackCirc {
                 // Additional logic for specific types...
             } else if (this.type.includes("enemyAttack") && this.collisionDetection(this.game.player.boundingBox)) {
                 this.game.player.takeDamage(this.attackDamage);
-                damageDealt = true;
+                this.damageDealt = true;
             }
 
             // Update lastAttackTime if damage was dealt
-            if (damageDealt) {
+            if (this.damageDealt) {
                 this.lastAttackTime = currentTime;
             }
         }
@@ -180,8 +223,8 @@ class AttackCirc {
      */
 
     collisionDetection(rect){
-        var distX = Math.abs(this.worldX - rect.left - rect.width/2);
-        var distY = Math.abs(this.worldY - rect.top - rect.height/2);
+        let distX = Math.abs(this.worldX - rect.left - rect.width/2);
+        let distY = Math.abs(this.worldY - rect.top - rect.height/2);
 
         if (distX > (rect.width/2 + this.radius)) { return false; }
         if (distY > (rect.height/2 + this.radius)) { return false; }
@@ -190,8 +233,8 @@ class AttackCirc {
         if (distY <= (rect.height/2)) { return true; }
 
         // also test for corner collisions
-        var dx= distX-rect.width / 2;
-        var dy= distY-rect.height / 2;
+        let dx= distX-rect.width / 2;
+        let dy= distY-rect.height / 2;
         return (dx*dx+dy*dy<=(this.radius*this.radius));
     }
 

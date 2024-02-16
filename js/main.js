@@ -16,6 +16,7 @@ ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_primaryattack.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_secondaryattack.png");
 ASSET_MANAGER.queueDownload("./sprites/scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_scythe.png");
+ASSET_MANAGER.queueDownload("./sprites/weapon_blood_scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/Tome.png");
 ASSET_MANAGER.queueDownload("./sprites/NecromancyStaff.png");
 ASSET_MANAGER.queueDownload("./sprites/map_rest_area.png");
@@ -27,6 +28,16 @@ ASSET_MANAGER.queueDownload("./sprites/attack_targeting.png");
 ASSET_MANAGER.queueDownload("./sprites/object_wall_debris.png");
 ASSET_MANAGER.queueDownload("./sprites/object_wall_debris2.png");
 ASSET_MANAGER.queueDownload("./sprites/object_pillar_debris.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_dual_blade.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_blood_scythe.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_blood_scythe(dual).png");
+ASSET_MANAGER.queueDownload("./sprites/weapon_blood_scythe_dual.png");
+ASSET_MANAGER.queueDownload("./sprites/weapon_scythe_dual.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_dual_blade(blood).png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_piercing.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_scythe.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_tome.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_staff.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
@@ -35,6 +46,7 @@ ASSET_MANAGER.queueDownload("./sprites/menu_player_upgrade.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_size.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_reduce_cd.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_knockback.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_currency_bar.png");
 
 //player

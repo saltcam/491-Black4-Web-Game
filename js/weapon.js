@@ -39,7 +39,6 @@ class Weapon {
     }
 
     draw(ctx, slotNum){
-
         // Primary attacks
         ctx.beginPath();
         ctx.fillStyle = "Black";
@@ -87,7 +86,7 @@ class Weapon {
         ctx.closePath();
 
         for (let i = 0; i < this.upgradeList.length; i++) {
-            console.log(this.upgradeList[i].name + ": " + this.upgradeList[i].active);
+            //console.log(this.upgradeList[i].name + ": " + this.upgradeList[i].active);
         }
 
     }
@@ -104,15 +103,20 @@ class Weapon {
             let indexes = new Set(); // To keep track of already selected indexes
             while (indexes.size < 3) {
                 let randomIndex = Math.floor(Math.random() * this.upgradeList.length);
-                console.log("CHOSE " + randomIndex);
+                //console.log("CHOSE " + randomIndex);
                 if (!indexes.has(randomIndex) && !this.upgradeList[randomIndex].active) {
-                    indexes.add(randomIndex);
-                    result.push(this.upgradeList[randomIndex]);
+                    // If the upgrade selected is 'special' lets add a rarity to it even being chosen
+                    if (this.upgradeList[randomIndex].special && (Math.random() < 1)) { // 20% chance that we let this special upgrade show up
+                        indexes.add(randomIndex);
+                        result.push(this.upgradeList[randomIndex]);
+                    }
+                    // Else if not special just add it to the list of upgrades then
+                    else if (!this.upgradeList[randomIndex].special){
+                        indexes.add(randomIndex);
+                        result.push(this.upgradeList[randomIndex]);
+                    }
                 }
             }
             return result;
-
     }
-
-
 }
