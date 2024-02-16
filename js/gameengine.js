@@ -317,7 +317,7 @@ class GameEngine {
             this.items.push(entity);
         } else if (entity.boundingBox.type === "portal") {
             this.portal = entity;
-        } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss" || entity.boundingBox.type === "allys") {
+        } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss" || entity.boundingBox.type === "ally") {
             this.enemies.push(entity);
         } else if (entity.boundingBox.type.includes("attack") || entity.boundingBox.type.includes("Attack")) {
             this.attacks.push(entity);
