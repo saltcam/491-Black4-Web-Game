@@ -9,7 +9,7 @@
 class BossOne extends Entity {
     /** Default Constructor - Only needs to be passed the gameengine and worldX and Y coords. */
     constructor(game, worldX, worldY) {
-        super(1, 1, 25,
+        super(1500, 1500, 20,
             game, worldX, worldY,
             20, 35, "enemyBoss",
             600,
@@ -46,10 +46,11 @@ class BossOne extends Entity {
 
         /** Target direction marker. Tracks where the boss should be pathing to next. */
         this.targetMarker = this.game.addEntity(new Entity(1, 1, 0, this.game,
-            0, 0, 1, 1, "marker",
+            0, 0, 5, 5, "attackMarker",
             0,
-            "./sprites/debug_marker.png",
-            0, 0, 91, 91, 1, 1, 1, 0));
+            "./sprites/attack_targeting.png",
+            0, 0, 92, 92, 4, 0.25, 2, 0));
+        this.targetMarker.animator.pauseAtFrame(10);
 
         // Attack Variables
         /** Flag that tracks if we are ready to perform another attack (ex: charge, ground smash). */
@@ -58,6 +59,10 @@ class BossOne extends Entity {
         this.lastAttackCheckTime = 0;
         /** How often to check if we are going to enter an attack mode. DO NOT SET THIS BELOW 1.4 (Or stuff will break) */
         this.attackCheckInterval = 1.5;
+        /** This is a temporary timer that we will use in various parts of this class' code. Default setting is -1. */
+        this.tempTimer = -1;
+        /** This tracks what the status of the boss attacks are. */
+        this.attackStatus = "none";
 
         // Charge Attack Variables
         /** Flag to track whether this boss is going to enter charge mode. */
@@ -65,17 +70,16 @@ class BossOne extends Entity {
         /** The time in seconds before the entity actually charges its target once entering charge mode. */
         this.chargeDelayTime = 1.23;
         /** Tracks how many seconds after stopping a charge that a new attack decision is allowed. */
-        this.timeDelayAfterCharge = 1.15;
-        /** Probability we charge on each chargeCheckInterval. */
-        this.chargeChance = 0.44;
 
         // Ground Smash Attack Variables
         /** Tracks if we are entering ground smash attack mode. */
         this.enterGroundSmashMode = false;
         /** The time in seconds the boss has his hammer stuck in the ground after a smash. */
         this.groundSmashDelayTime = 1.33;
-        /** Probability we charge on each chargeCheckInterval. */
-        this.groundSmashChance = 0.51;
+        /** How long the boss will dash backwards after a ground smash. */
+        this.backDashTime = 0.75;
+        /** Tracks the main attack circle that spawns on a ground smash attack. */
+        this.groundSmashMainAttackCircle = null;
 
         /** Flag to track whether we are still going to track the target marker to the player. 0.75 = 75% chance. */
         this.trackMode = true;
@@ -146,16 +150,24 @@ class BossOne extends Entity {
         if (Math.abs(this.pushbackVector.x) < 0.1) this.pushbackVector.x = 0;
         if (Math.abs(this.pushbackVector.y) < 0.1) this.pushbackVector.y = 0;
 
-        // Determine the direction to face based on the player's position
+        // Determine the direction to face based on the target's position
         if (this.targetMarker.worldX < this.worldX) {
-            // Player is to the left, face left
+            // Target is to the left, face left
             this.lastMove = "left";
         } else if (this.targetMarker.worldX > this.worldX) {
-            // Player is to the right, face right
+            // Target is to the right, face right
             this.lastMove = "right";
         }
 
         const targetDirection = this.calcTargetAngle(this.targetMarker);
+
+        // If we are in any of the attack modes, then we are not ready to start new attack
+        if (this.attackStatus !== "none" || (this.enterChargeMode || this.enterGroundSmashMode)) {
+            this.readyForNextAttack = false;
+        }
+        else {
+            this.readyForNextAttack = true;
+        }
 
         // If entity is not ready to charge again, make sure we don't allow the timer to tick
         if (!this.readyForNextAttack) {
@@ -174,15 +186,25 @@ class BossOne extends Entity {
 
         // Check if it's time to potentially enter an attack mode
         if ((!this.enterChargeMode && !this.enterGroundSmashMode) && currentTime - this.lastAttackCheckTime >= this.attackCheckInterval) {
-            // Perform RNG check to see if we are going to charge attack
-            if (Math.random() < this.chargeChance) {
+            const bossCenterX = this.worldX + this.animator.width/2;
+            const bossCenterY = this.worldY + this.animator.height/2;
+
+            const markerCenterX = this.targetMarker.worldX + this.targetMarker.animator.width/2;
+            const markerCenterY = this.targetMarker.worldY + this.targetMarker.animator.height/2;
+
+            const distanceX = Math.abs(bossCenterX - markerCenterX);
+            const distanceY = Math.abs(bossCenterY - markerCenterY);
+            const proximity = 300; // Adjusted proximity threshold
+
+            // Check if in proximity of target yet, if not, then charge to get closer
+            // Adjusted condition to allow for charge if far enough in either X or Y direction
+            if (distanceX > proximity || distanceY > proximity) {
                 this.enterChargeMode = true;
             }
-            // If not, then perform RNG check to see if we are going to ground smash attack
-            else if (Math.random() < this.groundSmashChance) {
+            // If not, then perform ground smash attack
+            else {
                 this.enterGroundSmashMode = true;
             }
-            // Else do nothing till next check (this adds unpredictability to the boss)
 
             // Regardless of the outcome, update lastCheckTime to schedule next check
             this.lastAttackCheckTime = currentTime;
@@ -190,130 +212,115 @@ class BossOne extends Entity {
 
         // START of Handle Charge Attack
         if (this.enterChargeMode) {
-            // Stop boss's movement
-            this.movementSpeed = 0;
+            if (this.attackStatus === "none") {
+                this.attackStatus = "Preparing to Charge";
 
-            // Set dash preparation stance sprite
-            this.currentAnimation = "preparingCharge";
-
-            // After 1.5 seconds CHARGE the player
-            setTimeout(() => {
-                // Set dash sprite
-                this.currentAnimation = "charging";
-            }, this.chargeDelayTime * 1000);
-            this.enterChargeMode = false;
-        }
-
-        // Apply proper animation sprites depending on currentAnimation
-        if (this.currentAnimation === "standing") {
-            if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/boss_knight_stand.png")) {
-                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_stand.png"), 0, 0, 40, 84, 4, 0.25);
-            }
-            this.movementSpeed = 0;
-        }
-        if (this.currentAnimation === "preparingCharge") {
-            if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png") || this.animator.frameCount !== 1) {
+                // First, we need to enter the prepare to charge stance animation
                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png"), 0, 0, 60, 84, 1, 1);
+                this.targetMarker.animator.pauseAtFrame(-1);
             }
-            this.movementSpeed = 0;
-        }
-        if (this.currentAnimation === "charging") {
-            if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png") || this.animator.frameCount !== 2) {
-                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png"), 60, 0, 60, 84, 2, 0.2);
+
+            // After this.chargeDelayTime has passed we need to actually enter the charge sprite animation and give the boss its charge movement speed.
+            // If the tempTimer is === -1 then we need to set it to current time to start the timer
+            if (this.tempTimer === -1) {
+                this.tempTimer = currentTime;
+            }
+            if (this.attackStatus === "Preparing to Charge" && (currentTime - this.chargeDelayTime >= this.tempTimer)) {
                 this.trackMode = false;
-                this.readyForNextAttack = false;
+                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png"), 60, 0, 60, 84, 2, 0.2)
+                this.tempTimer = -1;
+                this.attackStatus = "Charging"
+                this.movementSpeed = this.defaultSpeed;
             }
 
-            this.movementSpeed = this.defaultSpeed;
+            // After we reach the target destination, turn off charge mode, set movespeed = 0, and set animation to standing
+            if (this.attackStatus === "Charging") {
+                const bossCenterX = this.worldX + this.animator.width/2;
+                const bossCenterY = this.worldY + this.animator.height/2;
 
-            const bossCenterX = this.worldX + this.animator.width/2;
-            const bossCenterY = this.worldY + this.animator.height/2;
+                const markerCenterX = this.targetMarker.worldX + this.targetMarker.animator.width/2;
+                const markerCenterY = this.targetMarker.worldY + this.targetMarker.animator.height/2;
 
-            const markerCenterX = this.targetMarker.worldX + this.targetMarker.animator.width/2;
-            const markerCenterY = this.targetMarker.worldY + this.targetMarker.animator.height/2;
+                const distanceX = Math.abs(Math.abs(bossCenterX - markerCenterX) - 15);
+                const distanceY = Math.abs(bossCenterY - markerCenterY);
+                const proximity = 20;
 
-            const distanceX = Math.abs(Math.abs(bossCenterX - markerCenterX) - 15);
-            const distanceY = Math.abs(bossCenterY - markerCenterY);
-            const proximity = 10;
-
-            // Check if in proximity
-            //console.log("If distX(" + distanceX + ") AND distY(" + distanceY + ") < prox(" + proximity + ")" + this.trackMode + this.enterChargeMode);
-            if (distanceX < proximity && distanceY < proximity) {
-                //console.log("STOPPING BOSS CHARGE!");
-
-                // Set him back to standing if he arrives at the target marker
-                this.currentAnimation = "standing";
-
-                this.movementSpeed = 0;
-
-                // After 2 seconds start tracking marker onto player again
-                setTimeout(() => {
-                    this.readyForNextAttack = true;
-                }, this.timeDelayAfterCharge * 1000);
+                // Check if in proximity of target yet, if so then stop the charge and return to normal stance
+                if (distanceX < proximity && distanceY < proximity) {
+                    this.movementSpeed = 0;
+                    this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_stand.png"), 0, 0, 40, 84, 4, 0.25);
+                    this.tempTimer = -1;
+                    this.attackStatus = "none";
+                    this.enterChargeMode = false;
+                    this.targetMarker.animator.pauseAtFrame(10);
+                }
             }
+
         }
         // END of Handle Charge Attack
 
         // START of Handle Ground Smash Attack
         if (this.enterGroundSmashMode) {
-            // Stop boss's movement
-            this.movementSpeed = 0;
+            if (this.attackStatus === "none") {
+                this.attackStatus = "Ground Smashing";
 
-            // Stop tracking as we don't want him to act like a flopping dolphin
-            this.trackMode = false;
+                // First we set the ground smash animation
+                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_groundsmash.png"), 0, 0, 109, 100, 6, 0.35);
 
-            // Set ground smash animation
-            this.currentAnimation = "groundSmashing";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_groundsmash.png"), 0, 0, 109, 100, 6, 0.35);
+                this.trackMode = false;
+            }
 
-            // Place indication attack circle (0 damage for now). Do it from frame 1 to 6 of the smash animation
-            let newAttackCirc = this.game.addEntity(new AttackCirc(this.game, this, 200, "enemyAttack",
-                0, 0, 15,
-                null, 0, 0, 0,
-                15));
 
-            newAttackCirc.drawCircle = true;
+            // Spawn a warning attack circle (grey) for the attack that will be coming
+            if (!this.groundSmashMainAttackCircle) {
+                if (this.lastMove === "right") {
+                    this.groundSmashMainAttackCircle = this.game.addEntity(new AttackCirc(this.game, this, 150, "CAR_enemyAttack", 120, 130, 1.05, null, 0, this.atkPow * 2.5, 50, 0, 1));
+                } else {
+                    this.groundSmashMainAttackCircle = this.game.addEntity(new AttackCirc(this.game, this, 150, "CAR_enemyAttack", -120, 130, 1.05, null, 0, this.atkPow * 2.5, 50, 0, 1));
+                }
+                this.groundSmashMainAttackCircle.drawCircle = true;
+            }
 
-            // At the specified frame, delete the white attackCirc, and place a damaging red attack circ
-            setTimeout(() => {
-                newAttackCirc.removeFromWorld = true;
-                newAttackCirc = null;
+            // If we reach the last frame of the ground smashing animation, pause the animation for this.groundSmashDelayTime
+            if (this.attackStatus === "Ground Smashing" && (this.animator.currentFrame() === this.animator.frameCount - 1)) {
+                this.animator.pauseAtFrame(this.animator.frameCount - 1);
+                this.attackStatus = "Ground Smashed";
+            }
 
-                newAttackCirc = this.game.addEntity(new AttackCirc(this.game, this, 200, "enemyAttack",
-                    0, 0, 0.5,
-                    null, this.atkPow, 0, 0,
-                    5));
-                newAttackCirc.drawCircle = true;
-            }, ((this.animator.frameCount-4) * this.animator.frameDuration) * 1000);
+            if (this.attackStatus === "Ground Smashed") {
+                // If the tempTimer is === -1 then we need to set it to current time to start the timer
+                if (this.tempTimer === -1) {
+                    this.tempTimer = currentTime;
+                }
 
-            // After animation duration of swing, switch to hammer down frame.
-            setTimeout(() => {
-                // Pause on hammer down frame
-                this.currentAnimation = "groundSmashPause";
-                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_groundsmash.png"), 109*5, 0, 109, 100, 1, 1);
-
-                // After ground attack delay time, do a back dash
-                setTimeout(() => {
-                    // Turn on movement speed for this
+                // After this.groundSmashDelayTime has passed, invert movement to do a back-dash
+                if (currentTime - this.groundSmashDelayTime >= this.tempTimer) {
+                    this.animator.pauseAtFrame(-1);
+                    this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_backdash.png"), 0, 0, 62, 82, 1, 1);
                     this.movementSpeed = this.defaultSpeed;
-
-                    // Set dash sprite
-                    this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_backdash.png"), 0, 0, 62, 82, 1, 1)
-
-                    // Set inverse target direction to simulate a back dash
                     this.invertMovementDirection = true;
+                    this.attackStatus = "Back Dashing";
+                    this.tempTimer = -1;
+                }
+            }
 
-                    // After groundSmashDelayTime * 0.5, set to standing again, and say we are ready for the next attack decision, also make sure to set movement invert back to false
-                    setTimeout(() => {
-                        this.invertMovementDirection = false;
-                        this.currentAnimation = "standing";
-                        this.readyForNextAttack = true;
-                    }, (this.groundSmashDelayTime * 0.5) * 1000);
-                }, (this.groundSmashDelayTime * 1000));
+            if (this.attackStatus === "Back Dashing") {
+                // If the tempTimer is === -1 then we need to set it to current time to start the timer
+                if (this.tempTimer === -1) {
+                    this.tempTimer = currentTime;
+                }
 
-            }, (this.animator.frameCount * this.animator.frameDuration) * 1000);
-            this.enterGroundSmashMode = false;
-            this.readyForNextAttack = false;
+                // After this.backDashTime has passed while back dashing, switch back to non-attack mode
+                if (currentTime - this.backDashTime >= this.tempTimer) {
+                    this.movementSpeed = 0;
+                    this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_stand.png"), 0, 0, 40, 84, 4, 0.25);
+                    this.invertMovementDirection = false;
+                    this.tempTimer = -1;
+                    this.attackStatus = "none";
+                    this.enterGroundSmashMode = false;
+                    this.groundSmashMainAttackCircle = null;
+                }
+            }
         }
         // END of Ground Smash Attack
 

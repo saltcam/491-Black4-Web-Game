@@ -50,7 +50,7 @@ class GameEngine {
         /** Map scale for map 0 (Rest Area) */
         this.mapZeroScaleFactor = 1.5;
         /** Map scale for map 1 (Grasslands Map) */
-        this.mapOneScaleFactor = 2;
+        this.mapOneScaleFactor = 1;
         /** Map scale for map 2 (Cave Map) */
         this.mapTwoScaleFactor = 0.25;
         /** Map scale for map 3 (Space Map) */
@@ -113,7 +113,7 @@ class GameEngine {
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
-        this.eliteSpawnTimer = 1;
+        this.eliteSpawnTimer = 100;
         /** Spawn the boss after this many seconds of game time. */
         this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
@@ -176,7 +176,42 @@ class GameEngine {
 
     /** Call this to initialize the grassmands (Map #1) objects. */
     initGrasslandsObjects() {
-        this.addEntity(new Map_object(this, -250, 0, 86, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        // Visible Objects
+        let newEntity = this.addEntity(new Map_object(this, -250, 0, 86, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -1950, -2120, 185, 160, "./sprites/object_wall_debris.png", 0, 0, 215, 192, 1, 1, 1));
+        newEntity = this.addEntity(new Map_object(this, 250, 0, 170, 80, "./sprites/object_wall_debris2.png", 0, 0, 215, 192+50, 1, 1, 1));
+
+        // Invisible Objects
+        // Center Hole
+        newEntity = this.addEntity(new Map_object(this, -750, -1450, 375, 375, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);    // Essentially makes the sprite invisible by pausing on a frame that doesn't exist.
+        newEntity = this.addEntity(new Map_object(this, 475, -1375, 2100, 885, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, 1070, -850, 485, 200, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
+        // Top-Left Hole
+        newEntity = this.addEntity(new Map_object(this, -1785, -3000, 3100, 650, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
+        // Left Hole
+        newEntity = this.addEntity(new Map_object(this, -2310, 285, 727, 670, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, -1805, 145, 280, 390, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
+        // Bottom Hole
+        newEntity = this.addEntity(new Map_object(this, -130, 2125, 1400, 525, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, -35, 2420, 1210, 300, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
+        // Bottom-Right Hole
+        newEntity = this.addEntity(new Map_object(this, 2475, 1170, 450, 1260, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, 3025, 1070, 750, 2710, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
         this.mapObjectsInitialized = true;
     }
 
@@ -283,7 +318,7 @@ class GameEngine {
             this.portal = entity;
         } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss" || entity.boundingBox.type === "allys") {
             this.enemies.push(entity);
-        } else if (entity.boundingBox.type === "attack") {
+        } else if (entity.boundingBox.type.includes("attack") || entity.boundingBox.type.includes("Attack")) {
             this.attacks.push(entity);
         } else if (entity.boundingBox.type === "object") {
             this.objects.push(entity);
@@ -425,6 +460,20 @@ class GameEngine {
             return diff;
         });
 
+        // Draw 'attack' entities that are labeled as choreographed ('CAR_').
+        for (let attack of this.attacks) {
+            if (!attack.boundingBox.type.includes("CAR_")) {
+                continue;
+            }
+            attack.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode) {
+                //attack.drawHealth(this.ctx);
+                attack.boundingBox.draw(this.ctx, this);
+            }
+        }
+
         // Track if there is a boss spawned
         let bossEnemy = null;
 
@@ -442,8 +491,11 @@ class GameEngine {
             }
         }
 
-        // Draw 'attack' entities.
+        // Draw 'attack' entities not labeled as choreographed ('CAR_').
         for (let attack of this.attacks) {
+            if (attack.boundingBox.type.includes("CAR_")) {
+                continue;
+            }
             attack.draw(this.ctx, this);
 
             // If debug mode, then draw debug features.
@@ -497,6 +549,9 @@ class GameEngine {
         if (bossEnemy) {
             bossEnemy.drawBossHealthBar(this.ctx);
         }
+
+        // Draw gold currency tracker UI
+        this.drawGoldTracker(this.ctx);
 
         // Draw weapon upgrade screen.
         if (this.UPGRADE_SYSTEM) {
@@ -603,6 +658,28 @@ class GameEngine {
         ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
     }
 
+    /** Draws the gold currency tracker onto the game screen. */
+    drawGoldTracker(ctx) {
+        // Draw the currency bar background
+        let scaleFactor = 0.75;    // How much to scale the image
+        let image = ASSET_MANAGER.getAsset("./sprites/menu_currency_bar.png");
+        let destWidth = image.width * scaleFactor; // scale factor < 1 to reduce size
+        let destHeight = image.height * scaleFactor; // scale factor < 1 to reduce size
+        ctx.drawImage(image, 1288, 0, destWidth, destHeight);
+
+        // Draw the coin sprite
+        scaleFactor = 0.5;    // How much to scale the image
+        image = ASSET_MANAGER.getAsset("./sprites/object_coin.png");
+        destWidth = image.width * scaleFactor; // scale factor < 1 to reduce size
+        destHeight = image.height * scaleFactor; // scale factor < 1 to reduce size
+        ctx.drawImage(image, 1293, 13, destWidth, destHeight);
+
+        ctx.font = '26px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'left'
+        ctx.fillText(this.player.gold, 1320, 34);
+    }
+
     /** Call this method to spawn a portal to the next area. */
     spawnPortal(worldX, worldY, mapIndex) {
         this.addEntity(new Portal(this, worldX, worldY, mapIndex));
@@ -696,10 +773,10 @@ class GameEngine {
 
             // Calculate the actual boundaries considering the scaling
             this.mapBoundaries = {
-                left: -((this.mapWidth) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset,
-                top: -((this.mapHeight) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset,
-                right: ((this.mapWidth) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset,
-                bottom: ((this.mapHeight) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset
+                left: -((this.mapWidth) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset + 15,
+                top: -((this.mapHeight) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset - 15,
+                right: ((this.mapWidth) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset - 15,
+                bottom: ((this.mapHeight) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset - 30
             };
         }
         // If 2, then Cave Map is used.
@@ -978,6 +1055,7 @@ class GameEngine {
             if(this.attacks[i].duration <= 0) {
                 this.attacks[i].removeFromWorld = true;
             }
+
         }
 
         // Check if player is dead, if so: mark player for deletion.

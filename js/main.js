@@ -22,6 +22,11 @@ ASSET_MANAGER.queueDownload("./sprites/map_rest_area.png");
 ASSET_MANAGER.queueDownload("./sprites/object_treasure_chest.png");
 ASSET_MANAGER.queueDownload("./sprites/object_tombstone.png");
 ASSET_MANAGER.queueDownload("./sprites/object_coin_bag.png");
+ASSET_MANAGER.queueDownload("./sprites/object_coin.png");
+ASSET_MANAGER.queueDownload("./sprites/attack_targeting.png");
+ASSET_MANAGER.queueDownload("./sprites/object_wall_debris.png");
+ASSET_MANAGER.queueDownload("./sprites/object_wall_debris2.png");
+ASSET_MANAGER.queueDownload("./sprites/object_pillar_debris.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
@@ -30,6 +35,7 @@ ASSET_MANAGER.queueDownload("./sprites/menu_player_upgrade.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_size.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_reduce_cd.png");
+ASSET_MANAGER.queueDownload("./sprites/menu_currency_bar.png");
 
 //player
 ASSET_MANAGER.queueDownload("./sprites/McIdle.png");

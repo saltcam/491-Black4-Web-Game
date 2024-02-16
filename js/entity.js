@@ -103,7 +103,7 @@ class Entity {
             const selfCenter = this.calculateCenter();
 
             // Calculate direction vector towards the target's center
-            const dirX = targetCenter.x + 16 - selfCenter.x;
+            const dirX = targetCenter.x - selfCenter.x;
             const dirY = targetCenter.y - selfCenter.y;
 
             // Normalize the direction

@@ -10,7 +10,7 @@ class Projectile extends Entity{
             0, 0,
             this.duration,
             null,
-            atkPow,
+            atkPow, 0,
             pushbackForce,
             spriteRotationSpeed, attackTick));
     }
