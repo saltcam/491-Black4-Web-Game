@@ -1,9 +1,10 @@
 class Weapon_staff extends Weapon {
     constructor(game) {
         let upgrades = [
-            new Upgrade("Staff1", "Description"),
-            new Upgrade("Staff2", "Description"),
-            new Upgrade("Staff3", "Description")];
+            new Upgrade("Attack Size +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Primary CD -10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Secondary CD -10%", "Stackable, Multiplicative.", false,"./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Knockback +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png")];
 
         super(game, "Staff", 1, 2,
             10, 10,

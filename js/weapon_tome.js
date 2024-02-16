@@ -1,9 +1,10 @@
 class Weapon_tome extends Weapon {
     constructor(game) {
         let upgrades = [
-            new Upgrade("Tome1", "Description"),
-            new Upgrade("Tome2", "Description"),
-            new Upgrade("Tome3", "Description")];
+            new Upgrade("Attack Size +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Primary CD -10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Secondary CD -10%", "Stackable, Multiplicative.", false,"./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Knockback +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png")];
 
         super(game, "Tome", 1, 2,
             15, 15,
