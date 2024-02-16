@@ -179,7 +179,8 @@ class GameEngine {
         // Visible Objects
         let newEntity = this.addEntity(new Map_object(this, -250, 0, 86, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
         newEntity = this.addEntity(new Map_object(this, -1950, -2120, 185, 160, "./sprites/object_wall_debris.png", 0, 0, 215, 192, 1, 1, 1));
-        newEntity = this.addEntity(new Map_object(this, 250, 0, 170, 80, "./sprites/object_wall_debris2.png", 0, 0, 215, 192+50, 1, 1, 1));
+        newEntity = this.addEntity(new Map_object(this, 1710, 2641, 170, 80, "./sprites/object_wall_debris2.png", 0, 0, 215, 192+50, 1, 1, 1));
+        newEntity = this.addEntity(new Map_object(this, 500, 0, 0, 80, "./sprites/object_pillar_debris.png", 0, 0, 215, 192+50, 1, 1, 1));
 
         // Invisible Objects
         // Center Hole
