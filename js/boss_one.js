@@ -46,7 +46,7 @@ class BossOne extends Entity {
 
         /** Target direction marker. Tracks where the boss should be pathing to next. */
         this.targetMarker = this.game.addEntity(new Entity(1, 1, 0, this.game,
-            0, 0, 5, 5, "marker",
+            0, 0, 5, 5, "attackMarker",
             0,
             "./sprites/attack_targeting.png",
             0, 0, 92, 92, 4, 0.25, 2, 0));
@@ -243,7 +243,7 @@ class BossOne extends Entity {
 
                 const distanceX = Math.abs(Math.abs(bossCenterX - markerCenterX) - 15);
                 const distanceY = Math.abs(bossCenterY - markerCenterY);
-                const proximity = 10;
+                const proximity = 20;
 
                 // Check if in proximity of target yet, if so then stop the charge and return to normal stance
                 if (distanceX < proximity && distanceY < proximity) {

@@ -50,7 +50,7 @@ class GameEngine {
         /** Map scale for map 0 (Rest Area) */
         this.mapZeroScaleFactor = 1.5;
         /** Map scale for map 1 (Grasslands Map) */
-        this.mapOneScaleFactor = 2;
+        this.mapOneScaleFactor = 1;
         /** Map scale for map 2 (Cave Map) */
         this.mapTwoScaleFactor = 0.25;
         /** Map scale for map 3 (Space Map) */
@@ -176,7 +176,42 @@ class GameEngine {
 
     /** Call this to initialize the grassmands (Map #1) objects. */
     initGrasslandsObjects() {
-        this.addEntity(new Map_object(this, -250, 0, 86, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        // Visible Objects
+        let newEntity = this.addEntity(new Map_object(this, -250, 0, 86, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -1950, -2120, 185, 160, "./sprites/object_wall_debris.png", 0, 0, 215, 192, 1, 1, 1));
+        newEntity = this.addEntity(new Map_object(this, 250, 0, 170, 80, "./sprites/object_wall_debris2.png", 0, 0, 215, 192+50, 1, 1, 1));
+
+        // Invisible Objects
+        // Center Hole
+        newEntity = this.addEntity(new Map_object(this, -750, -1450, 375, 375, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);    // Essentially makes the sprite invisible by pausing on a frame that doesn't exist.
+        newEntity = this.addEntity(new Map_object(this, 475, -1375, 2100, 885, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, 1070, -850, 485, 200, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
+        // Top-Left Hole
+        newEntity = this.addEntity(new Map_object(this, -1785, -3000, 3100, 650, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
+        // Left Hole
+        newEntity = this.addEntity(new Map_object(this, -2310, 285, 727, 670, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, -1805, 145, 280, 390, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
+        // Bottom Hole
+        newEntity = this.addEntity(new Map_object(this, -130, 2125, 1400, 525, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, -35, 2420, 1210, 300, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
+        // Bottom-Right Hole
+        newEntity = this.addEntity(new Map_object(this, 2475, 1170, 450, 1260, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, 3025, 1070, 750, 2710, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+
         this.mapObjectsInitialized = true;
     }
 
@@ -427,7 +462,7 @@ class GameEngine {
 
         // Draw 'attack' entities that are labeled as choreographed ('CAR_').
         for (let attack of this.attacks) {
-            if (!attack.type.includes("CAR_")) {
+            if (!attack.boundingBox.type.includes("CAR_")) {
                 continue;
             }
             attack.draw(this.ctx, this);
@@ -458,7 +493,7 @@ class GameEngine {
 
         // Draw 'attack' entities not labeled as choreographed ('CAR_').
         for (let attack of this.attacks) {
-            if (attack.type.includes("CAR_")) {
+            if (attack.boundingBox.type.includes("CAR_")) {
                 continue;
             }
             attack.draw(this.ctx, this);
@@ -738,10 +773,10 @@ class GameEngine {
 
             // Calculate the actual boundaries considering the scaling
             this.mapBoundaries = {
-                left: -((this.mapWidth) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset,
-                top: -((this.mapHeight) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset,
-                right: ((this.mapWidth) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset,
-                bottom: ((this.mapHeight) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset
+                left: -((this.mapWidth) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset + 15,
+                top: -((this.mapHeight) * this.mapOneScaleFactor)/2 + this.mapBoundaryOffset - 15,
+                right: ((this.mapWidth) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset - 15,
+                bottom: ((this.mapHeight) * this.mapOneScaleFactor)/2 - this.mapBoundaryOffset - 30
             };
         }
         // If 2, then Cave Map is used.

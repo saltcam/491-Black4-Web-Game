@@ -24,6 +24,9 @@ ASSET_MANAGER.queueDownload("./sprites/object_tombstone.png");
 ASSET_MANAGER.queueDownload("./sprites/object_coin_bag.png");
 ASSET_MANAGER.queueDownload("./sprites/object_coin.png");
 ASSET_MANAGER.queueDownload("./sprites/attack_targeting.png");
+ASSET_MANAGER.queueDownload("./sprites/object_wall_debris.png");
+ASSET_MANAGER.queueDownload("./sprites/object_wall_debris2.png");
+ASSET_MANAGER.queueDownload("./sprites/object_pillar_debris.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
