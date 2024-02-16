@@ -1,12 +1,13 @@
 class Weapon_scythe extends Weapon{
     constructor(game) {
+        //"./sprites/upgrade_size.png"
         let upgrades = [
-            new Upgrade("Scythe1", "Description"),
-            new Upgrade("Scythe2", "Description"),
-            new Upgrade("Scythe3", "Description"),
-            new Upgrade("Scythe4", "Description"),
-            new Upgrade("Scythe5", "Description"),
-            new Upgrade("Scythe6", "Description")];
+            new Upgrade("Attack Size +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Primary CD -10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Secondary CD -10%", "Stackable, Multiplicative.", false,"./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Knockback +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Blood Scythe", "Unique: Scythe Attack Life Leech +15%.", true, "./sprites/upgrade_size.png"),
+            new Upgrade("Dual Blade", "Unique: Primary Scythe attack hits behind you as well.", true, "./sprites/upgrade_size.png")];
 
         super(game, "Scythe", 1, 2,
             30, 60,
@@ -70,5 +71,29 @@ class Weapon_scythe extends Weapon{
                 this.secondaryAttackPushbackForce,
                 0.3, 1));
         }
+    }
+
+    // handles generic upgrades, add a switch case for the index of your
+    genericUpgrade(){
+
+        for (let i = 0; i < this.upgradeList.length; i++) {
+            if(this.upgradeList[i].active && !this.upgradeList[i].special){
+                switch (this.upgradeList[i].name){
+                    case "Attack Size +10%":
+                        this.primaryAttackRadius *= 1.10;
+                        this.secondaryAttackRadius *= 1.10;
+                        break;
+                    case "Primary CD -10%":
+                        this.primaryCool *= 0.9;
+                        break;
+                    case "Secondary CD -10%":
+                        this.secondCool *= 0.9;
+                        break;
+                }
+                this.upgradeList[i].active = false;
+            }
+
+        }
+
     }
 }

@@ -119,7 +119,11 @@ class Upgrade_System {
                 }
                 if (upgradeChoice !== -1) {
                     // if a choice was made, set the upgrade chosen to be active. I love aliases!!
+                    // attempts a special upgrade, handles generics if given them
                     this.upgradeOptions[upgradeChoice].active = true;
+                    //attempt a generic upgrade
+                    this.game.player.weapons[this.weaponChoice].genericUpgrade();
+
                 }
 
             }
@@ -212,35 +216,6 @@ class Upgrade_System {
         this.currentMenu = 4;
     }
 
-    /** Returns a sprite for an upgrade text. */
-    setUpgradeSprite(ctx, upgradeText, entryNumber) {
-
-        // If upgrade is +Attack Size
-        if (upgradeText === this.genericWeaponUpgrades[0]) {
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
-            this.animator.scale = 0.3;
-            this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 60 - (this.animator.width * this.animator.scale)-70, (270 + (100 * entryNumber))-48);
-        }
-        // If upgrade is -PrimaryCD
-        else if (upgradeText === this.genericWeaponUpgrades[1]) {
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_reduce_cd.png"), 0, 0, 178, 178, 1, 1);
-            this.animator.scale = 0.3;
-            this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 60 - (this.animator.width * this.animator.scale)-70, (270 + (100 * entryNumber))-48);
-        }
-        // If upgrade is -SecondaryCD
-        else if (upgradeText === this.genericWeaponUpgrades[2]) {
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_reduce_cd.png"), 0, 0, 178, 178, 1, 1);
-            this.animator.scale = 0.3;
-            this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 60 - (this.animator.width * this.animator.scale)-70, (270 + (100 * entryNumber))-48);
-        }
-        // If no associated sprite found, use debug icon
-        else {
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/debug_warning.png"), 0, 0, 74, 74, 1, 1);
-            this.animator.scale = 0.5;
-            this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 95 - (this.animator.width * this.animator.scale), (270 + (100 * entryNumber)));
-        }
-    }
-
     /** Call this to draw menu #0 - 'Choose a Weapon to Upgrade'. */
     drawMenuZero(ctx) {
         // Handle drawing the text to each upgrade menu entry
@@ -281,6 +256,10 @@ class Upgrade_System {
         ctx.fillText("Choose a " + this.game.player.weapons[this.weaponChoice].name + " Upgrade", (ctx.canvas.width / 2) - 15, 225);
 
         for (let i = 0; i < 3; i++) {
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset(this.upgradeOptions[i].sprite), 0, 0, 178, 178, 1, 1);
+            this.animator.scale = 0.3;
+            this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - 60 - (this.animator.width * this.animator.scale)-70, (270 + (100 * i))-48);
+
             ctx.textAlign = 'left';
             ctx.font = '25px Arial';
             ctx.fillText(this.upgradeOptions[i].name, (ctx.canvas.width / 2) - 50, 300 + i*100);

@@ -114,24 +114,5 @@ class Weapon {
 
     }
 
-    genericUpgrade(upgradeChoice){
-        switch (upgradeChoice){
-            case 1:
-                this.primaryAttackRadius *= 1.15;
-                this.secondaryAttackRadius *= 1.15;
-                break;
-            case 2:
-                this.primaryCool *= 0.9;
-                break;
-            case 3:
-            this.secondCool *= 0.9;
-                break;
-        }
-    }
-
-    specialUpgrade(index){
-        this.upgradeList[index].active = true;
-    }
-
 
 }
