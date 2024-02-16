@@ -1,12 +1,18 @@
 class Weapon_tome extends Weapon {
     constructor(game) {
+        let upgrades = [
+            new Upgrade("Attack Size +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Primary CD -10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Secondary CD -10%", "Stackable, Multiplicative.", false,"./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Knockback +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png")];
+
         super(game, "Tome", 1, 2,
             15, 15,
             5, 1,
             20, 115,
             2, 5,
             "./sprites/Tome.png",
-            "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40);
+            "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40, upgrades);
 
     }
 
@@ -75,6 +81,29 @@ class Weapon_tome extends Weapon {
         }
 
 
+
+    }
+
+    genericUpgrade(){
+
+        for (let i = 0; i < this.upgradeList.length; i++) {
+            if(this.upgradeList[i].active && !this.upgradeList[i].special){
+                switch (this.upgradeList[i].name){
+                    case "Attack Size +10%":
+                        this.primaryAttackRadius *= 1.10;
+                        this.secondaryAttackRadius *= 1.10;
+                        break;
+                    case "Primary CD -10%":
+                        this.primaryCool *= 0.9;
+                        break;
+                    case "Secondary CD -10%":
+                        this.secondCool *= 0.9;
+                        break;
+                }
+                this.upgradeList[i].active = false;
+            }
+
+        }
 
     }
 

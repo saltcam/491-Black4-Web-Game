@@ -1,12 +1,21 @@
 class Weapon_scythe extends Weapon{
     constructor(game) {
+        //"./sprites/upgrade_size.png"
+        let upgrades = [
+            new Upgrade("Attack Size +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Primary CD -10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Secondary CD -10%", "Stackable, Multiplicative.", false,"./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Knockback +10%", "Stackable, Multiplicative.", false, "./sprites/upgrade_size.png"),
+            new Upgrade("Blood Scythe", "Unique: Scythe Attack Life Leech +15%.", true, "./sprites/upgrade_size.png"),
+            new Upgrade("Dual Blade", "Unique: Primary Scythe attack hits behind you as well.", true, "./sprites/upgrade_size.png")];
+
         super(game, "Scythe", 1, 2,
             30, 60,
             9, 14,
             110, 115,
             0.6, 0.85,
             "./sprites/weapon_scythe.png",
-            "./sounds/SE_scythe_primary.mp3", "./sounds/SE_scythe_secondary.mp3", 30, 50);
+            "./sounds/SE_scythe_primary.mp3", "./sounds/SE_scythe_secondary.mp3", 30, 50, upgrades);
     }
 
     performPrimaryAttack(player){
@@ -62,5 +71,29 @@ class Weapon_scythe extends Weapon{
                 this.secondaryAttackPushbackForce,
                 0.3, 1));
         }
+    }
+
+    // handles generic upgrades, add a switch case for the index of your
+    genericUpgrade(){
+
+        for (let i = 0; i < this.upgradeList.length; i++) {
+            if(this.upgradeList[i].active && !this.upgradeList[i].special){
+                switch (this.upgradeList[i].name){
+                    case "Attack Size +10%":
+                        this.primaryAttackRadius *= 1.10;
+                        this.secondaryAttackRadius *= 1.10;
+                        break;
+                    case "Primary CD -10%":
+                        this.primaryCool *= 0.9;
+                        break;
+                    case "Secondary CD -10%":
+                        this.secondCool *= 0.9;
+                        break;
+                }
+                this.upgradeList[i].active = false;
+            }
+
+        }
+
     }
 }

@@ -111,6 +111,35 @@ class AttackCirc {
                     }
                 });
 
+                this.game.objects.forEach((object) => {
+                    if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
+
+                        switch(this.type) {
+                            case "necromancyAttack":
+                                this.game.addEntity(new Ally_Contact(
+                                    "Ally", 25, 25,
+                                    10, this.game, object.worldX, object.worldY, 19/2,
+                                    28/2, "ally", 115, "./sprites/Zombie_Run.png",
+                                    0, 0, 34, 27,
+                                    8, 0.2, 3, 1));
+                                object.removeFromWorld = true;
+                                this.lastAttackTime = currentTime;
+                                break;
+                            case "explosionAttack":
+                                object.willExplode(this);
+                                object.removeFromWorld = true;
+                                this.lastAttackTime = currentTime;
+                                break;
+                            default:
+                                console.log("Tombstone hit with something else");
+                        }
+                        //console.log("necromancy!");
+                        // Push the enemy away
+                        //this.pushEnemy(enemy);
+
+                    }
+                });
+
                 // Additional logic for specific types...
             } else if (this.type.includes("enemyAttack") && this.collisionDetection(this.game.player.boundingBox)) {
                 this.game.player.takeDamage(this.attackDamage);
