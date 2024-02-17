@@ -38,6 +38,16 @@ ASSET_MANAGER.queueDownload("./sprites/upgrade_piercing.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_scythe.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_tome.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_staff.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_dash_cooldown.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_health_regen.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_max_health.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_movement_speed.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_projectile_speed.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_attack_damage.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_pickup_range.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_dash_distance.png");
+ASSET_MANAGER.queueDownload("./sprites/weapon_blood_scythe_primaryattack.png");
+ASSET_MANAGER.queueDownload("./sprites/weapon_blood_scythe_secondaryattack.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");

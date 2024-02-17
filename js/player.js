@@ -6,11 +6,21 @@
  * For McWalk.png, use width of 32, height of 28, frameCount of 8, and frameDuration of 0.1, scale 2.2
  */
 class Player extends Entity {
+
     constructor(game) {
         super(100, 100, 30, game, 0, 0,
             17, 29, "player", 200,
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
+
+        this.upgrades = [
+            new Upgrade("Health +10", "(Stackable, Additive).", false, "./sprites/upgrade_max_health.png"),
+            new Upgrade("Health Regen CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_health_regen.png"),
+            new Upgrade("Dash CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_cooldown.png"),
+            new Upgrade("Movement Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_movement_speed.png"),
+            new Upgrade("Attack Damage +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
+            new Upgrade("Pickup Range +20%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png"),
+            new Upgrade("Dash Distance +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png")];
 
         // Animation settings
         this.lastMove = "right"; // Default direction
@@ -18,7 +28,7 @@ class Player extends Entity {
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
 
         // Dash implementation
-        this.defaultDashCooldown = 1;   // This is the actual cooldown of dash that will be used each time we dash
+        this.defaultDashCooldown = 2;   // This is the actual cooldown of dash that will be used each time we dash
         this.currentDashCooldown = this.defaultDashCooldown;    // This holds the current time left till we can dash again
         this.dashSpeedMultiplier = 3;
         this.dashDuration = .5;
@@ -36,7 +46,72 @@ class Player extends Entity {
         this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching
         this.lastWeaponSwitchTime = 0;
         this.controlsEnabled = true;    // If false, player cannot input controls.
+        this.pickupRange = 200;
     };
+
+    // Handles code for turning on upgrades (Generic and Specific)
+    handleUpgrade() {
+        for (let i = 0; i < this.upgrades.length; i++) {
+            // If generic has been turned on
+            if (this.upgrades[i].active && !this.upgrades[i].special) {
+                switch (this.upgrades[i].name) {
+                    case "Health +10":
+                        this.maxHP += 10;
+                        this.heal(10);
+                        break;
+                    case "Health Regen CD -10%":
+                        this.healthRegenTime *= 0.9;
+                        break;
+                    case "Dash CD -10%":
+                        this.defaultDashCooldown *= 0.9;
+                        break;
+                    case "Movement Speed +10%":
+                        this.movementSpeed *= 1.1;
+                        break;
+                    case "Attack Damage +10%":
+                        this.atkPow *= 1.1;
+                        break;
+                    case "Pickup Range +20%":
+                        this.pickupRange *= 1.2;
+                        break;
+                    case "Dash Distance +10%":
+                        this.dashDuration *= 1.1;
+                        break;
+                }
+                // Set generic to 'false' so it can be re-used/activated in the future
+                this.upgrades[i].active = false;
+            }
+        }
+    }
+
+    /**
+     * Randomly choose 3 upgrades to show for a player upgrade screen.
+     * Returns a randomly generated array of size 3
+     * TODO still needs to handle what happens when you can't fill 3 slots
+     */
+    threeRandomUpgrades(){
+        // Check if the input array has less than 3 elements
+
+        let result = [];
+        let indexes = new Set(); // To keep track of already selected indexes
+        while (indexes.size < 3) {
+            let randomIndex = Math.floor(Math.random() * this.upgrades.length);
+            //console.log("CHOSE " + randomIndex);
+            if (!indexes.has(randomIndex) && !this.upgrades[randomIndex].active) {
+                // If the upgrade selected is 'special' lets add a rarity to it even being chosen
+                if (this.upgrades[randomIndex].special && (Math.random() < 1)) { // 20% chance that we let this special upgrade show up
+                    indexes.add(randomIndex);
+                    result.push(this.upgrades[randomIndex]);
+                }
+                // Else if not special just add it to the list of upgrades then
+                else if (!this.upgrades[randomIndex].special){
+                    indexes.add(randomIndex);
+                    result.push(this.upgrades[randomIndex]);
+                }
+            }
+        }
+        return result;
+    }
 
     update() {
         super.update();
@@ -83,9 +158,9 @@ class Player extends Entity {
         // if we are ready to trigger another attack.
         const currentTime = this.game.timer.gameTime;
 
-        // Handle health regen
-        if ((currentTime - this.timeSinceLastHealthRegen >= this.healthRegenTime) && (this.currHP < this.maxHP)) {
-            this.currHP += 1;
+        // Handle passive health regen
+        if ((currentTime - this.timeSinceLastHealthRegen >= this.healthRegenTime)) {
+            this.heal(1);
             this.timeSinceLastHealthRegen = currentTime;
         }
 

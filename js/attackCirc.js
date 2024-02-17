@@ -85,6 +85,9 @@ class AttackCirc {
         this.hitEntities = new Set(); // Tracks entities already hit if pulsatingDamage is false
 
         this.damageDealt = false;
+
+        // The amount this attack circle leeches health back to the attacker if the attackType.includes("VAMP_")
+        this.leechPercent = 0.03;
     }
 
 
@@ -112,6 +115,12 @@ class AttackCirc {
             this.game.enemies.forEach(enemy => {
                 if (!this.hitEntities.has(enemy) && this.collisionDetection(enemy.boundingBox)) {
                     enemy.takeDamage(this.attackDamage);
+
+                    // Handle leech healing if it's that kind of situation
+                    if (this.type.includes("VAMP_")) {
+                        this.entity.heal(this.attackDamage * this.leechPercent);
+                    }
+
                     this.pushEnemy(enemy);
                     this.hitEntities.add(enemy);
 
@@ -127,6 +136,11 @@ class AttackCirc {
             if (!this.damageDealt && this.collisionDetection(this.game.player.boundingBox)) {
                 this.game.player.takeDamage(this.attackDamage);
 
+                // Handle leech healing if it's that kind of situation
+                if (this.type.includes("VAMP_")) {
+                    this.entity.heal(this.attackDamage * this.leechPercent);
+                }
+
                 // If we are attacking via a projectile, then --maxHits to track pierced targets
                 if (this.entity instanceof Projectile) {
                     this.entity.maxHits -= 1;
@@ -139,13 +153,18 @@ class AttackCirc {
         else if (this.attackDamage !== 0 && (currentTime - this.lastAttackTime >= this.attackCooldown * 1000)) { // Convert attackCooldown to milliseconds
             this.damageDealt = false; // Flag to track if damage was dealt
 
-            // Handling different player attack types
+            // Handling different player vs enemy attack types
             if (["playerAttack", "necromancyAttack", "explosionAttack"].includes(this.type)) {
                 this.game.enemies.forEach(enemy => {
                     if (this.collisionDetection(enemy.boundingBox)) {
                         enemy.takeDamage(this.attackDamage);
                         this.pushEnemy(enemy);
                         this.damageDealt = true; // Set flag as true since damage was dealt
+
+                        // Handle leech healing if it's that kind of situation
+                        if (this.type.includes("VAMP_")) {
+                            this.entity.heal(this.attackDamage * this.leechPercent);
+                        }
 
                         // If we are attacking via a projectile, then --maxHits to track pierced targets
                         if (this.entity instanceof Projectile) {
@@ -182,11 +201,16 @@ class AttackCirc {
 
                     }
                 });
-
-                // Additional logic for specific types...
-            } else if (this.type.includes("enemyAttack") && this.collisionDetection(this.game.player.boundingBox)) {
+            }
+            // Handle enemy vs player pulsating damage attack
+            else if (this.type.includes("enemyAttack") && this.collisionDetection(this.game.player.boundingBox)) {
                 this.game.player.takeDamage(this.attackDamage);
                 this.damageDealt = true;
+
+                // Handle leech healing if it's that kind of situation
+                if (this.type.includes("VAMP_")) {
+                    this.entity.heal(this.attackDamage * this.leechPercent);
+                }
             }
 
             // Update lastAttackTime if damage was dealt

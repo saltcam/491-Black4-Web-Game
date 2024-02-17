@@ -19,6 +19,8 @@ class GameEngine {
         this.attacks = [];
         /** Tracks the items on the map. */
         this.items = [];
+        /** Tracks the damage numbers on the map. */
+        this.damageNumbers = [];
         /** Tracks the player entity. */
         this.player = null;
         /** Tracks the currently spawned boss. */
@@ -95,15 +97,15 @@ class GameEngine {
 
         /** An array of all potential (non-boss) enemy types. */
         this.enemyTypes = [
-            { name: "Zombie", maxHP: 47, currHP: 47, atkPow: 8, worldX: 0, worldY: 0, boxWidth: 19/2,
+            { name: "Zombie", maxHP: 47, currHP: 47, atkPow: 7, worldX: 0, worldY: 0, boxWidth: 19/2,
                 boxHeight: 28/2, boxType: "enemy", speed: 100, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
-                animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: 5},
-            { name: "Slime", maxHP: 62, currHP: 62, atkPow: 10, worldX: 0, worldY: 0, boxWidth: 19/2,
-                boxHeight: 28/2, boxType: "enemy", speed: 75, spritePath: "./sprites/SlimeMove.png", animXStart: 0,
+                animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: -1},
+            { name: "Slime", maxHP: 62, currHP: 62, atkPow: 10, worldX: 0, worldY: 0, boxWidth: 18,
+                boxHeight: 10, boxType: "enemy", speed: 75, spritePath: "./sprites/SlimeMove.png", animXStart: -1,
                 animYStart: 0, animW: 32, animH: 18, animFCount: 8, animFDur: 0.1, scale: 2, exp: 1},
-            { name: "Floating Eye", maxHP: 30, currHP: 30, atkPow: 6, worldX: 0, worldY: 0,
+            { name: "Floating Eye", maxHP: 30, currHP: 30, atkPow: 5, worldX: 0, worldY: 0,
                 boxWidth: 19/2, boxHeight: 28/2, boxType: "enemy", speed: 165, spritePath: "./sprites/FloatingEye.png",
-                animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: 2}
+                animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: -1}
         ];
 
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
@@ -113,7 +115,7 @@ class GameEngine {
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
-        this.eliteSpawnTimer = 100;
+        this.eliteSpawnTimer = 50;
         /** Spawn the boss after this many seconds of game time. */
         this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
@@ -333,6 +335,8 @@ class GameEngine {
             this.attacks.push(entity);
         } else if (entity.boundingBox.type === "object") {
             this.objects.push(entity);
+        } else if (entity.boundingBox.type === "damageNumber") {
+            this.damageNumbers.push(entity);
         }
         // Everything else is stored in entities list (Attack collision objects etc.)
         else {
@@ -349,7 +353,7 @@ class GameEngine {
         // Calculate the maximum number of enemies based on elapsed time
         let maxEnemies = this.baseMaxEnemies + (this.baseMaxEnemies * intervals); // Start with 15 and add 15 for each interval
 
-        console.log("Max enemies = " + maxEnemies + ". Curr enemies = " + this.enemies.length);
+        //("Max enemies = " + maxEnemies + ". Curr enemies = " + this.enemies.length);
 
         //console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
 
@@ -549,7 +553,11 @@ class GameEngine {
             }
         }
 
-        // Draw UI elemnts
+        // Draw UI elements
+        // Draw damage/heal numbers
+        for (let text of this.damageNumbers) {
+            text.draw(this.ctx);
+        }
         // Draw boss health bar.
         if (bossEnemy) {
             bossEnemy.drawBossHealthBar(this.ctx);
@@ -939,6 +947,13 @@ class GameEngine {
                     this.portal.handlePlayerInteraction(this.player);
                 }
             }
+
+            // Update damage numbers
+            for (let i = 0; i < this.damageNumbers.length; i++) {
+                if (!this.damageNumbers[i].removeFromWorld) {
+                    this.damageNumbers[i].update();
+                }
+            }
         }
 
         // UI Updates, this should happen even while the game is paused.
@@ -1026,6 +1041,13 @@ class GameEngine {
         // Remove 'player' entity if marked for deletion.
         if (this.player && this.player.removeFromWorld) {
             //this.player = null;   // If this is commented out, we don't delete the player entity on death.
+        }
+
+        // Remove damage numbers marked for deletion.
+        for (let i = this.damageNumbers.length - 1; i >= 0; --i) {
+            if (this.damageNumbers[i].removeFromWorld) {
+                this.damageNumbers.splice(i, 1);
+            }
         }
 
         // Update the elapsed time. (only while un-paused)

@@ -5,25 +5,26 @@ class Weapon_tome extends Weapon {
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
             new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png"),
-            new Upgrade("Primary Piercing +1", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png")];
+            new Upgrade("Primary Piercing +1", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png"),
+            new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png")];
 
         super(game, "Tome", 1, 2,
             0, 0,
             3, 1,
-            10, 90,
+            7, 55,
             3, 5,
             "./sprites/Tome.png",
             "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40, upgrades);
 
         // Save these values for calculations later
-        this.initialPrimaryAttackRadius = this.primaryAttackRadius;
-        this.initialSecondaryAttackRadius = this.secondaryAttackRadius;
+        this.initialPrimaryAttackRadius = 10;//this.primaryAttackRadius;
+        this.initialSecondaryAttackRadius = 90;//this.secondaryAttackRadius;
 
         // Effectively acts as max pierced targets before deleting projectiles
         this.maxPrimaryHits = 1;
         this.maxSecondaryHits = -1; // -1 Means infinite pierce
-        this.primaryProjectileMovementSpeed = 75;
-        this.secondaryProjectileMovementSpeed = 2;
+        this.primaryProjectileMovementSpeed = 60;
+        this.secondaryProjectileMovementSpeed = 3.5;
     }
 
     performPrimaryAttack(player) {
@@ -83,11 +84,11 @@ class Weapon_tome extends Weapon {
 
 
             this.lastSecondAttackTime = currentTime;
-            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 2,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 4,
                 player.worldX, player.worldY, 10, 10, "playerAttack", this.secondaryProjectileMovementSpeed,
                 "./sprites/exp_orb.png",
                 0, 0, 17, 17, 3, 0.2, 10 * (this.secondaryAttackRadius/this.initialSecondaryAttackRadius), dx, dy,
-                this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 0.3));
+                this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 0.25));
             newProjectile.maxHits = this.maxSecondaryHits; // Apply max pierce
             newProjectile.attackCirc.pulsatingDamage = true; // Tell the projectile that this attack pulsates damage.
         }
@@ -95,16 +96,16 @@ class Weapon_tome extends Weapon {
 
     // Handles code for turning on upgrades (Generic and Specific)
     handleUpgrade() {
-        for (let i = 0; i < this.upgradeList.length; i++) {
+        for (let i = 0; i < this.upgrades.length; i++) {
             // If generic has been turned on
-            if (this.upgradeList[i].active && !this.upgradeList[i].special) {
-                switch (this.upgradeList[i].name) {
+            if (this.upgrades[i].active && !this.upgrades[i].special) {
+                switch (this.upgrades[i].name) {
                     case "Attack Size +10%":
                         console.log("REACHED!");
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
 
-                        // Fixes a bug where size affected movement speed
+                        // Fixes a bug where size affected projectile movement speed
                         // TODO THIS IS NOT A PERFECT BUG-FIX, need to find the real issue!!!
                         this.primaryProjectileMovementSpeed *= 0.9;
                         this.secondaryProjectileMovementSpeed *= 0.9;
@@ -122,9 +123,11 @@ class Weapon_tome extends Weapon {
                     case "Primary Piercing +1":
                         this.maxPrimaryHits += 1;
                         break;
+                    case "Projectile Speed +10%":
+                        this.primaryProjectileMovementSpeed *= 1.1;
                 }
                 // Set generic to 'not active' so it can be re-used/activated in the future
-                this.upgradeList[i].active = false;
+                this.upgrades[i].active = false;
             }
         }
     }

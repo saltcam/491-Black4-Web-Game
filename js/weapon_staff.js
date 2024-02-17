@@ -98,10 +98,10 @@ class Weapon_staff extends Weapon {
 
     // Handles code for turning on upgrades (Generic and Specific)
     handleUpgrade() {
-        for (let i = 0; i < this.upgradeList.length; i++) {
+        for (let i = 0; i < this.upgrades.length; i++) {
             // If generic has been turned on
-            if (this.upgradeList[i].active && !this.upgradeList[i].special) {
-                switch (this.upgradeList[i].name) {
+            if (this.upgrades[i].active && !this.upgrades[i].special) {
+                switch (this.upgrades[i].name) {
                     case "Attack Size +10%":
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
@@ -118,7 +118,7 @@ class Weapon_staff extends Weapon {
                         break;
                 }
                 // Set generic to not active so it can be re-used/activated in the future
-                this.upgradeList[i].active = false;
+                this.upgrades[i].active = false;
             }
         }
     }

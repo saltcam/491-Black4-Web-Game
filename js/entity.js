@@ -41,6 +41,11 @@ class Entity {
         this.recentDamage = 0;
         this.lastDamageTime = 0;
         this.isElite = false;
+
+        // If -1 exp was given, that means we calculate the exp automatically based off entity's supposed difficulty
+        if (this.exp === -1) {
+            this.exp = (this.maxHP/12) + (this.atkPow/4);
+        }
     }
 
     update() {
@@ -82,15 +87,26 @@ class Entity {
         ctx.closePath();
     }
 
-    // Override takeDamage to track recent damage and last damage time
-    takeDamage(amount) {
-        // Apply the damage sprite to this entity
-        this.animator.damageSprite(250);
+    // Call this to heal entities/give them more currHP (without over-healing)
+    heal(healHp) {
+        if (this.currHP + healHp <= this.maxHP) {
+            this.currHP += healHp;
+            // Spawn floating healing number
+            this.game.addEntity(new Floating_text(this.game, healHp, this.worldX, this.worldY, true, this instanceof Player));
+        }
+    }
 
+    takeDamage(amount) {
         this.currHP -= amount;
         if (this.currHP <= 0) {
             this.currHP = 0;
+            this.isDead = true;
         }
+        // Apply the damage sprite to this entity
+        this.animator.damageSprite(250);
+
+        // Spawn floating damage number
+        this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY, false, this instanceof Player));
 
         this.recentDamage += amount;
         this.lastDamageTime = this.game.timer.gameTime;

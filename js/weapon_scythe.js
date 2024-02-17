@@ -6,7 +6,7 @@ class Weapon_scythe extends Weapon{
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false,"./sprites/upgrade_reduce_cd.png"),
             new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png"),
-            new Upgrade("Blood Scythe", "(Unique) Life Leech +15%.", true, "./sprites/upgrade_blood_scythe.png"),
+            new Upgrade("Blood Scythe", "(Unique) Life Leech +3%.", true, "./sprites/upgrade_blood_scythe.png"),
             new Upgrade("Dual Blade", "(Unique) Primary attack behind too.", true, "./sprites/upgrade_dual_blade.png")];
 
         super(game, "Scythe", 1, 2,
@@ -19,6 +19,16 @@ class Weapon_scythe extends Weapon{
     }
 
     performPrimaryAttack(player){
+        // Check if player has the blood scythe upgrade (life leech)
+        let bloodUpgrade = false;
+
+        player.weapons[0].upgrades.forEach(upgrade => {
+           if (upgrade.name === "Blood Scythe") {
+               bloodUpgrade = upgrade.active;
+               console.log(bloodUpgrade);
+           }
+        });
+
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -41,43 +51,81 @@ class Weapon_scythe extends Weapon{
             dy = Math.sin(this.attackAngle) * offsetDistance;
 
             this.lastPrimaryAttackTime = currentTime;
-            this.game.addEntity(new AttackCirc(this.game, player,
-                this.primaryAttackRadius / 2,
-                'playerAttack',
-                dx, dy,
-                this.primaryAttackDuration,
-                "./sprites/weapon_scythe_primaryattack.png",
-                this.game.player.atkPow, 0,
-                this.primaryAttackPushbackForce,
-                0, 1));
+
+            // Use different sprites depending on if we have a 'blood' scythe or not
+            if (bloodUpgrade) {
+                this.game.addEntity(new AttackCirc(this.game, player,
+                    this.primaryAttackRadius / 2,
+                    'VAMP_playerAttack',
+                    dx, dy,
+                    this.primaryAttackDuration,
+                    "./sprites/weapon_blood_scythe_primaryattack.png",
+                    this.game.player.atkPow, 0,
+                    this.primaryAttackPushbackForce,
+                    0, 1));
+            } else {
+                this.game.addEntity(new AttackCirc(this.game, player,
+                    this.primaryAttackRadius / 2,
+                    'playerAttack',
+                    dx, dy,
+                    this.primaryAttackDuration,
+                    "./sprites/weapon_scythe_primaryattack.png",
+                    this.game.player.atkPow, 0,
+                    this.primaryAttackPushbackForce,
+                    0, 1));
+            }
         }
     }
 
     performSecondaryAttack(player){
+        // Check if player has the blood scythe upgrade (life leech)
+        let bloodUpgrade = false;
+
+        player.weapons[0].upgrades.forEach(upgrade => {
+            if (upgrade.name === "Blood Scythe") {
+                bloodUpgrade = upgrade.active;
+                console.log(bloodUpgrade);
+            }
+        });
+
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
         if (currentTime - this.lastSecondAttackTime >= this.secondCool) {
             ASSET_MANAGER.playAsset(this.secondarySound);
             this.lastSecondAttackTime = currentTime;
-            this.game.addEntity(new AttackCirc(this.game, player,
-                this.secondaryAttackRadius,
-                'playerAttack',
-                0, 0,
-                this.secondaryAttackDuration,
-                "./sprites/weapon_scythe_secondaryattack.png",
-                this.game.player.atkPow*2, 0,
-                this.secondaryAttackPushbackForce,
-                0.3, 1));
+
+            // Use different sprites depending on if we have a 'blood' scythe or not
+            if (bloodUpgrade) {
+                this.game.addEntity(new AttackCirc(this.game, player,
+                    this.secondaryAttackRadius,
+                    'VAMP_playerAttack',
+                    0, 0,
+                    this.secondaryAttackDuration,
+                    "./sprites/weapon_blood_scythe_secondaryattack.png",
+                    this.game.player.atkPow * 2, 0,
+                    this.secondaryAttackPushbackForce,
+                    0.3, 1));
+            } else {
+                    this.game.addEntity(new AttackCirc(this.game, player,
+                    this.secondaryAttackRadius,
+                    'playerAttack',
+                    0, 0,
+                    this.secondaryAttackDuration,
+                    "./sprites/weapon_scythe_secondaryattack.png",
+                    this.game.player.atkPow * 2, 0,
+                    this.secondaryAttackPushbackForce,
+                    0.3, 1));
+            }
         }
     }
 
     // Handles code for turning on upgrades (Generic and Specific)
     handleUpgrade(){
-        for (let i = 0; i < this.upgradeList.length; i++) {
+        for (let i = 0; i < this.upgrades.length; i++) {
             // If generic has been turned on
-            if(this.upgradeList[i].active && !this.upgradeList[i].special){
-                switch (this.upgradeList[i].name){
+            if(this.upgrades[i].active && !this.upgrades[i].special){
+                switch (this.upgrades[i].name){
                     case "Attack Size +10%":
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
@@ -93,17 +141,17 @@ class Weapon_scythe extends Weapon{
                         this.secondaryAttackPushbackForce *= 1.1;
                         break;
                 }
-                // Set generic to not active so it can be re-used/activated in the future
-                this.upgradeList[i].active = false;
+                // Set generic to 'false' so it can be re-used/activated in the future
+                this.upgrades[i].active = false;
             }
-            else if(this.upgradeList[i].active && this.upgradeList[i].special){
-                switch (this.upgradeList[i].name){
+            else if(this.upgrades[i].active && this.upgrades[i].special){
+                switch (this.upgrades[i].name){
                     case "Blood Scythe":
                         // Switch weapon to blood scythe sprite
                         this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe.png"), 0, 0, 30, 50, 1, 1);
                         this.spritePath = "./sprites/weapon_blood_scythe.png";
                         // Set upgrade sprites to their relevant blood scythe variants
-                        this.upgradeList.forEach(upgrade => {
+                        this.upgrades.forEach(upgrade => {
                             if (upgrade.name === "Dual Blade" && upgrade.active) {
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
@@ -117,7 +165,7 @@ class Weapon_scythe extends Weapon{
                         break;
                     case "Dual Blade":
                         // Set upgrade sprites to their relevant blood scythe variants
-                        this.upgradeList.forEach(upgrade => {
+                        this.upgrades.forEach(upgrade => {
                             if (upgrade.name === "Blood Scythe" && upgrade.active) {
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_blood_scythe_dual.png";

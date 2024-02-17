@@ -19,7 +19,6 @@ class Upgrade_System {
 
         this.upgradeOptions = null;
 
-
         /**
          * Tracks what type of menu is currently open.
          * 0 === Weapon Upgrade Screen - Choose a Weapon to Upgrade
@@ -56,6 +55,11 @@ class Upgrade_System {
         }
 
         const realTimeNow = Date.now();
+
+        // If no menu, reset the upgrade options
+        if (this.currentMenu === -1) {
+            this.upgradeOptions = null;
+        }
 
         // Decrease cooldown if necessary
         if ((realTimeNow - this.lastRealTimeKeyPress) < this.selectionCooldown * 1000) {
@@ -127,22 +131,17 @@ class Upgrade_System {
             }
             // Check for input on player upgrade screen
             else if (this.currentMenu === 4) {
+                let upgradeChoice = -1;
                 if (this.game.keys["1"]) {
+                    upgradeChoice = 0;
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
                     }
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
-                    // for (let object of this.game.objects) {
-                    //     console.log(object.boundingBox.type);
-                    //     if (object.boundingBox.type === "anvil") {
-                    //         setTimeout(() => {
-                    //             object.hasBeenOpened = false;
-                    //         }, 1000);
-                    //     }
-                    // }
                 } else if (this.game.keys["2"]) {
+                    upgradeChoice = 1;
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -150,12 +149,20 @@ class Upgrade_System {
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
                 } else if (this.game.keys["3"]) {
+                    upgradeChoice = 2;
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
                     }
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
+                }
+                if (upgradeChoice !== -1) {
+                    // Set the upgrade to active
+                    this.upgradeOptions[upgradeChoice].active = true;
+
+                    // Handle turning on the upgrade (Both Generic and Specific handled here)
+                    this.game.player.handleUpgrade();
                 }
             }
         }
@@ -182,6 +189,9 @@ class Upgrade_System {
 
     /** Call this to pop up a player upgrade screen for the player. */
     showPlayerUpgradeScreen() {
+        // Reset upgrade options (fail-safe)
+        this.upgradeOptions = null;
+
         // Set the animator to use the player upgrade menu sprite if it's not already set to that.
         if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/menu_player_upgrade.png")) {
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_player_upgrade.png"), 0, 0, 388, 413, 1, 1);
@@ -262,29 +272,46 @@ class Upgrade_System {
         ctx.font = 'bold 36px Arial';
         ctx.fillText("Choose a Player Upgrade", (ctx.canvas.width / 2) - 15, 150);
 
-        this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
-        this.animator.scale = 0.45;
-        this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * 0))-72);
+        // Not ready yet - we haven't generated an upgrade list in update() yet
+        if (!this.upgradeOptions) {
+            this.upgradeOptions = this.game.player.threeRandomUpgrades();
+        }
 
-        ctx.textAlign = 'left';
-        ctx.font = '26px Arial';
-        ctx.fillText("Health +10", (ctx.canvas.width / 2) - 85, 275 + 0);
+        for (let i = 0; i < 3; i++) {
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset(this.upgradeOptions[i].sprite), 0, 0, 178, 178, 1, 1);
+            this.animator.scale = 0.45;
+            this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * i))-72);
 
-        this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
-        this.animator.scale = 0.45;
-        this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * 1))-72);
+            ctx.textAlign = 'left';
+            ctx.font = '26px Arial';
+            ctx.fillText(this.upgradeOptions[i].name, (ctx.canvas.width / 2) - 85, 260 + i*150);
+            ctx.font = '18px Arial';
+            ctx.fillText(this.upgradeOptions[i].description, (ctx.canvas.width / 2) - 85, 260 + i*150 + 37);
+        }
 
-        ctx.textAlign = 'left';
-        ctx.font = '26px Arial';
-        ctx.fillText("Speed +5%", (ctx.canvas.width / 2) - 85, 275 + 150);
-
-        this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
-        this.animator.scale = 0.45;
-        this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * 2))-72);
-
-        ctx.textAlign = 'left';
-        ctx.font = '26px Arial';
-        ctx.fillText("Dash CD -10%", (ctx.canvas.width / 2) - 85, 275 + 300);
+        // this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
+        // this.animator.scale = 0.45;
+        // this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * 0))-72);
+        //
+        // ctx.textAlign = 'left';
+        // ctx.font = '26px Arial';
+        // ctx.fillText("Health +10", (ctx.canvas.width / 2) - 85, 275 + 0);
+        //
+        // this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
+        // this.animator.scale = 0.45;
+        // this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * 1))-72);
+        //
+        // ctx.textAlign = 'left';
+        // ctx.font = '26px Arial';
+        // ctx.fillText("Speed +5%", (ctx.canvas.width / 2) - 85, 275 + 150);
+        //
+        // this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
+        // this.animator.scale = 0.45;
+        // this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * 2))-72);
+        //
+        // ctx.textAlign = 'left';
+        // ctx.font = '26px Arial';
+        // ctx.fillText("Dash CD -10%", (ctx.canvas.width / 2) - 85, 275 + 300);
 
         // Set animator back to original menu sprite sheet
         this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_player_upgrade.png"), 0, 0, 388, 413, 1, 1);
@@ -336,3 +363,14 @@ class Upgrade_System {
         ctx.shadowOffsetY = 0;
     }
 }
+
+
+// Nick: Save this for later (anvil stuff)
+// for (let object of this.game.objects) {
+//     console.log(object.boundingBox.type);
+//     if (object.boundingBox.type === "anvil") {
+//         setTimeout(() => {
+//             object.hasBeenOpened = false;
+//         }, 1000);
+//     }
+// }

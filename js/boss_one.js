@@ -15,7 +15,7 @@ class BossOne extends Entity {
             600,
             "./sprites/boss_knight_stand.png",
             0, 0, 40, 84, 4, 0.25, 3.5,
-            20);
+            -1);
 
         /** The name of this boss. */
         this.name = "Orange Bro";

@@ -8,7 +8,7 @@ class Exp_Orb extends Entity {
             17, 17, "orb", 0,
             "./sprites/exp_orb.png",
             0, 0, 17, 17, 3, 0.2, size, exp);
-        this.dist = 350;
+        this.dist = this.game.player.pickupRange;
         this.removeFromWorld = false;
     }
 

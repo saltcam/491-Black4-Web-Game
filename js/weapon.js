@@ -4,7 +4,7 @@ class Weapon {
                 primaryAttackPushbackForce, secondaryAttackPushbackForce,
                 primaryAttackRadius, secondaryAttackRadius,
                 primaryAttackDuration, secondaryAttackDuration,
-                spritePath, primarySound, secondarySound, spriteW, spriteH, upgradeList) {
+                spritePath, primarySound, secondarySound, spriteW, spriteH, upgrades) {
         this.game = game;
         this.name = name;
         this.primaryCool = primaryCool;
@@ -35,7 +35,7 @@ class Weapon {
         this.spritePath = spritePath;
 
         // list of all upgrade objects tied to the weapon
-        this.upgradeList = upgradeList;
+        this.upgrades = upgrades;
     }
 
     draw(ctx, slotNum){
@@ -85,7 +85,7 @@ class Weapon {
             30 * (diff / this.secondCool), 10);
         ctx.closePath();
 
-        for (let i = 0; i < this.upgradeList.length; i++) {
+        for (let i = 0; i < this.upgrades.length; i++) {
             //console.log(this.upgradeList[i].name + ": " + this.upgradeList[i].active);
         }
 
@@ -102,18 +102,18 @@ class Weapon {
             let result = [];
             let indexes = new Set(); // To keep track of already selected indexes
             while (indexes.size < 3) {
-                let randomIndex = Math.floor(Math.random() * this.upgradeList.length);
+                let randomIndex = Math.floor(Math.random() * this.upgrades.length);
                 //console.log("CHOSE " + randomIndex);
-                if (!indexes.has(randomIndex) && !this.upgradeList[randomIndex].active) {
+                if (!indexes.has(randomIndex) && !this.upgrades[randomIndex].active) {
                     // If the upgrade selected is 'special' lets add a rarity to it even being chosen
-                    if (this.upgradeList[randomIndex].special && (Math.random() < 1)) { // 20% chance that we let this special upgrade show up
+                    if (this.upgrades[randomIndex].special && (Math.random() < 1)) { // % chance that we let special upgrades show up (0.75 means 75% chance)
                         indexes.add(randomIndex);
-                        result.push(this.upgradeList[randomIndex]);
+                        result.push(this.upgrades[randomIndex]);
                     }
                     // Else if not special just add it to the list of upgrades then
-                    else if (!this.upgradeList[randomIndex].special){
+                    else if (!this.upgrades[randomIndex].special){
                         indexes.add(randomIndex);
-                        result.push(this.upgradeList[randomIndex]);
+                        result.push(this.upgrades[randomIndex]);
                     }
                 }
             }
