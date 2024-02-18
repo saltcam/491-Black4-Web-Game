@@ -414,6 +414,10 @@ class GameEngine {
             }
         }
 
+        //Slightly randomized enemy speeds
+        const speedMultiplier = Math.random() * 0.2 + 0.9; // Random speed multiplier between 0.9 and 1.1
+        newEnemy.speed *= speedMultiplier;
+
         //Add the new enemy into the game
         this.addEntity(newEnemy);
         //console.log("ENEMY SPAWNED!");
