@@ -54,7 +54,7 @@ class Weapon_scythe extends Weapon{
             // Use different sprites depending on if we have a 'blood' scythe or not
             if (bloodUpgrade) {
                 this.game.addEntity(new AttackCirc(this.game, player,
-                    this.primaryAttackRadius / 2,
+                    this.primaryAttackRadius / 1.45,
                     'VAMP_playerAttack',
                     dx, dy,
                     this.primaryAttackDuration,
@@ -69,7 +69,7 @@ class Weapon_scythe extends Weapon{
                     dx, dy,
                     this.primaryAttackDuration,
                     "./sprites/weapon_scythe_primaryattack.png",
-                    this.game.player.atkPow, 0,
+                    this.game.player.atkPow / 1.45, 0,
                     this.primaryAttackPushbackForce,
                     0, 1));
             }
@@ -101,7 +101,7 @@ class Weapon_scythe extends Weapon{
                     0, 0,
                     this.secondaryAttackDuration,
                     "./sprites/weapon_blood_scythe_secondaryattack.png",
-                    this.game.player.atkPow * 2, 0,
+                    this.game.player.atkPow * 1.35, 0,
                     this.secondaryAttackPushbackForce,
                     0.3, 1));
             } else {
@@ -111,7 +111,7 @@ class Weapon_scythe extends Weapon{
                     0, 0,
                     this.secondaryAttackDuration,
                     "./sprites/weapon_scythe_secondaryattack.png",
-                    this.game.player.atkPow * 2, 0,
+                    this.game.player.atkPow * 1.35, 0,
                     this.secondaryAttackPushbackForce,
                     0.3, 1));
             }

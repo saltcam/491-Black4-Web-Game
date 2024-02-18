@@ -51,7 +51,7 @@ class Floating_text {
         ctx.shadowOffsetY = 2; // Vertical shadow offset
         ctx.fillStyle = this.isHealing ? 'green' : (this.isPlayer ? 'red' : 'white');
 
-        ctx.fillText(Math.floor(this.value), this.worldX - this.game.camera.x, this.worldY - this.game.camera.y);
+        ctx.fillText(Math.round(this.value), this.worldX - this.game.camera.x, this.worldY - this.game.camera.y);
         ctx.restore();
 
         // Reset shadow properties to avoid affecting other drawings

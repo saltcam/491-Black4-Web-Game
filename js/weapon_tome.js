@@ -5,12 +5,12 @@ class Weapon_tome extends Weapon {
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
             new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png"),
-            new Upgrade("Primary Piercing +1", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png"),
+            new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png"),
             new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png")];
 
         super(game, "Tome", 1, 2,
             0, 0,
-            3, 1,
+            6, 1,
             7, 55,
             3, 5,
             "./sprites/Tome.png",
@@ -51,7 +51,7 @@ class Weapon_tome extends Weapon {
 
 
             this.lastPrimaryAttackTime = currentTime;
-            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 2,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 1.2,
                 player.worldX, player.worldY, 10, 10, "playerAttack", this.primaryProjectileMovementSpeed,
                 "./sprites/exp_orb.png",
                 0, 0, 17, 17, 3, 0.2, 2.2 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), dx, dy,
@@ -84,7 +84,7 @@ class Weapon_tome extends Weapon {
 
 
             this.lastSecondAttackTime = currentTime;
-            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 4,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 3,
                 player.worldX, player.worldY, 10, 10, "playerAttack", this.secondaryProjectileMovementSpeed,
                 "./sprites/exp_orb.png",
                 0, 0, 17, 17, 3, 0.2, 10 * (this.secondaryAttackRadius/this.initialSecondaryAttackRadius), dx, dy,
@@ -101,7 +101,6 @@ class Weapon_tome extends Weapon {
             if (this.upgrades[i].active && !this.upgrades[i].special) {
                 switch (this.upgrades[i].name) {
                     case "Attack Size +10%":
-                        console.log("REACHED!");
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
 
@@ -120,8 +119,8 @@ class Weapon_tome extends Weapon {
                         this.primaryAttackPushbackForce *= 1.1;
                         this.secondaryAttackPushbackForce *= 1.1;
                         break;
-                    case "Primary Piercing +1":
-                        this.maxPrimaryHits += 1;
+                    case "Primary Piercing +3":
+                        this.maxPrimaryHits += 3;
                         break;
                     case "Projectile Speed +10%":
                         this.primaryProjectileMovementSpeed *= 1.1;

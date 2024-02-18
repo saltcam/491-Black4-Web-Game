@@ -111,7 +111,7 @@ class GameEngine {
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
         this.baseEnemySpawnInterval = 1.5;
         /** How many enemies  can be on the map at once (this automatically increases as time goes on). */
-        this.baseMaxEnemies = 10;
+        this.baseMaxEnemies = 3;
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
@@ -369,30 +369,19 @@ class GameEngine {
     }
 
     spawnRandomEnemy() {
-        // Calculate how many full 60-second intervals have passed
-        let intervals = Math.floor(this.elapsedTime / 8000); // 15000 is 15 seconds
+        // Calculate how many intervals
+        let intervals = Math.floor(this.elapsedTime / 7500); // 15000 is 15 seconds
 
         // Calculate the maximum number of enemies based on elapsed time
-        let maxEnemies = this.baseMaxEnemies + (this.baseMaxEnemies * intervals); // Start with this.baseMaxEnemies and add this.baseMaxEnemies for each interval
+        let maxEnemies = this.baseMaxEnemies * intervals;
 
-        //console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
+        console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
 
         if (this.enemies.length > maxEnemies || this.currMap === 0) {
             return;
         }
 
-        const { x: randomXNumber, y: randomYNumber } = this.randomOffscreenCoords(); // New way
-
-        //Enemies Spawn outside the player camera + an offset OLD WAY
-        // const buffer = 100;
-        // let randomXNumber, randomYNumber;
-        // if(Math.random() < 0.5) {
-        //    randomXNumber = Math.random() < 0.5 ? this.camera.x - buffer : this.camera.x + this.camera.width + buffer;
-        //    randomYNumber = Math.random() * (this.camera.height) + this.camera.y;
-        // } else {
-        //    randomXNumber = Math.random() * (this.camera.width) + this.camera.x;
-        //    randomYNumber = Math.random() < 0.5 ? this.camera.y - buffer : this.camera.y + this.camera.height + buffer;
-        // }
+        const { x: randomXNumber, y: randomYNumber } = this.randomOffscreenCoords();
 
         //Selects a random enemy from the enemyTypes array
         const randomEnemyType =  this.enemyTypes[Math.floor(Math.random() * this.enemyTypes.length)];

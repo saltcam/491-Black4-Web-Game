@@ -66,7 +66,9 @@ ASSET_MANAGER.queueDownload("./sprites/McIdle_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/McWalk.png");
 ASSET_MANAGER.queueDownload("./sprites/McWalk_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/McDead.png");
+ASSET_MANAGER.queueDownload("./sprites/McDead_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/McDash.png");
+ASSET_MANAGER.queueDownload("./sprites/McDash_DAMAGED.png");
 
 //enemies
 ASSET_MANAGER.queueDownload("./sprites/SlimeMove.png");

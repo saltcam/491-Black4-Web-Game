@@ -40,6 +40,9 @@ class Upgrade_System {
         this.player = null;
 
         this.weaponUISprites = ["./sprites/upgrade_scythe.png", "./sprites/upgrade_tome.png", "./sprites/upgrade_staff.png"]
+
+        // How long player gets iFrames after exiting the upgrade menus
+        this.menuInvincibilityTime = 0.5;
     }
 
     /** Called every tick. */
@@ -71,30 +74,43 @@ class Upgrade_System {
         if (realTimeNow - this.lastRealTimeKeyPress >= this.selectionCooldown * 1000) {
             // Check for input on menu zero - 'Choose a Weapon to Upgrade'
             if (this.currentMenu === 0) {
-
+                this.game.player.menuInvincibility = true;
                 // there MUST be a better way...
                 if (this.game.keys["1"]) {
                     this.weaponChoice = 0;
                     this.currentMenu = 1;
                     this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
                     // makes a list of 3 random upgrades available to the chosen weapon
                     this.upgradeOptions = this.game.player.weapons[this.weaponChoice].threeRandomUpgrades();
                 } else if (this.game.keys["2"]) {
                     this.weaponChoice = 1;
                     this.currentMenu = 1;
                     this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
                     // makes a list of 3 random upgrades available to the chosen weapon
                     this.upgradeOptions = this.game.player.weapons[this.weaponChoice].threeRandomUpgrades();
                 } else if (this.game.keys["3"]) {
                     this.weaponChoice = 2;
                     this.currentMenu = 1;
                     this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
                     // makes a list of 3 random upgrades available to the chosen weapon
                     this.upgradeOptions = this.game.player.weapons[this.weaponChoice].threeRandomUpgrades();
                 }
             }
             // Check for input on menu one - 'Choose a Weapon Upgrade'
             else if (this.currentMenu === 1) {
+                this.game.player.menuInvincibility = true;
                 let upgradeChoice = -1;
                 if (this.game.keys["1"]) {
                     upgradeChoice = 0;
@@ -104,6 +120,10 @@ class Upgrade_System {
                     }
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
                 } else if (this.game.keys["2"]) {
                     upgradeChoice = 1;
                     this.waitingForSelection = false;
@@ -112,6 +132,10 @@ class Upgrade_System {
                     }
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
                 } else if (this.game.keys["3"]) {
                     upgradeChoice = 2;
                     this.waitingForSelection = false;
@@ -120,6 +144,10 @@ class Upgrade_System {
                     }
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
                 }
                 if (upgradeChoice !== -1) {
                     // Set the upgrade to active
@@ -131,6 +159,7 @@ class Upgrade_System {
             }
             // Check for input on player upgrade screen
             else if (this.currentMenu === 4) {
+                this.game.player.menuInvincibility = true;
                 let upgradeChoice = -1;
                 if (this.game.keys["1"]) {
                     upgradeChoice = 0;
@@ -140,6 +169,11 @@ class Upgrade_System {
                     }
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
+
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
                 } else if (this.game.keys["2"]) {
                     upgradeChoice = 1;
                     this.waitingForSelection = false;
@@ -148,6 +182,10 @@ class Upgrade_System {
                     }
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
                 } else if (this.game.keys["3"]) {
                     upgradeChoice = 2;
                     this.waitingForSelection = false;
@@ -156,6 +194,10 @@ class Upgrade_System {
                     }
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
                 }
                 if (upgradeChoice !== -1) {
                     // Set the upgrade to active

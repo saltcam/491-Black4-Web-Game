@@ -46,6 +46,9 @@ class Entity {
         if (this.exp === -1) {
             this.exp = (this.maxHP/20) + (this.atkPow/6);
         }
+
+        this.relocateMode = true; // Does this entity 'relocate' to opposite parts of screen when player gets too far.
+        this.buffer = 100; // Buffer distance outside the camera view to consider for relocation
     }
 
     update() {
@@ -62,8 +65,32 @@ class Entity {
     // Call this on update to re-locate this entity to the opposite side of the screen of the player if the player moves too far from this enemy)
     // This should only be used for enemy entities, not the player, and not attacks
     relocate() {
-        if (this.boundingBox.type && this.boundingBox.type.includes("enemy") && !this.boundingBox.type.includes("player")) {
+        // Exit if this is a player, or if this has relocation turned off.
+        if (!this.relocateMode || this.boundingBox.type.includes("player")) return;
 
+        // Only proceed for entities marked as "enemy"
+        if (this.boundingBox.type.includes("enemy")) {
+            const camera = this.game.camera;
+
+            // Calculate entity's position relative to the camera
+            const relativeX = this.worldX - camera.x;
+            const relativeY = this.worldY - camera.y;
+
+            let outsideHorizontalBounds = relativeX < -this.buffer || relativeX > camera.width + this.buffer;
+            let outsideVerticalBounds = relativeY < -this.buffer || relativeY > camera.height + this.buffer;
+
+            // Check if the entity is outside the bounds of the camera, plus a buffer
+            if (outsideHorizontalBounds || outsideVerticalBounds) {
+                // Generate new coordinates for relocation
+                let newCoords = this.game.randomOffscreenCoords();
+
+                // Update entity's position
+                this.worldX = newCoords.x;
+                this.worldY = newCoords.y;
+
+                // Immediately update the entity's bounding box with the new position
+                this.updateBoundingBox();
+            }
         }
     }
 

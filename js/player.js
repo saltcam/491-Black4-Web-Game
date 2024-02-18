@@ -4,12 +4,13 @@
  * Player can also dash using spacebar.
  * For McIdle.png, use width of 32, height of 28, frameCount of 2, and frameDuration of 0.5, scale 2.2
  * For McWalk.png, use width of 32, height of 28, frameCount of 8, and frameDuration of 0.1, scale 2.2
+ * For McDash.png, use width of 32, height of 28, frameCount of 2, and frameDuration of 0.1, scale 2.2
  */
 class Player extends Entity {
 
     constructor(game) {
         super(100, 100, 25, game, 0, 0,
-            17, 29, "player", 200,
+            17, 29, "player", 160,
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
 
@@ -18,8 +19,8 @@ class Player extends Entity {
             new Upgrade("Health Regen CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_health_regen.png"),
             new Upgrade("Dash CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_cooldown.png"),
             new Upgrade("Movement Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_movement_speed.png"),
-            new Upgrade("Attack Damage +5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
-            new Upgrade("Pickup Range +20%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png"),
+            new Upgrade("Attack Damage +7.5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
+            new Upgrade("Pickup Range +30%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png"),
             new Upgrade("Dash Distance +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png")];
 
@@ -32,15 +33,17 @@ class Player extends Entity {
         this.defaultDashCooldown = 2;   // This is the actual cooldown of dash that will be used each time we dash
         this.currentDashCooldown = this.defaultDashCooldown;    // This holds the current time left till we can dash again
         this.dashSpeedMultiplier = 3;
-        this.dashDuration = .5;
+        this.dashDuration = 0.5;
+        this.lastDashTime = 0; // Tracks when the last dash happened
 
         // Regen 1 health per this many seconds
-        this.healthRegenTime = 5;
+        this.healthRegenTime = 3.5;
         this.timeSinceLastHealthRegen = 0;
 
         this.gold = 0;
         this.level = 1;
         this.expGain = 1; // EXP Gain multiplier
+
         // weapon handling
         this.weapons = [new Weapon_scythe(game), new Weapon_tome(game), new Weapon_staff(game)];
         // index for current weapon: Weapon_scythe = 0; Weapon_tome = 1; Tome = 2;
@@ -48,7 +51,14 @@ class Player extends Entity {
         this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching
         this.lastWeaponSwitchTime = 0;
         this.controlsEnabled = true;    // If false, player cannot input controls.
-        this.pickupRange = 200;
+        this.pickupRange = 50;
+
+        this.menuInvincibility = false; // Auto-set to true for a bit  after exiting a menu, gives iFrames
+        this.isDashing = false; // Auto-set to true while dashing, gives iFrames
+
+        // Set this to true to give the player iFrames (Frames of Invincibility)
+        // Only used when dashing, and right after exiting upgrade menus
+        this.invincible = false;
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
@@ -70,11 +80,11 @@ class Player extends Entity {
                     case "Movement Speed +10%":
                         this.movementSpeed *= 1.1;
                         break;
-                    case "Attack Damage +5%":
-                        this.atkPow *= 1.05;
+                    case "Attack Damage +7.5%":
+                        this.atkPow *= 1.075;
                         break;
                     case "Pickup Range +20%":
-                        this.pickupRange *= 1.2;
+                        this.pickupRange *= 1.3;
                         break;
                     case "Dash Distance +10%":
                         this.dashDuration *= 1.1;
@@ -86,6 +96,12 @@ class Player extends Entity {
                 this.upgrades[i].active = false;
             }
         }
+    }
+
+    takeDamage(amount) {
+        if (this.invincible) return;
+
+        super.takeDamage(amount);
     }
 
     /**
@@ -100,7 +116,6 @@ class Player extends Entity {
         let indexes = new Set(); // To keep track of already selected indexes
         while (indexes.size < 3) {
             let randomIndex = Math.floor(Math.random() * this.upgrades.length);
-            //console.log("CHOSE " + randomIndex);
             if (!indexes.has(randomIndex) && !this.upgrades[randomIndex].active) {
                 // If the upgrade selected is 'special' lets add a rarity to it even being chosen
                 if (this.upgrades[randomIndex].special && (Math.random() < 1)) { // 20% chance that we let this special upgrade show up
@@ -131,6 +146,18 @@ class Player extends Entity {
             this.currentAnimation = "Dead";
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McDead.png"),
                 0, 0, 32, 40, 8, 0.1);
+        }
+
+        // Handle dashing duration and reset
+        if (this.isDashing && (this.game.timer.gameTime - this.lastDashTime >= this.dashDuration)) {
+            this.endDash();
+        }
+
+        // Handle if this frame has iFrame
+        if (this.isDashing || this.menuInvincibility) {
+            this.invincible = true;
+        } else {
+            this.invincible = false;
         }
 
         // Calculate the delta time which is defined as the time passed in seconds since the last frame.
@@ -220,13 +247,20 @@ class Player extends Entity {
         }
 
         // Check if the animation state needs to be switched
-        // TODO: Check if the player has the scythe or a different weapon equipped and change the spritesheet accordingly (Consider using the weapons classes!)
-        if (this.isMoving && this.currentAnimation !== "walking") {
+        if (!this.isDashing && this.isMoving && this.currentAnimation !== "walking") {
+            this.animator.pauseAtFrame(-1);
             this.currentAnimation = "walking";
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McWalk.png"), 0, 0, 32, 28, 8, 0.1);
-        } else if (!this.isMoving && this.currentAnimation !== "standing") {
+        } else if (!this.isDashing && !this.isMoving && this.currentAnimation !== "standing") {
+            this.animator.pauseAtFrame(-1);
             this.currentAnimation = "standing";
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McIdle.png"), 0, 0, 32, 28, 2, 0.5);
+        }
+
+        // If still currently dashing, then play up to frame 3 of the McDash animation
+        if (this.isDashing && this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/McDash.png")) {
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McDash.png"), 0, 0, 32, 28, 4, 0.15);
+            this.currentAnimation = "dashing";
         }
 
         // decrements dash cooldown
@@ -236,7 +270,7 @@ class Player extends Entity {
         }
         if (this.controlsEnabled) {
             // checks if space bar has been pressed and the dash is not on cooldown
-            if (this.game.keys[" "] && this.currentDashCooldown === 0) {
+            if (this.game.keys[" "] && (currentTime - this.lastDashTime >= this.defaultDashCooldown)) {
                 this.performDash();
             }
         }
@@ -286,15 +320,14 @@ class Player extends Entity {
 
     // called when the user has a valid dash and presses space bar
     performDash() {
-        this.currentDashCooldown = this.defaultDashCooldown; // reset dash cooldown to the default
+        this.movementSpeed *= this.dashSpeedMultiplier; // Temporarily increase movement speed
+        this.lastDashTime = this.game.timer.gameTime; // Record the start time of the dash
+        this.isDashing = true; // Flag to indicate dashing state, this flag also will enable iFrames
+    }
 
-        this.movementSpeed *= this.dashSpeedMultiplier; // increase movement speed
-
-        // timeout function to reset movement speed after desired time
-        setTimeout(() => {
-            this.movementSpeed /= this.dashSpeedMultiplier;
-        }, this.dashDuration * 1000); // convert dashDuration from seconds to milliseconds for accurate timeout
-
+    endDash() {
+        this.movementSpeed /= this.dashSpeedMultiplier; // Reset movement speed to original
+        this.isDashing = false; // Reset dashing state, this flag also will enable iFrames
     }
 
     gainExp(exp) {
@@ -417,6 +450,10 @@ class Player extends Entity {
             console.log("dude.draw(): Camera not found! Not drawing player!");
             return; // Skip drawing the player if the camera is not initialized
         }
+
+        // if (this.isDashing && this.animator.currentFrame() === this.animator.frameCount-2) {
+        //     this.animator.pauseAtFrame(3);
+        // }
 
         let screenX = this.worldX - this.game.camera.x;
         let screenY = this.worldY - this.game.camera.y;

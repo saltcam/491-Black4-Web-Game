@@ -57,7 +57,7 @@ class BossOne extends Entity {
         this.readyForNextAttack = true;
         /** Last time we checked for an attack to possibly happen. */
         this.lastAttackCheckTime = 0;
-        /** How often to check if we are going to enter an attack mode. DO NOT SET THIS BELOW 1.4 (Or stuff will break) */
+        /** How often to check if we are going to enter an attack mode. */
         this.attackCheckInterval = 1.5;
         /** This is a temporary timer that we will use in various parts of this class' code. Default setting is -1. */
         this.tempTimer = -1;
@@ -166,18 +166,18 @@ class BossOne extends Entity {
         // If we are in any of the attack modes, then we are not ready to start new attack
         if (this.attackStatus !== "none" || (this.enterChargeMode || this.enterGroundSmashMode)) {
             this.readyForNextAttack = false;
-        }
-        else {
+        } else {
             this.readyForNextAttack = true;
         }
 
         // If entity is not ready to charge again, make sure we don't allow the timer to tick
         if (!this.readyForNextAttack) {
             this.lastAttackCheckTime = currentTime;
-        }
-        else {
+            this.relocateMode = false;
+        } else {
             // We are ready for a new attack decision so enable the marker tracking again
             this.trackMode = true;
+            this.relocateMode = true;
         }
 
         // Track marker location to player's center location
