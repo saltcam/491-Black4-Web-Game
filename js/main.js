@@ -48,6 +48,7 @@ ASSET_MANAGER.queueDownload("./sprites/upgrade_pickup_range.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_dash_distance.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_blood_scythe_primaryattack.png");
 ASSET_MANAGER.queueDownload("./sprites/weapon_blood_scythe_secondaryattack.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_exp_gain.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");

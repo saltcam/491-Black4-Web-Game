@@ -44,17 +44,27 @@ class Entity {
 
         // If -1 exp was given, that means we calculate the exp automatically based off entity's supposed difficulty
         if (this.exp === -1) {
-            this.exp = (this.maxHP/12) + (this.atkPow/4);
+            this.exp = (this.maxHP/20) + (this.atkPow/6);
         }
     }
 
     update() {
+        this.relocate();
+
         // Calculate the scaled center of the sprite
         const scaledCenterX = this.worldX + (this.animator.width) / 2;
         const scaledCenterY = this.worldY + (this.animator.height) / 2;
 
         // Update the bounding box to be centered around the scaled sprite
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
+    }
+
+    // Call this on update to re-locate this entity to the opposite side of the screen of the player if the player moves too far from this enemy)
+    // This should only be used for enemy entities, not the player, and not attacks
+    relocate() {
+        if (this.boundingBox.type && this.boundingBox.type.includes("enemy") && !this.boundingBox.type.includes("player")) {
+
+        }
     }
 
     // Method to find the center of the entity

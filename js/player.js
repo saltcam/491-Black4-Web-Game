@@ -8,7 +8,7 @@
 class Player extends Entity {
 
     constructor(game) {
-        super(100, 100, 30, game, 0, 0,
+        super(100, 100, 25, game, 0, 0,
             17, 29, "player", 200,
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
@@ -18,9 +18,10 @@ class Player extends Entity {
             new Upgrade("Health Regen CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_health_regen.png"),
             new Upgrade("Dash CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_cooldown.png"),
             new Upgrade("Movement Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_movement_speed.png"),
-            new Upgrade("Attack Damage +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
+            new Upgrade("Attack Damage +5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Pickup Range +20%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png"),
-            new Upgrade("Dash Distance +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png")];
+            new Upgrade("Dash Distance +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
+            new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png")];
 
         // Animation settings
         this.lastMove = "right"; // Default direction
@@ -39,6 +40,7 @@ class Player extends Entity {
 
         this.gold = 0;
         this.level = 1;
+        this.expGain = 1; // EXP Gain multiplier
         // weapon handling
         this.weapons = [new Weapon_scythe(game), new Weapon_tome(game), new Weapon_staff(game)];
         // index for current weapon: Weapon_scythe = 0; Weapon_tome = 1; Tome = 2;
@@ -68,8 +70,8 @@ class Player extends Entity {
                     case "Movement Speed +10%":
                         this.movementSpeed *= 1.1;
                         break;
-                    case "Attack Damage +10%":
-                        this.atkPow *= 1.1;
+                    case "Attack Damage +5%":
+                        this.atkPow *= 1.05;
                         break;
                     case "Pickup Range +20%":
                         this.pickupRange *= 1.2;
@@ -77,6 +79,8 @@ class Player extends Entity {
                     case "Dash Distance +10%":
                         this.dashDuration *= 1.1;
                         break;
+                    case "Experience Gain +10%":
+                        this.expGain *= 1.1;
                 }
                 // Set generic to 'false' so it can be re-used/activated in the future
                 this.upgrades[i].active = false;
@@ -294,7 +298,7 @@ class Player extends Entity {
     }
 
     gainExp(exp) {
-        this.exp += exp;
+        this.exp += exp * this.expGain;
 
         // level up!
         if (this.exp >= (this.level * 10)) {

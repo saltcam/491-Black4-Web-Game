@@ -29,9 +29,7 @@ class Map_object extends Entity {
     }
 
     collectGold() {
-        console.log("ADD GOLD " + this.extractNumber(this.boundingBox.type));
         this.game.player.gold += this.extractNumber(this.boundingBox.type);
-        console.log("CURR GOLD = " + this.game.player.gold);
         this.removeFromWorld = true;
     }
 
@@ -39,7 +37,6 @@ class Map_object extends Entity {
     willExplode(explosion){
         this.isExploding = true;
         this.explosion = explosion;
-
     }
 
     // creates the explosion in game, which is called when removing.

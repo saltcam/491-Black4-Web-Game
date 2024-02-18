@@ -78,11 +78,16 @@ class AssetManager {
         return this.cache[path];
     };
 
-    playAsset(path) {
-        let audio = this.cache[path];
-        audio.currentTime = 0;
-        audio.play();
-    };
+    playAsset(path, volume = 0.1) {
+        if (this.cache[path]) {
+            let audio = this.cache[path].cloneNode(); // Clone the audio element
+            audio.volume = volume; // Set the volume for this instance
+            audio.play();
+            audio.addEventListener("ended", function () {
+                audio.remove(); // Optionally remove the cloned element once it has played
+            });
+        }
+    }
 
     muteAudio(mute) {
         for (let key in this.cache) {

@@ -108,15 +108,13 @@ class BossOne extends Entity {
     update() {
         super.update();
 
-        // Early exit if the player does not exist or enemy is dead
-        if (!this.game.player || this.isDead) {
+        // Early exit if the player does not exist for some reason at this point
+        if (!this.game.player) {
             return;
         }
 
         // If health hits 0 or below, this entity is declared dead
-        if (this.currHP <= 0) {
-            this.isDead = true;
-
+        if (this.isDead) {
             // Spawn a portal to rest area (because map is completed once boss is dead)
             this.game.spawnPortal(this.worldX, this.worldY,0);
 
@@ -125,6 +123,10 @@ class BossOne extends Entity {
 
             // Be sure to send the target marker entity to the garbage collector
             this.targetMarker.removeFromWorld = true;
+
+            this.removeFromWorld = true;
+
+            return;
         }
 
         // Decrease recent damage over time (for boss health bar calculations)

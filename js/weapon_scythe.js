@@ -25,7 +25,6 @@ class Weapon_scythe extends Weapon{
         player.weapons[0].upgrades.forEach(upgrade => {
            if (upgrade.name === "Blood Scythe") {
                bloodUpgrade = upgrade.active;
-               console.log(bloodUpgrade);
            }
         });
 
@@ -84,7 +83,6 @@ class Weapon_scythe extends Weapon{
         player.weapons[0].upgrades.forEach(upgrade => {
             if (upgrade.name === "Blood Scythe") {
                 bloodUpgrade = upgrade.active;
-                console.log(bloodUpgrade);
             }
         });
 
