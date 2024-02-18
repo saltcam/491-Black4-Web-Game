@@ -1,11 +1,12 @@
 class Floating_text {
-    constructor(game, value, worldX, worldY, isHealing, isPlayer) {
+    constructor(game, value, worldX, worldY, isHealing, isPlayer, isCrit = false) {
         this.game = game;
         this.value = value;
         this.worldX = worldX;
         this.worldY = worldY;
         this.isHealing = isHealing;
         this.isPlayer = isPlayer;
+        this.isCrit = isCrit;
         this.opacity = 1;
         this.duration = 1.5 * 1000; // Duration in milliseconds
         this.startTime = Date.now();
@@ -49,7 +50,14 @@ class Floating_text {
         ctx.shadowBlur = 0; // How much the shadow should be blurred
         ctx.shadowOffsetX = 2; // Horizontal shadow offset
         ctx.shadowOffsetY = 2; // Vertical shadow offset
-        ctx.fillStyle = this.isHealing ? 'green' : (this.isPlayer ? 'red' : 'white');
+
+        if (this.isHealing) {
+            ctx.fillStyle = 'green';
+        } else if (this.isCrit) { // Check for crit
+            ctx.fillStyle = 'orange'; // Set text color to orange on crit
+        } else {
+            ctx.fillStyle = this.isPlayer ? 'red' : 'white';
+        }
 
         ctx.fillText(Math.round(this.value), this.worldX - this.game.camera.x, this.worldY - this.game.camera.y);
         ctx.restore();

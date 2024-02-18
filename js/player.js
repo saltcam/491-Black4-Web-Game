@@ -22,6 +22,8 @@ class Player extends Entity {
             new Upgrade("Attack Damage +7.5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Pickup Range +30%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png"),
             new Upgrade("Dash Distance +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
+            new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
+            new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png")];
 
         // Animation settings
@@ -56,6 +58,9 @@ class Player extends Entity {
         this.menuInvincibility = false; // Auto-set to true for a bit  after exiting a menu, gives iFrames
         this.isDashing = false; // Auto-set to true while dashing, gives iFrames
 
+        this.critChance = 0.05; // 5% chance to deal crit damage
+        this.critDamage = 1.5; // 1.5x damage on crits
+
         // Set this to true to give the player iFrames (Frames of Invincibility)
         // Only used when dashing, and right after exiting upgrade menus
         this.invincible = false;
@@ -88,6 +93,12 @@ class Player extends Entity {
                         break;
                     case "Dash Distance +10%":
                         this.dashDuration *= 1.1;
+                        break;
+                    case "Crit Damage +20%":
+                        this.critDamage += 0.2;
+                        break;
+                    case "Crit Chance +5%":
+                        this.critChance += 0.05;
                         break;
                     case "Experience Gain +10%":
                         this.expGain *= 1.1;

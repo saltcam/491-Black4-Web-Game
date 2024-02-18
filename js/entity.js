@@ -134,6 +134,17 @@ class Entity {
     }
 
     takeDamage(amount) {
+        // Check if the entity taking damage is an enemy and if a critical hit happens
+        let isCrit = false;
+        if (!(this instanceof Player)) {
+            console.log("it got here");
+            const critRoll = Math.random();
+            if (critRoll < this.game.player.critChance) {
+                amount *= this.game.player.critDamage;
+                isCrit = true;
+            }
+        }
+
         this.currHP -= amount;
         if (this.currHP <= 0) {
             this.currHP = 0;
@@ -143,7 +154,7 @@ class Entity {
         this.animator.damageSprite(250);
 
         // Spawn floating damage number
-        this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY, false, this instanceof Player));
+        this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY, false, this instanceof Player, isCrit));
 
         this.recentDamage += amount;
         this.lastDamageTime = this.game.timer.gameTime;

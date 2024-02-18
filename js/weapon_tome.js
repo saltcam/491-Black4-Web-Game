@@ -53,8 +53,8 @@ class Weapon_tome extends Weapon {
             this.lastPrimaryAttackTime = currentTime;
             let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 1.2,
                 player.worldX, player.worldY, 10, 10, "playerAttack", this.primaryProjectileMovementSpeed,
-                "./sprites/exp_orb.png",
-                0, 0, 17, 17, 3, 0.2, 2.2 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), dx, dy,
+                "./sprites/MagicBall.png",
+                0, 0, 30, 30, 2, 0.2, 2.2 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), dx, dy,
                 this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 0.3));
             newProjectile.maxHits = this.maxPrimaryHits; // Apply max pierce
         }
@@ -86,8 +86,8 @@ class Weapon_tome extends Weapon {
             this.lastSecondAttackTime = currentTime;
             let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 3,
                 player.worldX, player.worldY, 10, 10, "playerAttack", this.secondaryProjectileMovementSpeed,
-                "./sprites/exp_orb.png",
-                0, 0, 17, 17, 3, 0.2, 10 * (this.secondaryAttackRadius/this.initialSecondaryAttackRadius), dx, dy,
+                "./sprites/ElectricOrb.png",
+                0, 0, 32.5, 32, 6, 0.15, 5.6 * (this.secondaryAttackRadius/this.initialSecondaryAttackRadius), dx, dy,
                 this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 0.25));
             newProjectile.maxHits = this.maxSecondaryHits; // Apply max pierce
             newProjectile.attackCirc.pulsatingDamage = true; // Tell the projectile that this attack pulsates damage.
