@@ -146,6 +146,8 @@ class GameEngine {
         this.pauseStartTime = 0;
         /** To accumulate total paused duration. */
         this.totalPausedTime = 0;
+
+        this.youWon = false; // temp win condition
     }
 
     /**
@@ -604,6 +606,27 @@ class GameEngine {
                 this.togglePause();
                 this.roundOver = true;
             }
+        }
+
+        // Temp win condition
+        if (this.youWon) {
+            this.ctx.beginPath();
+
+            this.ctx.fillStyle = "black";
+            this.ctx.fillRect(this.ctx.canvas.width / 2 - 175, this.ctx.canvas.height / 2 - 75, 350, 95);
+            // Draw "You Died!" text in large red font at the center of the canvas
+            this.ctx.font = '75px Arial';
+            this.ctx.fillStyle = 'yellow';
+            this.ctx.textAlign = 'center'
+            this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+            this.ctx.closePath();
+
+            setTimeout(() => {
+
+                if (!this.pauseGame) {
+                    this.togglePause();
+                }
+            }, 1000);
         }
 
         // If the defeated all enemies, display 'You Won!' text.

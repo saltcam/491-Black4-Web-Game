@@ -74,6 +74,9 @@ class Portal extends Entity {
         // Set roundOver to false now that we are on a new map
         this.roundOver = false;
 
+        // Temp win condition
+        this.game.youWon = true;
+
         // Remove the portal from the game after entering it
         this.removeFromWorld = true;
     }
