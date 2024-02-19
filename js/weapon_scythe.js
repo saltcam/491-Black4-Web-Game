@@ -21,10 +21,13 @@ class Weapon_scythe extends Weapon{
     performPrimaryAttack(player){
         // Check if player has the blood scythe upgrade (life leech)
         let bloodUpgrade = false;
+        let dualBladeUpgrade = false;
 
         player.weapons[0].upgrades.forEach(upgrade => {
            if (upgrade.name === "Blood Scythe") {
                bloodUpgrade = upgrade.active;
+           } else if (upgrade.name === "Dual Blade") {
+                dualBladeUpgrade = upgrade.active;
            }
         });
 
@@ -62,6 +65,19 @@ class Weapon_scythe extends Weapon{
                     this.game.player.atkPow, 0,
                     this.primaryAttackPushbackForce,
                     0, 1));
+
+                    if (dualBladeUpgrade) {
+                        this.game.addEntity(new AttackCirc(this.game, player,
+                            this.primaryAttackRadius / 1.95,
+                            'VAMP_playerAttack',
+                            -dx, -dy,
+                            this.primaryAttackDuration,
+                            "./sprites/weapon_blood_scythe_primaryattack.png",
+                            this.game.player.atkPow, 0,
+                            this.primaryAttackPushbackForce,
+                            0, 1));
+                    }
+
             } else {
                 this.game.addEntity(new AttackCirc(this.game, player,
                     this.primaryAttackRadius / 2,
@@ -72,6 +88,19 @@ class Weapon_scythe extends Weapon{
                     this.game.player.atkPow / 1.45, 0,
                     this.primaryAttackPushbackForce,
                     0, 1));
+
+                    if (dualBladeUpgrade) {
+                        this.game.addEntity(new AttackCirc(this.game, player,
+                            this.primaryAttackRadius / 2.5,
+                            'playerAttack',
+                            -dx, -dy,
+                            this.primaryAttackDuration,
+                            "./sprites/weapon_scythe_primaryattack.png",
+                            this.game.player.atkPow / 1.45, 0,
+                            this.primaryAttackPushbackForce,
+                            0, 1));
+                    }
+
             }
         }
     }
