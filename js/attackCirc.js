@@ -101,7 +101,7 @@ class AttackCirc {
 
         // increase in size each frame if of type explosion
         if (this.type === "explosionAttack") {
-            this.radius += 2;
+            this.radius += 3;
         }
 
         // Check for the end of duration
