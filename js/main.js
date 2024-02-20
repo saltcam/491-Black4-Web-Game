@@ -51,17 +51,25 @@ ASSET_MANAGER.queueDownload("./sprites/weapon_blood_scythe_secondaryattack.png")
 ASSET_MANAGER.queueDownload("./sprites/upgrade_exp_gain.png");
 ASSET_MANAGER.queueDownload("./sprites/MagicBall.png");
 ASSET_MANAGER.queueDownload("./sprites/ElectricOrb.png");
+ASSET_MANAGER.queueDownload("./sprites/transparent.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_generic.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_special.png");
+ASSET_MANAGER.queueDownload("./sprites/object_anvil.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
 ASSET_MANAGER.queueDownload("./sprites/debug_warning.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_player_upgrade.png");
+ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade_withclosebutton.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade_6options.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade_2options.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_size.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_reduce_cd.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_knockback.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_bleeding_edge.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_crippling_chill.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_echo_slash.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_currency_bar.png");
 
 //player

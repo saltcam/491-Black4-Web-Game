@@ -18,8 +18,10 @@ class Map_object extends Entity {
     }
 
     openAnvil() {
-        this.game.UPGRADE_SYSTEM.showPlayerUpgradeScreen();
-        this.hasBeenOpened = true;
+        if (!this.hasBeenOpened) {
+            this.game.UPGRADE_SYSTEM.showAnvilWeaponUpgradeScreen();
+            this.hasBeenOpened = true;
+        }
     }
 
     /** This method extracts the number from the end of strings, this will be used to see how much gold a coin bag is worth. */
@@ -47,7 +49,7 @@ class Map_object extends Entity {
         if (this.isExploding) {
             let newProjectile = this.game.addEntity(new Projectile(this.game, this.explosion.attackDamage,
                 this.worldX, this.worldY, 10, 10, "explosionAttack", 0,
-                "./sprites/exp_orb.png",
+                "./sprites/transparent.png",
                 0, 0, 17, 17, 3, 0.2, 0.01, 0, 0,
                 this.game.player.weapons[2].secondaryAttackDuration, 2, 5, 0, 1));
             this.isExploding = false;

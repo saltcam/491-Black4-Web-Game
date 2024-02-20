@@ -15,6 +15,10 @@ class Animator {
         this.scale = scale;
         this.pauseFrame = -1;
         this.beingDamaged = false;  // Is the sprite currently in damaged mode?
+
+        // Outline stuff
+        this.outlineMode = false;
+        this.outlineColor = 'yellow';
     };
 
     // Call this to tell the animator to pause at the given frame.
@@ -50,6 +54,12 @@ class Animator {
         if (direction === "left") {
             ctx.scale(-1, 1);   // Scale the context horizontally by -1 (flips horizontally)
             x = -x - (this.width * this.scale); // Adjust the x position when flipped
+        }
+
+        // Apply a outline glow effect (if on)
+        if (this.outlineMode) {
+            ctx.shadowBlur = 10; // Adjust for desired glow size
+            ctx.shadowColor = this.outlineColor; // Adjust for desired glow color
         }
 
         // If flag is set to true, pause the animation to the first frame
@@ -91,6 +101,10 @@ class Animator {
                 y,
                 scaledWidth,
                 scaledHeight);
+
+            // Restore highlight properties
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'white';
 
             // Restore the context to its original state
             ctx.restore();

@@ -63,7 +63,7 @@ class Entity {
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
     }
 
-    // Call this on update to re-locate this entity to the opposite side of the screen of the player if the player moves too far from this enemy)
+    // Call this on update to re-locate this entity to the opposite side of the screen of the player if the player moves too far from this enemy
     // This should only be used for enemy entities, not the player, and not attacks
     relocate() {
         // Exit if this is a player, or if this has relocation turned off.
@@ -150,7 +150,6 @@ class Entity {
         this.game.player.weapons[0].upgrades.forEach(upgrade => {
             if (upgrade.name === "Bleeding Edge" && upgrade.active && !(this instanceof Player)
                 && this.game.player.currentWeapon === 0) {
-                console.log("TRY HIT ENEMY WITH BLEED!");
                 isBleed = true;
                 let bleed = (amount * 1.5) / 6;
 
@@ -169,7 +168,6 @@ class Entity {
 
                             this.recentDamage += amount;
                             this.lastDamageTime = this.game.timer.gameTime;
-                            console.log("Ticked bleed damage of " + bleed);
                         }
                     }, 500 * i);
                 }
@@ -181,6 +179,12 @@ class Entity {
             // Spawn floating damage number
             this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY,
                 false, this instanceof Player, isCrit));
+
+            // Apply the damage sprite to this entity
+            this.animator.damageSprite(250);
+
+            this.recentDamage += amount;
+            this.lastDamageTime = this.game.timer.gameTime;
         }
 
         if (this.currHP <= 0) {
@@ -188,20 +192,39 @@ class Entity {
             this.isDead = true;
         }
 
-        // Apply the damage sprite to this entity
-        this.animator.damageSprite(250);
-
-        this.recentDamage += amount;
-        this.lastDamageTime = this.game.timer.gameTime;
-
         this.game.player.weapons[0].upgrades.forEach(upgrade => {
             if (upgrade.name === "Crippling Chill" && upgrade.active && !(this instanceof Player)
+                && !(this instanceof Ally_Contact)
                 && !this.boundingBox.type.includes("boss") && this.game.player.currentWeapon === 0) {
-                this.movementSpeed = 30;
+                // Only apply the actual slow if their faster than what we are slowing them to.
+                if (this.movementSpeed > 30) {
+                    this.movementSpeed = 30;
 
-                setTimeout(() => {
-                    this.movementSpeed = this.initialMovementSpeed
-                }, 1000);
+                    // Apply the visual chill effect outline
+                    this.animator.outlineMode = true;
+                    this.animator.outlineColor = 'lightblue';
+
+                    setTimeout(() => {
+                        this.animator.outlineColor = 'yellow';  // Back to default
+                        if (!this.isElite) {
+                            this.animator.outlineMode = false;
+                        }
+                        this.movementSpeed = this.initialMovementSpeed
+                    }, 1000);
+                }
+                // If was slower or already had 30 speed, then just apply the visual chill outline.
+                else if (this.movementSpeed <= 30) {
+                    // Apply the visual chill effect outline
+                    this.animator.outlineMode = true;
+                    this.animator.outlineColor = 'lightblue';
+
+                    setTimeout(() => {
+                        this.animator.outlineColor = 'yellow';  // Back to default
+                        if (!this.isElite) {
+                            this.animator.outlineMode = false;
+                        }
+                    }, 1000);
+                }
             }
         });
     }

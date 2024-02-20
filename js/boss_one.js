@@ -392,8 +392,9 @@ class BossOne extends Entity {
         // Draw the yellow recent damage
         const recentDamageWidth = (this.recentDamage / this.maxHP) * barWidth;
         if (recentDamageWidth > 0) {
+            const totalDamageWidth = Math.min(recentDamageWidth, barWidth - currentHealthWidth);
             ctx.fillStyle = "yellow";
-            ctx.fillRect(xOffset + currentHealthWidth, yOffset, recentDamageWidth, barHeight);
+            ctx.fillRect(xOffset + currentHealthWidth, yOffset, totalDamageWidth, barHeight);
         }
 
         // Draw boss' name

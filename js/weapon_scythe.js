@@ -2,16 +2,15 @@ class Weapon_scythe extends Weapon {
     constructor(game) {
         //"./sprites/upgrade_size.png"
         let upgrades = [
-            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png"),
-            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png"),
-            new Upgrade("Blood Scythe", "(Unique) Heal 1 hp per attack", true, "./sprites/upgrade_blood_scythe.png"),
-            new Upgrade("Dual Blade", "(Unique) Primary attack behind too.", true, "./sprites/upgrade_dual_blade.png"),
-            new Upgrade("Echo Slash", "(Unique) Attack Count++. CD++", true, "./sprites/upgrade_size.png"),
-            // new Upgrade("Boomerang Blade", "(Unique) Primary now throws scythe.", true, "./sprites/upgrade_size.png"),
-            new Upgrade("Crippling Chill", "(Unique) Cripple effect on attack.", true, "./sprites/upgrade_size.png"),
-            new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg dealt over time.", true, "./sprites/upgrade_size.png")
+            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 75),
+            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 35),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
+            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 25),
+            new Upgrade("Blood Scythe", "(Unique) Heal 1 hp per attack.", true, "./sprites/upgrade_blood_scythe.png", 200),
+            new Upgrade("Dual Blade", "(Unique) Adds primary back attack.", true, "./sprites/upgrade_dual_blade.png", 150),
+            new Upgrade("Echo Slash", "(Unique) Adds attack echoes. CDs +30%", true, "./sprites/upgrade_echo_slash.png", 175),
+            new Upgrade("Crippling Chill", "(Unique) Cripple effect on attacks.", true, "./sprites/upgrade_crippling_chill.png", 125),
+            new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg is now over-time.", true, "./sprites/upgrade_bleeding_edge.png", 200)
         ];
 
         super(game, "Scythe", 1, 5,
@@ -24,6 +23,10 @@ class Weapon_scythe extends Weapon {
 
         this.initialPrimaryCool = this.primaryCool;
         this.initialSecondaryCool = this.secondCool;
+
+        // How many seconds of delay before echoing attack (when echo slash upgrade is on)
+        this.primaryEchoDelay = 0.25;
+        this.secondaryEchoDelay = 0.5;
     }
 
     performPrimaryAttack(player) {
@@ -108,7 +111,7 @@ class Weapon_scythe extends Weapon {
                                 defaultPrimaryDamage / 2, 0,
                                 this.primaryAttackPushbackForce,
                                 0, 1));
-                        }, 250);
+                        }, this.primaryEchoDelay * 1000);
                     }
                 }
 
@@ -123,7 +126,7 @@ class Weapon_scythe extends Weapon {
                             defaultPrimaryDamage / 2, 0,
                             this.primaryAttackPushbackForce,
                             0, 1));
-                    }, 250);
+                    }, this.primaryEchoDelay * 1000);
                 }
 
             } else {
@@ -158,7 +161,7 @@ class Weapon_scythe extends Weapon {
                                 defaultPrimaryDamage / 2, 0,
                                 this.primaryAttackPushbackForce,
                                 0, 1));
-                        }, 250);
+                        }, this.primaryEchoDelay * 1000);
                     }
                 }
 
@@ -173,7 +176,7 @@ class Weapon_scythe extends Weapon {
                             defaultPrimaryDamage / 2, 0,
                             this.primaryAttackPushbackForce,
                             0, 0.6));
-                    }, 250);
+                    }, this.primaryEchoDelay * 1000);
                 }
 
             }
@@ -231,7 +234,7 @@ class Weapon_scythe extends Weapon {
                             defaultSecondaryDamage / 2, 0,
                             this.primaryAttackPushbackForce,
                             0.3, 1));
-                    }, 500);
+                    }, this.secondaryEchoDelay * 1000);
                 }
             } else {
                 this.game.addEntity(new AttackCirc(this.game, player,
@@ -255,7 +258,7 @@ class Weapon_scythe extends Weapon {
                             defaultSecondaryDamage / 2, 0,
                             this.primaryAttackPushbackForce,
                             0.3, 1));
-                    }, 500);
+                    }, this.secondaryEchoDelay * 1000);
                 }
             }
         }

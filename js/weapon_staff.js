@@ -1,10 +1,10 @@
 class Weapon_staff extends Weapon {
     constructor(game) {
         let upgrades = [
-            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png"),
-            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png")];
+            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 75),
+            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 35),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
+            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 25)];
 
         super(game, "Staff", 7, 7,
             0, 0,
@@ -13,7 +13,6 @@ class Weapon_staff extends Weapon {
             1, 0.5,
             "./sprites/NecromancyStaff.png",
             "./sounds/SE_staff_secondary.mp3", "./sounds/SE_staff_primary.mp3", 26, 70, upgrades);
-        // I know the file names are different, sue me
 
         // Save these values for calculations later (for sprite scaling)
         this.initialPrimaryAttackRadius = 115;
@@ -99,7 +98,7 @@ class Weapon_staff extends Weapon {
 
             let newProjectile = this.game.addEntity(new Projectile(this.game, defaultSecondaryDamage,
                 xWorld + 7, yWorld + 7, 10, 10, "explosionAttack", 0,
-                "./sprites/debug_warning.png",
+                "./sprites/transparent.png",
                 0, 0, 17, 17, 3, 0.001, 13 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), 0, 0,
                 this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 1));
             newProjectile.attackCirc.pulsatingDamage = false;

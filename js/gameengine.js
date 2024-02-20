@@ -122,7 +122,7 @@ class GameEngine {
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
         this.eliteSpawnTimer = 50;
         /** Spawn the boss after this many seconds of game time. */
-        this.bossSpawnTimer = 300;
+        this.bossSpawnTimer = 0;
         /** Tracks how long it has been since we last spawned an elite. */
         this.lastEliteSpawnTime = 0;
         /** Tracks if the round is over. */
@@ -237,7 +237,7 @@ class GameEngine {
 
     /** Call this to initialize the Rest Area (Map #0) objects. */
     initRestAreaObjects() {
-        let anvil = this.addEntity(new Map_object(this, 150, -50, 40, 20, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 1));
+        let anvil = this.addEntity(new Map_object(this, 150, -65, 40, 20, "./sprites/object_anvil.png", 0, 0, 93, 57, 20 + (32), 0.035, 1));
         anvil.boundingBox.type = "anvil";
         this.mapObjectsInitialized = true;
     }
@@ -414,6 +414,7 @@ class GameEngine {
                 newEnemy.boundingBox.height *= 1.5;
                 newEnemy.isElite = true;
                 this.spawnElite = false;
+                newEnemy.animator.outlineMode = true;
                 //console.log(newEnemy.name + "Elite Scale = " + newEnemy.animator.scale);
                 //console.log(newEnemy.name + " has become elite!");
             }
@@ -638,7 +639,7 @@ class GameEngine {
         }
 
         // Temp win condition
-        if (this.youWon) {
+        if (this.youWon && this.currMap === 2) {
             this.ctx.beginPath();
 
             this.ctx.fillStyle = "black";
