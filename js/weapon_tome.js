@@ -4,30 +4,34 @@ class Weapon_tome extends Weapon {
             new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png"),
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png"),
+            // new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png"),
             new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png"),
             new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png")];
 
-        super(game, "Tome", 1, 2,
+        super(game, "Tome", 1, 7,
             0, 0,
-            6, 1,
-            7, 55,
+            1, 1,
+            20, 75,
             3, 5,
             "./sprites/Tome.png",
             "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40, upgrades);
 
         // Save these values for calculations later
-        this.initialPrimaryAttackRadius = 10;//this.primaryAttackRadius;
-        this.initialSecondaryAttackRadius = 90;//this.secondaryAttackRadius;
-
+        this.initialPrimaryAttackRadius = this.primaryAttackRadius;
+        this.initialSecondaryAttackRadius = this.secondaryAttackRadius;
+``
         // Effectively acts as max pierced targets before deleting projectiles
-        this.maxPrimaryHits = 1;
+        this.maxPrimaryHits = 2;
         this.maxSecondaryHits = -1; // -1 Means infinite pierce
         this.primaryProjectileMovementSpeed = 60;
         this.secondaryProjectileMovementSpeed = 3.5;
+
     }
 
     performPrimaryAttack(player) {
+        // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
+        let defaultPrimaryDamage = player.atkPow;
+
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -51,16 +55,19 @@ class Weapon_tome extends Weapon {
 
 
             this.lastPrimaryAttackTime = currentTime;
-            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 1.2,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, defaultPrimaryDamage,
                 player.worldX, player.worldY, 10, 10, "playerAttack", this.primaryProjectileMovementSpeed,
                 "./sprites/MagicBall.png",
-                0, 0, 30, 30, 2, 0.2, 2.2 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), dx, dy,
+                0, 0, 30, 30, 2, 0.2, 2 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), dx, dy,
                 this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 0.3));
             newProjectile.maxHits = this.maxPrimaryHits; // Apply max pierce
         }
     }
 
     performSecondaryAttack(player) {
+        // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
+        let defaultSecondaryDamage = player.atkPow / 1.5;
+
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -84,10 +91,10 @@ class Weapon_tome extends Weapon {
 
 
             this.lastSecondAttackTime = currentTime;
-            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 3,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, defaultSecondaryDamage,
                 player.worldX, player.worldY, 10, 10, "playerAttack", this.secondaryProjectileMovementSpeed,
                 "./sprites/ElectricOrb.png",
-                0, 0, 32.5, 32, 6, 0.15, 5.6 * (this.secondaryAttackRadius/this.initialSecondaryAttackRadius), dx, dy,
+                0, 0, 32.5, 32, 6, 0.15, 4.75 * (this.secondaryAttackRadius/this.initialSecondaryAttackRadius), dx, dy,
                 this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 0.25));
             newProjectile.maxHits = this.maxSecondaryHits; // Apply max pierce
             newProjectile.attackCirc.pulsatingDamage = true; // Tell the projectile that this attack pulsates damage.
@@ -115,10 +122,10 @@ class Weapon_tome extends Weapon {
                     case "Secondary CD -10%":
                         this.secondCool *= 0.9;
                         break;
-                    case "Knockback +10%":
-                        this.primaryAttackPushbackForce *= 1.1;
-                        this.secondaryAttackPushbackForce *= 1.1;
-                        break;
+                    // case "Knockback +10%":
+                    //     this.primaryAttackPushbackForce *= 1.1;
+                    //     this.secondaryAttackPushbackForce *= 1.1;
+                    //     break;
                     case "Primary Piercing +3":
                         this.maxPrimaryHits += 3;
                         break;

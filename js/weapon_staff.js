@@ -6,16 +6,24 @@ class Weapon_staff extends Weapon {
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
             new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png")];
 
-        super(game, "Staff", 1, 2,
+        super(game, "Staff", 7, 7,
             0, 0,
             5, 5,
-            115, 115,
-            1, 1,
+            115, 2,
+            1, 0.5,
             "./sprites/NecromancyStaff.png",
-            "./sounds/SE_staff_primary.mp3", "./sounds/SE_staff_secondary.mp3", 26, 70, upgrades);
+            "./sounds/SE_staff_secondary.mp3", "./sounds/SE_staff_primary.mp3", 26, 70, upgrades);
+        // I know the file names are different, sue me
+
+        // Save these values for calculations later (for sprite scaling)
+        this.initialPrimaryAttackRadius = 115;
+        this.initialSecondaryAttackRadius = 2;
     }
 
     performPrimaryAttack(player) {
+        // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
+        let defaultPrimaryDamage = player.atkPow / 6;
+
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -46,17 +54,19 @@ class Weapon_staff extends Weapon {
 
             this.lastPrimaryAttackTime = currentTime;
 
-            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 3,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, defaultPrimaryDamage,
                 xWorld + 7, yWorld + 7, 10, 10, "necromancyAttack", 0,
                 "./sprites/exp_orb.png",
-                0, 0, 17, 17, 3, 0.2, 10, 0, 0,
+                0, 0, 17, 17, 3, 0.2, 13 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), 0, 0,
                 this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 1));
-            newProjectile.attackCirc.pulsatingDamage = true;
-
+            newProjectile.attackCirc.pulsatingDamage = false;
         }
     }
 
     performSecondaryAttack(player) {
+        // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
+        let defaultSecondaryDamage = player.atkPow / 2;
+
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -87,12 +97,13 @@ class Weapon_staff extends Weapon {
 
             this.lastSecondAttackTime = currentTime;
 
-            let newProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow / 3,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, defaultSecondaryDamage,
                 xWorld + 7, yWorld + 7, 10, 10, "explosionAttack", 0,
-                "./sprites/exp_orb.png",
-                0, 0, 17, 17, 3, 0.2, 10, 0, 0,
+                "./sprites/debug_warning.png",
+                0, 0, 17, 17, 3, 0.001, 13 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), 0, 0,
                 this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 1));
-            newProjectile.attackCirc.pulsatingDamage = true;
+            newProjectile.attackCirc.pulsatingDamage = false;
+            newProjectile.attackCirc.drawCircle = true;
         }
     }
 
@@ -105,6 +116,8 @@ class Weapon_staff extends Weapon {
                     case "Attack Size +10%":
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
+                        // TODO TEMP VALUE
+                        this.secondaryAttackDuration += 0.5;
                         break;
                     case "Primary CD -10%":
                         this.primaryCool *= 0.9;

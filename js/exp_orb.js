@@ -4,6 +4,9 @@ class Exp_Orb extends Entity {
         if (size < 1) {
             size = 1;
         }
+        if (size > 15) {
+            size = 15;
+        }
         super(1, 1, 0, game, worldX, worldY,
             17, 17, "orb", 0,
             "./sprites/exp_orb.png",

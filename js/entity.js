@@ -33,6 +33,7 @@ class Entity {
         this.boundingBox = new BoundingBox(worldX, worldY, boxWidth * scale, boxHeight * scale, boxType);
         this.animator = new Animator(game, ASSET_MANAGER.getAsset(spritePath), animXStart, animYStart, animW, animH, animFCount, animFDur, scale);
         this.movementSpeed = speed;
+        this.initialMovementSpeed = speed;
         this.worldX = worldX;
         this.worldY = worldY;
         this.isDead = false;
@@ -69,7 +70,7 @@ class Entity {
         if (!this.relocateMode || this.boundingBox.type.includes("player")) return;
 
         // Only proceed for entities marked as "enemy"
-        if (this.boundingBox.type.includes("enemy")) {
+        if (this.boundingBox.type.includes("enemy") || this.boundingBox.type.includes("ally")) {
             const camera = this.game.camera;
 
             // Calculate entity's position relative to the camera
@@ -136,8 +137,9 @@ class Entity {
     takeDamage(amount) {
         // Check if the entity taking damage is an enemy and if a critical hit happens
         let isCrit = false;
+        let isBleed = false;
+
         if (!(this instanceof Player)) {
-            console.log("it got here");
             const critRoll = Math.random();
             if (critRoll < this.game.player.critChance) {
                 amount *= this.game.player.critDamage;
@@ -145,19 +147,63 @@ class Entity {
             }
         }
 
-        this.currHP -= amount;
+        this.game.player.weapons[0].upgrades.forEach(upgrade => {
+            if (upgrade.name === "Bleeding Edge" && upgrade.active && !(this instanceof Player)
+                && this.game.player.currentWeapon === 0) {
+                console.log("TRY HIT ENEMY WITH BLEED!");
+                isBleed = true;
+                let bleed = (amount * 1.5) / 6;
+
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(() => {
+                        if (!this.isDead) {
+                            this.currHP -= bleed;
+                            this.game.addEntity(new Floating_text(this.game, bleed, this.worldX, this.worldY, false,
+                                this instanceof Player, isCrit));
+                            this.animator.damageSprite(100);
+
+                            if (this.currHP <= 0) {
+                                this.currHP = 0;
+                                this.isDead = true;
+                            }
+
+                            this.recentDamage += amount;
+                            this.lastDamageTime = this.game.timer.gameTime;
+                            console.log("Ticked bleed damage of " + bleed);
+                        }
+                    }, 500 * i);
+                }
+            }
+        });
+
+        if(!isBleed) {
+            this.currHP -= amount;
+            // Spawn floating damage number
+            this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY,
+                false, this instanceof Player, isCrit));
+        }
+
         if (this.currHP <= 0) {
             this.currHP = 0;
             this.isDead = true;
         }
+
         // Apply the damage sprite to this entity
         this.animator.damageSprite(250);
 
-        // Spawn floating damage number
-        this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY, false, this instanceof Player, isCrit));
-
         this.recentDamage += amount;
         this.lastDamageTime = this.game.timer.gameTime;
+
+        this.game.player.weapons[0].upgrades.forEach(upgrade => {
+            if (upgrade.name === "Crippling Chill" && upgrade.active && !(this instanceof Player)
+                && !this.boundingBox.type.includes("boss") && this.game.player.currentWeapon === 0) {
+                this.movementSpeed = 30;
+
+                setTimeout(() => {
+                    this.movementSpeed = this.initialMovementSpeed
+                }, 1000);
+            }
+        });
     }
 
     // Method to calculate the angle between the entity and a target (The player usually)

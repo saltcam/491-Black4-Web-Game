@@ -57,6 +57,8 @@ ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
 ASSET_MANAGER.queueDownload("./sprites/debug_warning.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_player_upgrade.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade.png");
+ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade_6options.png");
+ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade_2options.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_size.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_reduce_cd.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_knockback.png");
@@ -87,6 +89,8 @@ ASSET_MANAGER.queueDownload("./sprites/boss_knight_backdash.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_knight_backdash_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_knight_groundsmash.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_knight_groundsmash_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/skeleton.png");
+ASSET_MANAGER.queueDownload("./sprites/skeleton_DAMAGED.png");
 
 //sounds
 ASSET_MANAGER.queueDownload("./sounds/SE_scythe_primary.mp3");

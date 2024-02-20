@@ -1,34 +1,52 @@
-class Weapon_scythe extends Weapon{
+class Weapon_scythe extends Weapon {
     constructor(game) {
         //"./sprites/upgrade_size.png"
         let upgrades = [
             new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png"),
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
-            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false,"./sprites/upgrade_reduce_cd.png"),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png"),
             new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png"),
-            new Upgrade("Blood Scythe", "(Unique) Life Leech +3%.", true, "./sprites/upgrade_blood_scythe.png"),
-            new Upgrade("Dual Blade", "(Unique) Primary attack behind too.", true, "./sprites/upgrade_dual_blade.png")];
+            new Upgrade("Blood Scythe", "(Unique) Heal 1 hp per attack", true, "./sprites/upgrade_blood_scythe.png"),
+            new Upgrade("Dual Blade", "(Unique) Primary attack behind too.", true, "./sprites/upgrade_dual_blade.png"),
+            new Upgrade("Echo Slash", "(Unique) Attack Count++. CD++", true, "./sprites/upgrade_size.png"),
+            // new Upgrade("Boomerang Blade", "(Unique) Primary now throws scythe.", true, "./sprites/upgrade_size.png"),
+            new Upgrade("Crippling Chill", "(Unique) Cripple effect on attack.", true, "./sprites/upgrade_size.png"),
+            new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg dealt over time.", true, "./sprites/upgrade_size.png")
+        ];
 
-        super(game, "Scythe", 1, 2,
+        super(game, "Scythe", 1, 5,
             0, 0,
             5, 10,
-            110, 115,
+            73, 115,
             0.6, 0.85,
             "./sprites/weapon_scythe.png",
             "./sounds/SE_scythe_primary.mp3", "./sounds/SE_scythe_secondary.mp3", 30, 50, upgrades);
+
+        this.initialPrimaryCool = this.primaryCool;
+        this.initialSecondaryCool = this.secondCool;
     }
 
-    performPrimaryAttack(player){
-        // Check if player has the blood scythe upgrade (life leech)
+    performPrimaryAttack(player) {
+        // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
+        let defaultPrimaryDamage = player.atkPow / 1.5;
+        let defaultDualBladeRadius = this.primaryAttackRadius * .67;
+
+        // Check if special upgrade code is going to be used
         let bloodUpgrade = false;
         let dualBladeUpgrade = false;
+        let echoSlashUpgrade = false;
+        let bleedingEdgeUpgrade = false;
 
         player.weapons[0].upgrades.forEach(upgrade => {
-           if (upgrade.name === "Blood Scythe") {
-               bloodUpgrade = upgrade.active;
-           } else if (upgrade.name === "Dual Blade") {
+            if (upgrade.name === "Blood Scythe") {
+                bloodUpgrade = upgrade.active;
+            } else if (upgrade.name === "Dual Blade") {
                 dualBladeUpgrade = upgrade.active;
-           }
+            } else if (upgrade.name === "Echo Slash") {
+                echoSlashUpgrade = upgrade.active;
+            } else if (upgrade.name === "Bleeding Edge") {
+                bleedingEdgeUpgrade = upgrade.active;
+            }
         });
 
         const currentTime = this.game.timer.gameTime;
@@ -56,62 +74,128 @@ class Weapon_scythe extends Weapon{
 
             // Use different sprites depending on if we have a 'blood' scythe or not
             if (bloodUpgrade) {
-                this.game.addEntity(new AttackCirc(this.game, player,
-                    this.primaryAttackRadius / 1.45,
-                    'VAMP_playerAttack',
+                    this.game.addEntity(new AttackCirc(this.game, player,
+                    this.primaryAttackRadius,
+                    'playerAttack',
                     dx, dy,
                     this.primaryAttackDuration,
                     "./sprites/weapon_blood_scythe_primaryattack.png",
-                    this.game.player.atkPow, 0,
+                    defaultPrimaryDamage, 0,
                     this.primaryAttackPushbackForce,
                     0, 1));
 
-                    if (dualBladeUpgrade) {
+                    this.game.player.heal(1);
+
+                if (dualBladeUpgrade) {
+                    this.game.addEntity(new AttackCirc(this.game, player,
+                        defaultDualBladeRadius,
+                        'VAMP_playerAttack',
+                        -dx, -dy,
+                        this.primaryAttackDuration,
+                        "./sprites/weapon_blood_scythe_primaryattack.png",
+                        defaultPrimaryDamage, 0,
+                        this.primaryAttackPushbackForce,
+                        0, 1));
+
+                    if (echoSlashUpgrade) {
+                        setTimeout(() => {
+                            this.game.addEntity(new AttackCirc(this.game, player,
+                                defaultDualBladeRadius,
+                                'VAMP_playerAttack',
+                                -dx, -dy,
+                                this.primaryAttackDuration,
+                                "./sprites/weapon_blood_scythe_primaryattack.png",
+                                defaultPrimaryDamage / 2, 0,
+                                this.primaryAttackPushbackForce,
+                                0, 1));
+                        }, 250);
+                    }
+                }
+
+                if (echoSlashUpgrade) {
+                    setTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
-                            this.primaryAttackRadius / 1.95,
+                            this.primaryAttackRadius,
                             'VAMP_playerAttack',
-                            -dx, -dy,
+                            dx, dy,
                             this.primaryAttackDuration,
                             "./sprites/weapon_blood_scythe_primaryattack.png",
-                            this.game.player.atkPow, 0,
+                            defaultPrimaryDamage / 2, 0,
                             this.primaryAttackPushbackForce,
                             0, 1));
-                    }
+                    }, 250);
+                }
 
             } else {
                 this.game.addEntity(new AttackCirc(this.game, player,
-                    this.primaryAttackRadius / 2,
+                    this.primaryAttackRadius,
                     'playerAttack',
                     dx, dy,
                     this.primaryAttackDuration,
                     "./sprites/weapon_scythe_primaryattack.png",
-                    this.game.player.atkPow / 1.45, 0,
+                    defaultPrimaryDamage, 0,
                     this.primaryAttackPushbackForce,
                     0, 1));
 
-                    if (dualBladeUpgrade) {
+                if (dualBladeUpgrade) {
+                    this.game.addEntity(new AttackCirc(this.game, player,
+                        defaultDualBladeRadius,
+                        'playerAttack',
+                        -dx, -dy,
+                        this.primaryAttackDuration,
+                        "./sprites/weapon_scythe_primaryattack.png",
+                        defaultPrimaryDamage, 0,
+                        this.primaryAttackPushbackForce,
+                        0, 1));
+                    if (echoSlashUpgrade) {
+                        setTimeout(() => {
+                            this.game.addEntity(new AttackCirc(this.game, player,
+                                defaultDualBladeRadius,
+                                'playerAttack',
+                                -dx, -dy,
+                                this.primaryAttackDuration,
+                                "./sprites/weapon_scythe_primaryattack.png",
+                                defaultPrimaryDamage / 2, 0,
+                                this.primaryAttackPushbackForce,
+                                0, 1));
+                        }, 250);
+                    }
+                }
+
+                if (echoSlashUpgrade) {
+                    setTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
-                            this.primaryAttackRadius / 2.5,
+                            this.primaryAttackRadius,
                             'playerAttack',
-                            -dx, -dy,
+                            dx, dy,
                             this.primaryAttackDuration,
                             "./sprites/weapon_scythe_primaryattack.png",
-                            this.game.player.atkPow / 1.45, 0,
+                            defaultPrimaryDamage / 2, 0,
                             this.primaryAttackPushbackForce,
-                            0, 1));
-                    }
+                            0, 0.6));
+                    }, 250);
+                }
 
             }
         }
     }
 
-    performSecondaryAttack(player){
+    performSecondaryAttack(player) {
+        // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
+        let defaultSecondaryDamage = player.atkPow * 1.15;
+
         // Check if player has the blood scythe upgrade (life leech)
         let bloodUpgrade = false;
+        let echoSlashUpgrade = false;
+        let cripplingChillUpgrade = false;
 
         player.weapons[0].upgrades.forEach(upgrade => {
             if (upgrade.name === "Blood Scythe") {
                 bloodUpgrade = upgrade.active;
+            } else if (upgrade.name === "Echo Slash") {
+                echoSlashUpgrade = upgrade.active;
+            } else if (upgrade.name === "Crippling Chill") {
+                cripplingChillUpgrade = upgrade.active;
             }
         });
 
@@ -130,38 +214,70 @@ class Weapon_scythe extends Weapon{
                     0, 0,
                     this.secondaryAttackDuration,
                     "./sprites/weapon_blood_scythe_secondaryattack.png",
-                    this.game.player.atkPow * 1.35, 0,
+                    defaultSecondaryDamage, 0,
                     this.secondaryAttackPushbackForce,
                     0.3, 1));
+
+                this.game.player.heal(1);
+
+                if (echoSlashUpgrade) {
+                    setTimeout(() => {
+                        this.game.addEntity(new AttackCirc(this.game, player,
+                            this.secondaryAttackRadius,
+                            'VAMP_playerAttack',
+                            0, 0,
+                            this.primaryAttackDuration,
+                            "./sprites/weapon_blood_scythe_secondaryattack.png",
+                            defaultSecondaryDamage / 2, 0,
+                            this.primaryAttackPushbackForce,
+                            0.3, 1));
+                    }, 500);
+                }
             } else {
-                    this.game.addEntity(new AttackCirc(this.game, player,
+                this.game.addEntity(new AttackCirc(this.game, player,
                     this.secondaryAttackRadius,
                     'playerAttack',
                     0, 0,
                     this.secondaryAttackDuration,
                     "./sprites/weapon_scythe_secondaryattack.png",
-                    this.game.player.atkPow * 1.35, 0,
+                    defaultSecondaryDamage, 0,
                     this.secondaryAttackPushbackForce,
                     0.3, 1));
+
+                if (echoSlashUpgrade) {
+                    setTimeout(() => {
+                        this.game.addEntity(new AttackCirc(this.game, player,
+                            this.secondaryAttackRadius,
+                            'playerAttack',
+                            0, 0,
+                            this.primaryAttackDuration,
+                            "./sprites/weapon_scythe_secondaryattack.png",
+                            defaultSecondaryDamage / 2, 0,
+                            this.primaryAttackPushbackForce,
+                            0.3, 1));
+                    }, 500);
+                }
             }
         }
     }
 
     // Handles code for turning on upgrades (Generic and Specific)
-    handleUpgrade(){
+    handleUpgrade() {
         for (let i = 0; i < this.upgrades.length; i++) {
             // If generic has been turned on
-            if(this.upgrades[i].active && !this.upgrades[i].special){
-                switch (this.upgrades[i].name){
+            if (this.upgrades[i].active && !this.upgrades[i].special) {
+                switch (this.upgrades[i].name) {
                     case "Attack Size +10%":
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
                         break;
                     case "Primary CD -10%":
                         this.primaryCool *= 0.9;
+                        this.initialPrimaryCool *= 0.9;
                         break;
                     case "Secondary CD -10%":
                         this.secondCool *= 0.9;
+                        this.initialSecondaryCool *= 0.9;
                         break;
                     case "Knockback +10%":
                         this.primaryAttackPushbackForce *= 1.1;
@@ -171,8 +287,9 @@ class Weapon_scythe extends Weapon{
                 // Set generic to 'false' so it can be re-used/activated in the future
                 this.upgrades[i].active = false;
             }
-            else if(this.upgrades[i].active && this.upgrades[i].special){
-                switch (this.upgrades[i].name){
+            // Handle special sprite changes
+            else if (this.upgrades[i].active && this.upgrades[i].special) {
+                switch (this.upgrades[i].name) {
                     case "Blood Scythe":
                         // Switch weapon to blood scythe sprite
                         this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe.png"), 0, 0, 30, 50, 1, 1);
@@ -182,8 +299,7 @@ class Weapon_scythe extends Weapon{
                             if (upgrade.name === "Dual Blade" && upgrade.active) {
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
-                            }
-                            else if (upgrade.name === "Dual Blade" && !upgrade.active){
+                            } else if (upgrade.name === "Dual Blade" && !upgrade.active) {
                                 upgrade.sprite = "./sprites/upgrade_dual_blade(blood).png";
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_blood_scythe.png";
@@ -196,17 +312,23 @@ class Weapon_scythe extends Weapon{
                             if (upgrade.name === "Blood Scythe" && upgrade.active) {
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
-                            }
-                            else if (upgrade.name === "Blood Scythe" && !upgrade.active){
+                            } else if (upgrade.name === "Blood Scythe" && !upgrade.active) {
                                 upgrade.sprite = "./sprites/upgrade_blood_scythe(dual).png";
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_scythe_dual.png";
                             }
                         });
                         break;
+                    case "Echo Slash":
+                        if (this.primaryCool === this.initialPrimaryCool && this.secondCool === this.initialSecondaryCool) {
+                            this.primaryCool *= 1.3;
+                            this.secondCool *= 1.3;
+
+                            break;
+                        }
                 }
             }
-        }
 
+        }
     }
 }

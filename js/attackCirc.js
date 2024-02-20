@@ -8,6 +8,7 @@ class AttackCirc {
      * @param type 'playerAttack': does damage when colliding with enemy boundingBox
      *              'enemyAttack': does damage when colliding with player boundingBox
      *              'necromancyAttack': does damage when colliding with tombstone and enemy boundingBox
+     *              'explosionAttack': does damage when colliding with tombstones and enemy bounding boxes. Meant to chain react.
      * @param dx    x-offset from parent entity
      * @param dy    y-offset from parent entity
      * @param duration  How long in frames the attack animation stays on screen
@@ -87,7 +88,7 @@ class AttackCirc {
         this.damageDealt = false;
 
         // The amount this attack circle leeches health back to the attacker if the attackType.includes("VAMP_")
-        this.leechPercent = 0.03;
+        this.leechPercent = 0;
     }
 
 
@@ -97,6 +98,11 @@ class AttackCirc {
         this.worldY = this.entity.calculateCenter().y + this.dy;
 
         const currentTime = this.game.elapsedTime;
+
+        // increase in size each frame if of type explosion
+        if (this.type === "explosionAttack") {
+            this.radius += 2;
+        }
 
         // Check for the end of duration
         if (currentTime >= this.endTime) {
@@ -113,7 +119,7 @@ class AttackCirc {
         // Normal attack logic logic for player vs enemy
         if (!this.type.includes("enemy") && !this.pulsatingDamage && this.attackDamage > 0) {
             this.game.enemies.forEach(enemy => {
-                if (!this.hitEntities.has(enemy) && this.collisionDetection(enemy.boundingBox)) {
+                if (!this.hitEntities.has(enemy) && this.collisionDetection(enemy.boundingBox) /* && (enemy.boundingBox.type !== "ally") */) {
                     enemy.takeDamage(this.attackDamage);
 
                     // Handle leech healing if it's that kind of situation
@@ -130,6 +136,36 @@ class AttackCirc {
                     }
                 }
             });
+
+            if (["playerAttack", "necromancyAttack", "explosionAttack"].includes(this.type)) {
+                this.game.objects.forEach((object) => {
+                    if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
+                        switch (this.type) {
+                            case "necromancyAttack":
+                                this.game.addEntity(new Ally_Contact(
+                                    "Ally", 25, 25,
+                                    10, this.game, object.worldX, object.worldY, 19 / 2,
+                                    28 / 2, "ally", 115, "./sprites/Zombie_Run.png",
+                                    0, 0, 34, 27,
+                                    8, 0.2, 3, 1));
+                                object.removeFromWorld = true;
+                                this.lastAttackTime = currentTime;
+                                break;
+                            case "explosionAttack":
+                                object.willExplode(this);
+                                //object.removeFromWorld = true;
+                                this.lastAttackTime = currentTime;
+                                break;
+                            default:
+                                console.log("Tombstone hit with something else");
+                        }
+                        //console.log("necromancy!");
+                        // Push the enemy away
+                        //this.pushEnemy(enemy);
+
+                    }
+                });
+            }
         }
         // Enemy vs player
         else if (this.type.includes("enemy") && !this.pulsatingDamage && this.attackDamage > 0) {
@@ -156,7 +192,7 @@ class AttackCirc {
             // Handling different player vs enemy attack types
             if (["playerAttack", "necromancyAttack", "explosionAttack"].includes(this.type)) {
                 this.game.enemies.forEach(enemy => {
-                    if (this.collisionDetection(enemy.boundingBox)) {
+                    if (this.collisionDetection(enemy.boundingBox) /*&& (enemy.boundingBox.type !== "ally")*/) {
                         enemy.takeDamage(this.attackDamage);
                         this.pushEnemy(enemy);
                         this.damageDealt = true; // Set flag as true since damage was dealt
@@ -170,35 +206,6 @@ class AttackCirc {
                         if (this.entity instanceof Projectile) {
                             this.entity.maxHits -= 1;
                         }
-                    }
-                });
-
-                this.game.objects.forEach((object) => {
-                    if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
-
-                        switch(this.type) {
-                            case "necromancyAttack":
-                                this.game.addEntity(new Ally_Contact(
-                                    "Ally", 25, 25,
-                                    10, this.game, object.worldX, object.worldY, 19/2,
-                                    28/2, "ally", 115, "./sprites/Zombie_Run.png",
-                                    0, 0, 34, 27,
-                                    8, 0.2, 3, 1));
-                                object.removeFromWorld = true;
-                                this.lastAttackTime = currentTime;
-                                break;
-                            case "explosionAttack":
-                                object.willExplode(this);
-                                object.removeFromWorld = true;
-                                this.lastAttackTime = currentTime;
-                                break;
-                            default:
-                                console.log("Tombstone hit with something else");
-                        }
-                        //console.log("necromancy!");
-                        // Push the enemy away
-                        //this.pushEnemy(enemy);
-
                     }
                 });
             }

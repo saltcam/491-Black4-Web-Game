@@ -37,18 +37,22 @@ class Map_object extends Entity {
     willExplode(explosion){
         this.isExploding = true;
         this.explosion = explosion;
+        this.removeFromWorld = true;
     }
 
     // creates the explosion in game, which is called when removing.
     explode() {
         // duration is a raw value because it otherwise lasts infinitely.
+        // Do we want to take more info from player here?
         if (this.isExploding) {
-            this.game.addEntity(new Projectile(this.game, this.explosion.attackDamage,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, this.explosion.attackDamage,
                 this.worldX, this.worldY, 10, 10, "explosionAttack", 0,
                 "./sprites/exp_orb.png",
-                0, 0, 17, 17, 3, 0.2, 10, 0, 0,
-                3, this.explosion.radius, this.explosion.damagePushbackForce, 0, 1));
+                0, 0, 17, 17, 3, 0.2, 0.01, 0, 0,
+                this.game.player.weapons[2].secondaryAttackDuration, 2, 5, 0, 1));
             this.isExploding = false;
+            newProjectile.attackCirc.drawCircle = true;
+            ASSET_MANAGER.playAsset("./sounds/SE_staff_primary.mp3");
         }
     }
 

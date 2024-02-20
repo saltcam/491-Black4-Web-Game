@@ -13,6 +13,8 @@ class GameEngine {
         this.objects = [];
         /** Tracks enemy entities. */
         this.enemies = [];
+        /** Tracks ally entities */
+        this.allies = [];
         /** Tracks the portal entity (with this setup - there should only ever be ONE portal active at once). */
         this.portal = null;
         /** Tracks the attack entities like projectiles and attackCirc. */
@@ -105,7 +107,10 @@ class GameEngine {
                 animYStart: 0, animW: 32, animH: 18, animFCount: 8, animFDur: 0.1, scale: 2, exp: 1},
             { name: "Floating Eye", maxHP: 30, currHP: 30, atkPow: 3, worldX: 0, worldY: 0,
                 boxWidth: 19/2, boxHeight: 28/2, boxType: "enemy", speed: 85, spritePath: "./sprites/FloatingEye.png",
-                animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: -1}
+                animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: -1},
+            { name: "Skeleton", maxHP: 42, currHP: 42, atkPow: 4, worldX: 0, worldY: 0,
+                boxWidth: 38/2, boxHeight: 56/2, boxType: "enemy", speed: 80, spritePath: "./sprites/skeleton.png",
+                animXStart: 0.5, animYStart: 0, animW: 70.5, animH: 77, animFCount: 8, animFDur: 0.2, scale: 1.5, exp: -1},
         ];
 
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
@@ -331,12 +336,13 @@ class GameEngine {
             this.items.push(entity);
         } else if (entity.boundingBox.type === "portal") {
             this.portal = entity;
-        } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss" || entity.boundingBox.type === "ally") {
+        } else if (entity.boundingBox.type === "enemy" || entity.boundingBox.type === "enemyBoss") {
             this.enemies.push(entity);
-
             if (entity.boundingBox.type === "enemyBoss") {
                 this.boss = entity;
             }
+        } else if (entity.boundingBox.type === "ally") {
+            this.allies.push(entity);
         } else if (entity.boundingBox.type.includes("attack") || entity.boundingBox.type.includes("Attack")) {
             this.attacks.push(entity);
         } else if (entity.boundingBox.type === "object") {
@@ -377,7 +383,7 @@ class GameEngine {
         // Calculate the maximum number of enemies based on elapsed time
         let maxEnemies = this.baseMaxEnemies * intervals;
 
-        console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
+        //console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
 
         if (this.enemies.length > maxEnemies || this.currMap === 0) {
             return;
@@ -493,6 +499,19 @@ class GameEngine {
             return diff;
         });
 
+        // Sort enemies based on their worldY position with a threshold
+        this.allies.sort((a, b) => {
+            // Calculate the difference in worldY positions
+            const diff = a.worldY - b.worldY;
+
+            // Only consider them different if the difference exceeds the threshold
+            if (Math.abs(diff) < sortingThreshold) {
+                return 0; // Consider them as equal for sorting purposes
+            }
+            return diff;
+        });
+
+
         // Draw 'attack' entities that are labeled as choreographed ('CAR_').
         for (let attack of this.attacks) {
             if (!attack.boundingBox.type.includes("CAR_")) {
@@ -509,6 +528,16 @@ class GameEngine {
 
         // Draw 'enemy' entities.
         for (let enemy of this.enemies) {
+            enemy.draw(this.ctx, this);
+
+            // If debug mode, then draw debug features.
+            if (this.debugMode) {
+                enemy.drawHealth(this.ctx);
+            }
+        }
+
+        // Draw 'ally' entities.
+        for (let enemy of this.allies) {
             enemy.draw(this.ctx, this);
 
             // If debug mode, then draw debug features.
@@ -954,6 +983,13 @@ class GameEngine {
                 }
             }
 
+            // Update 'ally' entities.
+            for (let i = 0; i < this.allies.length; i++) {
+                if (!this.allies[i].removeFromWorld) {
+                    this.allies[i].update();
+                }
+            }
+
             // Update 'attack' entities.
             for (let i = 0; i < this.attacks.length; i++) {
                 if (!this.attacks[i].removeFromWorld) {
@@ -1022,12 +1058,26 @@ class GameEngine {
                     // Spawn XP Orb on killed enemies
                     this.addEntity(new Exp_Orb(this, this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].exp));
 
+                    let wasKilledByExplosion = false;
+
+                    //TODO make it so a certain upgrade prevents this
+                    this.attacks.forEach(attack => {
+                        if (attack.type === "explosionAttack" && attack.collisionDetection(this.enemies[i].boundingBox)) {
+
+                            wasKilledByExplosion = true;
+                        }
+                    });
+
                     // Spawn Tombstones on killed enemies (only % of the time)
-                    if (Math.random() < 0.5) {
+                    if (Math.random() < 0.5 && !wasKilledByExplosion) {
                         // Spawn Tombstone
                         let tombstone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
                         this.addEntity(tombstone);
                         tombstone.boundingBox.type = "tombstone";
+
+                        setTimeout(() => {
+                            tombstone.removeFromWorld = true;
+                        }, 70000);
                     }
 
                     // If elite or boss, drop a weapon upgrade chest
@@ -1052,6 +1102,14 @@ class GameEngine {
 
                 // Delete this enemy
                 this.enemies.splice(i, 1);
+            }
+        }
+
+        // Remove 'ally' entities that are marked for deletion.
+        for (let i = this.allies.length - 1; i >= 0; --i) {
+            if (this.allies[i].removeFromWorld) {
+                // Delete this enemy
+                this.allies.splice(i, 1);
             }
         }
 
@@ -1104,11 +1162,43 @@ class GameEngine {
             }
         }
 
+        // Check for collisions between allies
+        for (let i = 0; i < this.allies.length; i++) {
+            for (let j = i + 1; j < this.allies.length; j++) {
+                let ally1 = this.allies[i];
+                let ally2 = this.allies[j];
+
+                if (ally1.boundingBox.isColliding(ally2.boundingBox)) {
+                    this.respondToCollision(ally1, ally2);
+                }
+            }
+        }
+
+        // Check for collisions between allies
+        for (let i = 0; i < this.allies.length; i++) {
+            for (let j = i + 1; j < this.enemies.length; j++) {
+                let ally = this.allies[i];
+                let enemy = this.enemies[j];
+
+                if (ally.boundingBox.isColliding(enemy.boundingBox)) {
+                    this.respondToCollision(ally, enemy);
+                }
+            }
+        }
+
         // Loop through 'enemy' entities and set removeFromWorld flags.
         for (let i = 0; i < this.enemies.length; i++) {
             // If dead non-boss enemy, mark for deletion.
             if (this.enemies[i].isDead && this.enemies[i] !== this.boss) {
                 this.enemies[i].removeFromWorld = true;
+            }
+        }
+
+        // Loop through 'ally' entities and set removeFromWorld flags.
+        for (let i = 0; i < this.allies.length; i++) {
+            // If dead non-boss enemy, mark for deletion.
+            if (this.allies[i].isDead) {
+                this.allies[i].removeFromWorld = true;
             }
         }
 

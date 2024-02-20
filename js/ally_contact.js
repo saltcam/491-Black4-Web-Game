@@ -47,21 +47,19 @@ class Ally_Contact extends Entity {
         {
             this.isDead = true;
         }
-
-
-
-        const player = this.game.player;
+        // change target to nearest enemy on the field
+        const target = this.closestTarget();
 
         // Determine the direction to face based on the player's position
-        if (player.worldX < this.worldX) {
+        if (target.worldX < this.worldX) {
             // Player is to the left, face left
             this.lastMove = "left";
-        } else if (player.worldX > this.worldX) {
+        } else if (target.worldX > this.worldX) {
             // Player is to the right, face right
             this.lastMove = "right";
         }
 
-        const targetDirection = this.calcTargetAngle(player);
+        const targetDirection = this.calcTargetAngle(target);
 
         // Apply movement based on the direction and the zombie's speed
         this.worldX += targetDirection.x * this.movementSpeed * this.game.clockTick;
@@ -86,13 +84,14 @@ class Ally_Contact extends Entity {
         this.game.enemies.forEach((enemy) => {
 
         // Check collision and cooldown
-        if (enemy.boundingBox.type === "enemy" && this.boundingBox.isColliding(enemy.boundingBox) && currentTime - this.lastAttackTime >= this.attackCooldown) {
+        if (this.boundingBox.isColliding(enemy.boundingBox) && (currentTime - this.lastAttackTime >= this.attackCooldown)) {
             enemy.takeDamage(this.atkPow);
             this.takeDamage(5);
             this.lastAttackTime = currentTime; // Update last attack time
         }
         });
     }
+
     draw(ctx, game) {
         let screenX = this.worldX - this.game.camera.x;
         let screenY = this.worldY - this.game.camera.y;
@@ -101,5 +100,34 @@ class Ally_Contact extends Entity {
         this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
         this.drawHealth(ctx);
         this.boundingBox.draw(ctx, game);
+    }
+
+    closestTarget(){
+        // default to player so they try to stay close if no threats nearby
+        let target = this.game.player;
+        let dist = 100000;
+
+        this.game.enemies.forEach(enemy => {
+            // if not an ally and closer than previously targeted enemy, change target to that.
+            if (this.calcDist(enemy) < dist) {
+                dist = this.calcDist(enemy);
+                target = enemy;
+            }
+        });
+
+        return target;
+    }
+
+    calcDist(target){
+
+        const targetCenter = target.calculateCenter();
+        const selfCenter = this.calculateCenter();
+
+        // Calculate direction vector towards the target's center
+        const dirX = targetCenter.x - selfCenter.x;
+        const dirY = targetCenter.y - selfCenter.y;
+
+        return Math.sqrt(dirX * dirX + dirY * dirY);
+
     }
 }

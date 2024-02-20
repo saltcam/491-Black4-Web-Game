@@ -207,7 +207,151 @@ class Upgrade_System {
                     this.game.player.handleUpgrade();
                 }
             }
+            // Check for input on anvil upgrade menu - 'Choose a Weapon to Upgrade'
+            else if (this.currentMenu === 5) {
+                this.game.player.menuInvincibility = true;
+                // there MUST be a better way...
+                if (this.game.keys["1"]) {
+                    this.weaponChoice = 0;
+                    this.currentMenu = 6;
+                    this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
+                } else if (this.game.keys["2"]) {
+                    this.weaponChoice = 1;
+                    this.currentMenu = 6;
+                    this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
+                } else if (this.game.keys["3"]) {
+                    this.weaponChoice = 2;
+                    this.currentMenu = 6;
+                    this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
+                }
+            }
+            // Check for input on anvil upgrade menu - 'Choose Generic or Special'
+            else if (this.currentMenu === 6) {
+                this.game.player.menuInvincibility = true;
+                // there MUST be a better way...
+                if (this.game.keys["1"]) {
+                    this.weaponChoice = 0;
+                    this.currentMenu = 7;
+                    this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
+                } else if (this.game.keys["2"]) {
+                    this.weaponChoice = 1;
+                    this.currentMenu = 7;
+                    this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
+                } else if (this.game.keys["3"]) {
+                    this.weaponChoice = 2;
+                    this.currentMenu = 7;
+                    this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
+                }
+            }
+            // Check for input on menu one - 'Choose a Generic Upgrade' OR 'Choose a Special Upgrade'
+            else if (this.currentMenu === 7) {
+                this.game.player.menuInvincibility = true;
+                let upgradeChoice = -1;
+                if (this.game.keys["1"]) {
+                    upgradeChoice = 0;
+                    this.waitingForSelection = false;
+                    if (this.game.pauseGame) {
+                        this.game.togglePause();
+                    }
+                    this.currentMenu = -1;
+                    this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
+                } else if (this.game.keys["2"]) {
+                    upgradeChoice = 1;
+                    this.waitingForSelection = false;
+                    if (this.game.pauseGame) {
+                        this.game.togglePause();
+                    }
+                    this.currentMenu = -1;
+                    this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
+                } else if (this.game.keys["3"]) {
+                    upgradeChoice = 2;
+                    this.waitingForSelection = false;
+                    if (this.game.pauseGame) {
+                        this.game.togglePause();
+                    }
+                    this.currentMenu = -1;
+                    this.lastRealTimeKeyPress = Date.now();
+                    // After ~1 sec of exiting menu, turn player's menu invincibility off
+                    setTimeout(() => {
+                        this.game.player.menuInvincibility = false;
+                    }, this.menuInvincibilityTime * 1000);
+                }
+                if (upgradeChoice !== -1) {
+                    // Set the upgrade to active
+                    this.upgradeOptions[upgradeChoice].active = true;
+
+                    // Handle turning on the upgrade (Both Generic and Specific handled here)
+                    this.game.player.weapons[this.weaponChoice].handleUpgrade();
+                }
+                // Set CD for touching the anvil again.
+                for (let object of this.game.objects) {
+                    console.log(object.boundingBox.type);
+                    if (object.boundingBox.type === "anvil") {
+                        setTimeout(() => {
+                            object.hasBeenOpened = false;
+                        }, 1000);
+                    }
+                }
+            }
         }
+    }
+
+    /** Call this on player or weapon to get all generic upgrades. */
+    getGenericUpgrades(entity) {
+        this.upgradeOptions = null;
+        let i = 0;
+
+        entity.upgrades.forEach(upgrade => {
+            if (!upgrade.special) {
+                this.upgradeOptions[i] = upgrade;
+                i++;
+            }
+        });
+    }
+
+    /** Call this on player or weapon to get all special upgrades. */
+    getSpecialUpgrades(entity) {
+        this.upgradeOptions = null;
+        let i = 0;
+
+        entity.upgrades.forEach(upgrade => {
+            if (upgrade.special) {
+                this.upgradeOptions[i] = upgrade;
+                i++;
+            }
+        });
     }
 
     /** Call this to pop up a weapon upgrade screen for the player. */
@@ -331,33 +475,28 @@ class Upgrade_System {
             ctx.fillText(this.upgradeOptions[i].description, (ctx.canvas.width / 2) - 85, 260 + i*150 + 37);
         }
 
-        // this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
-        // this.animator.scale = 0.45;
-        // this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * 0))-72);
-        //
-        // ctx.textAlign = 'left';
-        // ctx.font = '26px Arial';
-        // ctx.fillText("Health +10", (ctx.canvas.width / 2) - 85, 275 + 0);
-        //
-        // this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
-        // this.animator.scale = 0.45;
-        // this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * 1))-72);
-        //
-        // ctx.textAlign = 'left';
-        // ctx.font = '26px Arial';
-        // ctx.fillText("Speed +5%", (ctx.canvas.width / 2) - 85, 275 + 150);
-        //
-        // this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/upgrade_size.png"), 0, 0, 178, 178, 1, 1);
-        // this.animator.scale = 0.45;
-        // this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 150, (250 + (150 * 2))-72);
-        //
-        // ctx.textAlign = 'left';
-        // ctx.font = '26px Arial';
-        // ctx.fillText("Dash CD -10%", (ctx.canvas.width / 2) - 85, 275 + 300);
-
         // Set animator back to original menu sprite sheet
         this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_player_upgrade.png"), 0, 0, 388, 413, 1, 1);
         this.animator.scale = 1.5;
+    }
+
+    /** Call this to draw menu #5 - 'Choose a Weapon to Upgrade' for anvil menu. */
+    showAnvilWeaponUpgradeScreen() {
+        // Set the animator to use the weapon upgrade menu sprite if it's not already set to that.
+        if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/menu_weapon_upgrade.png")) {
+            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_weapon_upgrade.png"), 0, 0, 388, 413, 1, 1);
+        }
+
+        // Declare that we are now going to be waiting for the player to make a menu selection.
+        this.waitingForSelection = true;
+
+        // Pause the game while we wait for the player to make a selection.
+        if (!this.game.pauseGame) {
+            this.game.togglePause();
+        }
+
+        // Tell the upgrade system which menu type we are currently on (refer to the java doc for more info)
+        this.currentMenu = 5;
     }
 
     /**
@@ -396,7 +535,6 @@ class Upgrade_System {
         } else if(this.currentMenu === 4) {
             this.drawMenuFour(ctx);
         }
-
 
         // Reset shadow properties to avoid affecting other drawings
         ctx.shadowColor = 'transparent';
