@@ -74,6 +74,14 @@ ASSET_MANAGER.queueDownload("./sprites/McDead_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/McDash.png");
 ASSET_MANAGER.queueDownload("./sprites/McDash_DAMAGED.png");
 
+//allies
+ASSET_MANAGER.queueDownload("./sprites/Ally_Contact_Walk.png");
+ASSET_MANAGER.queueDownload("./sprites/Ally_Contact_Walk_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/Ally_Ranged_Walk.png");
+ASSET_MANAGER.queueDownload("./sprites/Ally_Ranged_Walk_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/Ally_Charge_Walk.png");
+ASSET_MANAGER.queueDownload("./sprites/Ally_Charge_Walk_DAMAGED.png");
+
 //enemies
 ASSET_MANAGER.queueDownload("./sprites/SlimeMove.png");
 ASSET_MANAGER.queueDownload("./sprites/SlimeMove_DAMAGED.png");

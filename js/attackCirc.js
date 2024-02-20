@@ -144,10 +144,10 @@ class AttackCirc {
                             case "necromancyAttack":
                                 this.game.addEntity(new Ally_Contact(
                                     "Ally", 25, 25,
-                                    10, this.game, object.worldX, object.worldY, 19 / 2,
-                                    28 / 2, "ally", 115, "./sprites/Zombie_Run.png",
-                                    0, 0, 34, 27,
-                                    8, 0.2, 3, 1));
+                                    15, this.game, object.worldX, object.worldY, 17,
+                                    29, "ally", 170, "./sprites/Ally_Contact_Walk.png",
+                                    0, 0, 32, 28,
+                                    2, 0.5, 2, 1));
                                 object.removeFromWorld = true;
                                 this.lastAttackTime = currentTime;
                                 break;
