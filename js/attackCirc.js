@@ -137,7 +137,8 @@ class AttackCirc {
                 }
             });
 
-            if (["playerAttack", "necromancyAttack", "explosionAttack"].includes(this.type)) {
+            //handles collisions with tombstones
+            if (["necromancyAttack", "explosionAttack"].includes(this.type)) {
                 this.game.objects.forEach((object) => {
                     if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
                         switch (this.type) {
@@ -147,7 +148,7 @@ class AttackCirc {
                                     15, this.game, object.worldX, object.worldY, 17,
                                     29, "ally", 170, "./sprites/Ally_Contact_Walk.png",
                                     0, 0, 32, 28,
-                                    2, 0.5, 2, 1));
+                                    8, 0.1, 2, 1));
                                 object.removeFromWorld = true;
                                 this.lastAttackTime = currentTime;
                                 break;
