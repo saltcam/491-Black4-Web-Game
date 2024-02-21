@@ -43,12 +43,13 @@ class GameEngine {
 
         /**
          * Stores an int for what map we are on.
+         * -1 == Main Menu
          * 0 == Rest Area
          * 1 == Grasslands
          * 2 == Cave
          * 3 == Space
          */
-        this.currMap = 1
+        this.currMap = -1;
 
         // Map Scaling Variables
         /** Map scale for map 0 (Rest Area) */
@@ -450,279 +451,280 @@ class GameEngine {
 
         // Draw the map texture.
         this.drawMap();
+        if (this.currMap !== -1) {
+            // Draw 'other' entities.
+            for (let entity of this.entities) {
+                entity.draw(this.ctx, this);
 
-        // Draw 'other' entities.
-        for (let entity of this.entities) {
-            entity.draw(this.ctx, this);
-
-            // If debug mode, then draw debug features.
-            if (this.debugMode && entity instanceof Entity) {
-                //entity.drawHealth(this.ctx);
-                entity.boundingBox.draw(this.ctx, this);
+                // If debug mode, then draw debug features.
+                if (this.debugMode && entity instanceof Entity) {
+                    //entity.drawHealth(this.ctx);
+                    entity.boundingBox.draw(this.ctx, this);
+                }
             }
-        }
 
-        // Define a threshold for sorting (e.g., 5 pixels)
-        const sortingThreshold = 5;
+            // Define a threshold for sorting (e.g., 5 pixels)
+            const sortingThreshold = 5;
 
-        // Sort enemies based on their worldY position with a threshold
-        this.objects.sort((a, b) => {
-            // Calculate the difference in worldY positions
-            const diff = a.worldY - b.worldY;
+            // Sort enemies based on their worldY position with a threshold
+            this.objects.sort((a, b) => {
+                // Calculate the difference in worldY positions
+                const diff = a.worldY - b.worldY;
 
-            // Only consider them different if the difference exceeds the threshold
-            if (Math.abs(diff) < sortingThreshold) {
-                return 0; // Consider them as equal for sorting purposes
+                // Only consider them different if the difference exceeds the threshold
+                if (Math.abs(diff) < sortingThreshold) {
+                    return 0; // Consider them as equal for sorting purposes
+                }
+                return diff;
+            });
+
+            // Draw 'object' entities.
+            for (let object of this.objects) {
+                object.draw(this.ctx, this);
+
+                // If debug mode, then draw debug features.
+                if (this.debugMode) {
+                    object.drawHealth(this.ctx);
+                    object.boundingBox.draw(this.ctx, this);
+                }
             }
-            return diff;
-        });
 
-        // Draw 'object' entities.
-        for (let object of this.objects) {
-            object.draw(this.ctx, this);
+            // Sort enemies based on their worldY position with a threshold
+            this.enemies.sort((a, b) => {
+                // Calculate the difference in worldY positions
+                const diff = a.worldY - b.worldY;
 
-            // If debug mode, then draw debug features.
-            if (this.debugMode) {
-                object.drawHealth(this.ctx);
-                object.boundingBox.draw(this.ctx, this);
+                // Only consider them different if the difference exceeds the threshold
+                if (Math.abs(diff) < sortingThreshold) {
+                    return 0; // Consider them as equal for sorting purposes
+                }
+                return diff;
+            });
+
+            // Sort enemies based on their worldY position with a threshold
+            this.allies.sort((a, b) => {
+                // Calculate the difference in worldY positions
+                const diff = a.worldY - b.worldY;
+
+                // Only consider them different if the difference exceeds the threshold
+                if (Math.abs(diff) < sortingThreshold) {
+                    return 0; // Consider them as equal for sorting purposes
+                }
+                return diff;
+            });
+
+
+            // Draw 'attack' entities that are labeled as choreographed ('CAR_').
+            for (let attack of this.attacks) {
+                if (!attack.boundingBox.type.includes("CAR_")) {
+                    continue;
+                }
+                attack.draw(this.ctx, this);
+
+                // If debug mode, then draw debug features.
+                if (this.debugMode) {
+                    //attack.drawHealth(this.ctx);
+                    attack.boundingBox.draw(this.ctx, this);
+                }
             }
-        }
 
-        // Sort enemies based on their worldY position with a threshold
-        this.enemies.sort((a, b) => {
-            // Calculate the difference in worldY positions
-            const diff = a.worldY - b.worldY;
+            // Draw 'enemy' entities.
+            for (let enemy of this.enemies) {
+                enemy.draw(this.ctx, this);
 
-            // Only consider them different if the difference exceeds the threshold
-            if (Math.abs(diff) < sortingThreshold) {
-                return 0; // Consider them as equal for sorting purposes
+                // If debug mode, then draw debug features.
+                if (this.debugMode) {
+                    enemy.drawHealth(this.ctx);
+                }
             }
-            return diff;
-        });
 
-        // Sort enemies based on their worldY position with a threshold
-        this.allies.sort((a, b) => {
-            // Calculate the difference in worldY positions
-            const diff = a.worldY - b.worldY;
+            // Draw 'ally' entities.
+            for (let enemy of this.allies) {
+                enemy.draw(this.ctx, this);
 
-            // Only consider them different if the difference exceeds the threshold
-            if (Math.abs(diff) < sortingThreshold) {
-                return 0; // Consider them as equal for sorting purposes
+                // If debug mode, then draw debug features.
+                if (this.debugMode) {
+                    enemy.drawHealth(this.ctx);
+                }
             }
-            return diff;
-        });
 
+            // Draw 'attack' entities not labeled as choreographed ('CAR_').
+            for (let attack of this.attacks) {
+                if (attack.boundingBox.type.includes("CAR_")) {
+                    continue;
+                }
+                attack.draw(this.ctx, this);
 
-        // Draw 'attack' entities that are labeled as choreographed ('CAR_').
-        for (let attack of this.attacks) {
-            if (!attack.boundingBox.type.includes("CAR_")) {
-                continue;
+                // If debug mode, then draw debug features.
+                if (this.debugMode) {
+                    //attack.drawHealth(this.ctx);
+                    attack.boundingBox.draw(this.ctx, this);
+                }
             }
-            attack.draw(this.ctx, this);
 
-            // If debug mode, then draw debug features.
-            if (this.debugMode) {
-                //attack.drawHealth(this.ctx);
-                attack.boundingBox.draw(this.ctx, this);
+            // Draw 'portal' entity.
+            if (this.portal) {
+                this.portal.draw(this.ctx, this);
+
+                // If debug mode, then draw debug features.
+                if (this.debugMode) {
+                    //this.portal.drawHealth(this.ctx);
+                    this.portal.boundingBox.draw(this.ctx, this);
+                }
             }
-        }
 
-        // Draw 'enemy' entities.
-        for (let enemy of this.enemies) {
-            enemy.draw(this.ctx, this);
+            // Draw 'item' entities.
+            for (let item of this.items) {
+                item.draw(this.ctx, this);
 
-            // If debug mode, then draw debug features.
-            if (this.debugMode) {
-                enemy.drawHealth(this.ctx);
+                // If debug mode, then draw debug features.
+                if (this.debugMode) {
+                    item.boundingBox.draw(this.ctx, this);
+                }
             }
-        }
 
-        // Draw 'ally' entities.
-        for (let enemy of this.allies) {
-            enemy.draw(this.ctx, this);
+            // Draw 'player' entity.
+            if (this.player) {
+                this.player.draw(this.ctx, this);
 
-            // If debug mode, then draw debug features.
-            if (this.debugMode) {
-                enemy.drawHealth(this.ctx);
+                // If debug mode, then draw debug features.
+                if (this.debugMode) {
+                    //this.player.drawHealth(this.ctx); // We don't need to call this, it is already always called in dude.draw().
+                }
             }
-        }
 
-        // Draw 'attack' entities not labeled as choreographed ('CAR_').
-        for (let attack of this.attacks) {
-            if (attack.boundingBox.type.includes("CAR_")) {
-                continue;
+            // Draw UI elements
+            // Draw damage/heal numbers
+            for (let text of this.damageNumbers) {
+                text.draw(this.ctx);
             }
-            attack.draw(this.ctx, this);
-
-            // If debug mode, then draw debug features.
-            if (this.debugMode) {
-                //attack.drawHealth(this.ctx);
-                attack.boundingBox.draw(this.ctx, this);
+            // Draw boss health bar.
+            if (this.boss) {
+                this.boss.drawBossHealthBar(this.ctx);
             }
-        }
 
-        // Draw 'portal' entity.
-        if (this.portal) {
-            this.portal.draw(this.ctx, this);
+            // Draw gold currency tracker UI
+            this.drawGoldTracker(this.ctx);
 
-            // If debug mode, then draw debug features.
-            if (this.debugMode) {
-                //this.portal.drawHealth(this.ctx);
-                this.portal.boundingBox.draw(this.ctx, this);
+            // Draw weapon upgrade screen.
+            if (this.UPGRADE_SYSTEM) {
+                this.UPGRADE_SYSTEM.draw(this.ctx);
             }
-        }
 
-        // Draw 'item' entities.
-        for (let item of this.items) {
-            item.draw(this.ctx, this);
+            // Draw the mouse tracker.
+            this.drawMouseTracker(this.ctx);
 
-            // If debug mode, then draw debug features.
-            if (this.debugMode) {
-                item.boundingBox.draw(this.ctx, this);
+            // Draw the timer if we are no in rest area.
+            if (this.currMap > 0) {
+                this.drawTimer(this.ctx);
             }
-        }
 
-        // Draw 'player' entity.
-        if (this.player) {
-            this.player.draw(this.ctx, this);
+            // If the player is dead, display 'You Died!' text.
+            if (this.player && this.player.isDead) {
+                this.ctx.beginPath();
 
-            // If debug mode, then draw debug features.
-            if (this.debugMode) {
-                //this.player.drawHealth(this.ctx); // We don't need to call this, it is already always called in dude.draw().
-            }
-        }
+                this.ctx.fillStyle = "black";
+                this.ctx.fillRect(this.ctx.canvas.width / 2 - 175, this.ctx.canvas.height / 2 - 75, 350, 95);
+                // Draw "You Died!" text in large red font at the center of the canvas
+                this.ctx.font = '75px Arial';
+                this.ctx.fillStyle = 'red';
+                this.ctx.textAlign = 'center'
+                this.ctx.fillText('You Died!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+                this.ctx.closePath();
 
-        // Draw UI elements
-        // Draw damage/heal numbers
-        for (let text of this.damageNumbers) {
-            text.draw(this.ctx);
-        }
-        // Draw boss health bar.
-        if (this.boss) {
-            this.boss.drawBossHealthBar(this.ctx);
-        }
-
-        // Draw gold currency tracker UI
-        this.drawGoldTracker(this.ctx);
-
-        // Draw weapon upgrade screen.
-        if (this.UPGRADE_SYSTEM) {
-            this.UPGRADE_SYSTEM.draw(this.ctx);
-        }
-
-        // Draw the mouse tracker.
-        this.drawMouseTracker(this.ctx);
-
-        // Draw the timer if we are no in rest area.
-        if (this.currMap !== 0) {
-            this.drawTimer(this.ctx);
-        }
-
-        // If the player is dead, display 'You Died!' text.
-        if (this.player && this.player.isDead) {
-            this.ctx.beginPath();
-
-            this.ctx.fillStyle = "black";
-            this.ctx.fillRect(this.ctx.canvas.width / 2 - 175, this.ctx.canvas.height / 2 - 75, 350, 95);
-            // Draw "You Died!" text in large red font at the center of the canvas
-            this.ctx.font = '75px Arial';
-            this.ctx.fillStyle = 'red';
-            this.ctx.textAlign = 'center'
-            this.ctx.fillText('You Died!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
-            this.ctx.closePath();
-
-            // Pause game since we died
-            if (this.player.currHP <= 0 && !this.pauseGame) {
-                this.togglePause();
-                this.roundOver = true;
-            }
-        }
-
-        // Temp win condition
-        if (this.youWon && this.currMap === 2) {
-            this.ctx.beginPath();
-
-            this.ctx.fillStyle = "black";
-            this.ctx.fillRect(this.ctx.canvas.width / 2 - 175, this.ctx.canvas.height / 2 - 75, 350, 95);
-            // Draw "You Died!" text in large red font at the center of the canvas
-            this.ctx.font = '75px Arial';
-            this.ctx.fillStyle = 'yellow';
-            this.ctx.textAlign = 'center'
-            this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
-            this.ctx.closePath();
-
-            setTimeout(() => {
-
-                if (!this.pauseGame) {
+                // Pause game since we died
+                if (this.player.currHP <= 0 && !this.pauseGame) {
                     this.togglePause();
-                }
-            }, 1000);
-        }
-
-        // If the defeated all enemies, display 'You Won!' text.
-        if (this.enemies.length <= 0 && this.currMap === 3) {
-            this.ctx.beginPath();
-
-            // Draw "You Won!" text in large yellow font at the center of the canvas
-            this.ctx.font = '75px Arial';
-            this.ctx.fillStyle = 'yellow';
-            this.ctx.textAlign = 'center'
-            this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
-            this.ctx.closePath();
-        }
-
-        // Handle fade-to-black screen effect
-        if (this.fadeState !== 'none') {
-            const alpha = this.fadeElapsed / this.fadeDuration;
-            this.ctx.globalAlpha = this.fadeToBlack ? Math.min(1, alpha) : Math.max(0, 1 - alpha);
-
-            // Cover the canvas with black
-            if (this.fadeToBlack || this.fadeState === 'out') {
-                this.ctx.fillStyle = 'black';
-                this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-            }
-
-            // Update fade state
-            this.fadeElapsed += this.clockTick;
-            if (this.fadeElapsed >= this.fadeDuration) {
-                if (this.fadeState === 'in' && this.fadeToBlack && this.fadeElapsed >= this.fadeDuration * 2) {
-                    // Fade in complete, now fade out
-                    this.fadeState = 'out';
-                    this.fadeElapsed = 0;
-                    this.fadeToBlack = false;
-
-                    this.performPostFadeInActions();
-                } else if (this.fadeState === 'out') {
-                    // Fade out complete, reset
-                    this.fadeState = 'none'; // Reset fade state to allow future fade-in
-                    this.fadeElapsed = 0; // Reset elapsed time
-                    this.fadeToBlack = false; // Ensure fadeToBlack is false to allow next fade-in
-
-                    // Re-enable player controls now that they are finished teleporting.
-                    this.player.controlsEnabled = true;
+                    this.roundOver = true;
                 }
             }
-        }
 
-        // Reset globalAlpha to ensure other drawing operations are unaffected
-        this.ctx.globalAlpha = 1;
+            // Temp win condition
+            if (this.youWon && this.currMap === 2) {
+                this.ctx.beginPath();
 
-        // Calculate and draw FPS if debugMode is true
-        if (this.debugMode) {
-            const currentTime = Date.now();
-            const timeDelta = currentTime - this.lastDrawTime;
-            this.lastDrawTime = currentTime;
+                this.ctx.fillStyle = "black";
+                this.ctx.fillRect(this.ctx.canvas.width / 2 - 175, this.ctx.canvas.height / 2 - 75, 350, 95);
+                // Draw "You Died!" text in large red font at the center of the canvas
+                this.ctx.font = '75px Arial';
+                this.ctx.fillStyle = 'yellow';
+                this.ctx.textAlign = 'center'
+                this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+                this.ctx.closePath();
 
-            // Avoid division by zero and calculate FPS
-            if (timeDelta > 0) {
-                this.fps = 1000 / timeDelta;
+                setTimeout(() => {
+
+                    if (!this.pauseGame) {
+                        this.togglePause();
+                    }
+                }, 1000);
             }
 
-            // Draw FPS counter on the screen
-            this.ctx.font = '20px Arial';
-            this.ctx.fillStyle = 'yellow';
-            this.ctx.textAlign = 'left';
-            this.ctx.fillText(`FPS: ${this.fps.toFixed(2)}`, 10, 400);
+            // If the defeated all enemies, display 'You Won!' text.
+            if (this.enemies.length <= 0 && this.currMap === 3) {
+                this.ctx.beginPath();
+
+                // Draw "You Won!" text in large yellow font at the center of the canvas
+                this.ctx.font = '75px Arial';
+                this.ctx.fillStyle = 'yellow';
+                this.ctx.textAlign = 'center'
+                this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+                this.ctx.closePath();
+            }
+
+            // Handle fade-to-black screen effect
+            if (this.fadeState !== 'none') {
+                const alpha = this.fadeElapsed / this.fadeDuration;
+                this.ctx.globalAlpha = this.fadeToBlack ? Math.min(1, alpha) : Math.max(0, 1 - alpha);
+
+                // Cover the canvas with black
+                if (this.fadeToBlack || this.fadeState === 'out') {
+                    this.ctx.fillStyle = 'black';
+                    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                }
+
+                // Update fade state
+                this.fadeElapsed += this.clockTick;
+                if (this.fadeElapsed >= this.fadeDuration) {
+                    if (this.fadeState === 'in' && this.fadeToBlack && this.fadeElapsed >= this.fadeDuration * 2) {
+                        // Fade in complete, now fade out
+                        this.fadeState = 'out';
+                        this.fadeElapsed = 0;
+                        this.fadeToBlack = false;
+
+                        this.performPostFadeInActions();
+                    } else if (this.fadeState === 'out') {
+                        // Fade out complete, reset
+                        this.fadeState = 'none'; // Reset fade state to allow future fade-in
+                        this.fadeElapsed = 0; // Reset elapsed time
+                        this.fadeToBlack = false; // Ensure fadeToBlack is false to allow next fade-in
+
+                        // Re-enable player controls now that they are finished teleporting.
+                        this.player.controlsEnabled = true;
+                    }
+                }
+            }
+
+            // Reset globalAlpha to ensure other drawing operations are unaffected
+            this.ctx.globalAlpha = 1;
+
+            // Calculate and draw FPS if debugMode is true
+            if (this.debugMode) {
+                const currentTime = Date.now();
+                const timeDelta = currentTime - this.lastDrawTime;
+                this.lastDrawTime = currentTime;
+
+                // Avoid division by zero and calculate FPS
+                if (timeDelta > 0) {
+                    this.fps = 1000 / timeDelta;
+                }
+
+                // Draw FPS counter on the screen
+                this.ctx.font = '20px Arial';
+                this.ctx.fillStyle = 'yellow';
+                this.ctx.textAlign = 'left';
+                this.ctx.fillText(`FPS: ${this.fps.toFixed(2)}`, 10, 400);
+            }
         }
     }
 
@@ -771,9 +773,58 @@ class GameEngine {
         if (!this.camera || !this.player) {
             return; // Skip drawing the map if the camera or player is not initialized.
         }
+        // If -1, load the main menu
+        if (this.currMap === -1) {
 
+            this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+            this.ctx.font = '120px Serif';
+            this.ctx.fillStyle = 'black';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('Guy with Scythe', this.ctx.canvas.width / 2, 100);
+
+            this.ctx.font = '40px Arial';
+            const playButtonWidth = 150;
+            const playButtonHeight = 60;
+            const playButtonX = (this.ctx.canvas.width - playButtonWidth) / 2;
+            const playButtonY = (this.ctx.canvas.height * 2) / 3;
+            const playText = this.ctx.measureText('Play');
+            this.ctx.fillStyle = 'red';
+
+            this.ctx.fillRect(playButtonX, playButtonY, playButtonWidth, playButtonHeight);
+            this.ctx.fillStyle = 'white';
+            // this.ctx.fillText('Play', this.ctx.canvas.width / 2, playButtonY + 30);
+            this.ctx.fillText('Play', this.ctx.canvas.width / 2, playButtonY + playButtonHeight / 2 + playText.actualBoundingBoxAscent / 2);
+
+            const howToPlayButtonWidth = 300;
+            const howToPlayButtonHeight = 60;
+            const howToPlayButtonX = (this.ctx.canvas.width - howToPlayButtonWidth) / 2;
+            const howToPlayButtonY = playButtonY + playButtonHeight + 20;
+            const howToPlayText = this.ctx.measureText('How to Play');
+
+            this.ctx.fillStyle = 'red';
+            this.ctx.fillRect(howToPlayButtonX, howToPlayButtonY, howToPlayButtonWidth, howToPlayButtonHeight);
+            this.ctx.fillStyle = 'white';
+            // this.ctx.fillText('How to Play', this.ctx.canvas.width / 2, howToPlayButtonY + 30);
+            this.ctx.fillText('How to Play', this.ctx.canvas.width / 2, howToPlayButtonY + howToPlayButtonHeight / 2 + howToPlayText.actualBoundingBoxAscent / 2);
+            this.drawMouseTracker(this.ctx);
+
+            this.ctx.canvas.addEventListener('click', (event) => {
+                const mouseX = event.clientX - this.ctx.canvas.getBoundingClientRect().left;
+                const mouseY = event.clientY - this.ctx.canvas.getBoundingClientRect().top;
+
+                if (mouseX >= playButtonX && mouseX <= playButtonX + playButtonWidth &&
+                    mouseY >= playButtonY && mouseY <= playButtonY + playButtonHeight) {
+                    this.loadGame();
+                }
+
+                if (mouseX >= howToPlayButtonX && mouseX <= howToPlayButtonX + howToPlayButtonWidth &&
+                    mouseY >= howToPlayButtonY && mouseY <= howToPlayButtonY + howToPlayButtonHeight) {
+                    this.showInstructions();
+                }
+            });
+        }
         // If 0, then Rest Area Map is used.
-        if (this.currMap === 0) {
+        else if (this.currMap === 0) {
             // Initialize the map objects if we haven't already
             if (!this.mapObjectsInitialized) {
                 this.initRestAreaObjects();
@@ -1316,5 +1367,17 @@ class GameEngine {
             ctx.stroke();
         }
     }
+    // Loads the first map after clicking on play button
+    loadGame() {
+        console.log('Loading game...');
+        this.currMap = 1;
+        // this.start();
+    }
+
+    // Loads the instructions after clicking on the how to play button
+    showInstructions() {
+        console.log('Showing instructions...');
+    }
+
 }
 
