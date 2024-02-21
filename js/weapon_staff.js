@@ -10,7 +10,7 @@ class Weapon_staff extends Weapon {
             0, 0,
             5, 5,
             115, 2,
-            1, 0.5,
+            1, 0.3,
             "./sprites/NecromancyStaff.png",
             "./sounds/SE_staff_secondary.mp3", "./sounds/SE_staff_primary.mp3", 26, 70, upgrades);
 

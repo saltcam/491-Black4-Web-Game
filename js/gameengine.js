@@ -98,7 +98,7 @@ class GameEngine {
         this.debugMode = false;
 
         /** An array of all potential (non-boss) enemy types. */
-        this.enemyTypes = [
+        this.contactEnemyTypes = [
             { name: "Zombie", maxHP: 47, currHP: 47, atkPow: 6, worldX: 0, worldY: 0, boxWidth: 19/2,
                 boxHeight: 28/2, boxType: "enemy", speed: 72, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
                 animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: -1},
@@ -112,6 +112,12 @@ class GameEngine {
                 boxWidth: 38/2, boxHeight: 56/2, boxType: "enemy", speed: 80, spritePath: "./sprites/skeleton.png",
                 animXStart: 0.5, animYStart: 0, animW: 70.5, animH: 77, animFCount: 8, animFDur: 0.2, scale: 1.5, exp: -1},
         ];
+        this.rangedEnemyTypes = [
+            { name: "Wizard", maxHP: 32, currHP: 32, atkPow: 10, worldX: 0, worldY: 0,
+                boxWidth: 17, boxHeight: 29, boxType: "enemy", speed: 40, spritePath: "./sprites/Ally_Ranged_Walk.png",
+                animXStart: 0, animYStart: 0, animW: 32, animH: 28, animFCount: 8, animFDur: 0.4, scale: 2.8, exp: -1}
+        ];
+
 
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
         this.baseEnemySpawnInterval = 1.5;
@@ -391,15 +397,53 @@ class GameEngine {
 
         const { x: randomXNumber, y: randomYNumber } = this.randomOffscreenCoords();
 
-        //Selects a random enemy from the enemyTypes array
-        const randomEnemyType =  this.enemyTypes[Math.floor(Math.random() * this.enemyTypes.length)];
+        let randomEnemyType;
+        let newEnemy;
 
-        //Creates the new random enemy at a random location
-        const newEnemy = new Enemy_Contact(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
-            randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
-            randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
-            randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
-            randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
+        let enemyClass = Math.floor(Math.random() * 3);
+        //console.log("enemy: " + enemyClass);
+        //Selects a random enemy from the enemyTypes array
+        // 0 = contact, 1 = ranged, 2 = charge
+        switch(enemyClass){
+            case 0 :
+                randomEnemyType = this.contactEnemyTypes[Math.floor(Math.random() * this.contactEnemyTypes.length)];
+                //Creates the new random enemy at a random location
+                newEnemy = new Enemy_Contact(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
+                    randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
+                    randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
+                    randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
+                    randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
+                break;
+            case 1 :
+                randomEnemyType = this.rangedEnemyTypes[Math.floor(Math.random() * this.rangedEnemyTypes.length)];
+                //Creates the new random enemy at a random location
+                newEnemy = new Enemy_Ranged(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
+                    randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
+                    randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
+                    randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
+                    randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
+                break;
+            case 2 :
+                //TODO replace with charge enemies
+                randomEnemyType = this.contactEnemyTypes[Math.floor(Math.random() * this.contactEnemyTypes.length)];
+                //Creates the new random enemy at a random location
+                newEnemy = new Enemy_Contact(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
+                    randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
+                    randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
+                    randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
+                    randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
+                break;
+
+        }
+
+        //const randomEnemyType =  this.contactEnemyTypes[Math.floor(Math.random() * this.contactEnemyTypes.length)];
+
+
+        // const newEnemy = new Enemy_Contact(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
+        //     randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
+        //     randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
+        //     randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
+        //     randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
 
         // Spawn an elite every 2 minutes (120 seconds or 120000 milliseconds)
         if(this.spawnElite) {
