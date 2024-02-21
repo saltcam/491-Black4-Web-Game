@@ -30,7 +30,7 @@ class Weapon {
         this.lastPrimaryAttackTime = -100;
         this.lastSecondAttackTime = -100;
 
-        this.animator = new Animator(game, ASSET_MANAGER.getAsset(spritePath), 0, 0, spriteW, spriteH, 1, 60, 1);
+        this.animator = new Animator(game, ASSET_MANAGER.getAsset(spritePath), 0, 0, spriteW, spriteH, 1, 60, 1.6);
 
         this.spritePath = spritePath;
 
@@ -39,20 +39,30 @@ class Weapon {
     }
 
     draw(ctx, slotNum){
+        // adjust these for easier menu debugging
+        const weaponBoxHeight = 125;
+        const weaponBoxWidth = 100;
+        const barHeight = weaponBoxHeight - 15;
+        const barWidth = weaponBoxWidth/8;
+        // bow before my mathematical prowess!
+        const slotX = canvas.width/2 - (weaponBoxWidth * this.game.player.weapons.length)/2 + slotNum * weaponBoxWidth;
+        const slotY = canvas.height - weaponBoxHeight;
+
         // Primary attacks
         ctx.beginPath();
         ctx.fillStyle = "Black";
         if (this.game.player.currentWeapon === slotNum) {
             ctx.fillStyle = "Yellow";
         }
-        ctx.fillRect(40 * slotNum, 0, 40, 40);
+
+        ctx.fillRect(slotX, slotY, weaponBoxWidth, weaponBoxHeight);
         ctx.closePath();
 
-        this.animator.drawFrame(this.game.clockTick, ctx, (40 * slotNum), 0, "right");
+        this.animator.drawFrame(this.game.clockTick, ctx, slotX + 10, slotY + 30, "right");
 
         ctx.beginPath();
         ctx.fillStyle = "Red";
-        ctx.fillRect(40 * slotNum + 5, 40, 30, 10);
+        ctx.fillRect(slotX + weaponBoxWidth/2 + 10, slotY + 5, barWidth, barHeight);
         ctx.closePath();
 
         //draw the primary cooldown
@@ -63,14 +73,13 @@ class Weapon {
             diff = this.primaryCool;
             ctx.fillStyle = 'rgba(0, 255, 0, 1)';
         }
-        ctx.fillRect(40 * slotNum + 5, 40,
-            30 * (diff / this.primaryCool), 10);
+        ctx.fillRect(slotX + weaponBoxWidth/2 + 10, slotY + 5 + barHeight, barWidth, -1 * barHeight * (diff / this.primaryCool));
         ctx.closePath();
 
         // Secondary attacks
         ctx.beginPath();
         ctx.fillStyle = "Red";
-        ctx.fillRect(40 * slotNum + 5, 60, 30, 10);
+        ctx.fillRect(slotX + weaponBoxWidth/2 + barWidth*2, slotY + 5, barWidth, barHeight);
         ctx.closePath();
 
         //draw the secondary cooldown
@@ -81,13 +90,12 @@ class Weapon {
             diff = this.secondCool;
             ctx.fillStyle = 'rgba(0, 100, 255, 1)';
         }
-        ctx.fillRect(40 * slotNum + 5, 60,
-            30 * (diff / this.secondCool), 10);
+        ctx.fillRect(slotX + weaponBoxWidth/2 + barWidth*2, slotY + 5 + barHeight, barWidth, -1 * barHeight * (diff / this.secondCool));
         ctx.closePath();
 
-        for (let i = 0; i < this.upgrades.length; i++) {
-            //console.log(this.upgradeList[i].name + ": " + this.upgradeList[i].active);
-        }
+        // for (let i = 0; i < this.upgrades.length; i++) {
+        //     //console.log(this.upgradeList[i].name + ": " + this.upgradeList[i].active);
+        // }
 
     }
 
