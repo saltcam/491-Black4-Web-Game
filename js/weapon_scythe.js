@@ -101,7 +101,7 @@ class Weapon_scythe extends Weapon {
                         0, 1));
 
                     if (echoSlashUpgrade) {
-                        setTimeout(() => {
+                        this.game.setManagedTimeout(() => {
                             this.game.addEntity(new AttackCirc(this.game, player,
                                 defaultDualBladeRadius,
                                 'VAMP_playerAttack',
@@ -116,7 +116,7 @@ class Weapon_scythe extends Weapon {
                 }
 
                 if (echoSlashUpgrade) {
-                    setTimeout(() => {
+                    this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.primaryAttackRadius,
                             'VAMP_playerAttack',
@@ -151,7 +151,7 @@ class Weapon_scythe extends Weapon {
                         this.primaryAttackPushbackForce,
                         0, 1));
                     if (echoSlashUpgrade) {
-                        setTimeout(() => {
+                        this.game.setManagedTimeout(() => {
                             this.game.addEntity(new AttackCirc(this.game, player,
                                 defaultDualBladeRadius,
                                 'playerAttack',
@@ -166,7 +166,7 @@ class Weapon_scythe extends Weapon {
                 }
 
                 if (echoSlashUpgrade) {
-                    setTimeout(() => {
+                    this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.primaryAttackRadius,
                             'playerAttack',
@@ -224,7 +224,7 @@ class Weapon_scythe extends Weapon {
                 this.game.player.heal(1);
 
                 if (echoSlashUpgrade) {
-                    setTimeout(() => {
+                    this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.secondaryAttackRadius,
                             'VAMP_playerAttack',
@@ -248,7 +248,7 @@ class Weapon_scythe extends Weapon {
                     0.3, 1));
 
                 if (echoSlashUpgrade) {
-                    setTimeout(() => {
+                    this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.secondaryAttackRadius,
                             'playerAttack',

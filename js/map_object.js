@@ -4,17 +4,24 @@ class Map_object extends Entity {
         this.hasBeenOpened = false;
         this.isExploding = false;
         this.explosion = null;
+        this.arrowPointer = null;
+        this.openedAtTime = null;
+        this.deleteAfterOpenTime = 5; // Seconds to wait before deleting this after 'opening' it (if it's a chest type)
     }
 
     openChest() {
-        this.animator.pauseAtFrame(24); // Passing a -1 essentially unpauses the animator.
+        if (this.hasBeenOpened) return;
+
+        this.animator.pauseAtFrame(-1);
+        this.animator.pauseAtSpecificFrame(24); // Passing a -1 essentially unpauses the animator.
+        this.animator.outlineMode = false; // Turn off the outline now that it has been opened
         this.game.UPGRADE_SYSTEM.showWeaponUpgradeScreen();
         this.hasBeenOpened = true;
+        this.openedAtTime = this.game.timer.gameTime;
 
-        // Delete the chest entity after roughly 10 seconds of being opened.
-        setTimeout(() => {
-            this.removeFromWorld = true;
-        }, 10000);
+        if (this.arrowPointer) {
+            this.arrowPointer.removeFromWorld = true;
+        }
     }
 
     openAnvil() {

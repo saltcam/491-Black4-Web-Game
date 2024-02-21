@@ -86,9 +86,6 @@ class AttackCirc {
         this.hitEntities = new Set(); // Tracks entities already hit if pulsatingDamage is false
 
         this.damageDealt = false;
-
-        // The amount this attack circle leeches health back to the attacker if the attackType.includes("VAMP_")
-        this.leechPercent = 0;
     }
 
 
@@ -120,12 +117,8 @@ class AttackCirc {
         if (!this.type.includes("enemy") && !this.pulsatingDamage && this.attackDamage > 0) {
             this.game.enemies.forEach(enemy => {
                 if (!this.hitEntities.has(enemy) && this.collisionDetection(enemy.boundingBox) /* && (enemy.boundingBox.type !== "ally") */) {
-                    enemy.takeDamage(this.attackDamage);
-
-                    // Handle leech healing if it's that kind of situation
-                    if (this.type.includes("VAMP_")) {
-                        this.entity.heal(this.attackDamage * this.leechPercent);
-                    }
+                    if (this.attackDamage > 0) enemy.takeDamage(this.attackDamage);
+                    else if (this.attackDamage < 0) enemy.heal(-this.attackDamage);
 
                     this.pushEnemy(enemy);
                     this.hitEntities.add(enemy);
@@ -171,12 +164,8 @@ class AttackCirc {
         // Enemy vs player
         else if (this.type.includes("enemy") && !this.pulsatingDamage && this.attackDamage > 0) {
             if (!this.damageDealt && this.collisionDetection(this.game.player.boundingBox)) {
-                this.game.player.takeDamage(this.attackDamage);
-
-                // Handle leech healing if it's that kind of situation
-                if (this.type.includes("VAMP_")) {
-                    this.entity.heal(this.attackDamage * this.leechPercent);
-                }
+                if (this.attackDamage > 0) this.game.player.takeDamage(this.attackDamage);
+                else if (this.attackDamage < 0) this.game.player.heal(-this.attackDamage);
 
                 // If we are attacking via a projectile, then --maxHits to track pierced targets
                 if (this.entity instanceof Projectile) {
@@ -194,14 +183,15 @@ class AttackCirc {
             if (["playerAttack", "necromancyAttack", "explosionAttack"].includes(this.type)) {
                 this.game.enemies.forEach(enemy => {
                     if (this.collisionDetection(enemy.boundingBox) /*&& (enemy.boundingBox.type !== "ally")*/) {
-                        enemy.takeDamage(this.attackDamage);
-                        this.pushEnemy(enemy);
-                        this.damageDealt = true; // Set flag as true since damage was dealt
-
-                        // Handle leech healing if it's that kind of situation
-                        if (this.type.includes("VAMP_")) {
-                            this.entity.heal(this.attackDamage * this.leechPercent);
+                        if (this.attackDamage > 0) {
+                            enemy.takeDamage(this.attackDamage);
+                            this.pushEnemy(enemy);
                         }
+                        else if (this.attackDamage < 0) {
+                            enemy.heal(-this.attackDamage);
+                        }
+
+                        this.damageDealt = true; // Set flag as true since damage was dealt
 
                         // If we are attacking via a projectile, then --maxHits to track pierced targets
                         if (this.entity instanceof Projectile) {
@@ -212,13 +202,9 @@ class AttackCirc {
             }
             // Handle enemy vs player pulsating damage attack
             else if (this.type.includes("enemyAttack") && this.collisionDetection(this.game.player.boundingBox)) {
-                this.game.player.takeDamage(this.attackDamage);
+                if (this.attackDamage > 0) this.game.player.takeDamage(this.attackDamage);
+                else if (this.attackDamage < 0) this.game.player.heal(-this.attackDamage);
                 this.damageDealt = true;
-
-                // Handle leech healing if it's that kind of situation
-                if (this.type.includes("VAMP_")) {
-                    this.entity.heal(this.attackDamage * this.leechPercent);
-                }
             }
 
             // Update lastAttackTime if damage was dealt

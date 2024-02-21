@@ -116,7 +116,7 @@ class BossOne extends Entity {
         // If health hits 0 or below, this entity is declared dead
         if (this.isDead) {
             // Spawn a portal to rest area (because map is completed once boss is dead)
-            this.game.spawnPortal(this.worldX, this.worldY,0);
+            this.game.spawnPortal(0, 0,0);
 
             // Set the gameengine to roundOver
             this.game.roundOver = true;
@@ -378,7 +378,7 @@ class BossOne extends Entity {
         const barWidth = 750;
         const barHeight = 15;
         const xOffset = (ctx.canvas.width - barWidth) / 2;
-        const yOffset = 750; // Adjust for your game's UI layout
+        const yOffset = 85; // Adjust for your game's UI layout
 
         // Draw the black background
         ctx.fillStyle = "black";

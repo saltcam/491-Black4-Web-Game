@@ -4,7 +4,7 @@ class Timer {
     constructor() {
         this.gameTime = 0;
         this.maxStep = 0.05;
-        this.lastTimestamp = 0;
+        this.lastTimestamp = Date.now();
         this.isPaused = false;
     }
 
@@ -20,6 +20,11 @@ class Timer {
         const gameDelta = Math.min(delta, this.maxStep);
         this.gameTime += gameDelta;
         return gameDelta;
+    }
+
+    reset() {
+        this.lastTimestamp = Date.now();
+        this.gameTime = 0; // Reset the game time to 0
     }
 
     togglePause() {

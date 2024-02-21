@@ -2,15 +2,18 @@ class Floating_text {
     constructor(game, value, worldX, worldY, isHealing, isPlayer, isCrit = false) {
         this.game = game;
         this.value = value;
-        this.worldX = worldX;
-        this.worldY = worldY;
+        this.worldX = worldX + (Math.random() - 0.5) * 50; // Random number between -25 and 25
+        this.worldY = worldY + (Math.random() - 0.5) * 50; // Random number between -25 and 25
         this.isHealing = isHealing;
         this.isPlayer = isPlayer;
         this.isCrit = isCrit;
+        this.growsOverTime = isCrit; // New property to control behavior
         this.opacity = 1;
         this.duration = 1.5 * 1000; // Duration in milliseconds
         this.startTime = Date.now();
         this.boundingBox = new BoundingBox(0, 0, 0, 0, "damageNumber");
+        this.initialFontSize = 24; // Initial font size
+        this.maxFontSize = 36; // Maximum font size when growsOverTime is true
     }
 
     update() {
@@ -21,18 +24,26 @@ class Floating_text {
             this.opacity = 0; // Fully transparent
             this.removeFromWorld = true; // Mark for removal
         } else {
-            // Update position to move up
-            this.worldY -= 0.25;
+            if (this.growsOverTime) {
+                // Maintain position, but update font size and opacity for growing effect
+                const growthProgress = elapsedTime / this.duration;
+                const fontSizeIncrease = (this.maxFontSize - this.initialFontSize) * growthProgress;
+                this.currentFontSize = this.initialFontSize + fontSizeIncrease;
 
-            // Only start fading away after a certain % of the duration has passed
-            if (elapsedTime > this.duration / 1.5) {
-                // Calculate opacity based on the second half of the duration
-                const fadeElapsedTime = elapsedTime - this.duration / 2;
-                const fadeDuration = this.duration / 2;
-                this.opacity = 1 - (fadeElapsedTime / fadeDuration);
+                // Update opacity to fade out during the last half of the duration
+                if (elapsedTime > this.duration / 2) {
+                    const fadeElapsedTime = elapsedTime - this.duration / 2;
+                    const fadeDuration = this.duration / 2;
+                    this.opacity = 1 - (fadeElapsedTime / fadeDuration);
+                }
             } else {
-                // Maintain full opacity during the first half of the duration
-                this.opacity = 1;
+                // Scroll up and fade out as originally designed
+                this.worldY -= 0.25;
+                if (elapsedTime > this.duration / 2) {
+                    const fadeElapsedTime = elapsedTime - this.duration / 2;
+                    const fadeDuration = this.duration / 2;
+                    this.opacity = 1 - (fadeElapsedTime / fadeDuration);
+                }
             }
         }
     }
@@ -41,31 +52,32 @@ class Floating_text {
         ctx.save();
         ctx.globalAlpha = this.opacity;
 
-        // Set text font properties
-        ctx.font = '24px Helvetica';
+        // Set text font properties based on whether text grows over time
+        const fontSize = this.growsOverTime ? this.currentFontSize : this.initialFontSize;
+        if (!this.isCrit) {
+            ctx.font = `${fontSize}px Helvetica`;
+        } else {
+            ctx.font = `bold ${fontSize}px Helvetica`;
+        }
         ctx.textAlign = 'center';
 
         // Set shadow properties
-        ctx.shadowColor = 'rgba(0, 0, 0, 1)'; // Shadow color (black with some transparency)
-        ctx.shadowBlur = 0; // How much the shadow should be blurred
-        ctx.shadowOffsetX = 2; // Horizontal shadow offset
-        ctx.shadowOffsetY = 2; // Vertical shadow offset
+        ctx.shadowColor = 'rgba(0, 0, 0, 1)';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
 
+        // Set text color based on the type of text
         if (this.isHealing) {
-            ctx.fillStyle = 'green';
-        } else if (this.isCrit) { // Check for crit
-            ctx.fillStyle = 'orange'; // Set text color to orange on crit
+            ctx.fillStyle = "rgb(27, 255, 0)";
+        } else if (this.isCrit) {
+            ctx.fillStyle = 'orange';
         } else {
             ctx.fillStyle = this.isPlayer ? 'red' : 'white';
         }
 
+        // Draw the text
         ctx.fillText(Math.round(this.value), this.worldX - this.game.camera.x, this.worldY - this.game.camera.y);
         ctx.restore();
-
-        // Reset shadow properties to avoid affecting other drawings
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
     }
 }

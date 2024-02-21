@@ -11,6 +11,8 @@ class GameEngine {
         this.entities = [];
         /** Tracks object entities. */
         this.objects = [];
+        /** Tracks arrow pointer entities */
+        this.arrowPointers = [];
         /** Tracks enemy entities. */
         this.enemies = [];
         /** Tracks ally entities */
@@ -126,9 +128,9 @@ class GameEngine {
         /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
-        this.eliteSpawnTimer = 50;
+        this.eliteSpawnTimer = 60;
         /** Spawn the boss after this many seconds of game time. */
-        this.bossSpawnTimer = 0;
+        this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
         this.lastEliteSpawnTime = 0;
         /** Tracks if the round is over. */
@@ -159,6 +161,9 @@ class GameEngine {
         this.totalPausedTime = 0;
 
         this.youWon = false; // temp win condition
+
+        /** Stores active custom timeout calls, they respond to the game being paused. */
+        this.activeTimeouts = []; // To store active timeouts
     }
 
     /**
@@ -178,11 +183,11 @@ class GameEngine {
         this.timer.togglePause(); // Use the Timer's togglePause method
 
         if (this.pauseGame) {
-            // Game is being paused; record the current timestamp
             this.pauseStartTime = Date.now();
+            this.pauseTimeouts(); // Pause timeouts
         } else {
-            // Game is being un-paused; calculate the pause duration and add to totalPausedTime
             this.totalPausedTime += Date.now() - this.pauseStartTime;
+            this.resumeTimeouts(); // Resume timeouts
         }
     }
 
@@ -191,9 +196,36 @@ class GameEngine {
         this.boss = this.addEntity(new BossOne(this, 250, 0));
     }
 
+    /**
+     * Call this to spawn an upgrade chest at the given coordinates.
+     * Returns the chest entity.
+     * @param   worldX  The x coordinate on the world to spawn the chest.
+     * @param   worldY  The y coordinate on the world to spawn the chest.
+     */
+    spawnUpgradeChest(worldX, worldY) {
+        let newEntity = this.addEntity(new Map_object(this, worldX, worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.03, 1.25));
+        newEntity.boundingBox.type = "chest";
+        newEntity.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
+        newEntity.animator.outlineMode = true; // Turn on the outline
+        this.addEntity(new Arrow_Pointer(newEntity, this)); // Attach an arrow pointer to the chest
+
+        return newEntity;
+    }
+
+    /** Call this to initialize the Rest Area (Map #0) objects. */
+    initRestAreaObjects() {
+        let anvil = this.addEntity(new Map_object(this, 150, -65, 40, 20, "./sprites/object_anvil.png", 0, 0, 93, 57, 20 + (32), 0.035, 1));
+        anvil.boundingBox.type = "anvil";
+        this.mapObjectsInitialized = true;
+    }
+
     /** Call this to initialize the grassmands (Map #1) objects. */
     initGrasslandsObjects() {
         // Visible Objects
+        // Collectable Objects
+        this.spawnUpgradeChest(-1846, -1943);
+        this.spawnUpgradeChest(1797, 2802);
+
         // Rocks
         let newEntity = this.addEntity(new Map_object(this, -250, 0, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
         newEntity = this.addEntity(new Map_object(this, -1100, 255, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
@@ -238,13 +270,6 @@ class GameEngine {
         newEntity = this.addEntity(new Map_object(this, 3025, 1070, 750, 2710, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
         newEntity.animator.pauseAtFrame(10);
 
-        this.mapObjectsInitialized = true;
-    }
-
-    /** Call this to initialize the Rest Area (Map #0) objects. */
-    initRestAreaObjects() {
-        let anvil = this.addEntity(new Map_object(this, 150, -65, 40, 20, "./sprites/object_anvil.png", 0, 0, 93, 57, 20 + (32), 0.035, 1));
-        anvil.boundingBox.type = "anvil";
         this.mapObjectsInitialized = true;
     }
 
@@ -353,6 +378,8 @@ class GameEngine {
             this.attacks.push(entity);
         } else if (entity.boundingBox.type === "object") {
             this.objects.push(entity);
+        } else if (entity instanceof Arrow_Pointer) {
+            this.arrowPointers.push(entity);
         } else if (entity.boundingBox.type === "damageNumber") {
             this.damageNumbers.push(entity);
         }
@@ -636,6 +663,12 @@ class GameEngine {
             }
         }
 
+        // Draw arrow Pointers
+        // Draw 'object' entities.
+        for (let arrow of this.arrowPointers) {
+            arrow.draw(this.ctx, this);
+        }
+
         // Draw UI elements
         // Draw damage/heal numbers
         for (let text of this.damageNumbers) {
@@ -695,7 +728,7 @@ class GameEngine {
             this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
             this.ctx.closePath();
 
-            setTimeout(() => {
+            this.setManagedTimeout(() => {
 
                 if (!this.pauseGame) {
                     this.togglePause();
@@ -772,13 +805,16 @@ class GameEngine {
 
     /** Draws the game-time tracker on top of the game screen. */
     drawTimer(ctx) {
-        ctx.font = '20px Arial';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center'
-        const minutes = Math.floor(this.elapsedTime / 60000);
-        const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
-        const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
+        // Only draw the timer if elapsedTime is non-negative
+        if (this.elapsedTime >= 0) {
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            const minutes = Math.floor(this.elapsedTime / 60000);
+            const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
+            const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
+        }
     }
 
     /** Draws the gold currency tracker onto the game screen. */
@@ -805,7 +841,8 @@ class GameEngine {
 
     /** Call this method to spawn a portal to the next area. */
     spawnPortal(worldX, worldY, mapIndex) {
-        this.addEntity(new Portal(this, worldX, worldY, mapIndex));
+        let newPortal = this.addEntity(new Portal(this, worldX, worldY, mapIndex));
+        this.addEntity(new Arrow_Pointer(newPortal, this, "./sprites/arrow_pointer_blue.png")); // Attach an arrow pointer
     }
 
     /** Called in gameengine.draw() to draw the map textures. */
@@ -825,7 +862,7 @@ class GameEngine {
 
             // Spawn the rest area exit portal at this precise location if we don't have a portal here already.
             if (!this.portal) {
-                this.addEntity(new Portal(this, this.player.worldX + 350, this.player.worldY, 2));
+                this.spawnPortal(this.player.worldX + 350, this.player.worldY, 2)
             }
 
             const spawnOffsetX = 170;
@@ -908,7 +945,7 @@ class GameEngine {
             // if (!this.mapObjectsInitialized) {
             //     this.initGrasslandsObjects();
             // }
-            const map = ASSET_MANAGER.getAsset("./sprites/map_stone_background.png");
+            const map = ASSET_MANAGER.getAsset("./sprites/map_cave.png");
 
             this.mapWidth = map.width;
             this.mapHeight = map.height;
@@ -1065,127 +1102,139 @@ class GameEngine {
                 }
             }
 
+            // Update 'arrow pointer' entities. (If commented, then the update() does not exist atm in arrow class)
+            // for (let i = 0; i < this.arrowPointers.length; i++) {
+            //     if (!this.arrowPointers[i].removeFromWorld) {
+            //         this.arrowPointers[i].update();
+            //     }
+            // }
+
             // Update damage numbers
             for (let i = 0; i < this.damageNumbers.length; i++) {
                 if (!this.damageNumbers[i].removeFromWorld) {
                     this.damageNumbers[i].update();
                 }
             }
-        }
 
-        // UI Updates, this should happen even while the game is paused.
-        // Update Upgrade_System
-        // if (this.UPGRADE_SYSTEM) {
-        //     this.UPGRADE_SYSTEM.update();
-        // }
 
-        // Remove 'other' entities that are marked for deletion.
-        for (let i = this.entities.length - 1; i >= 0; --i) {
-            if (this.entities[i].removeFromWorld) {
-                this.entities.splice(i, 1);
+            // Remove 'other' entities that are marked for deletion.
+            for (let i = this.entities.length - 1; i >= 0; --i) {
+                if (this.entities[i].removeFromWorld) {
+                    this.entities.splice(i, 1);
+                }
             }
-        }
 
-        // Remove 'object' entities that are marked for deletion.
-        for (let i = this.objects.length - 1; i >= 0; --i) {
-            if (this.objects[i].removeFromWorld) {
-                // internally checks if exploding and then does so if true.
-                this.objects[i].explode();
-                this.objects.splice(i, 1);
+            // Remove 'object' entities that are marked for deletion.
+            for (let i = this.objects.length - 1; i >= 0; --i) {
+                // Treasure chest check
+                if (this.objects[i] && this.objects[i].boundingBox && this.objects[i].boundingBox.type === "chest" && this.objects[i].openedAtTime !== null && this.timer.gameTime - this.objects[i].openedAtTime >= this.objects[i].deleteAfterOpenTime) {
+                    this.objects[i].removeFromWorld = true;
+                }
+
+                if (this.objects[i].removeFromWorld) {
+                    // internally checks if exploding and then does so if true.
+                    this.objects[i].explode();
+                    this.objects.splice(i, 1);
+                }
             }
-        }
 
-        // Remove 'enemy' entities that are marked for deletion.
-        for (let i = this.enemies.length - 1; i >= 0; --i) {
-            if (this.enemies[i].removeFromWorld) {
-                // Only do the following if the enemy was actually 'killed' ex: currHP === 0
-                if (this.enemies[i].currHP === 0) {
-                    // Spawn XP Orb on killed enemies
-                    this.addEntity(new Exp_Orb(this, this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].exp));
+            // Remove 'enemy' entities that are marked for deletion.
+            for (let i = this.enemies.length - 1; i >= 0; --i) {
+                if (this.enemies[i].removeFromWorld) {
+                    // Only do the following if the enemy was actually 'killed' ex: currHP === 0
+                    if (this.enemies[i].currHP === 0) {
+                        // Spawn XP Orb on killed enemies
+                        this.addEntity(new Exp_Orb(this, this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].exp));
 
-                    let wasKilledByExplosion = false;
+                        let wasKilledByExplosion = false;
 
-                    //TODO make it so a certain upgrade prevents this
-                    this.attacks.forEach(attack => {
-                        if (attack.type === "explosionAttack" && attack.collisionDetection(this.enemies[i].boundingBox)) {
+                        //TODO make it so a certain upgrade prevents this
+                        this.attacks.forEach(attack => {
+                            if (attack.type === "explosionAttack" && attack.collisionDetection(this.enemies[i].boundingBox)) {
 
-                            wasKilledByExplosion = true;
+                                wasKilledByExplosion = true;
+                            }
+                        });
+
+                        // Spawn Tombstones on killed enemies (only % of the time)
+                        if (Math.random() < 0.5 && !wasKilledByExplosion) {
+                            // Spawn Tombstone
+                            let tombstone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
+                            this.addEntity(tombstone);
+                            tombstone.boundingBox.type = "tombstone";
+
+                            this.setManagedTimeout(() => {
+                                tombstone.removeFromWorld = true;
+                            }, 70000);
                         }
-                    });
 
-                    // Spawn Tombstones on killed enemies (only % of the time)
-                    if (Math.random() < 0.5 && !wasKilledByExplosion) {
-                        // Spawn Tombstone
-                        let tombstone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
-                        this.addEntity(tombstone);
-                        tombstone.boundingBox.type = "tombstone";
+                        // If elite or boss, drop a weapon upgrade chest
+                        if (this.enemies[i].isElite || this.enemies[i].boundingBox.type === "enemyBoss") {
+                            this.spawnUpgradeChest(this.enemies[i].worldX, this.enemies[i].worldY);
+                        }
 
-                        setTimeout(() => {
-                            tombstone.removeFromWorld = true;
-                        }, 70000);
+                        // % Chance to drop gold (gold amount based off of health)
+                        if (Math.random() < 0.1) {
+                            let coinBag = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 17, 17, "./sprites/object_coin_bag.png", 0, 0, 34, 34, 1, 1, 1);
+                            this.addEntity(coinBag);
+                            coinBag.boundingBox.type = "gold" + Math.ceil(this.enemies[i].maxHP / 10);
+                        }
                     }
 
-                    // If elite or boss, drop a weapon upgrade chest
-                    if (this.enemies[i].isElite || this.enemies[i].boundingBox.type === "enemyBoss") {
-                        let chest = this.addEntity(new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.02, 1.25));
-                        chest.boundingBox.type = "chest";
-                        chest.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
+                    if (this.boss && this.enemies[i] === this.boss) {
+                        // Stop tracking this boss since we are deleting it
+                        this.boss = null;
                     }
 
-                    // % Chance to drop gold (gold amount based off of health)
-                    if (Math.random() < 0.1) {
-                        let coinBag = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 17, 17, "./sprites/object_coin_bag.png", 0, 0, 34, 34, 1, 1, 1);
-                        this.addEntity(coinBag);
-                        coinBag.boundingBox.type = "gold" + Math.ceil(this.enemies[i].maxHP / 10);
-                    }
+                    // Delete this enemy
+                    this.enemies.splice(i, 1);
                 }
+            }
 
-                if (this.boss && this.enemies[i] === this.boss) {
-                    // Stop tracking this boss since we are deleting it
-                    this.boss = null;
+            // Remove 'ally' entities that are marked for deletion.
+            for (let i = this.allies.length - 1; i >= 0; --i) {
+                if (this.allies[i].removeFromWorld) {
+                    // Delete this enemy
+                    this.allies.splice(i, 1);
                 }
-
-                // Delete this enemy
-                this.enemies.splice(i, 1);
             }
-        }
 
-        // Remove 'ally' entities that are marked for deletion.
-        for (let i = this.allies.length - 1; i >= 0; --i) {
-            if (this.allies[i].removeFromWorld) {
-                // Delete this enemy
-                this.allies.splice(i, 1);
+            // Remove 'attack' entities that are marked for deletion.
+            for (let i = this.attacks.length - 1; i >= 0; --i) {
+                if (this.attacks[i].removeFromWorld) {
+                    this.attacks.splice(i, 1);
+                }
             }
-        }
 
-        // Remove 'attack' entities that are marked for deletion.
-        for (let i = this.attacks.length - 1; i >= 0; --i) {
-            if (this.attacks[i].removeFromWorld) {
-                this.attacks.splice(i, 1);
+            // Remove 'portal' entity if marked for deletion.
+            if (this.portal && this.portal.removeFromWorld) {
+                this.portal = null;
             }
-        }
 
-        // Remove 'portal' entity if marked for deletion.
-        if (this.portal && this.portal.removeFromWorld) {
-            this.portal = null;
-        }
-
-        // Remove 'item' entities that are marked for deletion.
-        for (let i = this.items.length - 1; i >= 0; --i) {
-            if (this.items[i].removeFromWorld) {
-                this.items.splice(i, 1);
+            // Remove 'item' entities that are marked for deletion.
+            for (let i = this.items.length - 1; i >= 0; --i) {
+                if (this.items[i].removeFromWorld) {
+                    this.items.splice(i, 1);
+                }
             }
-        }
 
-        // Remove 'player' entity if marked for deletion.
-        if (this.player && this.player.removeFromWorld) {
-            //this.player = null;   // If this is commented out, we don't delete the player entity on death.
-        }
+            // Remove 'player' entity if marked for deletion.
+            if (this.player && this.player.removeFromWorld) {
+                //this.player = null;   // If this is commented out, we don't delete the player entity on death.
+            }
 
-        // Remove damage numbers marked for deletion.
-        for (let i = this.damageNumbers.length - 1; i >= 0; --i) {
-            if (this.damageNumbers[i].removeFromWorld) {
-                this.damageNumbers.splice(i, 1);
+            // Remove 'arrow pointer' entities that are marked for deletion.
+            for (let i = this.arrowPointers.length - 1; i >= 0; --i) {
+                if (this.arrowPointers[i].removeFromWorld) {
+                    this.arrowPointers.splice(i, 1);
+                }
+            }
+
+            // Remove damage numbers marked for deletion.
+            for (let i = this.damageNumbers.length - 1; i >= 0; --i) {
+                if (this.damageNumbers[i].removeFromWorld) {
+                    this.damageNumbers.splice(i, 1);
+                }
             }
         }
 
@@ -1276,7 +1325,7 @@ class GameEngine {
         // Check if it's time to spawn an enemy based on current spawn interval
         if (this.elapsedTime > 0 && this.elapsedTime % currentSpawnInterval < this.clockTick * 1000) {
             // Conditions to spawn enemies: no boss, round not over, not in rest area
-            if (!this.boss && !this.roundOver && this.currMap !== 0) {
+            if (this.boss === null && !this.roundOver && this.currMap !== 0) {
                 this.spawnRandomEnemy();
             }
         }
@@ -1360,5 +1409,53 @@ class GameEngine {
             ctx.stroke();
         }
     }
-}
 
+    // New method to set a managed timeout
+    setManagedTimeout(callback, delay, ...args) {
+        const timeoutInfo = {
+            callback: callback,
+            delay: delay,
+            startTime: Date.now(),
+            args: args,
+        };
+
+        timeoutInfo.id = setTimeout(() => {
+            // Execute the callback
+            callback(...args);
+            // Remove from active timeouts
+            this.activeTimeouts = this.activeTimeouts.filter(t => t.id !== timeoutInfo.id);
+        }, delay);
+
+        // Add to active timeouts
+        this.activeTimeouts.push(timeoutInfo);
+        return timeoutInfo.id;
+    }
+
+    /** Method to clear a managed timeout */
+    clearManagedTimeout(timeoutId) {
+        // Clear the timeout
+        clearTimeout(timeoutId);
+        // Remove from active timeouts
+        this.activeTimeouts = this.activeTimeouts.filter(t => t.id !== timeoutId);
+    }
+
+    /** Method to pause all active timeouts */
+    pauseTimeouts() {
+        const currentTime = Date.now();
+        this.activeTimeouts.forEach(t => {
+            clearTimeout(t.id);
+            // Calculate remaining delay
+            t.remainingDelay = t.delay - (currentTime - t.startTime);
+        });
+    }
+
+    /** Method to resume all active timeouts */
+    resumeTimeouts() {
+        this.activeTimeouts.forEach(t => {
+            // Re-set the timeout with the remaining delay
+            t.id = this.setManagedTimeout(t.callback, t.remainingDelay, ...t.args);
+            t.startTime = Date.now(); // Reset start time
+            t.delay = t.remainingDelay; // Update delay to remaining delay
+        });
+    }
+}

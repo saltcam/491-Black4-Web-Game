@@ -9,7 +9,7 @@
 class Player extends Entity {
 
     constructor(game) {
-        super(100, 100, 2500, game, 0, 0,
+        super(100, 100, 25, game, 0, 0,
             17, 29, "player", 160,
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
@@ -33,10 +33,10 @@ class Player extends Entity {
 
         // Dash implementation
         this.defaultDashCooldown = 2;   // This is the actual cooldown of dash that will be used each time we dash
-        this.currentDashCooldown = this.defaultDashCooldown;    // This holds the current time left till we can dash again
+        this.currentDashCooldown = 0;    // This holds the current time left till we can dash again
         this.dashSpeedMultiplier = 3;
         this.dashDuration = 0.5;
-        this.lastDashTime = 0; // Tracks when the last dash happened
+        this.lastDashTime = -this.defaultDashCooldown; // Tracks when the last dash happened
 
         // Regen 1 health per this many seconds
         this.healthRegenTime = 3.5;
@@ -47,6 +47,7 @@ class Player extends Entity {
         this.expGain = 1; // EXP Gain multiplier
 
         // weapon handling
+        this.allowWeaponSwitch = true;
         this.weapons = [new Weapon_scythe(game), new Weapon_tome(game), new Weapon_staff(game)];
         // index for current weapon: Weapon_scythe = 0; Weapon_tome = 1; Tome = 2;
         this.currentWeapon = 0;
@@ -107,6 +108,10 @@ class Player extends Entity {
                 this.upgrades[i].active = false;
             }
         }
+    }
+
+    setWeaponSwitchDelay() {
+        this.lastWeaponSwitchTime = this.game.timer.gameTime;
     }
 
     takeDamage(amount) {
@@ -206,13 +211,42 @@ class Player extends Entity {
             this.timeSinceLastHealthRegen = currentTime;
         }
 
-        if (this.controlsEnabled) {
+        if (this.controlsEnabled && this.allowWeaponSwitch && currentTime - this.lastWeaponSwitchTime >= this.weaponSwitchCooldown) {
             // Allows the user to switch weapons on a cooldown
-            if (this.game.keys["q"] && currentTime - this.lastWeaponSwitchTime >= this.weaponSwitchCooldown) {
+            if (this.game.keys["q"]) {
                 this.currentWeapon = (this.currentWeapon + 1) % this.weapons.length;
                 this.lastWeaponSwitchTime = currentTime;
             }
 
+            // Weapon switching with mouse wheel
+            if (this.game.wheel) {
+                if (this.game.wheel.deltaY < 0) { // Scroll up
+                    this.currentWeapon = (this.currentWeapon - 1 + this.weapons.length) % this.weapons.length;
+                    this.lastWeaponSwitchTime = currentTime;
+                } else if (this.game.wheel.deltaY > 0) { // Scroll down
+                    this.currentWeapon = (this.currentWeapon + 1) % this.weapons.length;
+                    this.lastWeaponSwitchTime = currentTime;
+                }
+                this.game.wheel = null; // Reset wheel event after handling
+            }
+
+            // Weapon switching with number keys
+            if (this.game.keys["1"]) {
+                this.currentWeapon = 0; // Switch to first weapon
+                this.game.keys["1"] = false; // Prevent continuous switching
+                this.lastWeaponSwitchTime = currentTime;
+            } else if (this.game.keys["2"]) {
+                this.currentWeapon = 1; // Switch to second weapon
+                this.game.keys["2"] = false;
+                this.lastWeaponSwitchTime = currentTime;
+            } else if (this.game.keys["3"]) {
+                this.currentWeapon = 2; // Switch to third weapon
+                this.game.keys["3"] = false;
+                this.lastWeaponSwitchTime = currentTime;
+            }
+        }
+
+        if (this.controlsEnabled) {
             //asks current weapon if it can attack
             if (this.game.leftMouseDown && currentTime - this.weapons[this.currentWeapon].lastPrimaryAttackTime >= this.weapons[this.currentWeapon].primaryCool) {
                 this.weapons[this.currentWeapon].performPrimaryAttack(this);
@@ -276,6 +310,7 @@ class Player extends Entity {
 
         // decrements dash cooldown
         this.currentDashCooldown -= this.game.clockTick;
+
         if (this.currentDashCooldown < 0) {
             this.currentDashCooldown = 0;
         }
@@ -453,6 +488,44 @@ class Player extends Entity {
         }
     }
 
+    // Draws a white bar for roll CD tracking
+    drawRollCD(ctx) {
+        const barWidth = 200;
+        const barHeight = 10;
+        const xOffset = (ctx.canvas.width - barWidth) / 2;
+        const yOffset = 500; // Adjust for your game's UI layout
+
+        // Calculate the elapsed time since the last dash
+        const timeSinceLastDash = this.game.timer.gameTime - this.lastDashTime;
+        // Calculate the remaining cooldown time
+        const remainingCooldown = Math.max(0, this.defaultDashCooldown - timeSinceLastDash);
+        // Calculate the width of the filled portion based on the remaining cooldown
+        const filledWidth = barWidth * (1 - (remainingCooldown / this.defaultDashCooldown));
+
+        // Start fading out the bar 5 seconds after the last dash
+        const fadeStartTime = 2.5; // Seconds after last dash when fading starts
+        const fadeDuration = 1; // Duration over which the bar fades out, in seconds
+        let alpha = 1; // Default alpha value (fully opaque)
+
+        // If the last dash was more than 5 seconds ago, start fading
+        if (timeSinceLastDash >= fadeStartTime) {
+            const fadeProgress = (timeSinceLastDash - fadeStartTime) / fadeDuration;
+            alpha = Math.max(0, 1 - fadeProgress); // Decrease alpha to fade out, but not below 0
+        }
+
+        // Draw the background of the cooldown bar (semi-transparent grey)
+        ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.5})`; // Background fades with the bar
+        ctx.fillRect(xOffset, yOffset, barWidth, barHeight);
+
+        // Draw the filled portion of the cooldown bar (white when cooling down)
+        if (remainingCooldown === 0) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`; // Foreground fades with the bar
+        } else {
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.66})`; // Foreground fades with the bar
+        }
+        ctx.fillRect(xOffset, yOffset, filledWidth, barHeight);
+    }
+
     draw(ctx, game) {
         // Check if the camera is initialized.
         // This is necessary as it is needed for this method, but may not be initialized on the first few calls
@@ -474,6 +547,7 @@ class Player extends Entity {
 
         // Force the super class to draw the health bar for our player
         this.drawHealth(ctx);
+        this.drawRollCD(ctx);
         this.drawExp(ctx);
         this.drawWeaponUI(ctx);
         this.drawWeapons(ctx)

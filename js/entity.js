@@ -104,8 +104,8 @@ class Entity {
     }
 
     drawHealth(ctx) {
-        // If this is a 0 health entity, we can ignore drawing the healthbar.
-        if (this.maxHP === 0) {
+        // If this is a non-health entity, we can ignore drawing the healthbar.
+        if (this.maxHP <= 0) {
             return;
         }
         //draw the max healthbar
@@ -130,7 +130,12 @@ class Entity {
         if (this.currHP + healHp <= this.maxHP) {
             this.currHP += healHp;
             // Spawn floating healing number
-            this.game.addEntity(new Floating_text(this.game, healHp, this.worldX, this.worldY, true, this instanceof Player));
+            this.game.addEntity(new Floating_text(this.game, healHp, this.worldX, this.worldY, true, this instanceof Player || this.boundingBox.type.includes("ally")));
+        }
+        // If over-heal then just restore to max hp
+        else {
+            this.currHP = this.maxHP;
+            this.game.addEntity(new Floating_text(this.game, healHp, this.worldX, this.worldY, true, this instanceof Player || this.boundingBox.type.includes("ally")));
         }
     }
 
@@ -148,17 +153,17 @@ class Entity {
         }
 
         this.game.player.weapons[0].upgrades.forEach(upgrade => {
-            if (upgrade.name === "Bleeding Edge" && upgrade.active && !(this instanceof Player)
+            if (upgrade.name === "Bleeding Edge" && upgrade.active && !(this instanceof Player) && !this.boundingBox.type.includes("ally")
                 && this.game.player.currentWeapon === 0) {
                 isBleed = true;
                 let bleed = (amount * 1.5) / 6;
 
                 for (let i = 0; i < 6; i++) {
-                    setTimeout(() => {
+                    this.game.setManagedTimeout(() => {
                         if (!this.isDead) {
                             this.currHP -= bleed;
                             this.game.addEntity(new Floating_text(this.game, bleed, this.worldX, this.worldY, false,
-                                this instanceof Player, isCrit));
+                                this instanceof Player || this.boundingBox.type.includes("ally"), isCrit));
                             this.animator.damageSprite(100);
 
                             if (this.currHP <= 0) {
@@ -166,7 +171,7 @@ class Entity {
                                 this.isDead = true;
                             }
 
-                            this.recentDamage += amount;
+                            this.recentDamage += bleed;
                             this.lastDamageTime = this.game.timer.gameTime;
                         }
                     }, 500 * i);
@@ -178,7 +183,7 @@ class Entity {
             this.currHP -= amount;
             // Spawn floating damage number
             this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY,
-                false, this instanceof Player, isCrit));
+                false, this instanceof Player || this.boundingBox.type.includes("ally"), isCrit));
 
             // Apply the damage sprite to this entity
             this.animator.damageSprite(250);
@@ -194,7 +199,7 @@ class Entity {
 
         this.game.player.weapons[0].upgrades.forEach(upgrade => {
             if (upgrade.name === "Crippling Chill" && upgrade.active && !(this instanceof Player)
-                && !(this instanceof Ally_Contact)
+                && !this.boundingBox.type.includes("ally")
                 && !this.boundingBox.type.includes("boss") && this.game.player.currentWeapon === 0) {
                 // Only apply the actual slow if their faster than what we are slowing them to.
                 if (this.movementSpeed > 30) {
@@ -204,7 +209,7 @@ class Entity {
                     this.animator.outlineMode = true;
                     this.animator.outlineColor = 'lightblue';
 
-                    setTimeout(() => {
+                    this.game.setManagedTimeout(() => {
                         this.animator.outlineColor = 'yellow';  // Back to default
                         if (!this.isElite) {
                             this.animator.outlineMode = false;
@@ -218,7 +223,7 @@ class Entity {
                     this.animator.outlineMode = true;
                     this.animator.outlineColor = 'lightblue';
 
-                    setTimeout(() => {
+                    this.game.setManagedTimeout(() => {
                         this.animator.outlineColor = 'yellow';  // Back to default
                         if (!this.isElite) {
                             this.animator.outlineMode = false;

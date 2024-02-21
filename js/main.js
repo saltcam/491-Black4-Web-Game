@@ -71,6 +71,9 @@ ASSET_MANAGER.queueDownload("./sprites/upgrade_bleeding_edge.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_crippling_chill.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_echo_slash.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_currency_bar.png");
+ASSET_MANAGER.queueDownload("./sprites/arrow_pointer.png");
+ASSET_MANAGER.queueDownload("./sprites/arrow_pointer_blue.png");
+ASSET_MANAGER.queueDownload("./sprites/map_cave.png");
 
 //player
 ASSET_MANAGER.queueDownload("./sprites/McIdle.png");

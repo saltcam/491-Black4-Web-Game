@@ -114,6 +114,7 @@ class Upgrade_System {
                 let upgradeChoice = -1;
                 if (this.game.keys["1"]) {
                     upgradeChoice = 0;
+                    this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -126,6 +127,7 @@ class Upgrade_System {
                     }, this.menuInvincibilityTime * 1000);
                 } else if (this.game.keys["2"]) {
                     upgradeChoice = 1;
+                    this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -138,6 +140,7 @@ class Upgrade_System {
                     }, this.menuInvincibilityTime * 1000);
                 } else if (this.game.keys["3"]) {
                     upgradeChoice = 2;
+                    this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -163,6 +166,7 @@ class Upgrade_System {
                 let upgradeChoice = -1;
                 if (this.game.keys["1"]) {
                     upgradeChoice = 0;
+                    this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -176,6 +180,7 @@ class Upgrade_System {
                     }, this.menuInvincibilityTime * 1000);
                 } else if (this.game.keys["2"]) {
                     upgradeChoice = 1;
+                    this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -188,6 +193,7 @@ class Upgrade_System {
                     }, this.menuInvincibilityTime * 1000);
                 } else if (this.game.keys["3"]) {
                     upgradeChoice = 2;
+                    this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
                         this.game.togglePause();
@@ -239,6 +245,7 @@ class Upgrade_System {
                 // Close menu if the player presses 'E'
                 else if (this.game.keys["e"]) {
                     this.weaponChoice = -1;
+                    this.game.player.setWeaponSwitchDelay();
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
                     this.waitingForSelection = false;
@@ -284,6 +291,7 @@ class Upgrade_System {
                 else if (this.game.keys["e"]) {
                     upgradeChoice = -1;
                     this.weaponChoice = -1;
+                    this.game.player.setWeaponSwitchDelay();
                     this.currentMenu = -1;
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
@@ -297,7 +305,7 @@ class Upgrade_System {
                     // Reset anvil interaction CD after 1 sec
                     for (let object of this.game.objects) {
                         if (object.boundingBox.type === "anvil") {
-                            setTimeout(() => {
+                            this.game.setManagedTimeout(() => {
                                 object.hasBeenOpened = false;
                             }, 1000);
                         }
@@ -319,6 +327,7 @@ class Upgrade_System {
                     // Ignore input if player doesn't have enough gold
                     if (this.upgradeOptions[0].goldCost <= this.game.player.gold) {
                         upgradeChoice = 0;
+                        this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
                         if (this.game.pauseGame) {
                             this.game.togglePause();
@@ -332,7 +341,7 @@ class Upgrade_System {
                         // Reset anvil interaction CD after 1 sec
                         for (let object of this.game.objects) {
                             if (object.boundingBox.type === "anvil") {
-                                setTimeout(() => {
+                                this.game.setManagedTimeout(() => {
                                     object.hasBeenOpened = false;
                                 }, 1000);
                             }
@@ -342,6 +351,7 @@ class Upgrade_System {
                     // Ignore input if player doesn't have enough gold
                     if (this.upgradeOptions[1].goldCost <= this.game.player.gold) {
                         upgradeChoice = 1;
+                        this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
                         if (this.game.pauseGame) {
                             this.game.togglePause();
@@ -355,7 +365,7 @@ class Upgrade_System {
                         // Reset anvil interaction CD after 1 sec
                         for (let object of this.game.objects) {
                             if (object.boundingBox.type === "anvil") {
-                                setTimeout(() => {
+                                this.game.setManagedTimeout(() => {
                                     object.hasBeenOpened = false;
                                 }, 1000);
                             }
@@ -365,6 +375,7 @@ class Upgrade_System {
                     // Ignore input if player doesn't have enough gold
                     if (this.upgradeOptions[2].goldCost <= this.game.player.gold) {
                         upgradeChoice = 2;
+                        this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
                         if (this.game.pauseGame) {
                             this.game.togglePause();
@@ -378,7 +389,7 @@ class Upgrade_System {
                         // Reset anvil interaction CD after 1 sec
                         for (let object of this.game.objects) {
                             if (object.boundingBox.type === "anvil") {
-                                setTimeout(() => {
+                                this.game.setManagedTimeout(() => {
                                     object.hasBeenOpened = false;
                                 }, 1000);
                             }
@@ -388,6 +399,7 @@ class Upgrade_System {
                     // Ignore input if player doesn't have enough gold
                     if (this.upgradeOptions[3].goldCost <= this.game.player.gold) {
                         upgradeChoice = 3;
+                        this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
                         if (this.game.pauseGame) {
                             this.game.togglePause();
@@ -401,7 +413,7 @@ class Upgrade_System {
                         // Reset anvil interaction CD after 1 sec
                         for (let object of this.game.objects) {
                             if (object.boundingBox.type === "anvil") {
-                                setTimeout(() => {
+                                this.game.setManagedTimeout(() => {
                                     object.hasBeenOpened = false;
                                 }, 1000);
                             }
@@ -411,6 +423,7 @@ class Upgrade_System {
                     // Ignore input if player doesn't have enough gold
                     if (this.upgradeOptions[4].goldCost <= this.game.player.gold) {
                         upgradeChoice = 4;
+                        this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
                         if (this.game.pauseGame) {
                             this.game.togglePause();
@@ -424,7 +437,7 @@ class Upgrade_System {
                         // Reset anvil interaction CD after 1 sec
                         for (let object of this.game.objects) {
                             if (object.boundingBox.type === "anvil") {
-                                setTimeout(() => {
+                                this.game.setManagedTimeout(() => {
                                     object.hasBeenOpened = false;
                                 }, 1000);
                             }
@@ -434,6 +447,7 @@ class Upgrade_System {
                     // Ignore input if player doesn't have enough gold
                     if (this.upgradeOptions[5].goldCost <= this.game.player.gold) {
                         upgradeChoice = 5;
+                        this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
                         if (this.game.pauseGame) {
                             this.game.togglePause();
@@ -447,7 +461,7 @@ class Upgrade_System {
                         // Reset anvil interaction CD after 1 sec
                         for (let object of this.game.objects) {
                             if (object.boundingBox.type === "anvil") {
-                                setTimeout(() => {
+                                this.game.setManagedTimeout(() => {
                                     object.hasBeenOpened = false;
                                 }, 1000);
                             }
@@ -458,6 +472,7 @@ class Upgrade_System {
                 else if (this.game.keys["e"]) {
                     upgradeChoice = -1;
                     this.weaponChoice = -1;
+                    this.game.player.setWeaponSwitchDelay();
                     this.currentMenu = -1;
                     this.waitingForSelection = false;
                     if (this.game.pauseGame) {
@@ -471,7 +486,7 @@ class Upgrade_System {
                     // Reset anvil interaction CD after 1 sec
                     for (let object of this.game.objects) {
                         if (object.boundingBox.type === "anvil") {
-                            setTimeout(() => {
+                            this.game.setManagedTimeout(() => {
                                 object.hasBeenOpened = false;
                             }, 1000);
                         }
@@ -812,13 +827,3 @@ class Upgrade_System {
         ctx.shadowOffsetY = 0;
     }
 }
-
-
-// Nick: Save this for later (anvil stuff)
-// for (let object of this.game.objects) {
-//     if (object.boundingBox.type === "anvil") {
-//         setTimeout(() => {
-//             object.hasBeenOpened = false;
-//         }, 1000);
-//     }
-// }

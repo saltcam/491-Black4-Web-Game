@@ -28,14 +28,6 @@ class Portal extends Entity {
     }
 
     switchMap() {
-        // Pause the game clock if we are going into areas like Rest Area
-        if (this.teleportIndex === 0) {
-            this.game.pauseClock = true;
-        }
-        else {
-            this.game.pauseClock = false;
-        }
-
         // Reset clock on entering new map
         this.game.startTime = Date.now();
 
@@ -71,11 +63,30 @@ class Portal extends Entity {
         this.game.mapInitialized = false;
         this.game.mapObjectsInitialized = false;
 
-        // Set roundOver to false now that we are on a new map
-        this.roundOver = false;
+        if (this.teleportIndex !== 0) {
+            // Set roundOver to false now that we are on a new map (that is not rest area)
+            this.game.roundOver = false;
+        }
+
+        // Reset the game clock to 0
+        this.game.timer.reset();
+
+        // Reset player dash cooldown
+        this.game.player.currentDashCooldown = 0; // Dash is immediately ready
+        this.game.player.lastDashTime = this.game.timer.gameTime - this.game.player.defaultDashCooldown; // Adjust if necessary
+
+        // Reset weapon cooldowns for all weapons
+        this.game.player.weapons.forEach(weapon => {
+            weapon.lastPrimaryAttackTime = this.game.timer.gameTime - weapon.primaryCool;
+            weapon.lastSecondAttackTime = this.game.timer.gameTime - weapon.secondCool;
+        });
 
         // Temp win condition
-        this.game.youWon = true;
+        this.game.youWon = false;
+
+        if (this.arrowPointer) {
+            this.arrowPointer.removeFromWorld = true;
+        }
 
         // Remove the portal from the game after entering it
         this.removeFromWorld = true;

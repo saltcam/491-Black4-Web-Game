@@ -27,6 +27,11 @@ class Animator {
         this.pauseFrame = frameNumber;
     }
 
+    // Method to pause animation at a specific frame
+    pauseAtSpecificFrame(frameNumber) {
+        this.specificPauseFrame = frameNumber;
+    }
+
     drawFrame(tick, ctx, x, y, direction) {
         // Update the elapsed time (only if we are not paused)
         if (!this.game.pauseGame) {
@@ -38,6 +43,12 @@ class Animator {
 
         // Get the current frame
         const frame = this.currentFrame();
+
+        // Check if current frame matches the specific pause frame
+        if (this.specificPauseFrame !== null && frame === this.specificPauseFrame) {
+            this.pauseAtFrame(this.specificPauseFrame); // Pause at the specific frame
+            this.specificPauseFrame = null; // Reset specificPauseFrame to avoid repeated pausing in future loops
+        }
 
         // Save the current context state 
         ctx.save();
@@ -63,8 +74,9 @@ class Animator {
         }
 
         // If flag is set to true, pause the animation to the first frame
+        // Apply scaling, flipping, and drawing logic...
         if (this.pauseFrame >= 0) {
-            // Draw only the last frame
+            // Draw only the specified pause frame
             ctx.drawImage(this.spritesheet,
                 this.xStart + (this.width * this.pauseFrame),
                 this.yStart,
@@ -72,9 +84,8 @@ class Animator {
                 this.height,
                 x,
                 y,
-                scaledWidth,
-                scaledHeight);
-
+                this.width * this.scale,
+                this.height * this.scale);
             ctx.restore();
         } else {
             // Determine the path for the spritesheet
@@ -136,7 +147,7 @@ class Animator {
         if (!this.beingDamaged) {
             this.beingDamaged = true;
 
-            setTimeout(() => {
+            this.game.setManagedTimeout(() => {
                 this.beingDamaged = false;
             }, damageDuration);
         }
