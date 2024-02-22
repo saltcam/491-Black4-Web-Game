@@ -22,11 +22,6 @@ class Timer {
         return gameDelta;
     }
 
-    reset() {
-        this.lastTimestamp = Date.now();
-        this.gameTime = 0; // Reset the game time to 0
-    }
-
     togglePause() {
         this.isPaused = !this.isPaused;
         if (!this.isPaused) {

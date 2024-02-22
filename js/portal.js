@@ -72,11 +72,7 @@ class Portal extends Entity {
         }
 
         // Reset the game clock to 0
-        this.game.timer.reset();
         this.game.elapsedTime = 0;
-
-        // Reset health regeneration timer (to prevent no regen bug)
-        this.game.player.timeSinceLastHealthRegen = this.game.timer.gameTime;
 
         // Reset player dash cooldown
         this.game.player.currentDashCooldown = 0; // Dash is immediately ready
