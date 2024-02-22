@@ -34,25 +34,6 @@ class Weapon_scythe extends Weapon {
         let defaultPrimaryDamage = player.atkPow / 1.5;
         let defaultDualBladeRadius = this.primaryAttackRadius * .67;
 
-        // Check if special upgrade code is going to be used
-        let bloodUpgrade = false;
-        let dualBladeUpgrade = false;
-        let echoSlashUpgrade = false;
-        let bleedingEdgeUpgrade = false;
-
-        // I feel like this is not necessary
-        player.weapons[0].upgrades.forEach(upgrade => {
-            if (upgrade.name === "Blood Scythe") {
-                bloodUpgrade = upgrade.active;
-            } else if (upgrade.name === "Dual Blade") {
-                dualBladeUpgrade = upgrade.active;
-            } else if (upgrade.name === "Echo Slash") {
-                echoSlashUpgrade = upgrade.active;
-            } else if (upgrade.name === "Bleeding Edge") {
-                bleedingEdgeUpgrade = upgrade.active;
-            }
-        });
-
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -76,21 +57,22 @@ class Weapon_scythe extends Weapon {
 
             this.lastPrimaryAttackTime = currentTime;
 
-            // Use different sprites depending on if we have a 'blood' scythe or not
+            // If blood scythe is active
             if (this.upgrades[4].active) {
-                    this.game.addEntity(new AttackCirc(this.game, player,
-                    this.primaryAttackRadius,
-                    'playerAttack',
-                    dx, dy,
-                    this.primaryAttackDuration,
-                    "./sprites/weapon_blood_scythe_primaryattack.png",
-                    defaultPrimaryDamage, 0,
-                    this.primaryAttackPushbackForce,
-                    0, 1));
+                this.game.addEntity(new AttackCirc(this.game, player,
+                this.primaryAttackRadius,
+                'playerAttack',
+                dx, dy,
+                this.primaryAttackDuration,
+                "./sprites/weapon_blood_scythe_primaryattack.png",
+                defaultPrimaryDamage, 0,
+                this.primaryAttackPushbackForce,
+                0, 1));
 
-                    this.game.player.heal(1);
+                this.game.player.heal(1);
 
-                if (dualBladeUpgrade) {
+                // If dual blade is active
+                if (this.upgrades[5].active) {
                     this.game.addEntity(new AttackCirc(this.game, player,
                         defaultDualBladeRadius,
                         'VAMP_playerAttack',
@@ -101,7 +83,8 @@ class Weapon_scythe extends Weapon {
                         this.primaryAttackPushbackForce,
                         0, 1));
 
-                    if (echoSlashUpgrade) {
+                    // If echo slash is active
+                    if (this.upgrades[6].active) {
                         this.game.setManagedTimeout(() => {
                             this.game.addEntity(new AttackCirc(this.game, player,
                                 defaultDualBladeRadius,
@@ -116,7 +99,8 @@ class Weapon_scythe extends Weapon {
                     }
                 }
 
-                if (echoSlashUpgrade) {
+                // If echo blade is active
+                if (this.upgrades[6].active) {
                     this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.primaryAttackRadius,
@@ -141,7 +125,8 @@ class Weapon_scythe extends Weapon {
                     this.primaryAttackPushbackForce,
                     0, 1));
 
-                if (dualBladeUpgrade) {
+                // If dual blade is active
+                if (this.upgrades[5].active) {
                     this.game.addEntity(new AttackCirc(this.game, player,
                         defaultDualBladeRadius,
                         'playerAttack',
@@ -151,7 +136,8 @@ class Weapon_scythe extends Weapon {
                         defaultPrimaryDamage, 0,
                         this.primaryAttackPushbackForce,
                         0, 1));
-                    if (echoSlashUpgrade) {
+                    // If echo blade is active
+                    if (this.upgrades[6].active) {
                         this.game.setManagedTimeout(() => {
                             this.game.addEntity(new AttackCirc(this.game, player,
                                 defaultDualBladeRadius,
@@ -166,7 +152,8 @@ class Weapon_scythe extends Weapon {
                     }
                 }
 
-                if (echoSlashUpgrade) {
+                // If echo slash
+                if (this.upgrades[6].active) {
                     this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.primaryAttackRadius,
@@ -188,21 +175,6 @@ class Weapon_scythe extends Weapon {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         let defaultSecondaryDamage = player.atkPow * 1.15;
 
-        // Check if player has the blood scythe upgrade (life leech)
-        let bloodUpgrade = false;
-        let echoSlashUpgrade = false;
-        let cripplingChillUpgrade = false;
-
-        player.weapons[0].upgrades.forEach(upgrade => {
-            if (upgrade.name === "Blood Scythe") {
-                bloodUpgrade = upgrade.active;
-            } else if (upgrade.name === "Echo Slash") {
-                echoSlashUpgrade = upgrade.active;
-            } else if (upgrade.name === "Crippling Chill") {
-                cripplingChillUpgrade = upgrade.active;
-            }
-        });
-
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
@@ -210,8 +182,8 @@ class Weapon_scythe extends Weapon {
             ASSET_MANAGER.playAsset(this.secondarySound);
             this.lastSecondAttackTime = currentTime;
 
-            // Use different sprites depending on if we have a 'blood' scythe or not
-            if (bloodUpgrade) {
+            // If blood scythe is active
+            if (this.upgrades[4].active) {
                 this.game.addEntity(new AttackCirc(this.game, player,
                     this.secondaryAttackRadius,
                     'VAMP_playerAttack',
@@ -224,7 +196,8 @@ class Weapon_scythe extends Weapon {
 
                 this.game.player.heal(1);
 
-                if (echoSlashUpgrade) {
+                // If echo slash is active
+                if (this.upgrades[6].active) {
                     this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.secondaryAttackRadius,
@@ -248,7 +221,8 @@ class Weapon_scythe extends Weapon {
                     this.secondaryAttackPushbackForce,
                     0.3, 1));
 
-                if (echoSlashUpgrade) {
+                // If echo slash is active
+                if (this.upgrades[6].active) {
                     this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.secondaryAttackRadius,
@@ -300,7 +274,8 @@ class Weapon_scythe extends Weapon {
                         this.spritePath = "./sprites/weapon_blood_scythe.png";
                         // Set upgrade sprites to their relevant blood scythe variants
                         this.upgrades.forEach(upgrade => {
-                            if (upgrade.name === "Dual Blade" && upgrade.active) {
+                            // If dual blade is active
+                            if (this.upgrades[5].active) {
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
                             } else if (upgrade.name === "Dual Blade" && !upgrade.active) {
@@ -313,10 +288,13 @@ class Weapon_scythe extends Weapon {
                     case "Dual Blade":
                         // Set upgrade sprites to their relevant blood scythe variants
                         this.upgrades.forEach(upgrade => {
-                            if (upgrade.name === "Blood Scythe" && upgrade.active) {
+                            // If blood scythe is active
+                            if (this.upgrades[4].active) {
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
-                            } else if (upgrade.name === "Blood Scythe" && !upgrade.active) {
+                            }
+                            // If blood scythe is NOT active
+                            else if (!this.upgrades[4].active) {
                                 upgrade.sprite = "./sprites/upgrade_blood_scythe(dual).png";
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_scythe_dual.png";
