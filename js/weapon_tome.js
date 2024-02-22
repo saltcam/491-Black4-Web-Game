@@ -6,9 +6,9 @@ class Weapon_tome extends Weapon {
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
             new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 40),
             new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 25),
-            new Upgrade("Double Shot", "(Unique) Multishot++.", true, "./sprites/upgrade_piercing.png", 120),
-            new Upgrade("Bouncing shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_piercing.png", 120),
-            new Upgrade("Doubletime", "(Unique) Secondary tickrate 2x.", true, "./sprites/upgrade_piercing.png", 120),
+            new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_piercing.png", 120),
+            new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_piercing.png", 120),
+            new Upgrade("Doubletime", "(Unique) Secondary hits 100% more often.", true, "./sprites/upgrade_piercing.png", 120),
             //new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 120)
         ];
 
@@ -110,7 +110,7 @@ class Weapon_tome extends Weapon {
         });
 
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
-        let defaultSecondaryDamage = player.atkPow / 1.5;
+        let defaultSecondaryDamage = player.atkPow / 1.75;
 
         const currentTime = this.game.timer.gameTime;
 

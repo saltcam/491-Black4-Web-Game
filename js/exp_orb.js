@@ -16,7 +16,6 @@ class Exp_Orb extends Entity {
     }
 
     updateMoveSpeed() {
-
         const targetCenter = this.game.player.calculateCenter();
         const selfCenter = this.calculateCenter();
 
@@ -26,7 +25,7 @@ class Exp_Orb extends Entity {
 
         this.dist = Math.sqrt(dirX * dirX + dirY * dirY);
         let speed = 350 - this.dist;
-        if (this.game.enemies.length === 0) {
+        if (this.game.enemies.length === 0 && this.game.roundOver) {
             speed = 750;
         }
 

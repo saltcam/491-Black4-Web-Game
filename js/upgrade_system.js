@@ -116,7 +116,7 @@ class Upgrade_System {
                     upgradeChoice = 0;
                     this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
-                    if (this.game.pauseGame) {
+                    if (this.game.isGamePaused) {
                         this.game.togglePause();
                     }
                     this.currentMenu = -1;
@@ -129,7 +129,7 @@ class Upgrade_System {
                     upgradeChoice = 1;
                     this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
-                    if (this.game.pauseGame) {
+                    if (this.game.isGamePaused) {
                         this.game.togglePause();
                     }
                     this.currentMenu = -1;
@@ -142,7 +142,7 @@ class Upgrade_System {
                     upgradeChoice = 2;
                     this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
-                    if (this.game.pauseGame) {
+                    if (this.game.isGamePaused) {
                         this.game.togglePause();
                     }
                     this.currentMenu = -1;
@@ -168,7 +168,7 @@ class Upgrade_System {
                     upgradeChoice = 0;
                     this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
-                    if (this.game.pauseGame) {
+                    if (this.game.isGamePaused) {
                         this.game.togglePause();
                     }
                     this.currentMenu = -1;
@@ -182,7 +182,7 @@ class Upgrade_System {
                     upgradeChoice = 1;
                     this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
-                    if (this.game.pauseGame) {
+                    if (this.game.isGamePaused) {
                         this.game.togglePause();
                     }
                     this.currentMenu = -1;
@@ -195,7 +195,7 @@ class Upgrade_System {
                     upgradeChoice = 2;
                     this.game.player.setWeaponSwitchDelay();
                     this.waitingForSelection = false;
-                    if (this.game.pauseGame) {
+                    if (this.game.isGamePaused) {
                         this.game.togglePause();
                     }
                     this.currentMenu = -1;
@@ -249,7 +249,7 @@ class Upgrade_System {
                     this.currentMenu = -1;
                     this.lastRealTimeKeyPress = Date.now();
                     this.waitingForSelection = false;
-                    if (this.game.pauseGame) {
+                    if (this.game.isGamePaused) {
                         this.game.togglePause();
                     }
                     // After ~1 sec of exiting menu, turn player's menu invincibility off
@@ -294,7 +294,7 @@ class Upgrade_System {
                     this.game.player.setWeaponSwitchDelay();
                     this.currentMenu = -1;
                     this.waitingForSelection = false;
-                    if (this.game.pauseGame) {
+                    if (this.game.isGamePaused) {
                         this.game.togglePause();
                     }
                     this.lastRealTimeKeyPress = Date.now();
@@ -329,7 +329,7 @@ class Upgrade_System {
                         upgradeChoice = 0;
                         this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
-                        if (this.game.pauseGame) {
+                        if (this.game.isGamePaused) {
                             this.game.togglePause();
                         }
                         this.currentMenu = -1;
@@ -353,7 +353,7 @@ class Upgrade_System {
                         upgradeChoice = 1;
                         this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
-                        if (this.game.pauseGame) {
+                        if (this.game.isGamePaused) {
                             this.game.togglePause();
                         }
                         this.currentMenu = -1;
@@ -377,7 +377,7 @@ class Upgrade_System {
                         upgradeChoice = 2;
                         this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
-                        if (this.game.pauseGame) {
+                        if (this.game.isGamePaused) {
                             this.game.togglePause();
                         }
                         this.currentMenu = -1;
@@ -401,7 +401,7 @@ class Upgrade_System {
                         upgradeChoice = 3;
                         this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
-                        if (this.game.pauseGame) {
+                        if (this.game.isGamePaused) {
                             this.game.togglePause();
                         }
                         this.currentMenu = -1;
@@ -425,7 +425,7 @@ class Upgrade_System {
                         upgradeChoice = 4;
                         this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
-                        if (this.game.pauseGame) {
+                        if (this.game.isGamePaused) {
                             this.game.togglePause();
                         }
                         this.currentMenu = -1;
@@ -449,7 +449,7 @@ class Upgrade_System {
                         upgradeChoice = 5;
                         this.game.player.setWeaponSwitchDelay();
                         this.waitingForSelection = false;
-                        if (this.game.pauseGame) {
+                        if (this.game.isGamePaused) {
                             this.game.togglePause();
                         }
                         this.currentMenu = -1;
@@ -475,7 +475,7 @@ class Upgrade_System {
                     this.game.player.setWeaponSwitchDelay();
                     this.currentMenu = -1;
                     this.waitingForSelection = false;
-                    if (this.game.pauseGame) {
+                    if (this.game.isGamePaused) {
                         this.game.togglePause();
                     }
                     this.lastRealTimeKeyPress = Date.now();
@@ -543,7 +543,7 @@ class Upgrade_System {
         this.waitingForSelection = true;
 
         // Pause the game while we wait for the player to make a selection.
-        if (!this.game.pauseGame) {
+        if (!this.game.isGamePaused) {
             this.game.togglePause();
         }
 
@@ -565,7 +565,7 @@ class Upgrade_System {
         this.waitingForSelection = true;
 
         // Pause the game while we wait for the player to make a selection.
-        if (!this.game.pauseGame) {
+        if (!this.game.isGamePaused) {
             this.game.togglePause();
         }
 
@@ -584,7 +584,7 @@ class Upgrade_System {
         this.waitingForSelection = true;
 
         // Pause the game while we wait for the player to make a selection.
-        if (!this.game.pauseGame) {
+        if (!this.game.isGamePaused) {
             this.game.togglePause();
         }
 

@@ -16,12 +16,12 @@ class Player extends Entity {
 
         this.upgrades = [
             new Upgrade("Health +10", "(Stackable, Additive).", false, "./sprites/upgrade_max_health.png"),
-            new Upgrade("Health Regen CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_health_regen.png"),
+            new Upgrade("Health Regen CD -20%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_health_regen.png"),
             new Upgrade("Dash CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_cooldown.png"),
             new Upgrade("Movement Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_movement_speed.png"),
             new Upgrade("Attack Damage +7.5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Pickup Range +30%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png"),
-            new Upgrade("Dash Distance +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
+            new Upgrade("Dash Duration +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
             new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png")];
@@ -77,8 +77,8 @@ class Player extends Entity {
                         this.maxHP += 10;
                         this.heal(10);
                         break;
-                    case "Health Regen CD -10%":
-                        this.healthRegenTime *= 0.9;
+                    case "Health Regen CD -20%":
+                        this.healthRegenTime *= 0.8;
                         break;
                     case "Dash CD -10%":
                         this.defaultDashCooldown *= 0.9;
@@ -92,7 +92,7 @@ class Player extends Entity {
                     case "Pickup Range +20%":
                         this.pickupRange *= 1.3;
                         break;
-                    case "Dash Distance +10%":
+                    case "Dash Duration +10%":
                         this.dashDuration *= 1.1;
                         break;
                     case "Crit Damage +20%":
@@ -206,9 +206,9 @@ class Player extends Entity {
         const currentTime = this.game.timer.gameTime;
 
         // Handle passive health regen
-        if ((currentTime - this.timeSinceLastHealthRegen >= this.healthRegenTime)) {
-            this.heal(1);
-            this.timeSinceLastHealthRegen = currentTime;
+        if (currentTime - this.timeSinceLastHealthRegen >= this.healthRegenTime) {
+            this.heal(1); // Assuming heal(1) regenerates health by 1 unit
+            this.timeSinceLastHealthRegen = currentTime; // Reset the last regen time
         }
 
         if (this.controlsEnabled && this.allowWeaponSwitch && currentTime - this.lastWeaponSwitchTime >= this.weaponSwitchCooldown) {

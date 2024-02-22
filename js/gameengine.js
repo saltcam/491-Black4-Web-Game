@@ -101,8 +101,6 @@ class GameEngine {
         /** Toggle to enable debug mode features. */
         this.debugMode = false;
 
-        /** Spawn the boss after this many seconds of game time. */
-        this.bossSpawnTimer = 300;
         /** Tracks if the round is over. */
         this.roundOver = false;
 
@@ -126,7 +124,7 @@ class GameEngine {
         this.UPGRADE_SYSTEM = new Upgrade_System(this);
 
         /** If true, pauses all entities from moving/taking action. Also pauses the game timer.*/
-        this.pauseGame = false;
+        this.isGamePaused = false;
         /** To record when the game was paused. */
         this.pauseStartTime = 0;
         /** To accumulate total paused duration. */
@@ -151,10 +149,10 @@ class GameEngine {
 
     /** Call this to toggle the game pausing. */
     togglePause() {
-        this.pauseGame = !this.pauseGame;
+        this.isGamePaused = !this.isGamePaused;
         this.timer.togglePause(); // Use the Timer's togglePause method
 
-        if (this.pauseGame) {
+        if (this.isGamePaused) {
             this.pauseStartTime = Date.now();
             this.pauseTimeouts(); // Pause timeouts
         } else {
@@ -197,6 +195,9 @@ class GameEngine {
         // Collectable Objects
         this.spawnUpgradeChest(-1846, -1943);
         this.spawnUpgradeChest(1797, 2802);
+
+        // Debug Portal
+        // this.spawnPortal(0, 100, 0);
 
         // Rocks
         let newEntity = this.addEntity(new Map_object(this, -250, 0, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
@@ -241,6 +242,15 @@ class GameEngine {
         newEntity.animator.pauseAtFrame(10);
         newEntity = this.addEntity(new Map_object(this, 3025, 1070, 750, 2710, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
         newEntity.animator.pauseAtFrame(10);
+
+        this.mapObjectsInitialized = true;
+    }
+
+    initCaveObjects() {
+        // Visible Objects
+        // Collectable Objects
+        this.spawnUpgradeChest(-1846, -1943);
+        this.spawnUpgradeChest(1797, 2802);
 
         this.mapObjectsInitialized = true;
     }
@@ -399,7 +409,8 @@ class GameEngine {
 
         // Draw the map texture.
         this.drawMap();
-        if (this.currMap > 0) {
+
+        if (this.currMap >= 0) {
             // Draw 'other' entities.
             for (let entity of this.entities) {
                 entity.draw(this.ctx, this);
@@ -568,7 +579,7 @@ class GameEngine {
             // Draw the mouse tracker.
             this.drawMouseTracker(this.ctx);
 
-            // Draw the timer if we are no in rest area.
+            // Draw the timer if we are not in rest area.
             if (this.currMap > 0) {
                 this.drawTimer(this.ctx);
             }
@@ -587,14 +598,14 @@ class GameEngine {
                 this.ctx.closePath();
 
                 // Pause game since we died
-                if (this.player.currHP <= 0 && !this.pauseGame) {
-                    this.togglePause();
+                if (this.player.currHP <= 0 && !this.isGamePaused) {
                     this.roundOver = true;
+                    this.togglePause();
                 }
             }
 
             // Temp win condition
-            if (this.youWon && this.currMap === 2) {
+            if (this.youWon && this.currMap === -1) {
                 this.ctx.beginPath();
 
                 this.ctx.fillStyle = "black";
@@ -608,7 +619,7 @@ class GameEngine {
 
                 this.setManagedTimeout(() => {
 
-                    if (!this.pauseGame) {
+                    if (!this.isGamePaused) {
                         this.togglePause();
                     }
                 }, 1000);
@@ -631,31 +642,31 @@ class GameEngine {
                 const alpha = this.fadeElapsed / this.fadeDuration;
                 this.ctx.globalAlpha = this.fadeToBlack ? Math.min(1, alpha) : Math.max(0, 1 - alpha);
 
-                // Cover the canvas with black
-                if (this.fadeToBlack || this.fadeState === 'out') {
-                    this.ctx.fillStyle = 'black';
-                    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-                }
+                // Fill the canvas with black during fade in and out
+                this.ctx.fillStyle = 'black';
+                this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-                // Update fade state
+                // Update the elapsed time for the current fade state
                 this.fadeElapsed += this.clockTick;
-                if (this.fadeElapsed >= this.fadeDuration) {
-                    if (this.fadeState === 'in' && this.fadeToBlack && this.fadeElapsed >= this.fadeDuration * 2) {
-                        // Fade in complete, now fade out
-                        this.fadeState = 'out';
-                        this.fadeElapsed = 0;
-                        this.fadeToBlack = false;
 
-                        this.performPostFadeInActions();
-                    } else if (this.fadeState === 'out') {
-                        // Fade out complete, reset
-                        this.fadeState = 'none'; // Reset fade state to allow future fade-in
-                        this.fadeElapsed = 0; // Reset elapsed time
-                        this.fadeToBlack = false; // Ensure fadeToBlack is false to allow next fade-in
-
-                        // Re-enable player controls now that they are finished teleporting.
-                        this.player.controlsEnabled = true;
+                // Check if the fade to black has completed
+                if (this.fadeToBlack && this.fadeElapsed >= this.fadeDuration) {
+                    // The screen is now fully black, perform the map switch here
+                    if (this.fadeInCompleteAction) {
+                        this.fadeInCompleteAction(); // Execute the map switch
+                        this.fadeInCompleteAction = null; // Prevent re-execution
                     }
+                    // Prepare to fade back in by adjusting the fade state and resetting elapsed time
+                    this.fadeToBlack = false;
+                    this.fadeState = 'out';
+                    this.fadeElapsed = 0;
+                }
+                // Check if the fade back in has completed
+                else if (!this.fadeToBlack && this.fadeElapsed >= this.fadeDuration && this.fadeState === 'out') {
+                    // Fade back in is complete, reset fade state and re-enable player controls
+                    this.fadeState = 'none';
+                    this.fadeElapsed = 0;
+                    this.player.controlsEnabled = true;
                 }
             }
 
@@ -685,16 +696,18 @@ class GameEngine {
     /** Draws the game-time tracker on top of the game screen. */
     drawTimer(ctx)
         {
-            // Only draw the timer if elapsedTime is non-negative
-            if (this.elapsedTime >= 0) {
-                ctx.font = '20px Arial';
-                ctx.fillStyle = 'white';
-                ctx.textAlign = 'center';
-                const minutes = Math.floor(this.elapsedTime / 60000);
-                const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
-                const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
+            // Fix elapsed time if negative
+            if (this.elapsedTime < 0) {
+                this.elapsedTime = 0;
             }
+
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            const minutes = Math.floor(this.elapsedTime / 60000);
+            const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
+            const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
     }
 
     /** Draws the gold currency tracker onto the game screen. */
@@ -735,9 +748,10 @@ class GameEngine {
 
         // If -1, load the main menu
         if (this.currMap === -1) {
-            if(!this.pauseGame){
+            if(!this.isGamePaused){
                 this.togglePause();
             }
+
             this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
             this.ctx.font = '120px Serif';
             this.ctx.fillStyle = 'black';
@@ -915,10 +929,10 @@ class GameEngine {
         }
         // If 2, then Cave Map is used.
         else if (this.currMap === 2){
-            // Initialize the map objects if we haven't already
-            // if (!this.mapObjectsInitialized) {
-            //     this.initGrasslandsObjects();
-            // }
+            //Initialize the map objects if we haven't already
+            if (!this.mapObjectsInitialized) {
+                this.initCaveObjects();
+            }
             const map = ASSET_MANAGER.getAsset("./sprites/map_cave.png");
 
             this.mapWidth = map.width;
@@ -1004,13 +1018,12 @@ class GameEngine {
     /** This method is called every tick to update all entities etc. */
     update() {
         // Handle boss spawn timer
-        // Spawn boss after (this.bossSpawnTimer/60) minutes of game time
-        if ((this.elapsedTime / 60000) >= (this.bossSpawnTimer / 60) && !this.roundOver && !this.boss) {
+        if ((this.elapsedTime / 60000) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss) {
             this.spawnBossOne();
         }
 
         // Update entities only while the game is un-paused.
-        if (!this.pauseGame) {
+        if (!this.isGamePaused) {
             // Update 'other' entities.
             for (let i = 0; i < this.entities.length; i++) {
                 if (!this.entities[i].removeFromWorld) {
@@ -1204,8 +1217,8 @@ class GameEngine {
         }
 
         // Update the elapsed time. (only while un-paused)
-        if (!this.pauseGame) {
-            this.elapsedTime = (Date.now() - this.startTime) - this.totalPausedTime;
+        if (!this.isGamePaused) {
+            this.elapsedTime = Math.max(((Date.now() - this.startTime) - this.totalPausedTime), 0); // Never set the elapsed time below 0
         }
 
         // Update enemy collisions
@@ -1282,7 +1295,7 @@ class GameEngine {
 
     respondToCollision(enemy1, enemy2) {
         // We should not respond to collisions while game is paused
-        if (this.pauseGame) {
+        if (this.isGamePaused) {
             return;
         }
 
@@ -1324,7 +1337,7 @@ class GameEngine {
         this.clockTick = this.timer.tick();
 
         // If the game is not paused, update game logic
-        if (!this.pauseGame) {
+        if (!this.isGamePaused) {
             this.update();
         }
 
@@ -1416,7 +1429,7 @@ class GameEngine {
     // Loads the first map after clicking on play button
     loadGame() {
         this.currMap = 1;
-        if(this.pauseGame) {
+        if(this.isGamePaused) {
             this.togglePause();
         }
     }

@@ -6,20 +6,18 @@ class Spawn_System {
     constructor(game) {
         /** Reference to the game engine. */
         this.game = game;
-        /** Controls if the spawn system is enabled or not. */
-        this.enabled = true;
         /** Tracks if the spawn system has initialized. */
-        this.initinitialized = false;
+        this.initialized = false;
         /** Controls the max enemy count, gets doubled incrementally. */
         this.baseMaxEnemies = 2;
         /** Tracks the current max enemy count. */
         this.currentMaxEnemies = 0;
-        /** Controls how often (in seconds) to increment max enemy count. (Doubles) */
+        /** Controls how often (in seconds) to increment max enemy count. */
         this.maxEnemyIncrementTime = 7.5;
         /** Stores how many max enemy intervals have passed. */
         this.maxEnemyIntervals = 0;
         /** How much to lower the spawn delay each interval. */
-        this.spawnDelayDecreaseMultiplier = 0.9;
+        this.spawnDelayDecreaseMultiplier = 0.88;
         /** Controls how often (in seconds) we reduce the spawn delay of enemies. */
         this.lowerSpawnDelayInterval = 12.5;
         /** Tracks when the last time we lowered the spawn delay was. */
@@ -32,6 +30,8 @@ class Spawn_System {
         this.spawnElite = false;
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
         this.eliteSpawnTimer = 60;
+        /** Spawn the boss after this many seconds of game time. */
+        this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
         this.lastEliteSpawnTime = 0;
 
@@ -46,9 +46,9 @@ class Spawn_System {
             { enemyType: "contact", name: "Floating Eye", maxHP: 30, currHP: 30, atkPow: 3, worldX: 0, worldY: 0,
                 boxWidth: 19/2, boxHeight: 28/2, boxType: "enemy", speed: 85, spritePath: "./sprites/FloatingEye.png",
                 animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: -1},
-            { enemyType: "contact", name: "Skeleton", maxHP: 42, currHP: 42, atkPow: 4, worldX: 0, worldY: 0,
+            { enemyType: "contact", name: "Skeleton", maxHP: 75, currHP: 75, atkPow: 10, worldX: 0, worldY: 0,
                 boxWidth: 38/2, boxHeight: 56/2, boxType: "enemy", speed: 60, spritePath: "./sprites/skeleton.png",
-                animXStart: 0.5, animYStart: 0, animW: 70.5, animH: 77, animFCount: 8, animFDur: 0.2, scale: 1.5, exp: -1},
+                animXStart: 0.5, animYStart: 0, animW: 70.5, animH: 77, animFCount: 8, animFDur: 0.2, scale: 1.4, exp: -1},
 
         ];
         /** An array of all potential enemies of type 'Enemy_Ranged'. */
@@ -56,53 +56,75 @@ class Spawn_System {
             { enemyType: "ranged", name: "Mage", maxHP: 32, currHP: 32, atkPow: 10, worldX: 0, worldY: 0,
                 boxWidth: 17, boxHeight: 29, boxType: "enemy", speed: 40, spritePath: "./sprites/Ally_Ranged_Walk.png",
                 animXStart: 0, animYStart: 0, animW: 32, animH: 28, animFCount: 8, animFDur: 0.4, scale: 2.8, exp: -1,
-                projectileFreq: 3, projectileSpeed: 20, projectileSize: 20, projectilePulse: false, projectileCount: 1, projectileSpread: 0},
+                projectileFreq: 3, projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 1, projectileSpread: 0},
             { enemyType: "ranged", name: "Wizard", maxHP: 42, currHP: 42, atkPow: 4, worldX: 0, worldY: 0,
                 boxWidth: 38/2, boxHeight: 56/2, boxType: "enemy", speed: 40, spritePath: "./sprites/wizard.png",
                 animXStart: 0, animYStart: 0, animW: 60, animH: 92, animFCount: 8, animFDur: 0.2, scale: 1, exp: -1,
-                projectileFreq: 6, projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 3, projectileSpread: 45},
+                projectileFreq: 6, projectileSpeed: 12, projectileSize: 20, projectilePulse: false, projectileCount: 3, projectileSpread: 45},
         ];
+        /** Sets the maximum allowed projectile/ranged enemies (Since too many will be way too hard/annoying) */
+        this.maxRangedEnemies = 4
+        /** For use later, when we are changing the max ranged enemies. */
+        this.initialMaxRangedEnemies = this.maxRangedEnemies;
 
         /** Stores the current wave. First wave is always wave #0. */
         this.currentWave = 0;
         /** How often the wave increments in seconds. */
         this.waveIncrementTime = 30;
+
         /**
          * An array that stores enemies based on difficulty for Map#1 (Grasslands)
          * Each map is 5 minutes, with each minute representing one wave.
-         * Each map can have a range of 0-8 waves.
+         * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapOneEnemies = [
-            this.contactEnemyTypes[0], // Wave 0 (0-30)
-            this.contactEnemyTypes[1], // Wave 1 (30-60)
-            this.contactEnemyTypes[2], // Wave 2 (60-120)
-            this.rangedEnemyTypes[0], // Wave 3 (120-150)
-            this.contactEnemyTypes[3] // Wave 4 (150-180)
+            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
+            this.contactEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
+            this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
+            this.rangedEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
+            this.contactEnemyTypes[3],  // Wave 4 (2:00 - 2:30)
+            this.contactEnemyTypes[2],  // Wave 5 (2:30 - 3:00)
+            this.contactEnemyTypes[2],  // Wave 6 (3:00 - 3:30)
+            this.contactEnemyTypes[3],  // Wave 7 (3:30 - 4:00)
+            this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
         ];
-        //
-        // this.mapOneEnemies = [
-        //     this.rangedEnemyTypes[0]
-        // ];
+        /**
+         * An array that stores enemies based on difficulty for Map#2 (Cave)
+         * Each map is 5 minutes, with each minute representing one wave.
+         * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
+         */
+        this.mapTwoEnemies = [
+            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
+            this.contactEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
+            this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
+            this.rangedEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
+            this.contactEnemyTypes[3],  // Wave 4 (2:00 - 2:30)
+            this.contactEnemyTypes[2],  // Wave 5 (2:30 - 3:00)
+            this.contactEnemyTypes[2],  // Wave 6 (3:00 - 3:30)
+            this.contactEnemyTypes[3],  // Wave 7 (3:30 - 4:00)
+            this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
+        ];
 
         /** This array stores enemies from previous waves for constant spawning. */
         this.passiveEnemySpawns = [];
+        /** Tracks what passive enemy to spawn next. */
+        this.passiveEnemyIndex = 0;
     }
 
-    /** Called once at the start */
+    /** Called once at the start of the script. */
     start() {
-        const currentTime = this.game.timer.gameTime;
-
-        this.lastSpawnDelayDecreaseTime = currentTime;
+        this.lastSpawnDelayDecreaseTime = this.game.timer.gameTime;
         this.initialized = true;
     }
 
     /** Called every frame/tick. */
     update() {
+        // Call start() if the script has not been initialized yet (avoids bug like game engine not being initialized yet)
         if (!this.initialized) {
             this.start();
         }
         // Do nothing if game is paused
-        if (this.game.pauseGame) return;
+        if (this.game.isGamePaused) return;
 
         // Handle elite spawn timer
         // Check if this.eliteSpawnTimer time has passed since last elite spawn
@@ -114,23 +136,13 @@ class Spawn_System {
         // Update the enemy spawn interval (make enemies spawn faster)
         let currentSpawnInterval = this.updateSpawnSettings();
 
-        // Check if it's time to spawn an enemy based on current spawn interval
-        // if (this.game.elapsedTime > 0 && this.game.elapsedTime % currentSpawnInterval < this.game.clockTick * 1000) {
-        //     // Conditions to spawn enemies: no boss, round not over, not in rest area
-        //     if (this.game.boss === null && !this.game.roundOver && this.game.currMap !== 0 &&
-        //         this.game.enemies.length < this.currentMaxEnemies) {
-        //         //console.log("CURR = " + this.game.enemies.length + ", MAX = " + this.currentMaxEnemies);
-        //         this.spawnScalingEnemies();
-        //     }
-        // }
-
         if (this.game.elapsedTime > 0 && this.game.elapsedTime % currentSpawnInterval < this.game.clockTick * 1000) {
             // Conditions to spawn enemies: no boss, round not over, not in rest area, this.game.timer.gameTime - this.lastSpawnTime >= this.baseEnemySpawnInterval
             if (this.game.boss === null && !this.game.roundOver && this.game.currMap !== 0 &&
                 this.game.enemies.length < this.currentMaxEnemies &&
                 (this.game.timer.gameTime - this.lastSpawnTime >= this.baseEnemySpawnInterval)) {
-                //console.log("CURR = " + this.game.enemies.length + ", MAX = " + this.currentMaxEnemies);
                 this.spawnScalingEnemies();
+                console.log("CURR = " + this.game.enemies.length + ", MAX = " + this.currentMaxEnemies);
             }
         }
     }
@@ -138,7 +150,7 @@ class Spawn_System {
     /** Call this method to spawn enemies of increasing difficulty. */
     spawnScalingEnemies() {
         // Store Wave#
-        const waveNumber = Math.min(Math.floor(this.game.elapsedTime/(this.waveIncrementTime * 1000)), 8);
+        const waveNumber = Math.min(Math.floor(this.game.elapsedTime / (this.waveIncrementTime * 1000)), 8);
         //console.log("Calculated wave = " + waveNumber);
 
         // Spawn this wave's enemy type
@@ -152,19 +164,99 @@ class Spawn_System {
             }
 
             // Generate random off-screen coordinates for spawning
-            let { x: randomXNumber, y: randomYNumber } = this.game.randomOffscreenCoords();
+            let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
 
-            //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapOneEnemies.length - 1) + " enemies.");
+            // If this is a ranged enemy wave, temporarily double ranged enemies
+            if (this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].enemyType === "ranged" && this.maxRangedEnemies === this.initialMaxRangedEnemies) {
+                this.maxRangedEnemies *= 2;
+            }
+            // Otherwise make sure we are at default ranged enemy cap
+            else if (this.maxRangedEnemies !== this.initialMaxRangedEnemies) {
+                this.maxRangedEnemies = this.initialMaxRangedEnemies;
+            }
+
+            //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapOneEnemies.length - 1) + " enemies. Name = " + this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].name);
             this.spawnEnemy(this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)], randomXNumber, randomYNumber);
-        }
-        
-        // Trigger passive spawns
-        this.passiveEnemySpawns.forEach(enemy => {
-            // Generate random off-screen coordinates for spawning
-            let { x: randomXNumber, y: randomYNumber } = this.game.randomOffscreenCoords();
+        } else if (this.game.currMap === 2) {
+            // Increment current wave, and move previous enemy to passive spawn array
+            if (waveNumber > this.currentWave && this.currentWave !== this.mapTwoEnemies.length - 1) {
+                // Add the previous wave's enemy to the passive wave array
+                this.passiveEnemySpawns.push(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)]);
 
-            this.spawnEnemy(enemy, randomXNumber, randomYNumber);
+                this.currentWave = waveNumber;
+            }
+
+            // Generate random off-screen coordinates for spawning
+            let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
+
+            // If this is a ranged enemy wave, temporarily double ranged enemies
+            if (this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)].enemyType === "ranged" && this.maxRangedEnemies === this.initialMaxRangedEnemies) {
+                this.maxRangedEnemies *= 2;
+            }
+            // Otherwise make sure we are at default ranged enemy cap
+            else if (this.maxRangedEnemies !== this.initialMaxRangedEnemies) {
+                this.maxRangedEnemies = this.initialMaxRangedEnemies;
+            }
+
+            //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapTwoEnemies.length - 1) + " enemies. Name = " + this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)].name);
+            this.spawnEnemy(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)], randomXNumber, randomYNumber);
+        }
+
+        // Passive spawning code
+        this.triggerPassiveEnemySpawn();
+    }
+
+    /** Call this from the spawnScalingEnemy() method to trigger passive enemy spawns. */
+    triggerPassiveEnemySpawn() {
+        // Only attempt if we have enemies in the passive spawn array
+        if (this.passiveEnemySpawns.length > 0) {
+            // If we are about to spawn a ranged enemy while we are at the max ranged enemy count, try to find an index of a non-ranged enemy to spawn
+            let iterations = 0; // Track the number of iterations to prevent infinite loops
+            while (this.passiveEnemySpawns[this.passiveEnemyIndex].enemyType === "ranged" && this.getRangedEnemyCount() >= this.maxRangedEnemies) {
+                // Skip this enemy and spawn the next one in the array
+                this.passiveEnemyIndex += 1;
+
+                // If we've checked all enemies in the passive array, break to avoid an infinite loop
+                if (iterations >= this.passiveEnemySpawns.length) {
+                    break; // Exit the loop if we've looped through the entire array
+                }
+
+                // Ensure the index wraps around if it exceeds the array length
+                if (this.passiveEnemyIndex >= this.passiveEnemySpawns.length) {
+                    this.passiveEnemyIndex = 0;
+                }
+
+                // Increment the iterations counter
+                iterations += 1;
+            }
+
+            // Generate random off-screen coordinates for spawning
+            let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
+
+            // Spawn the enemy
+            this.spawnEnemy(this.passiveEnemySpawns[this.passiveEnemyIndex], randomXNumber, randomYNumber);
+
+            this.passiveEnemyIndex += 1;
+
+            // Ensure the index wraps around if it exceeds the array length
+            if (this.passiveEnemyIndex >= this.passiveEnemySpawns.length) {
+                this.passiveEnemyIndex = 0;
+            }
+        }
+    }
+
+    /** Call this to get how many current ranged enemies are spawned in the this.game.enemies[]. */
+    getRangedEnemyCount() {
+        let count = 0;
+
+        this.game.enemies.forEach(enemy => {
+            // Check if the enemy's name matches any in the rangedEnemyTypes array
+            if (this.rangedEnemyTypes.some(rangedEnemy => rangedEnemy.name === enemy.name)) {
+                count += 1; // Increment count for each match
+            }
         });
+
+        return count;
     }
 
     /**
@@ -186,16 +278,23 @@ class Spawn_System {
                 enemy.animYStart, enemy.animW, enemy.animH,
                 enemy.animFCount, enemy.animFDur, enemy.scale,
                 enemy.exp));
-        } else if (this.mapOneEnemies[0].enemyType === "ranged") {
-            newEnemy = this.game.addEntity(new Enemy_Ranged(enemy.name, enemy.maxHP,
-                enemy.currHP, enemy.atkPow, this.game, worldX, worldY,
-                enemy.boxWidth, enemy.boxHeight, enemy.boxType,
-                enemy.speed, enemy.spritePath, enemy.animXStart,
-                enemy.animYStart, enemy.animW, enemy.animH,
-                enemy.animFCount, enemy.animFDur, enemy.scale,
-                enemy.exp, enemy.projectileFreq, enemy.projectileSpeed,
-                enemy.projectileSize, enemy.projectilePulse,
-                enemy.projectileCount, enemy.projectileSpread));
+        } else if (enemy.enemyType === "ranged") {
+            // If we haven't hit the ranged enemy cap
+            if (this.getRangedEnemyCount() < this.maxRangedEnemies) {
+                newEnemy = this.game.addEntity(new Enemy_Ranged(enemy.name, enemy.maxHP,
+                    enemy.currHP, enemy.atkPow, this.game, worldX, worldY,
+                    enemy.boxWidth, enemy.boxHeight, enemy.boxType,
+                    enemy.speed, enemy.spritePath, enemy.animXStart,
+                    enemy.animYStart, enemy.animW, enemy.animH,
+                    enemy.animFCount, enemy.animFDur, enemy.scale,
+                    enemy.exp, enemy.projectileFreq, enemy.projectileSpeed,
+                    enemy.projectileSize, enemy.projectilePulse,
+                    enemy.projectileCount, enemy.projectileSpread));
+            }
+            // If we hit the ranged enemy cap, try a passive spawn
+            else {
+                this.triggerPassiveEnemySpawn();
+            }
         }
 
         // Spawn an elite if this.spawnElite has been set to true
@@ -278,37 +377,12 @@ class Spawn_System {
         // Calculate the maximum number of enemies based on number of intervals that have passed
         this.currentMaxEnemies = this.baseMaxEnemies * this.maxEnemyIntervals;
 
-        // Calculate spawn rate based on elapsed time
-        // const elapsedTimeInMinutes = this.game.elapsedTime / (this.lowerSpawnDelayInterval * 1000);
-
         // Update the spawn delay if the this.lowerSpawnDelayInterval has passed since the last time we did this
         if ((currentTime - this.lastSpawnDelayDecreaseTime) >= this.lowerSpawnDelayInterval) {
-            console.log("Lowering spawn delay from " + this.baseEnemySpawnInterval + " to " + (this.baseEnemySpawnInterval * this.spawnDelayDecreaseMultiplier));
+            //console.log("Lowering spawn delay from " + this.baseEnemySpawnInterval + " to " + (this.baseEnemySpawnInterval * this.spawnDelayDecreaseMultiplier));
             this.baseEnemySpawnInterval *= this.spawnDelayDecreaseMultiplier;
             this.lastSpawnDelayDecreaseTime = currentTime;
         }
-
-        // Calculate the spawn rate multiplier exponentially
-        // Do some fancy math to lower the spawn delay exponentially
-        // const spawnRateMultiplier = Math.pow(0.5, Math.floor(elapsedTimeInMinutes));
-
-        // Calculate the current spawn interval based on the multiplier
-        // No explicit minimum interval, but you could enforce one if needed
-        //return ((this.baseEnemySpawnInterval * 1000) * spawnRateMultiplier); // Return the current spawn interval
         return (this.baseEnemySpawnInterval * 1000);
     }
-
-    // updateSpawnSettings() {
-    //     // Update the max enemy interval
-    //     this.maxEnemyIntervals = Math.floor(this.game.elapsedTime / (this.maxEnemyIncrementTime * 1000));
-    //
-    //     // Calculate the maximum number of enemies based on number of intervals that have passed
-    //     this.currentMaxEnemies = this.baseMaxEnemies * this.maxEnemyIntervals;
-    //
-    //     if (this.game.timer.gameTime - this.lastSpawnDelayDecreaseTime <= this.lowerSpawnDelayInterval) {
-    //         console.log("Lowering spawn delay from " + this.baseEnemySpawnInterval + " to " + (this.baseEnemySpawnInterval * this.spawnDelayDecreaseMultiplier));
-    //         this.baseEnemySpawnInterval *= this.spawnDelayDecreaseMultiplier;
-    //         this.lastSpawnDelayDecreaseTime = this.game.timer.gameTime;
-    //     }
-    // }
 }

@@ -129,7 +129,7 @@ class Weapon_staff extends Weapon {
                         this.secondaryAttackPushbackForce *= 1.1;
                         break;
                 }
-                // Set generic to not active so it can be re-used/activated in the future
+                // Set generic to not active so that it can be re-used/activated in the future
                 this.upgrades[i].active = false;
             }
         }

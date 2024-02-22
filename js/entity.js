@@ -24,7 +24,7 @@ class Entity {
      * @param scale The scale of the entity's sprite. 1.0 is normal size.
      * @param exp   the amount of exp the entity gives when killed
      */
-    constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp){
+    constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp) {
         this.maxHP = maxHP;
         this.currHP = currHP;
         this.atkPow = atkPow;
@@ -49,7 +49,7 @@ class Entity {
         }
 
         this.relocateMode = true; // Does this entity 'relocate' to opposite parts of screen when player gets too far.
-        this.buffer = 100; // Buffer distance outside the camera view to consider for relocation
+        this.outOfBoundsOffset = 150; // Buffer distance outside the camera view to consider for relocation
     }
 
     update() {
@@ -77,8 +77,8 @@ class Entity {
             const relativeX = this.worldX - camera.x;
             const relativeY = this.worldY - camera.y;
 
-            let outsideHorizontalBounds = relativeX < -this.buffer || relativeX > camera.width + this.buffer;
-            let outsideVerticalBounds = relativeY < -this.buffer || relativeY > camera.height + this.buffer;
+            let outsideHorizontalBounds = relativeX < -this.outOfBoundsOffset || relativeX > camera.width + this.outOfBoundsOffset;
+            let outsideVerticalBounds = relativeY < -this.outOfBoundsOffset || relativeY > camera.height + this.outOfBoundsOffset;
 
             // Check if the entity is outside the bounds of the camera, plus a buffer
             if (outsideHorizontalBounds || outsideVerticalBounds) {

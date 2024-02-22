@@ -189,7 +189,7 @@ class Enemy_Ranged extends Entity {
 
                 let newProjectile = this.game.addEntity(new Projectile(this.game, this.atkPow,
                     this.worldX, this.worldY, 10, 10, "enemyAttack", this.projectileSpeed,
-                    "./sprites/MagicBall.png",
+                    "./sprites/MagicBall_red.png",
                     0, 0, 30, 30, 2, 0.2, 2, dx, dy,
                     3, this.projectileSize, 1, 0, 0.3));
                 newProjectile.pulsatingDamage = this.pulse;

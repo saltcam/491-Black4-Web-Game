@@ -18,12 +18,12 @@ class Camera {
     }
 
     get x() {
-        // Center the camera on the middle of the player horizontally
+        // Center the camera onto the middle of the player horizontally
         return this.player.worldX + this.player.animator.width / 2 - this.width / 2;
     }
 
     get y() {
-        // Center the camera on the middle of the player vertically
+        // Center the camera onto the middle of the player vertically
         return this.player.worldY + this.player.animator.height / 2 - this.height / 2;
     }
 }

@@ -5,6 +5,7 @@ class Portal extends Entity {
             1, 0, 24, 58, 4, 0.18, 2.5);
 
         this.teleportIndex = teleportIndex;
+        this.interactionInitiated = false;
     }
 
     collidesWithPlayer(player) {
@@ -12,12 +13,12 @@ class Portal extends Entity {
     }
 
     handlePlayerInteraction(player) {
-        if (this.collidesWithPlayer(player)) {
-            // Trigger screen fade-to-black animation
+        if (this.collidesWithPlayer(player) && !this.interactionInitiated) {
+            this.interactionInitiated = true; // Set the flag to true to prevent re-entry
+
+            // The rest of your method remains unchanged
             this.game.fadeState = 'in';
             this.game.fadeToBlack = true;
-
-            // Disable player controls while teleporting (fade-to-black0 sequence is happening.
             this.game.player.controlsEnabled = false;
 
             // Set up map switching as a post-fade-in action
@@ -30,9 +31,6 @@ class Portal extends Entity {
     switchMap() {
         // Reset clock on entering new map
         this.game.startTime = Date.now();
-
-        // Tell the game engine to switch to the map of the teleport index
-        this.game.currMap = this.teleportIndex;
 
         // Delete old map stuff
         // Delete 'other' entities
@@ -55,6 +53,11 @@ class Portal extends Entity {
             this.game.attacks[i].removeFromWorld = true;
         }
 
+        // Delete any lingering 'arrow pointer' entities
+        for (let i = 0; i < this.game.arrowPointers.length; i++) {
+            this.game.arrowPointers[i].removeFromWorld = true;
+        }
+
         // Place player at world center
         this.game.player.worldX = 0;
         this.game.player.worldY = 0;
@@ -70,6 +73,10 @@ class Portal extends Entity {
 
         // Reset the game clock to 0
         this.game.timer.reset();
+        this.game.elapsedTime = 0;
+
+        // Reset health regeneration timer (to prevent no regen bug)
+        this.game.player.timeSinceLastHealthRegen = this.game.timer.gameTime;
 
         // Reset player dash cooldown
         this.game.player.currentDashCooldown = 0; // Dash is immediately ready
@@ -87,6 +94,9 @@ class Portal extends Entity {
         if (this.arrowPointer) {
             this.arrowPointer.removeFromWorld = true;
         }
+
+        // Tell the game engine to switch to the map of the teleport index
+        this.game.currMap = this.teleportIndex;
 
         // Reset spawn system on map change
         this.game.SPAWN_SYSTEM = new Spawn_System(this.game);

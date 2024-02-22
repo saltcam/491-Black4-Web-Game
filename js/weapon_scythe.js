@@ -6,8 +6,8 @@ class Weapon_scythe extends Weapon {
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 35),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
             new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 25),
-            new Upgrade("Blood Scythe", "(Unique) Heal 1 hp per attack.", true, "./sprites/upgrade_blood_scythe.png", 200),
-            new Upgrade("Dual Blade", "(Unique) Adds primary back attack.", true, "./sprites/upgrade_dual_blade.png", 150),
+            new Upgrade("Blood Scythe", "(Unique) Heal 1 hp per attack.", true, "./sprites/upgrade_blood_scythe.png", 150),
+            new Upgrade("Dual Blade", "(Unique) Adds primary back attack.", true, "./sprites/upgrade_dual_blade.png", 175),
             new Upgrade("Echo Slash", "(Unique) Adds attack echoes. CDs +30%", true, "./sprites/upgrade_echo_slash.png", 175),
             new Upgrade("Crippling Chill", "(Unique) Cripple effect on attacks.", true, "./sprites/upgrade_crippling_chill.png", 125),
             new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg is now over-time.", true, "./sprites/upgrade_bleeding_edge.png", 200)
@@ -272,34 +272,37 @@ class Weapon_scythe extends Weapon {
                         // Switch weapon to blood scythe sprite
                         this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe.png"), 0, 0, 30, 50, 1, 1);
                         this.spritePath = "./sprites/weapon_blood_scythe.png";
-                        // Set upgrade sprites to their relevant blood scythe variants
-                        this.upgrades.forEach(upgrade => {
-                            // If dual blade is active
-                            if (this.upgrades[5].active) {
-                                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
-                                this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
-                            } else if (upgrade.name === "Dual Blade" && !upgrade.active) {
-                                upgrade.sprite = "./sprites/upgrade_dual_blade(blood).png";
-                                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe.png"), 0, 0, 41, 49, 1, 1);
-                                this.spritePath = "./sprites/weapon_blood_scythe.png";
-                            }
-                        });
+
+                        // If dual blade is active, apply dual blade blood scythe
+                        if (this.upgrades[5].active) {
+                            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
+                            this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
+                        }
+                        // If dual blade is NOT active, apply regular blood scythe
+                        else if (!this.upgrades[5].active) {
+                            // Set upgrade icon of dual blade to its blood scythe variant
+                            this.upgrades[5].sprite = "./sprites/upgrade_dual_blade(blood).png";
+
+                            // Set the weapon sprite of this weapon to regular blood scythe
+                            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe.png"), 0, 0, 41, 49, 1, 1);
+                            this.spritePath = "./sprites/weapon_blood_scythe.png";
+                        }
                         break;
                     case "Dual Blade":
-                        // Set upgrade sprites to their relevant blood scythe variants
-                        this.upgrades.forEach(upgrade => {
-                            // If blood scythe is active
+                            // If blood scythe is active, apply dual blade blood scythe
                             if (this.upgrades[4].active) {
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_blood_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_blood_scythe_dual.png";
                             }
-                            // If blood scythe is NOT active
+                            // If blood scythe is NOT active, apply regular dual blade
                             else if (!this.upgrades[4].active) {
-                                upgrade.sprite = "./sprites/upgrade_blood_scythe(dual).png";
+                                // Set upgrade icon of blood scythe to it dual blade variant
+                                this.upgrades[4].sprite = "./sprites/upgrade_blood_scythe(dual).png";
+
+                                // Apply regular dual blade as this weapon's sprite
                                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/weapon_scythe_dual.png"), 0, 0, 41, 49, 1, 1);
                                 this.spritePath = "./sprites/weapon_scythe_dual.png";
                             }
-                        });
                         break;
                     case "Echo Slash":
                         if (this.primaryCool === this.initialPrimaryCool && this.secondCool === this.initialSecondaryCool) {

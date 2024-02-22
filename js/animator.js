@@ -34,7 +34,7 @@ class Animator {
 
     drawFrame(tick, ctx, x, y, direction) {
         // Update the elapsed time (only if we are not paused)
-        if (!this.game.pauseGame) {
+        if (!this.game.isGamePaused) {
             this.elapsedTime += tick;
         }
 
