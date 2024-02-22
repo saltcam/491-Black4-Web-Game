@@ -101,8 +101,6 @@ class GameEngine {
 
         /** Spawn the boss after this many seconds of game time. */
         this.bossSpawnTimer = 300;
-        /** Tracks how long it has been since we last spawned an elite. */
-        this.lastEliteSpawnTime = 0;
         /** Tracks if the round is over. */
         this.roundOver = false;
 
@@ -120,7 +118,9 @@ class GameEngine {
         /** The calculated FPS value. */
         this.fps = 0;
 
-        /** Tracks the Upgrade_System (handles player and weapon upgrade screens/interactions. */
+        /** The spawn system that controls enemy spawning. */
+        this.SPAWN_SYSTEM = new Spawn_System(this);
+        /** Tracks the Upgrade_System (handles player and weapon upgrade screens/interactions). */
         this.UPGRADE_SYSTEM = new Upgrade_System(this);
 
         /** If true, pauses all entities from moving/taking action. Also pauses the game timer.*/
@@ -905,13 +905,6 @@ class GameEngine {
 
     /** This method is called every tick to update all entities etc. */
     update() {
-        // Handle elite spawn timer
-        // Check if this.eliteSpawnTimer time has passed since last elite spawn
-        if ((this.elapsedTime / 60000) - this.lastEliteSpawnTime >= (this.eliteSpawnTimer/60)) {
-            this.spawnElite = true;
-            this.lastEliteSpawnTime = this.elapsedTime / 60000; // Update last trigger time
-        }
-
         // Handle boss spawn timer
         // Spawn boss after (this.bossSpawnTimer/60) minutes of game time
         if ((this.elapsedTime / 60000) >= (this.bossSpawnTimer / 60) && !this.roundOver && !this.boss) {
@@ -1185,24 +1178,8 @@ class GameEngine {
             this.player.removeFromWorld = true;
         }
 
-        // Calculate spawn rate based on elapsed time
-        const elapsedTimeInMinutes = this.elapsedTime / 60000; // Convert elapsed time to minutes
-
-        // Calculate the spawn rate multiplier exponentially
-        // Halve the spawn interval for each minute passed
-        const spawnRateMultiplier = Math.pow(0.5, Math.floor(elapsedTimeInMinutes));
-
-        // Calculate the current spawn interval based on the multiplier
-        // No explicit minimum interval, but you could enforce one if needed
-        let currentSpawnInterval = (this.baseEnemySpawnInterval * 1000) * spawnRateMultiplier;
-
-        // Check if it's time to spawn an enemy based on current spawn interval
-        if (this.elapsedTime > 0 && this.elapsedTime % currentSpawnInterval < this.clockTick * 1000) {
-            // Conditions to spawn enemies: no boss, round not over, not in rest area
-            if (this.boss === null && !this.roundOver && this.currMap !== 0) {
-                this.spawnRandomEnemy();
-            }
-        }
+        // Update Spawn_System (Spawn enemies)
+        this.SPAWN_SYSTEM.update();
     }
 
     respondToCollision(enemy1, enemy2) {

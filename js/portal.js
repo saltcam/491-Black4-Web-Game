@@ -88,6 +88,9 @@ class Portal extends Entity {
             this.arrowPointer.removeFromWorld = true;
         }
 
+        // Reset spawn system on map change
+        this.game.SPAWN_SYSTEM = new Spawn_System(this.game);
+
         // Remove the portal from the game after entering it
         this.removeFromWorld = true;
     }
