@@ -110,6 +110,9 @@ ASSET_MANAGER.queueDownload("./sprites/boss_knight_groundsmash.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_knight_groundsmash_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/skeleton.png");
 ASSET_MANAGER.queueDownload("./sprites/skeleton_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/wizard.png");
+ASSET_MANAGER.queueDownload("./sprites/wizard_DAMAGED.png");
+
 
 //sounds
 ASSET_MANAGER.queueDownload("./sounds/SE_scythe_primary.mp3");

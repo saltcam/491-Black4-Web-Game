@@ -40,6 +40,7 @@ class Weapon_scythe extends Weapon {
         let echoSlashUpgrade = false;
         let bleedingEdgeUpgrade = false;
 
+        // I feel like this is not necessary
         player.weapons[0].upgrades.forEach(upgrade => {
             if (upgrade.name === "Blood Scythe") {
                 bloodUpgrade = upgrade.active;
@@ -76,7 +77,7 @@ class Weapon_scythe extends Weapon {
             this.lastPrimaryAttackTime = currentTime;
 
             // Use different sprites depending on if we have a 'blood' scythe or not
-            if (bloodUpgrade) {
+            if (this.upgrades[4].active) {
                     this.game.addEntity(new AttackCirc(this.game, player,
                     this.primaryAttackRadius,
                     'playerAttack',

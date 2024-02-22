@@ -1,3 +1,4 @@
+const EXPLOSION_GROWTH = 3;
 class AttackCirc {
 
     /**
@@ -98,7 +99,7 @@ class AttackCirc {
 
         // increase in size each frame if of type explosion
         if (this.type === "explosionAttack") {
-            this.radius += 3;
+            this.radius += EXPLOSION_GROWTH;
         }
 
         // Check for the end of duration
@@ -136,12 +137,27 @@ class AttackCirc {
                     if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
                         switch (this.type) {
                             case "necromancyAttack":
-                                this.game.addEntity(new Ally_Contact(
-                                    "Ally", 25, 25,
-                                    15, this.game, object.worldX, object.worldY, 17,
-                                    29, "ally", 170, "./sprites/Ally_Contact_Walk.png",
-                                    0, 0, 32, 28,
-                                    8, 0.1, 2, 1));
+                                let enemyClass = Math.floor(Math.random() * 2);
+                                switch(enemyClass){
+                                    case 0:
+                                        this.game.addEntity(new Ally_Contact(
+                                            "Ally", 25, 25,
+                                            15, this.game, object.worldX, object.worldY, 17,
+                                            29, "ally", 210, "./sprites/Ally_Contact_Walk.png",
+                                            0, 0, 32, 28,
+                                            8, 0.1, 2, 1));
+                                        break;
+                                    case 1:
+                                        this.game.addEntity(new Ally_Ranged(
+                                            "Ally", 25, 25,
+                                            15, this.game, object.worldX, object.worldY, 17,
+                                            29, "ally", 200, "./sprites/Ally_Ranged_Walk.png",
+                                            0, 0, 32, 28,
+                                            8, 0.1, 2, 1,
+                                            3, 20, 20, false, 1, 0));
+                                        break;
+                                }
+
                                 object.removeFromWorld = true;
                                 this.lastAttackTime = currentTime;
                                 break;

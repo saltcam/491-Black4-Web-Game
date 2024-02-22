@@ -4,13 +4,14 @@ class Weapon_staff extends Weapon {
             new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 75),
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 35),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
-            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 25)];
+            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 25),
+            new Upgrade("Corpse Explosion", "Enemies killed with explosions may explode.", true, "./sprites/upgrade_knockback.png", 25)];
 
         super(game, "Staff", 7, 7,
             0, 0,
             5, 5,
             115, 2,
-            1, 0.3,
+            1, 0.5,
             "./sprites/NecromancyStaff.png",
             "./sounds/SE_staff_secondary.mp3", "./sounds/SE_staff_primary.mp3", 26, 70, upgrades);
 
@@ -21,7 +22,7 @@ class Weapon_staff extends Weapon {
 
     performPrimaryAttack(player) {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
-        let defaultPrimaryDamage = player.atkPow / 6;
+        let defaultPrimaryDamage = player.atkPow / 4;
 
         const currentTime = this.game.timer.gameTime;
 
@@ -115,8 +116,7 @@ class Weapon_staff extends Weapon {
                     case "Attack Size +10%":
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
-                        // TODO TEMP VALUE
-                        this.secondaryAttackDuration += 0.5;
+                        this.secondaryAttackDuration *= 1.10;
                         break;
                     case "Primary CD -10%":
                         this.primaryCool *= 0.9;

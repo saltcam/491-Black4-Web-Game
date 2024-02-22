@@ -99,36 +99,6 @@ class GameEngine {
         /** Toggle to enable debug mode features. */
         this.debugMode = false;
 
-        /** An array of all potential (non-boss) enemy types. */
-        this.contactEnemyTypes = [
-            { name: "Zombie", maxHP: 47, currHP: 47, atkPow: 6, worldX: 0, worldY: 0, boxWidth: 19/2,
-                boxHeight: 28/2, boxType: "enemy", speed: 72, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
-                animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: -1},
-            { name: "Slime", maxHP: 62, currHP: 62, atkPow: 9, worldX: 0, worldY: 0, boxWidth: 18,
-                boxHeight: 10, boxType: "enemy", speed: 42, spritePath: "./sprites/SlimeMove.png", animXStart: -1,
-                animYStart: 0, animW: 32, animH: 18, animFCount: 8, animFDur: 0.1, scale: 2, exp: 1},
-            { name: "Floating Eye", maxHP: 30, currHP: 30, atkPow: 3, worldX: 0, worldY: 0,
-                boxWidth: 19/2, boxHeight: 28/2, boxType: "enemy", speed: 85, spritePath: "./sprites/FloatingEye.png",
-                animXStart: -3, animYStart: 0, animW: 128, animH: 128, animFCount: 80, animFDur: 0.05, scale: 2, exp: -1},
-            { name: "Skeleton", maxHP: 42, currHP: 42, atkPow: 4, worldX: 0, worldY: 0,
-                boxWidth: 38/2, boxHeight: 56/2, boxType: "enemy", speed: 80, spritePath: "./sprites/skeleton.png",
-                animXStart: 0.5, animYStart: 0, animW: 70.5, animH: 77, animFCount: 8, animFDur: 0.2, scale: 1.5, exp: -1},
-        ];
-        this.rangedEnemyTypes = [
-            { name: "Wizard", maxHP: 32, currHP: 32, atkPow: 10, worldX: 0, worldY: 0,
-                boxWidth: 17, boxHeight: 29, boxType: "enemy", speed: 40, spritePath: "./sprites/Ally_Ranged_Walk.png",
-                animXStart: 0, animYStart: 0, animW: 32, animH: 28, animFCount: 8, animFDur: 0.4, scale: 2.8, exp: -1}
-        ];
-
-
-        /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
-        this.baseEnemySpawnInterval = 1.5;
-        /** How many enemies  can be on the map at once (this automatically increases as time goes on). */
-        this.baseMaxEnemies = 3;
-        /** Setting this to true tells gameengine.spawnRandomEnemy() to make the next enemy it spawns an elite. */
-        this.spawnElite = false;
-        /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
-        this.eliteSpawnTimer = 60;
         /** Spawn the boss after this many seconds of game time. */
         this.bossSpawnTimer = 300;
         /** Tracks how long it has been since we last spawned an elite. */
@@ -407,100 +377,6 @@ class GameEngine {
         }
 
         return { x, y };
-    }
-
-    spawnRandomEnemy() {
-        // Calculate how many intervals
-        let intervals = Math.floor(this.elapsedTime / 7500); // 15000 is 15 seconds
-
-        // Calculate the maximum number of enemies based on elapsed time
-        let maxEnemies = this.baseMaxEnemies * intervals;
-
-        //console.log("CURRENT ENEMIES = " + this.enemies.length + ". MAX = " + maxEnemies);
-
-        if (this.enemies.length > maxEnemies || this.currMap === 0) {
-            return;
-        }
-
-        const { x: randomXNumber, y: randomYNumber } = this.randomOffscreenCoords();
-
-        let randomEnemyType;
-        let newEnemy;
-
-        let enemyClass = Math.floor(Math.random() * 3);
-        //console.log("enemy: " + enemyClass);
-        //Selects a random enemy from the enemyTypes array
-        // 0 = contact, 1 = ranged, 2 = charge
-        switch(enemyClass){
-            case 0 :
-                randomEnemyType = this.contactEnemyTypes[Math.floor(Math.random() * this.contactEnemyTypes.length)];
-                //Creates the new random enemy at a random location
-                newEnemy = new Enemy_Contact(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
-                    randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
-                    randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
-                    randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
-                    randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
-                break;
-            case 1 :
-                randomEnemyType = this.rangedEnemyTypes[Math.floor(Math.random() * this.rangedEnemyTypes.length)];
-                //Creates the new random enemy at a random location
-                newEnemy = new Enemy_Ranged(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
-                    randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
-                    randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
-                    randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
-                    randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
-                break;
-            case 2 :
-                //TODO replace with charge enemies
-                randomEnemyType = this.contactEnemyTypes[Math.floor(Math.random() * this.contactEnemyTypes.length)];
-                //Creates the new random enemy at a random location
-                newEnemy = new Enemy_Contact(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
-                    randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
-                    randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
-                    randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
-                    randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
-                break;
-
-        }
-
-        //const randomEnemyType =  this.contactEnemyTypes[Math.floor(Math.random() * this.contactEnemyTypes.length)];
-
-
-        // const newEnemy = new Enemy_Contact(randomEnemyType.name, randomEnemyType.maxHP, randomEnemyType.currHP,
-        //     randomEnemyType.atkPow, this, randomXNumber, randomYNumber, randomEnemyType.boxWidth,
-        //     randomEnemyType.boxHeight, "enemy", randomEnemyType.speed, randomEnemyType.spritePath,
-        //     randomEnemyType.animXStart, randomEnemyType.animYStart, randomEnemyType.animW, randomEnemyType.animH,
-        //     randomEnemyType.animFCount, randomEnemyType.animFDur, randomEnemyType.scale, randomEnemyType.exp);
-
-        // Spawn an elite every 2 minutes (120 seconds or 120000 milliseconds)
-        if(this.spawnElite) {
-            if (Math.random() < 1) {    // Can make it a chance if we lower the 1 to something < 1 (ex: 0.1 === 10% chance)
-                newEnemy.maxHP *= 8;
-                newEnemy.currHP = newEnemy.maxHP;
-                newEnemy.atkPow *= 2;
-                newEnemy.speed *= 0.75; //+= 25;
-                newEnemy.exp *= 5;
-                newEnemy.animator.scale *= 1.5;
-                newEnemy.boundingBox.width *= 1.5;
-                newEnemy.boundingBox.height *= 1.5;
-                newEnemy.isElite = true;
-                this.spawnElite = false;
-                newEnemy.animator.outlineMode = true;
-                //console.log(newEnemy.name + "Elite Scale = " + newEnemy.animator.scale);
-                //console.log(newEnemy.name + " has become elite!");
-            }
-            else {
-                newEnemy.isElite = false;
-            }
-        }
-
-        //Slightly randomized enemy speeds
-        const speedMultiplier = Math.random() * 0.2 + 0.9; // Random speed multiplier between 0.9 and 1.1
-        newEnemy.speed *= speedMultiplier;
-
-        //Add the new enemy into the game
-        this.addEntity(newEnemy);
-        //console.log("ENEMY SPAWNED!");
     }
 
     /** This will be called to let the portal execute map switching code only when the game engine is mid-fade-to-black. */
@@ -1148,16 +1024,14 @@ class GameEngine {
 
                         let wasKilledByExplosion = false;
 
-                        //TODO make it so a certain upgrade prevents this
                         this.attacks.forEach(attack => {
                             if (attack.type === "explosionAttack" && attack.collisionDetection(this.enemies[i].boundingBox)) {
-
                                 wasKilledByExplosion = true;
                             }
                         });
 
                         // Spawn Tombstones on killed enemies (only % of the time)
-                        if (Math.random() < 0.5 && !wasKilledByExplosion) {
+                        if (Math.random() < 0.5 && (!wasKilledByExplosion || this.player.weapons[2].upgrades[4].active)) {
                             // Spawn Tombstone
                             let tombstone = new Map_object(this, this.enemies[i].worldX, this.enemies[i].worldY, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
                             this.addEntity(tombstone);

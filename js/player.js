@@ -391,7 +391,7 @@ class Player extends Entity {
         ctx.beginPath();
         ctx.fillStyle = "Black";
         ctx.fillRect(this.boundingBox.left - this.game.camera.x,
-            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 10,
+            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 20,
             this.boundingBox.width, 10);
         ctx.closePath();
 
@@ -404,7 +404,7 @@ class Player extends Entity {
             meter = 1;
         }
         ctx.fillRect(this.boundingBox.left - this.game.camera.x,
-            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 10,
+            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 20,
             this.boundingBox.width * meter, 10);
         ctx.closePath();
     }
@@ -413,6 +413,37 @@ class Player extends Entity {
         for (let i = 0; i < this.weapons.length; i++) {
             this.weapons[i].draw(ctx, i);
         }
+
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(150, 150, 150, 1)";
+        ctx.fillRect(this.boundingBox.left - this.game.camera.x,
+            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 10,
+            this.boundingBox.width, 10);
+        ctx.closePath();
+
+        // //draw the current exp value
+
+        // ctx.beginPath();
+        // ctx.fillStyle = 'rgba(0, 0, 255, 0.6)';
+        // diff = this.game.timer.gameTime - this.lastSecondAttackTime;
+        // if (diff > this.secondCool) {
+        //     diff = this.secondCool;
+        //     ctx.fillStyle = 'rgba(0, 100, 255, 1)';
+        // }
+        // ctx.fillRect(slotX + weaponBoxWidth/2 + barWidth*2, slotY + 5 + barHeight, barWidth, -1 * barHeight * (diff / this.secondCool));
+        // ctx.closePath();
+        let weapon = this.weapons[this.currentWeapon];
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(0, 0, 255, 0.6)';
+        let diff = (this.game.timer.gameTime - weapon.lastSecondAttackTime)/weapon.secondCool;
+        if (diff > 1) {
+            diff = 1;
+            ctx.fillStyle = 'rgba(0, 100, 255, 1)';
+        }
+        ctx.fillRect(this.boundingBox.left - this.game.camera.x,
+            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 10,
+            this.boundingBox.width * diff, 10);
+        ctx.closePath();
     }
 
     drawWeapons(ctx) {
@@ -471,9 +502,9 @@ class Player extends Entity {
     drawStaffAttackIndicator(ctx) {
         if (this.currentWeapon === 2) {
             if (this.game.mouse) {
-                const attackRadius = this.weapons[this.currentWeapon].primaryAttackRadius
                 const mouseX = this.game.mouse.x;
                 const mouseY =  this.game.mouse.y;
+                let attackRadius = this.weapons[this.currentWeapon].primaryAttackRadius
 
                 ctx.beginPath();
                 ctx.arc(mouseX, mouseY, attackRadius, 0, 2 * Math.PI, false)
@@ -482,6 +513,19 @@ class Player extends Entity {
 
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
+                ctx.stroke();
+                ctx.closePath();
+
+                attackRadius = this.weapons[this.currentWeapon].secondaryAttackDuration *
+                    60 * EXPLOSION_GROWTH + this.weapons[this.currentWeapon].secondaryAttackRadius;
+
+                ctx.beginPath();
+                ctx.arc(mouseX, mouseY, attackRadius, 0, 2 * Math.PI, false)
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+                ctx.fill();
+
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'
                 ctx.stroke();
                 ctx.closePath();
             }
@@ -550,7 +594,7 @@ class Player extends Entity {
         this.drawRollCD(ctx);
         this.drawExp(ctx);
         this.drawWeaponUI(ctx);
-        this.drawWeapons(ctx)
+        this.drawWeapons(ctx);
         this.drawStaffAttackIndicator(ctx);
         this.boundingBox.draw(ctx, game);
     }

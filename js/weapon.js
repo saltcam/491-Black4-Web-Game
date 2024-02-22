@@ -50,9 +50,9 @@ class Weapon {
 
         // Primary attacks
         ctx.beginPath();
-        ctx.fillStyle = "Black";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
         if (this.game.player.currentWeapon === slotNum) {
-            ctx.fillStyle = "Yellow";
+            ctx.fillStyle = "rgba(197,197,197,0.3)";
         }
 
         ctx.fillRect(slotX, slotY, weaponBoxWidth, weaponBoxHeight);

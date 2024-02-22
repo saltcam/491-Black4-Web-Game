@@ -1,6 +1,35 @@
 class Enemy_Ranged extends Entity {
-    //TODO add support for different projectile properties so each ranged enemy feels different
-    constructor(name, maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp) {
+    /**
+     *
+     * @param name
+     * @param maxHP
+     * @param currHP
+     * @param atkPow
+     * @param game
+     * @param worldX
+     * @param worldY
+     * @param boxWidth
+     * @param boxHeight
+     * @param boxType
+     * @param speed
+     * @param spritePath
+     * @param animXStart
+     * @param animYStart
+     * @param animW
+     * @param animH
+     * @param animFCount
+     * @param animFDur
+     * @param scale
+     * @param exp
+     * @param projectileFreq how often the entity fires its attack pattern
+     * @param projectileSpeed speed of the projectile
+     * @param projectileSize how big each bullet is
+     * @param projectilePulse if the projectile should be pulsating
+     * @param projectileCount number of projectiles fired in an attack cycle
+     * @param projectileSpread complete range for projectiles to be fired. the projectiles will be shot evenly within this range (0 means no difference and they fire in a straight line)
+     */
+    constructor(name, maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp,
+                projectileFreq, projectileSpeed, projectileSize, projectilePulse, projectileCount, projectileSpread) {
         super(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp);
 
         this.name = name;
@@ -10,11 +39,18 @@ class Enemy_Ranged extends Entity {
         this.boundingBox.drawBoundingBox = false;
 
         // Properties to track cooldown of being able to damage the player
-        this.attackCooldown = 4;    // in seconds
+        this.attackCooldown = projectileFreq;    // in seconds
         this.lastAttackTime = 0;    // time since last attack
 
         this.pushbackVector = { x: 0, y: 0 };
         this.pushbackDecay = 0.9; // Determines how quickly the pushback force decays
+
+        this.projectileSpeed = projectileSpeed;
+
+        this.projectileSize = projectileSize;
+        this.pulse = projectilePulse;
+        this.projectileCount = projectileCount;
+        this.projectileSpread = projectileSpread;
     }
 
     applyPushback(forceX, forceY) {
@@ -137,14 +173,27 @@ class Enemy_Ranged extends Entity {
             let attackAngle = Math.atan2(dy, dx);
 
             const offsetDistance = (20) * 0.6;
-            dx = Math.cos(attackAngle) * offsetDistance;
-            dy = Math.sin(attackAngle) * offsetDistance;
 
-            this.game.addEntity(new Projectile(this.game, this.atkPow,
-                this.worldX, this.worldY, 10, 10, "enemyAttack", 20,
-                "./sprites/MagicBall.png",
-                0, 0, 30, 30, 2, 0.2, 2, dx, dy,
-                3, 20, 1, 0, 0.3));
+            for (let i = 0; i < this.projectileCount; i++) {
+                // trying to convert this to an angle
+                // odd -> i - 1     (mod 2 = 1)
+                // even -> i - 0.5 (mod 2 = 0)
+                let adjust = this.projectileCount % 2;
+                if (adjust !== 1) {
+                    adjust += 0.5;
+                }
+
+                let angle = (attackAngle + Math.PI/(180/360) * (((i-adjust) * (this.projectileSpread/this.projectileCount))/360));
+                dx = Math.cos(angle) * offsetDistance;
+                dy = Math.sin(angle) * offsetDistance;
+
+                let newProjectile = this.game.addEntity(new Projectile(this.game, this.atkPow,
+                    this.worldX, this.worldY, 10, 10, "enemyAttack", this.projectileSpeed,
+                    "./sprites/MagicBall.png",
+                    0, 0, 30, 30, 2, 0.2, 2, dx, dy,
+                    3, this.projectileSize, 1, 0, 0.3));
+                newProjectile.pulsatingDamage = this.pulse;
+            }
             this.lastAttackTime = currentTime; // Update last attack time
         }
     }
