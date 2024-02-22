@@ -234,7 +234,7 @@ class Entity {
         });
     }
 
-    // Method to calculate the angle between the entity and a target (The player usually)
+    // Method to calculate the angle between the entity and a target
     calcTargetAngle(target) {
         if (target) {
             const targetCenter = target.calculateCenter();

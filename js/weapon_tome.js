@@ -5,7 +5,12 @@ class Weapon_tome extends Weapon {
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 35),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
             new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 40),
-            new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 25)];
+            new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 25),
+            new Upgrade("Double Shot", "(Unique) Multishot++.", true, "./sprites/upgrade_piercing.png", 120),
+            new Upgrade("Bouncing shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_piercing.png", 120),
+            new Upgrade("Doubletime", "(Unique) Secondary tickrate 2x.", true, "./sprites/upgrade_piercing.png", 120),
+            //new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 120)
+        ];
 
         super(game, "Tome", 1, 7,
             0, 0,
@@ -27,8 +32,17 @@ class Weapon_tome extends Weapon {
     }
 
     performPrimaryAttack(player) {
-        // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
-        let defaultPrimaryDamage = player.atkPow;
+        let doubleShotUpgrade = false;
+        let bouncingShotUpgrade = false;
+        let doubleShotDamageMultiplier = 0.5;
+
+        this.upgrades.forEach(upgrade => {
+            if (upgrade.name === "Double Shot") {
+                doubleShotUpgrade = upgrade.active;
+            } else if (upgrade.name === "Bouncing shots") {
+                bouncingShotUpgrade = upgrade.active;
+            }
+        });
 
         const currentTime = this.game.timer.gameTime;
 
@@ -53,16 +67,48 @@ class Weapon_tome extends Weapon {
 
 
             this.lastPrimaryAttackTime = currentTime;
-            let newProjectile = this.game.addEntity(new Projectile(this.game, defaultPrimaryDamage,
-                player.worldX, player.worldY, 10, 10, "playerAttack", this.primaryProjectileMovementSpeed,
-                "./sprites/MagicBall.png",
-                0, 0, 30, 30, 2, 0.2, 2 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), dx, dy,
-                this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 0.3));
-            newProjectile.maxHits = this.maxPrimaryHits; // Apply max pierce
+
+            const projectile = this.addPrimaryProjectile(player, dx, dy, 1);
+
+            if (projectile && bouncingShotUpgrade) {
+                projectile.bouncesLeft = this.maxPrimaryHits;
+            }
+
+            if (doubleShotUpgrade) {
+                this.game.setManagedTimeout(() => {
+                    this.addPrimaryProjectile(player, dx, dy, doubleShotDamageMultiplier);
+                }, 100);
+            }
         }
     }
 
+    addPrimaryProjectile(player, dx, dy, damageMultiplier) {
+        let defaultPrimaryDamage = player.atkPow * damageMultiplier;
+        let newProjectile = this.game.addEntity(new Projectile(this.game, defaultPrimaryDamage,
+            player.worldX, player.worldY, 10, 10, "playerAttack", this.primaryProjectileMovementSpeed,
+            "./sprites/MagicBall.png",
+            0, 0, 30, 30, 2, 0.2, 2 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), dx, dy,
+            this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 0.3));
+        newProjectile.maxHits = this.maxPrimaryHits;
+
+        return newProjectile;
+    }
+
     performSecondaryAttack(player) {
+
+        let doubletimeUpgrade = false;
+        let singularityUpgrade = false;
+
+        let secondaryAttackTickRate = 0.25
+
+        this.upgrades.forEach(upgrade => {
+            if (upgrade.name === "Doubletime") {
+                doubletimeUpgrade = upgrade.active;
+            } else if (upgrade.name === "Singularity") {
+                singularityUpgrade = upgrade.active;
+            }
+        });
+
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         let defaultSecondaryDamage = player.atkPow / 1.5;
 
@@ -89,11 +135,20 @@ class Weapon_tome extends Weapon {
 
 
             this.lastSecondAttackTime = currentTime;
+
+            if (doubletimeUpgrade) {
+                secondaryAttackTickRate /= 2;
+            }
+
+            if (singularityUpgrade) {
+
+            }
+
             let newProjectile = this.game.addEntity(new Projectile(this.game, defaultSecondaryDamage,
                 player.worldX, player.worldY, 10, 10, "playerAttack", this.secondaryProjectileMovementSpeed,
                 "./sprites/ElectricOrb.png",
                 0, 0, 32.5, 32, 6, 0.15, 4.75 * (this.secondaryAttackRadius/this.initialSecondaryAttackRadius), dx, dy,
-                this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 0.25));
+                this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, secondaryAttackTickRate));
             newProjectile.maxHits = this.maxSecondaryHits; // Apply max pierce
             newProjectile.attackCirc.pulsatingDamage = true; // Tell the projectile that this attack pulsates damage.
         }

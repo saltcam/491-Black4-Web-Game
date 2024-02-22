@@ -126,7 +126,12 @@ class AttackCirc {
 
                     // If we are attacking via a projectile, then --maxHits to track pierced targets
                     if (this.entity instanceof Projectile) {
-                        this.entity.maxHits -= 1;
+                        if (this.entity instanceof Projectile && this.entity.bouncesLeft > 0) {
+                            this.entity.hitTargets.add(enemy);
+                            this.entity.bounceToNextTarget();
+                        } else {
+                            this.entity.maxHits -= 1;
+                        }
                     }
                 }
             });
