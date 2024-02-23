@@ -67,24 +67,26 @@ class Spawn_System {
         /** An array of all potential enemies of type 'Enemy_Ranged'. */
         this.rangedEnemyTypes = [
             { enemyType: "ranged", name: "Mage", maxHP: 32, currHP: 32, atkPow: 10, worldX: 0, worldY: 0,
-                boxWidth: 17, boxHeight: 29, boxType: "enemy", speed: 40, spritePath: "./sprites/Ally_Ranged_Walk.png",
-                animXStart: 0, animYStart: 0, animW: 32, animH: 28, animFCount: 8, animFDur: 0.4, scale: 2.8, exp: -1,
-                projectileFreq: 3, projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 1, projectileSpread: 0},
-            { enemyType: "ranged", name: "Wizard", maxHP: 42, currHP: 42, atkPow: 4, worldX: 0, worldY: 0,
-                boxWidth: 38/2, boxHeight: 56/2, boxType: "enemy", speed: 40, spritePath: "./sprites/wizard.png",
-                animXStart: 0, animYStart: 0, animW: 60, animH: 92, animFCount: 8, animFDur: 0.2, scale: 1, exp: -1,
-                projectileFreq: 6, projectileSpeed: 12, projectileSize: 20, projectilePulse: false, projectileCount: 3, projectileSpread: 45},
+                boxWidth: 40, boxHeight: 60, boxType: "enemy", speed: 40, spritePath: "./sprites/wizard_walk.png",
+                shootSpritePath: "./sprites/wizard_shooting.png" , animXStart: 0, animYStart: 0, animW: 418, animH: 145,
+                animFCount: 7, animFDur: 0.2, scale: 0.65, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 418,
+                shootAnimH: 145, shootAnimFCount: 7, shootAnimFDur: 0.2, shootScale: 0.65, exp: -1, projectileFreq: 3,
+                projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 1, projectileSpread: 0}
         ];
         /** An array of all potential enemies of type 'Enemy_Charger'. */
         this.chargerEnemyTypes = [
-            { enemyType: "charger", name: "AngryDude", maxHP: 47, currHP: 47, atkPow: 6, worldX: 0, worldY: 0, boxWidth: 19/2,
-                boxHeight: 28/2, boxType: "enemy", speed: 72, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
-                animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: -1, chargeTimer: 5}
+            { enemyType: "charger", name: "AngryDude", maxHP: 80, currHP: 80, atkPow: 7, worldX: 0, worldY: 0, boxWidth: 19/2,
+                boxHeight: 28/2, boxType: "enemy", speed: 50, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
+                animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: -1}
         ];
         /** Sets the maximum allowed projectile/ranged enemies (Since too many will be way too hard/annoying) */
-        this.maxRangedEnemies = 4
+        this.maxRangedEnemies = 3
         /** For use later, when we are changing the max ranged enemies. */
         this.initialMaxRangedEnemies = this.maxRangedEnemies;
+        /** Sets the maximum allowed projectile/ranged enemies (Since too many will be way too hard/annoying) */
+        this.maxChargerEnemies = 2
+        /** For use later, when we are changing the max ranged enemies. */
+        this.initialMaxChargerEnemies = this.maxChargerEnemies;
 
         /** Stores the current wave. First wave is always wave #0. */
         this.currentWave = 0;
@@ -97,13 +99,13 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapOneEnemies = [
-            this.chargerEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
+            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
             this.contactEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
-            this.rangedEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
+            this.chargerEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
             this.contactEnemyTypes[3],  // Wave 4 (2:00 - 2:30)
             this.contactEnemyTypes[2],  // Wave 5 (2:30 - 3:00)
-            this.contactEnemyTypes[2],  // Wave 6 (3:00 - 3:30)
+            this.rangedEnemyTypes[0],  // Wave 6 (3:00 - 3:30)
             this.contactEnemyTypes[3],  // Wave 7 (3:30 - 4:00)
             this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
         ];
@@ -132,7 +134,7 @@ class Spawn_System {
 
     /** Called once at the start of the script. */
     start() {
-        this.lastSpawnDelayDecreaseTime = this.game.timer.gameTime;
+        this.lastSpawnDelayDecreaseTime = this.game.elapsedTime / 1000;
         this.initialized = true;
     }
 
@@ -159,10 +161,10 @@ class Spawn_System {
         let currentSpawnInterval = this.updateSpawnSettings();
 
         if (this.game.elapsedTime > 0 && this.game.elapsedTime % currentSpawnInterval < this.game.clockTick * 1000) {
-            // Conditions to spawn enemies: no boss, round not over, not in rest area, this.game.timer.gameTime - this.lastSpawnTime >= this.baseEnemySpawnInterval
+            // Conditions to spawn enemies: no boss, round not over, not in rest area, (this.game.elapsedTime / 1000) - this.lastSpawnTime >= this.baseEnemySpawnInterval
             if (this.game.boss === null && !this.game.roundOver && this.game.currMap !== 0 &&
                 this.game.enemies.length < this.currentMaxEnemies &&
-                (this.game.timer.gameTime - this.lastSpawnTime >= this.baseEnemySpawnInterval)) {
+                ((this.game.elapsedTime / 1000) - this.lastSpawnTime >= this.baseEnemySpawnInterval)) {
                 this.spawnScalingEnemies();
                 //console.log("CURR = " + this.game.enemies.length + ", MAX = " + this.currentMaxEnemies);
             }
@@ -194,14 +196,22 @@ class Spawn_System {
             // Generate random off-screen coordinates for spawning
             let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
 
-            // If this is a ranged enemy wave, temporarily double ranged enemies
-            // if (this.contactEnemy
+            // If this is a ranged enemy wave, temporarily double ranged enemies cap
             if (this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].enemyType === "ranged" && this.maxRangedEnemies === this.initialMaxRangedEnemies) {
                 this.maxRangedEnemies *= 2;
             }
             // Otherwise make sure we are at default ranged enemy cap
             else if (this.maxRangedEnemies !== this.initialMaxRangedEnemies) {
                 this.maxRangedEnemies = this.initialMaxRangedEnemies;
+            }
+
+            // If this is a charger enemy wave, temporarily double charger enemies cap
+            if (this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].enemyType === "charger" && this.maxChargerEnemies === this.initialMaxChargerEnemies) {
+                this.maxChargerEnemies *= 2;
+            }
+            // Otherwise make sure we are at default charger enemy cap
+            else if (this.maxChargerEnemies !== this.initialMaxChargerEnemies) {
+                this.maxChargerEnemies = this.initialMaxChargerEnemies;
             }
 
             //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapOneEnemies.length - 1) + " enemies. Name = " + this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].name);
@@ -227,6 +237,15 @@ class Spawn_System {
                 this.maxRangedEnemies = this.initialMaxRangedEnemies;
             }
 
+            // If this is a charger enemy wave, temporarily double charger enemies cap
+            if (this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].enemyType === "charger" && this.maxChargerEnemies === this.initialMaxChargerEnemies) {
+                this.maxChargerEnemies *= 2;
+            }
+            // Otherwise make sure we are at default charger enemy cap
+            else if (this.maxChargerEnemies !== this.initialMaxChargerEnemies) {
+                this.maxChargerEnemies = this.initialMaxChargerEnemies;
+            }
+
             //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapTwoEnemies.length - 1) + " enemies. Name = " + this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)].name);
             this.spawnEnemy(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)], randomXNumber, randomYNumber);
         }
@@ -239,16 +258,19 @@ class Spawn_System {
     triggerPassiveEnemySpawn() {
         // Only attempt if we have enemies in the passive spawn array
         if (this.passiveEnemySpawns.length > 0) {
-            // If we are about to spawn a ranged enemy while we are at the max ranged enemy count, try to find an index of a non-ranged enemy to spawn
             let iterations = 0; // Track the number of iterations to prevent infinite loops
-            while (this.passiveEnemySpawns[this.passiveEnemyIndex].enemyType === "ranged" && this.getRangedEnemyCount() >= this.maxRangedEnemies) {
-                // Skip this enemy and spawn the next one in the array
-                this.passiveEnemyIndex += 1;
 
-                // If we've checked all enemies in the passive array, break to avoid an infinite loop
-                if (iterations >= this.passiveEnemySpawns.length) {
-                    break; // Exit the loop if we've looped through the entire array
-                }
+            // Function to check if the spawning condition for the current enemy is met
+            const canSpawnEnemyType = (enemyType) => {
+                if (enemyType === "ranged") return this.getRangedEnemyCount() < this.maxRangedEnemies;
+                if (enemyType === "charger") return this.getChargerEnemyCount() < this.maxChargerEnemies;
+                return true; // Always true for enemy types without a max count
+            };
+
+            // Loop until we find an enemy that can be spawned
+            while (!canSpawnEnemyType(this.passiveEnemySpawns[this.passiveEnemyIndex].enemyType)) {
+                // Skip this enemy and try the next one in the array
+                this.passiveEnemyIndex += 1;
 
                 // Ensure the index wraps around if it exceeds the array length
                 if (this.passiveEnemyIndex >= this.passiveEnemySpawns.length) {
@@ -257,6 +279,11 @@ class Spawn_System {
 
                 // Increment the iterations counter
                 iterations += 1;
+
+                // If we've checked all enemies in the passive array, break to avoid an infinite loop
+                if (iterations >= this.passiveEnemySpawns.length) {
+                    return; // Exit the method if we've looped through the entire array without finding a suitable enemy to spawn
+                }
             }
 
             // Generate random off-screen coordinates for spawning
@@ -265,12 +292,8 @@ class Spawn_System {
             // Spawn the enemy
             this.spawnEnemy(this.passiveEnemySpawns[this.passiveEnemyIndex], randomXNumber, randomYNumber);
 
-            this.passiveEnemyIndex += 1;
-
-            // Ensure the index wraps around if it exceeds the array length
-            if (this.passiveEnemyIndex >= this.passiveEnemySpawns.length) {
-                this.passiveEnemyIndex = 0;
-            }
+            // Move to the next enemy for the next spawn
+            this.passiveEnemyIndex = (this.passiveEnemyIndex + 1) % this.passiveEnemySpawns.length;
         }
     }
 
@@ -281,6 +304,20 @@ class Spawn_System {
         this.game.enemies.forEach(enemy => {
             // Check if the enemy's name matches any in the rangedEnemyTypes array
             if (this.rangedEnemyTypes.some(rangedEnemy => rangedEnemy.name === enemy.name)) {
+                count += 1; // Increment count for each match
+            }
+        });
+
+        return count;
+    }
+
+    /** Call this to get how many current ranged enemies are spawned in the this.game.enemies[]. */
+    getChargerEnemyCount() {
+        let count = 0;
+
+        this.game.enemies.forEach(enemy => {
+            // Check if the enemy's name matches any in the rangedEnemyTypes array
+            if (this.chargerEnemyTypes.some(chargerEnemy => chargerEnemy.name === enemy.name)) {
                 count += 1; // Increment count for each match
             }
         });
@@ -313,9 +350,11 @@ class Spawn_System {
                 newEnemy = this.game.addEntity(new Enemy_Ranged(enemy.name, enemy.maxHP,
                     enemy.currHP, enemy.atkPow, this.game, worldX, worldY,
                     enemy.boxWidth, enemy.boxHeight, enemy.boxType,
-                    enemy.speed, enemy.spritePath, enemy.animXStart,
+                    enemy.speed, enemy.spritePath, enemy.shootSpritePath, enemy.animXStart,
                     enemy.animYStart, enemy.animW, enemy.animH,
-                    enemy.animFCount, enemy.animFDur, enemy.scale,
+                    enemy.animFCount, enemy.animFDur, enemy.scale, enemy.shootAnimXStart,
+                    enemy.shootAnimYStart, enemy.shootAnimW, enemy.shootAnimH,
+                    enemy.shootAnimFCount, enemy.shootAnimFDur, enemy.shootScale,
                     enemy.exp, enemy.projectileFreq, enemy.projectileSpeed,
                     enemy.projectileSize, enemy.projectilePulse,
                     enemy.projectileCount, enemy.projectileSpread));
@@ -325,13 +364,20 @@ class Spawn_System {
                 this.triggerPassiveEnemySpawn();
             }
         } else if (enemy.enemyType === "charger") {
+            // If we haven't hit the charger enemy cap
+            if (this.getChargerEnemyCount() < this.maxChargerEnemies) {
             newEnemy = this.game.addEntity(new Enemy_Charger(enemy.name, enemy.maxHP,
                 enemy.currHP, enemy.atkPow, this.game, worldX, worldY,
                 enemy.boxWidth, enemy.boxHeight, enemy.boxType,
                 enemy.speed, enemy.spritePath, enemy.animXStart,
                 enemy.animYStart, enemy.animW, enemy.animH,
                 enemy.animFCount, enemy.animFDur, enemy.scale,
-                enemy.exp, enemy.chargeTimer));
+                enemy.exp));
+            }
+            // If we hit the charger enemy cap, try a passive spawn
+            else {
+                this.triggerPassiveEnemySpawn();
+            }
         }
 
         // Spawn an elite if this.spawnElite has been set to true
@@ -356,7 +402,7 @@ class Spawn_System {
         }
 
         // Store this time as the last time we spawned an enemy
-        this.lastSpawnTime = this.game.timer.gameTime;
+        this.lastSpawnTime = this.game.elapsedTime / 1000;
 
         return newEnemy;
     }
@@ -406,7 +452,7 @@ class Spawn_System {
      * @return  The current spawn interval.
      */
     updateSpawnSettings() {
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // Update the max enemy interval
         this.maxEnemyIntervals = Math.floor(this.game.elapsedTime / (this.maxEnemyIncrementTime * 1000));

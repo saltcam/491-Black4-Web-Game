@@ -51,10 +51,10 @@ class Enemy_Contact extends Entity {
         const player = this.game.player;
 
         // Determine the direction to face based on the player's position
-        if (player.worldX < this.worldX) {
+        if (player.worldX < this.worldX + this.animator.width/2) {
             // Player is to the left, face left
             this.lastMove = "left";
-        } else if (player.worldX > this.worldX) {
+        } else if (player.worldX > this.worldX + this.animator.width/2) {
             // Player is to the right, face right
             this.lastMove = "right";
         }
@@ -79,7 +79,7 @@ class Enemy_Contact extends Entity {
 
     checkCollisionAndDealDamage() {
         const player = this.game.player;
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // Check collision and cooldown
         if (this.boundingBox.isColliding(player.boundingBox) && currentTime - this.lastAttackTime >= this.attackCooldown) {

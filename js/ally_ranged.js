@@ -181,7 +181,7 @@ class Ally_Ranged extends Entity {
 
     castProjectile(){
         // if it has been enough time since last attack, shoot an orb
-        let currentTime = this.game.timer.gameTime;
+        let currentTime = this.game.elapsedTime / 1000;
         if (currentTime - this.lastAttackTime >= this.attackCooldown) {
             const targetCenter = this.closestTarget().calculateCenter();
             const thisCenter = this.calculateCenter();

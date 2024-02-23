@@ -49,7 +49,8 @@ class Entity {
         }
 
         this.relocateMode = true; // Does this entity 'relocate' to opposite parts of screen when player gets too far.
-        this.outOfBoundsOffset = 150; // Buffer distance outside the camera view to consider for relocation
+        this.outOfBoundsOffset = 250; // Buffer distance outside the camera view to consider for relocation
+        this.lastMove = "right";
     }
 
     update() {
@@ -172,7 +173,7 @@ class Entity {
                             }
 
                             this.recentDamage += bleed;
-                            this.lastDamageTime = this.game.timer.gameTime;
+                            this.lastDamageTime = this.game.elapsedTime / 1000;
                         }
                     }, 500 * i);
                 }
@@ -189,7 +190,7 @@ class Entity {
             this.animator.damageSprite(250);
 
             this.recentDamage += amount;
-            this.lastDamageTime = this.game.timer.gameTime;
+            this.lastDamageTime = this.game.elapsedTime / 1000;
         }
 
         if (this.currHP <= 0) {
@@ -264,7 +265,6 @@ class Entity {
         let screenX = this.worldX - this.game.camera.x;
         let screenY = this.worldY - this.game.camera.y;
 
-        // Draw the player at the calculated screen position
         this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
 
         this.boundingBox.draw(ctx, game);

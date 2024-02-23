@@ -373,7 +373,7 @@ class GameEngine {
     }
 
     randomOffscreenCoords() {
-        const buffer = 100; // Distance outside the camera view
+        const buffer = 250; // Distance outside the camera view
         let x, y;
 
         // Determine if the enemy will spawn horizontally or vertically outside the camera view
@@ -474,9 +474,10 @@ class GameEngine {
 
             // Draw 'attack' entities that are labeled as choreographed ('CAR_').
             for (let attack of this.attacks) {
-                if (!attack.boundingBox.type.includes("CAR_")) {
+                if (!attack instanceof AttackCirc || !attack.type || !attack.type.includes("CAR_")) {
                     continue;
                 }
+
                 attack.draw(this.ctx, this);
 
                 // If debug mode, then draw debug features.
@@ -508,14 +509,14 @@ class GameEngine {
 
             // Draw 'attack' entities not labeled as choreographed ('CAR_').
             for (let attack of this.attacks) {
-                if (attack.boundingBox.type.includes("CAR_")) {
+                if (attack instanceof AttackCirc && attack.type && attack.type.includes("CAR_")) {
                     continue;
                 }
+
                 attack.draw(this.ctx, this);
 
                 // If debug mode, then draw debug features.
                 if (this.debugMode) {
-                    //attack.drawHealth(this.ctx);
                     attack.boundingBox.draw(this.ctx, this);
                 }
             }
@@ -538,6 +539,13 @@ class GameEngine {
                 // If debug mode, then draw debug features.
                 if (this.debugMode) {
                     item.boundingBox.draw(this.ctx, this);
+                }
+            }
+
+            // Draw exp orbs
+            for (let entity of this.entities) {
+                if (entity.boundingBox.type === "orb") {
+                    entity.draw(this.ctx, this);
                 }
             }
 
@@ -694,19 +702,23 @@ class GameEngine {
 
     /** Draws the game-time tracker on top of the game screen. */
     drawTimer(ctx)
-        {
-            // Fix elapsed time if negative
-            if (this.elapsedTime < 0) {
-                this.elapsedTime = 0;
-            }
+    {
+        // console.log("gameTime = " + this.timer.gameTime);
+        // console.log("elapsedTime / 1000 = " + this.elapsedTime / 1000);
+        // console.log("elapsedTime = " + this.elapsedTime);
 
-            ctx.font = '20px Arial';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            const minutes = Math.floor(this.elapsedTime / 60000);
-            const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
-            const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
+        // Fix elapsed time if negative
+        if (this.elapsedTime < 0) {
+            this.elapsedTime = 0;
+        }
+
+        ctx.font = '20px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        const minutes = Math.floor(this.elapsedTime / 60000);
+        const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
+        const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        ctx.fillText(formattedTime, this.ctx.canvas.width / 2, 30);
     }
 
     /** Draws the gold currency tracker onto the game screen. */
@@ -1106,7 +1118,7 @@ class GameEngine {
             // Remove 'object' entities that are marked for deletion.
             for (let i = this.objects.length - 1; i >= 0; --i) {
                 // Treasure chest check
-                if (this.objects[i] && this.objects[i].boundingBox && this.objects[i].boundingBox.type === "chest" && this.objects[i].openedAtTime !== null && this.timer.gameTime - this.objects[i].openedAtTime >= this.objects[i].deleteAfterOpenTime) {
+                if (this.objects[i] && this.objects[i].boundingBox && this.objects[i].boundingBox.type === "chest" && this.objects[i].openedAtTime !== null && (this.elapsedTime / 1000) - this.objects[i].openedAtTime >= this.objects[i].deleteAfterOpenTime) {
                     this.objects[i].removeFromWorld = true;
                 }
 
@@ -1436,5 +1448,41 @@ class GameEngine {
     // Loads the instructions after clicking on the how to play button
     showInstructions() {
         this.currMap = -2;
+    }
+
+    /**
+     * Spawns a sequenced pattern of choreographed attack circles that swirl around a center point.
+     * @param entity - The entity spawning this attack
+     * @param {number} x - The center x-coordinate where the pattern starts.
+     * @param {number} y - The center y-coordinate where the pattern starts.
+     * @param {number} numCircles - Total number of circles to spawn in the pattern.
+     * @param {number} delayBetweenCircles - Delay in milliseconds between each circle spawn.
+     * @param {number} circleRadius - Radius of each attack circle.
+     * @param {number} attackDuration - Duration each attack circle stays active in seconds.
+     * @param {number} curlTightness - Controls the spacing between circles in the pattern. Higher values make the swirl tighter.
+     * @param {number} spiralSpacing - Distance between each circle in the spiral.
+     */
+    spawnSwirlingAttackCirclePattern(entity, x, y, numCircles = 15, delayBetweenCircles = 250, circleRadius = 100, attackDuration = 1, curlTightness = 1, spiralSpacing = 20) {
+        for (let i = 0; i < numCircles; i++) {
+            // Calculate the delay for the current circle
+            const delay = i * delayBetweenCircles;
+
+            // Use a timeout to delay the creation of each circle
+            this.setManagedTimeout(() => {
+                // Calculate position for the current circle
+                // The angle is modified by curlTightness to control how tight the swirl is
+                const angle = (Math.PI * 2 / numCircles * curlTightness) * i; // Distribute circles evenly in a circular pattern, modified by curlTightness
+                // Adjust dx and dy calculations to account for both curlTightness and spiralSpacing
+                // curlTightness affects the angle between circles, while spiralSpacing affects their radial distance from the center
+                const dx = Math.cos(angle) * (spiralSpacing * Math.sqrt(i)); // Use square root of i to ensure even distribution of circles in a spiral
+                const dy = Math.sin(angle) * (spiralSpacing * Math.sqrt(i)); // Use square root of i to ensure even distribution of circles in a spiral
+
+                // Create the attack circle at the calculated position
+                const attackCircle = new AttackCirc(this, entity, circleRadius, "enemyAttack", x + dx, y + dy, attackDuration, null, 0, entity.atkPow / 3, 0, 0, 1);
+                attackCircle.drawCircle = true;
+                attackCircle.trackToEntity = false;
+                this.addEntity(attackCircle);
+            }, delay);
+        }
     }
 }

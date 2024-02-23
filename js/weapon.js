@@ -44,6 +44,7 @@ class Weapon {
     }
 
     draw(ctx, slotNum){
+        const currentTime = this.game.elapsedTime / 1000;
         // adjust these for easier menu debugging
         const weaponBoxHeight = 125;
         const weaponBoxWidth = 100;
@@ -73,7 +74,7 @@ class Weapon {
         //draw the primary cooldown
         ctx.beginPath();
         ctx.fillStyle = 'rgba(0, 255, 0, 0.6)';
-        let diff = this.game.timer.gameTime - this.lastPrimaryAttackTime;
+        let diff = (this.game.elapsedTime / 1000) - this.lastPrimaryAttackTime;
         if (diff > this.primaryCool) {
             diff = this.primaryCool;
             ctx.fillStyle = 'rgba(0, 255, 0, 1)';
@@ -90,7 +91,7 @@ class Weapon {
         //draw the secondary cooldown
         ctx.beginPath();
         ctx.fillStyle = 'rgba(0, 0, 255, 0.6)';
-        diff = this.game.timer.gameTime - this.lastSecondAttackTime;
+        diff = (this.game.elapsedTime / 1000) - this.lastSecondAttackTime;
         if (diff > this.secondCool) {
             diff = this.secondCool;
             ctx.fillStyle = 'rgba(0, 100, 255, 1)';

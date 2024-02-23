@@ -47,7 +47,7 @@ class Weapon_tome extends Weapon {
             }
         });
 
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // if true, perform the attack
         if ((currentTime - this.lastPrimaryAttackTime >= this.primaryCool) || cheating) {
@@ -115,7 +115,7 @@ class Weapon_tome extends Weapon {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         let defaultSecondaryDamage = player.atkPow / 1.75;
 
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // if true, perform the attack
         if ((currentTime - this.lastSecondAttackTime >= this.secondCool) || cheating) {

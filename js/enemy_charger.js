@@ -1,8 +1,7 @@
 class Enemy_Charger extends Entity {
 
     // chargeTimer: the amount of seconds it takes while this enemy is stationary/running away before it enters charge mode
-    constructor(name, maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp,
-                chargeTimer) {
+    constructor(name, maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp, chargeCooldown = 5) {
         super(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp);
 
         this.name = name;
@@ -20,9 +19,8 @@ class Enemy_Charger extends Entity {
         // false: move like a ranged enemy
         // true: stay put until charge timer finishes, then lunge forward to player's coordinates (+ some more) at time of charge
         this.enterChargeMode = false; // enterChargeMode
-        // tick down when stationary (spacing returns 0)
-        this.chargeTimer = 0;
-        this.maxChargeTimer = chargeTimer * 60;
+        // this.maxChargeTimer = chargeTimer * 200;
+        this.chargeCooldown = chargeCooldown; // How long between charges
 
         /** Target direction marker. Tracks where the entity should be pathing to next. */
         this.targetMarker = this.game.addEntity(new Entity(1, 1, 0, this.game,
@@ -30,22 +28,22 @@ class Enemy_Charger extends Entity {
             0,
             "./sprites/attack_targeting.png",
             0, 0, 92, 92, 4, 0.25, 2, 0));
+        this.targetMarker.animator.pauseAtFrame(10); // Sets the tracker invisible
 
         /** The cooldown of how often this entity can damage the player with its bounding box collision attacks. */
         this.attackCooldown = 1;    // in seconds
         /** Controls whether this entity receives pushback force. */
         this.canBePushedBack = false;
-        /** How often to check if we are going to enter an attack mode. */
-        //this.attackCheckInterval = 1.5;
         /** Last time we checked for an attack to possibly happen. */
         this.lastAttackCheckTime = 0;
         /** The time in seconds before the entity actually charges its target once entering charge mode. */
-        this.chargeDelayTime = 1.23;
+        this.chargeDelayTime = 1.75;
         /** Flag that tracks if we are ready to perform another attack (ex: charge, ground smash). */
         this.readyForNextAttack = true;
 
-        this.tempTimer = 0;
+        this.tempTimer = -1;
         this.attackStatus = "none";
+        this.chargeDamage = this.atkPow * 2;
         this.initialMovementSpeed = this.movementSpeed;
     }
 
@@ -74,7 +72,7 @@ class Enemy_Charger extends Entity {
             return;
         }
 
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // Apply pushback (if there is any)
         this.worldX += this.pushbackVector.x;
@@ -88,12 +86,14 @@ class Enemy_Charger extends Entity {
         if (Math.abs(this.pushbackVector.x) < 0.1) this.pushbackVector.x = 0;
         if (Math.abs(this.pushbackVector.y) < 0.1) this.pushbackVector.y = 0;
 
-        // Determine the direction to face based on the target's position
-        if (this.targetMarker.worldX < this.worldX) {
-            // Target is to the left, face left
+        const player = this.game.player;
+
+        // Determine the direction to face based on the player's position
+        if (player.worldX < this.worldX + this.animator.width/2) {
+            // Player is to the left, face left
             this.lastMove = "left";
-        } else if (this.targetMarker.worldX > this.worldX) {
-            // Target is to the right, face right
+        } else if (player.worldX > this.worldX + this.animator.width/2) {
+            // Player is to the right, face right
             this.lastMove = "right";
         }
 
@@ -118,40 +118,38 @@ class Enemy_Charger extends Entity {
 
         // Track the marker an offset amount behind the player (this way the entity charges 'through' where the player was)
         if (this.trackMode && this.targetMarker) {
-            //TODO make the reticle move behind the player I hate math
-            //
-            // let diffX = this.game.player.worldX - this.worldX;
-            // let diffY = this.game.player.worldY - this.worldY;
-            //
-            // let slope = diffY / diffX;
-            //
-            // let distanceFromTarget = Math.sqrt(this.worldX * this.worldX + this.worldY * this.worldY) + slope*100;
-            //
-            // let angle = this.calcTargetAngle(this.game.player);
-            // let dx = Math.cos(this.angle) * distanceFromTarget;
-            // let dy = Math.sin(this.angle) * distanceFromTarget;
+            const playerCenter = this.game.player.calculateCenter();
+            const selfCenter = this.calculateCenter();
 
+            // Calculate direction vector towards the player's center
+            const dirX = playerCenter.x - selfCenter.x;
+            const dirY = playerCenter.y - selfCenter.y;
 
-            this.targetMarker.worldX = this.game.player.worldX - (this.game.player.animator.width);
-            this.targetMarker.worldY = this.game.player.worldY - (this.game.player.animator.height);
-        }
+            // Calculate distance to normalize the vector
+            const dist = Math.sqrt(dirX * dirX + dirY * dirY);
 
-        // Check if it's time to potentially enter an attack mode
-        if (!this.enterChargeMode && this.chargeTimer >= this.maxChargeTimer) {
-            this.enterChargeMode = true;
+            // Normalize direction vector
+            const normX = dirX / dist;
+            const normY = dirY / dist;
 
-            // Regardless of the outcome, update lastCheckTime to schedule next check
-            this.lastAttackCheckTime = currentTime;
+            // Determine the offset distance behind the player
+            // This value can be adjusted to place the marker closer or further from the player
+            const offsetDistance = -250; // Negative value to place marker behind the player
+
+            // Calculate new position for the marker
+            // Subtracting because we're moving in the opposite direction of the normalized vector
+            this.targetMarker.worldX = playerCenter.x - (normX * offsetDistance) - 50;
+            this.targetMarker.worldY = playerCenter.y - (normY * offsetDistance) - 50;
         }
 
         // START of Handle Charge Attack
         if (this.enterChargeMode) {
             if (this.attackStatus === "none") {
                 this.attackStatus = "Preparing to Charge";
-                console.log("Attack Status = Preparing to charge!");
                 this.movementSpeed = 0;
                 // First, we need to enter the prepare to charge stance animation
                 //this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png"), 0, 0, 60, 84, 1, 1);
+                //this.targetMarker.animator.pauseAtFrame(-1);
             }
 
             // After this.chargeDelayTime has passed we need to actually enter the charge sprite animation and give the entity its charge movement speed.
@@ -166,8 +164,7 @@ class Enemy_Charger extends Entity {
                 //this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png"), 60, 0, 60, 84, 2, 0.2)
                 this.tempTimer = -1; // Reset the timer for later use
                 this.attackStatus = "Charging";
-                console.log("Attack Status = Charging!");
-                this.movementSpeed = this.initialMovementSpeed * 4;
+                this.movementSpeed = this.initialMovementSpeed * 7.5;
             }
 
             // After we reach the target destination, turn off charge mode, return the entity back to normal
@@ -188,10 +185,8 @@ class Enemy_Charger extends Entity {
                     this.tempTimer = -1;
                     this.attackStatus = "none";
                     this.enterChargeMode = false;
-                    //this.targetMarker.animator.pauseAtFrame(10);
-                    this.chargeTimer = 0;
-                    console.log("Attack Status = none!");
                     this.movementSpeed = this.initialMovementSpeed;
+                    //this.targetMarker.animator.pauseAtFrame(10);
                 }
             }
         }
@@ -211,46 +206,106 @@ class Enemy_Charger extends Entity {
     negative (flee because too close to player)
     much more lenient than ranged enemies, so they can stay put for longer
     */
-    calcSpacing(){
+    calcSpacing() {
         let spacing = 1;
         // if not charging, take steps to get into charge position
         if (!this.enterChargeMode && !(this.attackStatus === "Charging")) {
-            const targetCenter = this.targetMarker.calculateCenter();
-            const selfCenter = this.calculateCenter();
+            const bossCenterX = this.worldX + this.animator.width / 2;
+            const bossCenterY = this.worldY + this.animator.height / 2;
 
-            // Calculate direction vector towards the target's center
-            const dirX = targetCenter.x + 16 - selfCenter.x;
-            const dirY = targetCenter.y - selfCenter.y;
+            const markerCenterX = this.targetMarker.worldX + this.targetMarker.animator.width / 2;
+            const markerCenterY = this.targetMarker.worldY + this.targetMarker.animator.height / 2;
 
-            let dist = Math.sqrt(dirX * dirX + dirY * dirY);
-            // console.log("dist: " + dist);
+            const distanceX = Math.abs(bossCenterX - markerCenterX);
+            const distanceY = Math.abs(bossCenterY - markerCenterY);
 
-            if (dist > 600) {
-                // console.log("approach");
+            const fleeProximity = 250; // Adjusted proximity threshold
+            const chargeProximity = 500
+
+            if (distanceX > chargeProximity || distanceY > chargeProximity) {
                 spacing = 1;
-            } else if (dist < 150) {
-                // console.log("flee");
+            } else if (distanceX < fleeProximity || distanceY < fleeProximity) {
                 spacing = -0.75;
-                //this.chargeTimer++;
-            } else if (dist > 150 && dist < 600) {
-                // console.log("stay put");
-                spacing = 0;
-                this.chargeTimer++;
+            } else if (distanceX < chargeProximity || distanceY < chargeProximity) {
+                const currentTime = this.game.elapsedTime / 1000;
+                if (this.readyForNextAttack && currentTime - this.lastAttackCheckTime >= this.chargeCooldown) {
+                    this.enterChargeMode = true;
+
+                    // Regardless of the outcome, update lastCheckTime to schedule next check
+                    this.lastAttackCheckTime = currentTime;
+                }
             }
         }
-        // console.log(spacing);
         return spacing;
     }
 
     checkCollisionAndDealDamage() {
         const player = this.game.player;
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // Check collision and cooldown
         if (this.boundingBox.isColliding(player.boundingBox) && (currentTime - this.lastAttackTime >= this.attackCooldown)) {
-            player.takeDamage(this.atkPow);
+            if (this.attackStatus === "Charging") {
+                player.takeDamage(this.chargeDamage);
+            } else {
+                player.takeDamage(this.atkPow);
+            }
+
             this.lastAttackTime = currentTime; // Update last attack time
         }
     }
 
+    draw(ctx, game) {
+        if (this.attackStatus === "Charging" || this.attackStatus === "Preparing to Charge") {
+            const targetCenter = {
+                x: this.targetMarker.worldX + (this.targetMarker.animator.width / 2),
+                y: this.targetMarker.worldY + (this.targetMarker.animator.height / 2),
+            };
+
+            const startPoint = {
+                x: this.worldX + (this.animator.width / 2),
+                y: this.worldY + (this.animator.height / 2),
+            };
+
+            const chargeDirection = {
+                x: targetCenter.x - startPoint.x,
+                y: targetCenter.y - startPoint.y,
+            };
+
+            const chargeMagnitude = Math.sqrt(chargeDirection.x ** 2 + chargeDirection.y ** 2);
+
+            // Normalize the charge direction vector
+            chargeDirection.x /= chargeMagnitude;
+            chargeDirection.y /= chargeMagnitude;
+
+            // Use the actual distance to the target marker center as the charge distance
+            const actualChargeDistance = chargeMagnitude;
+
+            // Calculate angle for rotation
+            const angle = Math.atan2(chargeDirection.y, chargeDirection.x);
+
+            // Draw rotated shaded area
+            ctx.save(); // Save the current state of the canvas
+            ctx.translate(startPoint.x - this.game.camera.x, startPoint.y - this.game.camera.y); // Move the origin to the starting point of the charge
+            ctx.rotate(angle); // Rotate the canvas to align with the charge direction
+
+            // If charging, use red fill
+            if (this.attackStatus === "Charging") {
+                // Draw the shaded area (now aligned with the charge direction)
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+            }
+            // Otherwise grey as we prepare to charge
+            else {
+                // Draw the shaded area (now aligned with the charge direction)
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            }
+
+            const shadedHeight = 100; // Height for the shaded area
+            ctx.fillRect(0, -shadedHeight / 2, actualChargeDistance, shadedHeight); // Draw the rectangle
+
+            ctx.restore(); // Restore the canvas to its original state
+        }
+
+        super.draw(ctx, game);
+    }
 }

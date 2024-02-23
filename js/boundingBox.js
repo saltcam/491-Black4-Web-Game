@@ -30,11 +30,12 @@ class BoundingBox {
             this.top < other.bottom &&
             this.bottom > other.top;
     }
-    
+
     // Update the bounding box to be centered around a given point
     updateCentered(centerX, centerY, width, height) {
-        this.left = centerX - width / 2;
-        this.top = centerY - height / 2;
+        // Calculate top-left corner based on center position
+        this.left = centerX - (width / 2);
+        this.top = centerY - (height / 2);
         this.width = width;
         this.height = height;
     }

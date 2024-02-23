@@ -55,7 +55,7 @@ class Player extends Entity {
         this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching
         this.lastWeaponSwitchTime = 0;
         this.controlsEnabled = true;    // If false, player cannot input controls.
-        this.pickupRange = 100;
+        this.pickupRange = 125;
 
         this.menuInvincibility = false; // Auto-set to true for a bit  after exiting a menu, gives iFrames
         this.isDashing = false; // Auto-set to true while dashing, gives iFrames
@@ -117,7 +117,7 @@ class Player extends Entity {
     }
 
     setWeaponSwitchDelay() {
-        this.lastWeaponSwitchTime = this.game.timer.gameTime;
+        this.lastWeaponSwitchTime = this.game.elapsedTime / 1000;
     }
 
     takeDamage(amount) {
@@ -171,7 +171,7 @@ class Player extends Entity {
         }
 
         // Handle dashing duration and reset
-        if (this.isDashing && (this.game.timer.gameTime - this.lastDashTime >= this.dashDuration)) {
+        if (this.isDashing && ((this.game.elapsedTime / 1000) - this.lastDashTime >= this.dashDuration)) {
             this.endDash();
         }
 
@@ -209,7 +209,7 @@ class Player extends Entity {
         // Perform attacks if mouse buttons are held down and the attacks are off cooldown.
         // To achieve this store the current game time and subtract it to the time since last attack to see
         // if we are ready to trigger another attack.
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // Handle passive health regen
         if (currentTime - this.timeSinceLastHealthRegen >= this.healthRegenTime) {
@@ -372,7 +372,7 @@ class Player extends Entity {
 
     // called when the user has a valid dash and presses space bar
     performDash() {
-        this.lastDashTime = this.game.timer.gameTime; // Record the start time of the dash
+        this.lastDashTime = this.game.elapsedTime / 1000; // Record the start time of the dash
         this.isDashing = true; // Flag to indicate dashing state, this flag also will enable iFrames
     }
 
@@ -429,7 +429,7 @@ class Player extends Entity {
 
         // ctx.beginPath();
         // ctx.fillStyle = 'rgba(0, 0, 255, 0.6)';
-        // diff = this.game.timer.gameTime - this.lastSecondAttackTime;
+        // diff = (this.game.elapsedTime / 1000) - this.lastSecondAttackTime;
         // if (diff > this.secondCool) {
         //     diff = this.secondCool;
         //     ctx.fillStyle = 'rgba(0, 100, 255, 1)';
@@ -439,7 +439,7 @@ class Player extends Entity {
         let weapon = this.weapons[this.currentWeapon];
         ctx.beginPath();
         ctx.fillStyle = 'rgba(0, 0, 255, 0.6)';
-        let diff = (this.game.timer.gameTime - weapon.lastSecondAttackTime)/weapon.secondCool;
+        let diff = ((this.game.elapsedTime / 1000) - weapon.lastSecondAttackTime)/weapon.secondCool;
         if (diff > 1) {
             diff = 1;
             ctx.fillStyle = 'rgba(0, 100, 255, 1)';
@@ -541,10 +541,10 @@ class Player extends Entity {
         const barWidth = 200;
         const barHeight = 10;
         const xOffset = (ctx.canvas.width - barWidth) / 2;
-        const yOffset = 500; // Adjust for your game's UI layout
+        const yOffset = 500;
 
         // Calculate the elapsed time since the last dash
-        const timeSinceLastDash = this.game.timer.gameTime - this.lastDashTime;
+        const timeSinceLastDash = (this.game.elapsedTime / 1000) - this.lastDashTime;
         // Calculate the remaining cooldown time
         const remainingCooldown = Math.max(0, this.defaultDashCooldown - timeSinceLastDash);
         // Calculate the width of the filled portion based on the remaining cooldown

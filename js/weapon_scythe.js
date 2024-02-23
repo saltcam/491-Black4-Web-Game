@@ -6,7 +6,7 @@ class Weapon_scythe extends Weapon {
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 35),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
             new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 25),
-            new Upgrade("Blood Scythe", "(Unique) Heal 1 hp per attack.", true, "./sprites/upgrade_blood_scythe.png", 150),
+            new Upgrade("Blood Scythe", "(Unique) Heal 1.5% HP per attack.", true, "./sprites/upgrade_blood_scythe.png", 150),
             new Upgrade("Dual Blade", "(Unique) Adds primary back attack.", true, "./sprites/upgrade_dual_blade.png", 175),
             new Upgrade("Echo Slash", "(Unique) Adds attack echoes. CDs +30%", true, "./sprites/upgrade_echo_slash.png", 175),
             new Upgrade("Crippling Chill", "(Unique) Cripple effect on attacks.", true, "./sprites/upgrade_crippling_chill.png", 125),
@@ -34,7 +34,7 @@ class Weapon_scythe extends Weapon {
         let defaultPrimaryDamage = player.atkPow / 1.5;
         let defaultDualBladeRadius = this.primaryAttackRadius * .67;
 
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // if true, perform the attack
         if ((currentTime - this.lastPrimaryAttackTime >= this.primaryCool) || cheating) {
@@ -69,7 +69,7 @@ class Weapon_scythe extends Weapon {
                 this.primaryAttackPushbackForce,
                 0, 1));
 
-                this.game.player.heal(1);
+                this.game.player.heal(this.game.player.maxHP * 0.015);
 
                 // If dual blade is active
                 if (this.upgrades[5].active) {
@@ -175,7 +175,7 @@ class Weapon_scythe extends Weapon {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         let defaultSecondaryDamage = player.atkPow * 1.15;
 
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // if true, perform the attack
         if ((currentTime - this.lastSecondAttackTime >= this.secondCool) || cheating) {
@@ -194,7 +194,7 @@ class Weapon_scythe extends Weapon {
                     this.secondaryAttackPushbackForce,
                     0.3, 1));
 
-                this.game.player.heal(1);
+                this.game.player.heal(this.game.player.maxHP * 0.015);
 
                 // If echo slash is active
                 if (this.upgrades[6].active) {

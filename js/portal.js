@@ -16,7 +16,6 @@ class Portal extends Entity {
         if (this.collidesWithPlayer(player) && !this.interactionInitiated) {
             this.interactionInitiated = true; // Set the flag to true to prevent re-entry
 
-            // The rest of your method remains unchanged
             this.game.fadeState = 'in';
             this.game.fadeToBlack = true;
             this.game.player.controlsEnabled = false;
@@ -77,12 +76,12 @@ class Portal extends Entity {
 
         // Reset player dash cooldown
         this.game.player.currentDashCooldown = 0; // Dash is immediately ready
-        this.game.player.lastDashTime = this.game.timer.gameTime - this.game.player.defaultDashCooldown; // Adjust if necessary
+        this.game.player.lastDashTime = (this.game.elapsedTime / 1000) - this.game.player.defaultDashCooldown; // Adjust if necessary
 
         // Reset weapon cooldowns for all weapons
         this.game.player.weapons.forEach(weapon => {
-            weapon.lastPrimaryAttackTime = this.game.timer.gameTime - weapon.primaryCool;
-            weapon.lastSecondAttackTime = this.game.timer.gameTime - weapon.secondCool;
+            weapon.lastPrimaryAttackTime = (this.game.elapsedTime / 1000) - weapon.primaryCool;
+            weapon.lastSecondAttackTime = (this.game.elapsedTime / 1000) - weapon.secondCool;
         });
 
         // Temp win condition

@@ -33,6 +33,8 @@ class BossOne extends Entity {
         this.boundingBox.drawBoundingBox = false;
         /** The cooldown of how often this entity can damage the player with its attacks. */
         this.attackCooldown = 1;    // in seconds
+        /** The damage done to player if hit by this entity's bounding box while this boss is charging. */
+        this.chargeDamage = this.atkPow * 2;
         /** The time since this entity last damaged the player. */
         this.lastAttackTime = 0;    // time since last attack
         /** Controls whether this entity receives pushback force. */
@@ -50,6 +52,7 @@ class BossOne extends Entity {
             0,
             "./sprites/attack_targeting.png",
             0, 0, 92, 92, 4, 0.25, 2, 0));
+        this.targetMarker.animator.pauseAtFrame(10); // Sets the tracker invisible
 
         // Attack Variables
         /** Flag that tracks if we are ready to perform another attack (ex: charge, ground smash). */
@@ -67,7 +70,7 @@ class BossOne extends Entity {
         /** Flag to track whether this boss is going to enter charge mode. */
         this.enterChargeMode = false;
         /** The time in seconds before the entity actually charges its target once entering charge mode. */
-        this.chargeDelayTime = 1.23;
+        this.chargeDelayTime = 1.75;
         /** Tracks how many seconds after stopping a charge that a new attack decision is allowed. */
 
         // Ground Smash Attack Variables
@@ -129,7 +132,7 @@ class BossOne extends Entity {
         }
 
         // Decrease recent damage over time (for boss health bar calculations)
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
         if (currentTime - this.lastDamageTime > this.damageDecayDelay && this.recentDamage > 0) {
             const timeSinceLastDamage = currentTime - this.lastDamageTime - this.damageDecayDelay;
             const decayAmount = this.damageDecayRate * (timeSinceLastDamage / 1000); // Calculate decay based on time passed
@@ -179,10 +182,38 @@ class BossOne extends Entity {
             this.relocateMode = true;
         }
 
-        // Track marker location to player's center location
-        if (this.trackMode && this.targetMarker) {
-            this.targetMarker.worldX = this.game.player.worldX - (this.game.player.animator.width);
-            this.targetMarker.worldY = this.game.player.worldY - (this.game.player.animator.height);
+        if (this.enterChargeMode) {
+            // Track the marker an offset amount behind the player (this way the entity charges 'through' where the player was)
+            if (this.trackMode && this.targetMarker) {
+                const playerCenter = this.game.player.calculateCenter();
+                const selfCenter = this.calculateCenter();
+
+                // Calculate direction vector towards the player's center
+                const dirX = playerCenter.x - selfCenter.x;
+                const dirY = playerCenter.y - selfCenter.y;
+
+                // Calculate distance to normalize the vector
+                const dist = Math.sqrt(dirX * dirX + dirY * dirY);
+
+                // Normalize direction vector
+                const normX = dirX / dist;
+                const normY = dirY / dist;
+
+                // Determine the offset distance behind the player
+                // This value can be adjusted to place the marker closer or further from the player
+                const offsetDistance = -500; // Negative value to place marker behind the player
+
+                // Calculate new position for the marker
+                // Subtracting because we're moving in the opposite direction of the normalized vector
+                this.targetMarker.worldX = playerCenter.x - (normX * offsetDistance) - 50;
+                this.targetMarker.worldY = playerCenter.y - (normY * offsetDistance) - 50;
+            }
+        } else {
+            // Track marker location to player's center location
+            if (this.trackMode && this.targetMarker) {
+                this.targetMarker.worldX = this.game.player.worldX - (this.game.player.animator.width);
+                this.targetMarker.worldY = this.game.player.worldY - (this.game.player.animator.height);
+            }
         }
 
         // Check if it's time to potentially enter an attack mode
@@ -195,7 +226,7 @@ class BossOne extends Entity {
 
             const distanceX = Math.abs(bossCenterX - markerCenterX);
             const distanceY = Math.abs(bossCenterY - markerCenterY);
-            const proximity = 300; // Adjusted proximity threshold
+            const proximity = 600; // Adjusted proximity threshold
 
             // Check if in proximity of target yet, if not, then charge to get closer
             // Adjusted condition to allow for charge if far enough in either X or Y direction
@@ -218,6 +249,8 @@ class BossOne extends Entity {
 
                 // First, we need to enter the prepare to charge stance animation
                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png"), 0, 0, 60, 84, 1, 1);
+
+                this.targetMarker.animator.pauseAtFrame(-1);
             }
 
             // After this.chargeDelayTime has passed we need to actually enter the charge sprite animation and give the boss its charge movement speed.
@@ -231,6 +264,7 @@ class BossOne extends Entity {
                 this.tempTimer = -1;
                 this.attackStatus = "Charging"
                 this.movementSpeed = this.defaultSpeed;
+                this.targetMarker.animator.pauseAtFrame(10);
             }
 
             // After we reach the target destination, turn off charge mode, set movespeed = 0, and set animation to standing
@@ -252,7 +286,6 @@ class BossOne extends Entity {
                     this.tempTimer = -1;
                     this.attackStatus = "none";
                     this.enterChargeMode = false;
-                    this.targetMarker.animator.pauseAtFrame(10);
                 }
             }
 
@@ -273,12 +306,13 @@ class BossOne extends Entity {
 
             // Spawn a warning attack circle (grey) for the attack that will be coming
             if (!this.groundSmashMainAttackCircle) {
-                if (this.lastMove === "right") {
-                    this.groundSmashMainAttackCircle = this.game.addEntity(new AttackCirc(this.game, this, 150, "CAR_enemyAttack", 120, 130, 1.05, null, 0, this.atkPow * 2.5, 50, 0, 1));
-                } else {
-                    this.groundSmashMainAttackCircle = this.game.addEntity(new AttackCirc(this.game, this, 150, "CAR_enemyAttack", -120, 130, 1.05, null, 0, this.atkPow * 2.5, 50, 0, 1));
-                }
+                let int = 0;
+                if (this.lastMove === "right") int = 1;
+                else int = -1;
+
+                this.groundSmashMainAttackCircle = this.game.addEntity(new AttackCirc(this.game, this, 150, "CAR_enemyAttack", int * 120, 130, 1.05, null, 0, this.atkPow * 2, 0, 0, 1));
                 this.groundSmashMainAttackCircle.drawCircle = true;
+                this.game.spawnSwirlingAttackCirclePattern(this, int * 120, 130, 30, 100, 100, 1.35, 2.5, 150);
             }
 
             // If we reach the last frame of the ground smashing animation, pause the animation for this.groundSmashDelayTime
@@ -344,27 +378,30 @@ class BossOne extends Entity {
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
 
         this.checkCollisionAndDealDamage();
-    }p
+    }
 
     checkCollisionAndDealDamage() {
         const player = this.game.player;
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // Check collision and cooldown
         if (this.boundingBox.isColliding(player.boundingBox) && currentTime - this.lastAttackTime >= this.attackCooldown) {
-            player.takeDamage(this.atkPow);
+            if (this.attackStatus === "Charging") {
+                player.takeDamage(this.chargeDamage);
+            } else {
+                player.takeDamage(this.atkPow);
+            }
             this.lastAttackTime = currentTime; // Update last attack time
         }
     }
 
     drawBossHealthBar(ctx) {
         // Current game time
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // Check if more than 1 second has passed since the last damage
         if (currentTime - this.lastDamageTime > this.damageDecayDelay && this.recentDamage > 0) {
             // Gradually decrease recentDamage over time here
-            // This is a simplified example, you might want to decrease it more smoothly
             this.recentDamage -= 1; // Adjust this rate as needed
         }
 
@@ -376,7 +413,7 @@ class BossOne extends Entity {
         const barWidth = 750;
         const barHeight = 15;
         const xOffset = (ctx.canvas.width - barWidth) / 2;
-        const yOffset = 85; // Adjust for your game's UI layout
+        const yOffset = 85;
 
         // Draw the black background
         ctx.fillStyle = "black";
@@ -403,12 +440,56 @@ class BossOne extends Entity {
     }
 
     draw(ctx, game) {
-        let screenX = this.worldX - this.game.camera.x;
-        let screenY = this.worldY - this.game.camera.y;
+        if (this.attackStatus === "Charging" || this.attackStatus === "Preparing to Charge") {
+            const targetCenter = {
+                x: this.targetMarker.worldX + (this.targetMarker.animator.width / 2),
+                y: this.targetMarker.worldY + (this.targetMarker.animator.height / 2),
+            };
 
-        // Draw the player at the calculated screen position
-        this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+            const startPoint = {
+                x: this.worldX + (this.animator.width / 2),
+                y: this.worldY + (this.animator.height / 2),
+            };
 
-        this.boundingBox.draw(ctx, game);
+            const chargeDirection = {
+                x: targetCenter.x - startPoint.x,
+                y: targetCenter.y - startPoint.y,
+            };
+
+            const chargeMagnitude = Math.sqrt(chargeDirection.x ** 2 + chargeDirection.y ** 2);
+
+            // Normalize the charge direction vector
+            chargeDirection.x /= chargeMagnitude;
+            chargeDirection.y /= chargeMagnitude;
+
+            // Use the actual distance to the target marker center as the charge distance
+            const actualChargeDistance = chargeMagnitude;
+
+            // Calculate angle for rotation
+            const angle = Math.atan2(chargeDirection.y, chargeDirection.x);
+
+            // Draw rotated shaded area
+            ctx.save(); // Save the current state of the canvas
+            ctx.translate(startPoint.x - this.game.camera.x, startPoint.y - this.game.camera.y); // Move the origin to the starting point of the charge
+            ctx.rotate(angle); // Rotate the canvas to align with the charge direction
+
+            // If charging, use red fill
+            if (this.attackStatus === "Charging") {
+                // Draw the shaded area (now aligned with the charge direction)
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+            }
+            // Otherwise grey as we prepare to charge
+            else {
+                // Draw the shaded area (now aligned with the charge direction)
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            }
+
+            const shadedHeight = 120; // Height for the shaded area
+            ctx.fillRect(0, -shadedHeight / 2, actualChargeDistance, shadedHeight); // Draw the rectangle
+
+            ctx.restore(); // Restore the canvas to its original state
+        }
+
+        super.draw(ctx, game);
     }
 }

@@ -832,7 +832,7 @@ class Upgrade_System {
         let yIncrement = 24;
 
         // Player Attack Power
-        ctx.fillText("Atk Pow: " + (this.game.player.atkPow / this.game.player.initialAtkPow) * 100 + "%", screenX, screenY);
+        ctx.fillText("Atk Pow: " + Math.round((this.game.player.atkPow / this.game.player.initialAtkPow) * 100) + "%", screenX, screenY);
         // Player Crit Chance
         ctx.fillText("Crit Chance: " + (Math.round((this.game.player.critChance * 100) * 10) / 10) + "%", screenX, screenY+(yIncrement));
         // Player Crit Dmg

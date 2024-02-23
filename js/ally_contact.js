@@ -79,7 +79,7 @@ class Ally_Contact extends Entity {
 
     checkCollisionAndDealDamage() {
 
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         this.game.enemies.forEach((enemy) => {
 

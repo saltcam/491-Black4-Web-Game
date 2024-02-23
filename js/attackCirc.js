@@ -87,13 +87,16 @@ class AttackCirc {
         this.hitEntities = new Set(); // Tracks entities already hit if pulsatingDamage is false
 
         this.damageDealt = false;
+        this.trackToEntity = true;
     }
 
 
     // changes world position to match its attached entity, offset by dx and dy values.
     update() {
-        this.worldX = this.entity.calculateCenter().x + this.dx;
-        this.worldY = this.entity.calculateCenter().y + this.dy;
+        if (this.trackToEntity) {
+            this.worldX = this.entity.calculateCenter().x + this.dx;
+            this.worldY = this.entity.calculateCenter().y + this.dy;
+        }
 
         const currentTime = this.game.elapsedTime;
 

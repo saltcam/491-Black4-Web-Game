@@ -17,7 +17,7 @@ class Map_object extends Entity {
         this.animator.outlineMode = false; // Turn off the outline now that it has been opened
         this.game.UPGRADE_SYSTEM.showWeaponUpgradeScreen();
         this.hasBeenOpened = true;
-        this.openedAtTime = this.game.timer.gameTime;
+        this.openedAtTime = this.game.elapsedTime / 1000;
 
         if (this.arrowPointer) {
             this.arrowPointer.removeFromWorld = true;

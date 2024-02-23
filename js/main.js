@@ -57,6 +57,10 @@ ASSET_MANAGER.queueDownload("./sprites/transparent.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_generic.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_special.png");
 ASSET_MANAGER.queueDownload("./sprites/object_anvil.png");
+ASSET_MANAGER.queueDownload("./sprites/wizard_walk.png");
+ASSET_MANAGER.queueDownload("./sprites/wizard_walk_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/wizard_shooting.png");
+ASSET_MANAGER.queueDownload("./sprites/wizard_shooting_DAMAGED.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");

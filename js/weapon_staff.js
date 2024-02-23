@@ -24,7 +24,7 @@ class Weapon_staff extends Weapon {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         let defaultPrimaryDamage = player.atkPow / 4;
 
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // if true, perform the attack
         if ((currentTime - this.lastPrimaryAttackTime >= this.primaryCool) || cheating) {
@@ -67,7 +67,7 @@ class Weapon_staff extends Weapon {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         let defaultSecondaryDamage = player.atkPow / 2;
 
-        const currentTime = this.game.timer.gameTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // if true, perform the attack
         if ((currentTime - this.lastSecondAttackTime >= this.secondCool) || cheating) {
