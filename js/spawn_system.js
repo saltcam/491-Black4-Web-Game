@@ -10,13 +10,13 @@
  */
 class Spawn_System {
     /** Default Constructor */
-    constructor(game) {
+    constructor(game, difficulty_scale = 1.0) {
         /**
          * Controls how scaled up enemy stats are.
          * Set this to something < 1 to make the enemies easier.
          * Set this to something > 1 to make the enemies harder.
          */
-        this.DIFFICULTY_SCALE = 1.0;
+        this.DIFFICULTY_SCALE = difficulty_scale;
 
         /** Reference to the game engine. */
         this.game = game;

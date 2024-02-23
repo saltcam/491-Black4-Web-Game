@@ -96,7 +96,7 @@ class Portal extends Entity {
         this.game.currMap = this.teleportIndex;
 
         // Reset spawn system on map change
-        this.game.SPAWN_SYSTEM.passiveEnemySpawns = [];
+        this.game.SPAWN_SYSTEM = new Spawn_System(this.game, this.game.SPAWN_SYSTEM.DIFFICULTY_SCALE);
 
         // Remove the portal from the game after entering it
         this.removeFromWorld = true;
