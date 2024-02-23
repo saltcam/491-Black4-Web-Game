@@ -63,7 +63,6 @@ class Spawn_System {
             { enemyType: "contact", name: "Skeleton", maxHP: 75, currHP: 75, atkPow: 10, worldX: 0, worldY: 0,
                 boxWidth: 38/2, boxHeight: 56/2, boxType: "enemy", speed: 60, spritePath: "./sprites/skeleton.png",
                 animXStart: 0.5, animYStart: 0, animW: 70.5, animH: 77, animFCount: 8, animFDur: 0.2, scale: 1.4, exp: -1},
-
         ];
         /** An array of all potential enemies of type 'Enemy_Ranged'. */
         this.rangedEnemyTypes = [
@@ -165,7 +164,7 @@ class Spawn_System {
                 this.game.enemies.length < this.currentMaxEnemies &&
                 (this.game.timer.gameTime - this.lastSpawnTime >= this.baseEnemySpawnInterval)) {
                 this.spawnScalingEnemies();
-                console.log("CURR = " + this.game.enemies.length + ", MAX = " + this.currentMaxEnemies);
+                //console.log("CURR = " + this.game.enemies.length + ", MAX = " + this.currentMaxEnemies);
             }
         }
     }
@@ -196,6 +195,7 @@ class Spawn_System {
             let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
 
             // If this is a ranged enemy wave, temporarily double ranged enemies
+            // if (this.contactEnemy
             if (this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].enemyType === "ranged" && this.maxRangedEnemies === this.initialMaxRangedEnemies) {
                 this.maxRangedEnemies *= 2;
             }

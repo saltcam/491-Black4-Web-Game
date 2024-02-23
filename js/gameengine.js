@@ -1218,7 +1218,6 @@ class GameEngine {
         // Update the elapsed time. (only while un-paused)
         if (!this.isGamePaused) {
             this.elapsedTime = Math.max(((Date.now() - this.startTime) - this.totalPausedTime), 0); // Never set the elapsed time below 0
-            console.log("Game Time(" + this.timer.gameTime + "), Elapsed (" + this.elapsedTime + ")");
         }
 
         // Update enemy collisions

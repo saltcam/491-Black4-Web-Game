@@ -218,7 +218,6 @@ class BossOne extends Entity {
 
                 // First, we need to enter the prepare to charge stance animation
                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/boss_knight_dash.png"), 0, 0, 60, 84, 1, 1);
-                this.targetMarker.animator.pauseAtFrame(-1);
             }
 
             // After this.chargeDelayTime has passed we need to actually enter the charge sprite animation and give the boss its charge movement speed.
@@ -345,7 +344,7 @@ class BossOne extends Entity {
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
 
         this.checkCollisionAndDealDamage();
-    }
+    }p
 
     checkCollisionAndDealDamage() {
         const player = this.game.player;
