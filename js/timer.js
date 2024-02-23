@@ -21,12 +21,5 @@ class Timer {
         this.gameTime += gameDelta;
         return gameDelta;
     }
-
-    togglePause() {
-        this.isPaused = !this.isPaused;
-        if (!this.isPaused) {
-            this.lastTimestamp = Date.now(); // Reset lastTimestamp to avoid jump in gameTime
-        }
-    }
 }
 

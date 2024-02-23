@@ -5,7 +5,7 @@ class Weapon_tome extends Weapon {
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 35),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
             new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 40),
-            new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 25),
+            new Upgrade("Projectile Speed +15%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 25),
             new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_piercing.png", 120),
             new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_piercing.png", 120),
             new Upgrade("Doubletime", "(Unique) Secondary hits 100% more often.", true, "./sprites/upgrade_piercing.png", 120),
@@ -27,7 +27,7 @@ class Weapon_tome extends Weapon {
         // Effectively acts as max pierced targets before deleting projectiles
         this.maxPrimaryHits = 2;
         this.maxSecondaryHits = -1; // -1 Means infinite pierce
-        this.primaryProjectileMovementSpeed = 60;
+        this.primaryProjectileMovementSpeed = 45;
         this.secondaryProjectileMovementSpeed = 3.5;
 
         // Stats tracking
@@ -178,15 +178,11 @@ class Weapon_tome extends Weapon {
                     case "Secondary CD -10%":
                         this.secondCool *= 0.9;
                         break;
-                    // case "Knockback +10%":
-                    //     this.primaryAttackPushbackForce *= 1.1;
-                    //     this.secondaryAttackPushbackForce *= 1.1;
-                    //     break;
                     case "Primary Piercing +3":
                         this.maxPrimaryHits += 3;
                         break;
                     case "Projectile Speed +10%":
-                        this.primaryProjectileMovementSpeed *= 1.1;
+                        this.primaryProjectileMovementSpeed *= 1.15;
                 }
                 // Set generic to 'not active' so it can be re-used/activated in the future
                 this.upgrades[i].active = false;

@@ -1,39 +1,17 @@
 class Exp_Orb extends Entity {
     constructor(game, worldX, worldY, exp) {
-        let size = 0.3 * exp;
-        if (size < 1) {
-            size = 1;
-        }
-        if (size > 15) {
-            size = 15;
-        }
+        let size = Math.max(Math.min(0.3 * exp, 5), 1); // Ensure size is between 1 and 5
         super(1, 1, 0, game, worldX, worldY,
             17, 17, "orb", 0,
             "./sprites/exp_orb.png",
             0, 0, 17, 17, 3, 0.2, size, exp);
-        this.dist = this.game.player.pickupRange;
-        this.removeFromWorld = false;
+        this.maxSpeed = 1000; // Set the maximum speed
+        this.acceleration = 7.5; // Acceleration rate towards the player
+        this.currentSpeed = 0; // Starting speed
+        this.isMovingTowardsPlayer = false; // Indicates whether the orb has started moving towards the player
+        this.distanceToGetConsumed = 25; // How far from the player till he actually 'collects' this exp orb
     }
 
-    updateMoveSpeed() {
-        const targetCenter = this.game.player.calculateCenter();
-        const selfCenter = this.calculateCenter();
-
-        // Calculate direction vector towards the target's center
-        const dirX = targetCenter.x + 16 - selfCenter.x;
-        const dirY = targetCenter.y - selfCenter.y;
-
-        this.dist = Math.sqrt(dirX * dirX + dirY * dirY);
-        let speed = 350 - this.dist;
-        if (this.game.enemies.length === 0 && this.game.roundOver) {
-            speed = 750;
-        }
-
-        if (speed > 0) {
-            this.movementSpeed = speed;
-        }
-
-    }
     update() {
         super.update();
 
@@ -41,27 +19,37 @@ class Exp_Orb extends Entity {
             return;
         }
 
-        const targetDirection = this.calcTargetAngle(this.game.player);
+        // Calculate distance and direction to player
+        const targetCenter = this.game.player.calculateCenter();
+        const selfCenter = this.calculateCenter();
+        const dirX = targetCenter.x - selfCenter.x;
+        const dirY = targetCenter.y - selfCenter.y;
+        this.dist = Math.sqrt(dirX * dirX + dirY * dirY);
 
-        this.updateMoveSpeed();
+        // Check if orb is within pickup range or has already started moving
+        if (this.dist <= this.game.player.pickupRange || this.isMovingTowardsPlayer) {
+            this.isMovingTowardsPlayer = true; // Set flag to true once orb starts moving
+            const normX = dirX / this.dist; // Normalize direction
+            const normY = dirY / this.dist;
 
-        // Apply movement based on the direction and the zombie's speed
-        this.worldX += targetDirection.x * this.movementSpeed * this.game.clockTick;
-        this.worldY += targetDirection.y * this.movementSpeed * this.game.clockTick;
+            // Increase speed with acceleration until it reaches max speed
+            this.currentSpeed += this.acceleration;
+            this.currentSpeed = Math.min(this.currentSpeed, this.maxSpeed);
 
-        // Calculate the scaled center of the sprite
-        const scaledCenterX = this.worldX + (this.animator.width) / 2;
-        const scaledCenterY = this.worldY + (this.animator.height) / 2;
+            // Apply movement
+            this.worldX += normX * this.currentSpeed * this.game.clockTick;
+            this.worldY += normY * this.currentSpeed * this.game.clockTick;
+        }
 
-        // Update the bounding box to be centered around the scaled sprite
-        const boxWidth = this.boundingBox.width;
-        const boxHeight = this.boundingBox.height;
-        this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
-
-        if (this.dist <= 25) {
+        // Collect the orb if close enough to the player
+        if (this.dist <= this.distanceToGetConsumed) {
             this.removeFromWorld = true;
             this.game.player.gainExp(this.exp);
         }
 
+        // If the round is over, collect all remaining exp orbs
+        if (this.game.roundOver) {
+            this.isMovingTowardsPlayer = true;
+        }
     }
 }

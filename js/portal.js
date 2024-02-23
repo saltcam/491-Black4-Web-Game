@@ -53,7 +53,7 @@ class Portal extends Entity {
             this.game.attacks[i].removeFromWorld = true;
         }
 
-        // Delete any lingering 'arrow pointer' entities
+        // Delete any lingering 'arrow pointer' entitiesd
         for (let i = 0; i < this.game.arrowPointers.length; i++) {
             this.game.arrowPointers[i].removeFromWorld = true;
         }
@@ -72,6 +72,7 @@ class Portal extends Entity {
         }
 
         // Reset the game clock to 0
+        this.game.totalPausedTime = 0;
         this.game.elapsedTime = 0;
 
         // Reset player dash cooldown
@@ -95,7 +96,7 @@ class Portal extends Entity {
         this.game.currMap = this.teleportIndex;
 
         // Reset spawn system on map change
-        this.game.SPAWN_SYSTEM = new Spawn_System(this.game);
+        this.game.SPAWN_SYSTEM.passiveEnemySpawns = [];
 
         // Remove the portal from the game after entering it
         this.removeFromWorld = true;

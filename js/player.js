@@ -21,7 +21,7 @@ class Player extends Entity {
             new Upgrade("Movement Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_movement_speed.png"),
             new Upgrade("Attack Damage +7.5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Pickup Range +30%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png"),
-            new Upgrade("Dash Duration +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
+            new Upgrade("Dash Duration +15%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
             new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png")];
@@ -54,7 +54,7 @@ class Player extends Entity {
         this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching
         this.lastWeaponSwitchTime = 0;
         this.controlsEnabled = true;    // If false, player cannot input controls.
-        this.pickupRange = 50;
+        this.pickupRange = 100;
 
         this.menuInvincibility = false; // Auto-set to true for a bit  after exiting a menu, gives iFrames
         this.isDashing = false; // Auto-set to true while dashing, gives iFrames
@@ -94,11 +94,11 @@ class Player extends Entity {
                     case "Attack Damage +7.5%":
                         this.atkPow *= 1.075;
                         break;
-                    case "Pickup Range +20%":
+                    case "Pickup Range +30%":
                         this.pickupRange *= 1.3;
                         break;
-                    case "Dash Duration +10%":
-                        this.dashDuration *= 1.1;
+                    case "Dash Duration +15%":
+                        this.dashDuration *= 1.15;
                         break;
                     case "Crit Damage +20%":
                         this.critDamage += 0.2;

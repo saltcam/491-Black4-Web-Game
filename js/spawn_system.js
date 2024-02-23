@@ -1,9 +1,23 @@
 /**
  * This class will control all enemy spawning in the game.
+ *
+ * The way enemies are spawned in this script is that we spawn a certain enemy type over 30 second waves.
+ * Then, when the next wave triggers, we store the previous wave's enemy in a passive enemy spawn array.
+ * From then on the game will always spawn one enemy of the current wave, and one enemy from ONE of the previous waves.
+ * The enemy chosen from previous waves changes with every spawn that happens.
+ *
+ * On map swaps, we reset only the passive enemy array.
  */
 class Spawn_System {
     /** Default Constructor */
     constructor(game) {
+        /**
+         * Controls how scaled up enemy stats are.
+         * Set this to something < 1 to make the enemies easier.
+         * Set this to something > 1 to make the enemies harder.
+         */
+        this.DIFFICULTY_SCALE = 1.0;
+
         /** Reference to the game engine. */
         this.game = game;
         /** Tracks if the spawn system has initialized. */
@@ -126,6 +140,9 @@ class Spawn_System {
         // Do nothing if game is paused
         if (this.game.isGamePaused) return;
 
+        // Update enemy stats based on DIFFICULTY_SCALE
+        this.updateEnemyStats();
+
         // Handle elite spawn timer
         // Check if this.eliteSpawnTimer time has passed since last elite spawn
         if ((this.game.elapsedTime / 60000) - this.lastEliteSpawnTime >= (this.eliteSpawnTimer/60)) {
@@ -146,6 +163,12 @@ class Spawn_System {
             }
         }
     }
+
+    /** Call this in updade() to keep enemy stats up to date with with latest DIFFICULTY_SCALE value. */
+    updateEnemyStats() {
+
+    }
+
 
     /** Call this method to spawn enemies of increasing difficulty. */
     spawnScalingEnemies() {
