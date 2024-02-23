@@ -25,8 +25,8 @@ class Weapon_scythe extends Weapon {
         this.initialSecondaryCool = this.secondCool;
 
         // How many seconds of delay before echoing attack (when echo slash upgrade is on)
-        this.primaryEchoDelay = 0.25;
-        this.secondaryEchoDelay = 0.5;
+        this.primaryEchoDelay = 0.33;
+        this.secondaryEchoDelay = 0.66;
     }
 
     performPrimaryAttack(player) {
@@ -308,9 +308,8 @@ class Weapon_scythe extends Weapon {
                         if (this.primaryCool === this.initialPrimaryCool && this.secondCool === this.initialSecondaryCool) {
                             this.primaryCool *= 1.3;
                             this.secondCool *= 1.3;
-
-                            break;
                         }
+                        break;
                 }
             }
 

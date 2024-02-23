@@ -594,6 +594,9 @@ class Upgrade_System {
 
     /** Call this to draw menu #0 - 'Choose a Weapon to Upgrade'. */
     drawMenuZero(ctx) {
+        // Also draw player stats menu
+        this.drawPlayerStatsMenu(ctx);
+
         // Handle drawing the text to each upgrade menu entry
         // Set text font properties
         ctx.fillStyle = 'white';
@@ -626,6 +629,9 @@ class Upgrade_System {
 
     /** Call this to draw menu #1 - 'Choose a Weapon Upgrade'. */
     drawMenuOne(ctx) {
+        // Also draw player stats menu
+        this.drawPlayerStatsMenu(ctx);
+
         // Draw menu title
         ctx.font = 'bold 36px Arial';
         ctx.fillText("Choose a " + this.game.player.weapons[this.weaponChoice].name + " Upgrade", (ctx.canvas.width / 2) - 15, 150);
@@ -649,6 +655,9 @@ class Upgrade_System {
 
     /** Call this to draw menu #4 - 'Choose a Player Upgrade'. */
     drawMenuFour(ctx) {
+        // Also draw player stats menu
+        this.drawPlayerStatsMenu(ctx);
+
         // Draw menu title
         ctx.textAlign = 'center';
         ctx.font = 'bold 36px Arial';
@@ -678,6 +687,9 @@ class Upgrade_System {
 
     /** Call this to draw anvil menu #5 - 'Choose a Weapon to Upgrade'. */
     drawMenuFive(ctx) {
+        // Also draw player stats menu
+        this.drawPlayerStatsMenu(ctx);
+
         // Draw menu title
         ctx.font = 'bold 36px Arial';
         ctx.fillText("Choose a Weapon to Upgrade", (ctx.canvas.width / 2) - 15, 150);
@@ -698,6 +710,9 @@ class Upgrade_System {
 
     /** Call this to draw anvil menu #6 - 'Choose Upgrade Type'. */
     drawMenuSix(ctx) {
+        // Also draw player stats menu
+        this.drawPlayerStatsMenu(ctx);
+
         // Draw menu title
         ctx.font = 'bold 36px Arial';
         ctx.fillText("Choose Upgrade Type", (ctx.canvas.width / 2) - 15, 150+70);
@@ -729,6 +744,9 @@ class Upgrade_System {
 
     /** Call this to draw anvil menu #7 - 'Choose a Weapon Upgrade'. */
     drawMenuSeven(ctx) {
+        // Also draw player stats menu
+        this.drawPlayerStatsMenu(ctx);
+
         let scale = .66;
         // Draw menu title
         ctx.font = 'bold 27px Arial';
@@ -778,6 +796,143 @@ class Upgrade_System {
     }
 
     /**
+     * Call this to draw the character/weapon statistics menu.
+     */
+    drawPlayerStatsMenu(ctx) {
+        let scale = 1;
+
+        // Set animator back to original menu sprite sheet
+        this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_player_stats.png"), 0, 0, 259, 394, 1, 1);
+        this.animator.scale = (1.5) * scale;
+
+        // Calculate the center of the screen
+        let screenX = this.game.player.worldX - this.game.camera.x - (this.animator.width / 2);
+        let screenY = this.game.player.worldY - this.game.camera.y - (this.animator.height / 2);
+
+        // Draw the player at the calculated screen position
+        this.animator.drawFrame(this.game.clockTick, ctx, screenX-520, screenY, "right");
+
+        // Draw menu title
+        ctx.font = 'bold 45px Arial';
+        ctx.textAlign = "center";
+        ctx.fillText("Stats", screenX-400, screenY-32);
+
+        // Prepare stats text settings
+        ctx.font = '15px Arial';
+        ctx.textAlign = "left";
+        screenX -= 500;
+        screenY += 45;
+
+        // Set shadow properties
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
+        ctx.shadowBlur = 0; // How much the shadow should be blurred
+        ctx.shadowOffsetX = 1.33; // Horizontal shadow offset
+        ctx.shadowOffsetY = 1.33; // Vertical shadow offset
+
+        let yIncrement = 24;
+
+        // Player Attack Power
+        ctx.fillText("Atk Pow: " + (this.game.player.atkPow / this.game.player.initialAtkPow) * 100 + "%", screenX, screenY);
+        // Player Crit Chance
+        ctx.fillText("Crit Chance: " + (Math.round((this.game.player.critChance * 100) * 10) / 10) + "%", screenX, screenY+(yIncrement));
+        // Player Crit Dmg
+        ctx.fillText("Crit Dmg: " + (Math.round((this.game.player.critDamage * 100) * 10) / 10) + "%", screenX, screenY+(yIncrement * 2));
+        // Player Max Health
+        ctx.fillText("Max HP: " + Math.round(this.game.player.maxHP), screenX, screenY+(yIncrement * 3));
+        // Player Health Regen CD
+        ctx.fillText("Regen: 1 hp / " + (Math.round(this.game.player.healthRegenTime * 10) / 10) + "s", screenX, screenY+(yIncrement * 4));
+
+        // Next column
+        screenX += 140;
+
+        // Player Dash CD
+        ctx.fillText("Dash CD: " + (Math.round(this.game.player.defaultDashCooldown * 10) / 10) + "s", screenX, screenY);
+        // Player Dash Distance
+        ctx.fillText("Dash Dur: " + (Math.round(this.game.player.dashDuration * 10) / 10) + "s", screenX, screenY+(yIncrement));
+        // Player Movement Speed
+        ctx.fillText("Speed: " + Math.round((this.game.player.movementSpeed / this.game.player.initialMovementSpeed) * 100) + "%", screenX, screenY+(yIncrement * 2));
+        // Player Pickup Range
+        ctx.fillText("Pickup Range: " + Math.round((this.game.player.pickupRange / this.game.player.initialPickupRange) * 100) + "%", screenX, screenY+(yIncrement * 3));
+        // Player Pickup Range
+        ctx.fillText("Exp Gain: " + Math.round((this.game.player.expGain / this.game.player.initialExpGain) * 100) + "%", screenX, screenY+(yIncrement * 4));
+
+        // Back to first column
+        screenX -= 140;
+        // Next row
+        screenY += 107;
+
+        // Scythe Attack Size
+        ctx.fillText("Attack Size: " + Math.round((this.game.player.weapons[0].primaryAttackRadius / this.game.player.weapons[0].initialPrimaryAttackRadius) * 100) + "%", screenX, screenY+(yIncrement));
+        // Scythe Primary CD
+        ctx.fillText("Primary CD: " + (Math.round((this.game.player.weapons[0].primaryCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 2));
+        // Scythe Secondary CD
+        ctx.fillText("Secondary CD: " + (Math.round((this.game.player.weapons[0].secondCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 3));
+
+        // Next column
+        screenX += 140;
+
+        // Scythe Knockback force
+        ctx.fillText("Knockback: " + Math.round((this.game.player.weapons[0].primaryAttackPushbackForce / this.game.player.weapons[0].initialPrimaryAttackPushbackForce) * 100) + "%", screenX, screenY+(yIncrement));
+
+        // Back to first column
+        screenX -= 140;
+        // Next row
+        screenY += 90;
+
+        // Tome Attack Size
+        ctx.fillText("Attack Size: " + Math.round((this.game.player.weapons[1].primaryAttackRadius / this.game.player.weapons[1].initialPrimaryAttackRadius) * 100) + "%", screenX, screenY+(yIncrement));
+        // Tome Primary CD
+        ctx.fillText("Primary CD: " + (Math.round((this.game.player.weapons[1].primaryCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 2));
+        // Tome Secondary CD
+        ctx.fillText("Secondary CD: " + (Math.round((this.game.player.weapons[1].secondCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 3));
+
+        // Next column
+        screenX += 140;
+
+        // Tome Piercing
+        ctx.fillText("Piercing: " + this.game.player.weapons[1].maxPrimaryHits, screenX, screenY+(yIncrement));
+        // Tome Projectile Speed
+        ctx.fillText("Proj Speed: " + Math.round((this.game.player.weapons[1].primaryProjectileMovementSpeed / this.game.player.weapons[1].initialPrimaryProjectileMovementSpeed) * 100) + "%", screenX, screenY+(yIncrement * 2));
+
+        // Back to first column
+        screenX -= 140;
+        // Next row
+        screenY += 90;
+
+        // Staff Attack Size
+        ctx.fillText("Attack Size: " + Math.round((this.game.player.weapons[2].primaryAttackRadius / this.game.player.weapons[2].initialPrimaryAttackRadius) * 100) + "%", screenX, screenY+(yIncrement));
+        // Staff Primary CD
+        ctx.fillText("Primary CD: " + (Math.round((this.game.player.weapons[2].primaryCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 2));
+        // Staff Secondary CD
+        ctx.fillText("Secondary CD: " + (Math.round((this.game.player.weapons[2].secondCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 3));
+        // Staff Knockback force (Assuming we only affect primary pushback)
+        ctx.fillText("Knockback: " + Math.round((this.game.player.weapons[2].secondaryAttackPushbackForce / this.game.player.weapons[0].initialSecondaryAttackPushbackForce) * 100) + "%", screenX, screenY+(yIncrement * 4));
+
+        // Next column
+        screenX += 140;
+
+        // Summons' Health
+        ctx.fillText("Summ HP: N/A", screenX, screenY+(yIncrement));
+        // Summons' Speed
+        ctx.fillText("Summ Speed: N/A", screenX, screenY+(yIncrement * 2));
+        // Summons' Dmg
+        ctx.fillText("Summ Dmg: N/A", screenX, screenY+(yIncrement * 3));
+        // Summons' Dmg
+        ctx.fillText("Tomb Chance: N/A", screenX, screenY+(yIncrement * 4));
+
+
+
+        // Reset text font properties
+        ctx.font = '24px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
+        ctx.shadowBlur = 0; // How much the shadow should be blurred
+        ctx.shadowOffsetX = 2; // Horizontal shadow offset
+        ctx.shadowOffsetY = 2; // Vertical shadow offset
+    }
+
+    /**
      * Call this every frame to draw the UI elements.
      * @param ctx The canvas context being passed in.
      */
@@ -808,6 +963,7 @@ class Upgrade_System {
 
         if (this.currentMenu === 0) {
             this.drawMenuZero(ctx);
+            this.drawPlayerStatsMenu(ctx);
         } else if (this.currentMenu === 1) {
             this.drawMenuOne(ctx);
         } else if(this.currentMenu === 4) {

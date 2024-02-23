@@ -66,6 +66,7 @@ ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade_withclosebutton.png")
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade_6options.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade_2options.png");
+ASSET_MANAGER.queueDownload("./sprites/menu_player_stats.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_size.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_reduce_cd.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_knockback.png");

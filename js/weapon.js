@@ -36,6 +36,11 @@ class Weapon {
 
         // list of all upgrade objects tied to the weapon
         this.upgrades = upgrades;
+
+        // Stats tracking
+        this.initialPrimaryAttackRadius = this.primaryAttackRadius;
+        this.initialPrimaryAttackPushbackForce = this.primaryAttackPushbackForce;
+        this.initialSecondaryAttackPushbackForce = this.secondaryAttackPushbackForce;
     }
 
     draw(ctx, slotNum){

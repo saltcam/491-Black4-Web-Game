@@ -65,6 +65,11 @@ class Player extends Entity {
         // Set this to true to give the player iFrames (Frames of Invincibility)
         // Only used when dashing, and right after exiting upgrade menus
         this.invincible = false;
+
+        // For stats tracking
+        this.initialAtkPow = this.atkPow;
+        this.initialPickupRange = this.pickupRange;
+        this.initialExpGain = this.expGain;
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
@@ -178,7 +183,7 @@ class Player extends Entity {
 
         // Calculate the delta time which is defined as the time passed in seconds since the last frame.
         // We will use this to calculate how much we should move the character on this frame.
-        const delta = this.game.clockTick * this.movementSpeed;
+        const delta = this.game.clockTick * this.movementSpeed * (this.isDashing ? this.dashSpeedMultiplier : 1);
 
         this.isMoving = false; // Reset the isMoving flag to false
 
@@ -366,13 +371,11 @@ class Player extends Entity {
 
     // called when the user has a valid dash and presses space bar
     performDash() {
-        this.movementSpeed *= this.dashSpeedMultiplier; // Temporarily increase movement speed
         this.lastDashTime = this.game.timer.gameTime; // Record the start time of the dash
         this.isDashing = true; // Flag to indicate dashing state, this flag also will enable iFrames
     }
 
     endDash() {
-        this.movementSpeed /= this.dashSpeedMultiplier; // Reset movement speed to original
         this.isDashing = false; // Reset dashing state, this flag also will enable iFrames
     }
 

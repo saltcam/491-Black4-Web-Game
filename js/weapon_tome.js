@@ -29,6 +29,9 @@ class Weapon_tome extends Weapon {
         this.maxSecondaryHits = -1; // -1 Means infinite pierce
         this.primaryProjectileMovementSpeed = 60;
         this.secondaryProjectileMovementSpeed = 3.5;
+
+        // Stats tracking
+        this.initialPrimaryProjectileMovementSpeed = this.primaryProjectileMovementSpeed;
     }
 
     performPrimaryAttack(player) {
