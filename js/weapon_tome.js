@@ -34,7 +34,7 @@ class Weapon_tome extends Weapon {
         this.initialPrimaryProjectileMovementSpeed = this.primaryProjectileMovementSpeed;
     }
 
-    performPrimaryAttack(player) {
+    performPrimaryAttack(player, cheating) {
         let doubleShotUpgrade = false;
         let bouncingShotUpgrade = false;
         let doubleShotDamageMultiplier = 0.5;
@@ -50,7 +50,7 @@ class Weapon_tome extends Weapon {
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
-        if (currentTime - this.lastPrimaryAttackTime >= this.primaryCool) {
+        if ((currentTime - this.lastPrimaryAttackTime >= this.primaryCool) || cheating) {
             ASSET_MANAGER.playAsset(this.primarySound);
             const clickPos = this.game.mouse; // Use the current mouse position instead of the click position
 
@@ -97,7 +97,7 @@ class Weapon_tome extends Weapon {
         return newProjectile;
     }
 
-    performSecondaryAttack(player) {
+    performSecondaryAttack(player, cheating) {
 
         let doubletimeUpgrade = false;
         let singularityUpgrade = false;
@@ -118,7 +118,7 @@ class Weapon_tome extends Weapon {
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
-        if (currentTime - this.lastSecondAttackTime >= this.secondCool) {
+        if ((currentTime - this.lastSecondAttackTime >= this.secondCool) || cheating) {
             ASSET_MANAGER.playAsset(this.secondarySound);
             const clickPos = this.game.mouse; // Use the current mouse position instead of the click position
 

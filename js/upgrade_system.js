@@ -612,7 +612,7 @@ class Upgrade_System {
         ctx.fillText("Choose a Weapon to Upgrade", (ctx.canvas.width / 2) - 15, 150);
 
 
-        for (let i = 0; i < this.game.player.weapons.length; i++) {
+        for (let i = 0; i < /*this.game.player.weapons.length*/ 3; i++) {
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset(this.weaponUISprites[i]), 0, 0, 178, 178, 1, 1);
             this.animator.scale = 0.55;
             this.animator.drawFrame(this.game.clockTick, ctx, (ctx.canvas.width / 2) - (this.animator.width * this.animator.scale) - 130, (250 + (150 * i))-72);

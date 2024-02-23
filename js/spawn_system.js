@@ -76,6 +76,12 @@ class Spawn_System {
                 animXStart: 0, animYStart: 0, animW: 60, animH: 92, animFCount: 8, animFDur: 0.2, scale: 1, exp: -1,
                 projectileFreq: 6, projectileSpeed: 12, projectileSize: 20, projectilePulse: false, projectileCount: 3, projectileSpread: 45},
         ];
+        /** An array of all potential enemies of type 'Enemy_Charger'. */
+        this.chargerEnemyTypes = [
+            { enemyType: "charger", name: "AngryDude", maxHP: 47, currHP: 47, atkPow: 6, worldX: 0, worldY: 0, boxWidth: 19/2,
+                boxHeight: 28/2, boxType: "enemy", speed: 72, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
+                animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: -1, chargeTimer: 5}
+        ];
         /** Sets the maximum allowed projectile/ranged enemies (Since too many will be way too hard/annoying) */
         this.maxRangedEnemies = 4
         /** For use later, when we are changing the max ranged enemies. */
@@ -92,7 +98,7 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapOneEnemies = [
-            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
+            this.chargerEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
             this.contactEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
             this.rangedEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
@@ -318,6 +324,14 @@ class Spawn_System {
             else {
                 this.triggerPassiveEnemySpawn();
             }
+        } else if (enemy.enemyType === "charger") {
+            newEnemy = this.game.addEntity(new Enemy_Charger(enemy.name, enemy.maxHP,
+                enemy.currHP, enemy.atkPow, this.game, worldX, worldY,
+                enemy.boxWidth, enemy.boxHeight, enemy.boxType,
+                enemy.speed, enemy.spritePath, enemy.animXStart,
+                enemy.animYStart, enemy.animW, enemy.animH,
+                enemy.animFCount, enemy.animFDur, enemy.scale,
+                enemy.exp, enemy.chargeTimer));
         }
 
         // Spawn an elite if this.spawnElite has been set to true

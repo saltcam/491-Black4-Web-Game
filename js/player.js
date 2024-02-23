@@ -48,6 +48,7 @@ class Player extends Entity {
 
         // weapon handling
         this.allowWeaponSwitch = true;
+        // new Weapon_scytoff(game) // special cheat weapon
         this.weapons = [new Weapon_scythe(game), new Weapon_tome(game), new Weapon_staff(game)];
         // index for current weapon: Weapon_scythe = 0; Weapon_tome = 1; Tome = 2;
         this.currentWeapon = 0;
@@ -254,12 +255,12 @@ class Player extends Entity {
         if (this.controlsEnabled) {
             //asks current weapon if it can attack
             if (this.game.leftMouseDown && currentTime - this.weapons[this.currentWeapon].lastPrimaryAttackTime >= this.weapons[this.currentWeapon].primaryCool) {
-                this.weapons[this.currentWeapon].performPrimaryAttack(this);
+                this.weapons[this.currentWeapon].performPrimaryAttack(this, false);
             }
 
             // Perform the secondary attack off cooldown as long as right click is held.
             if (this.game.rightMouseDown && currentTime - this.weapons[this.currentWeapon].lastSecondAttackTime >= this.weapons[this.currentWeapon].secondCool) {
-                this.weapons[this.currentWeapon].performSecondaryAttack(this);
+                this.weapons[this.currentWeapon].performSecondaryAttack(this, false);
             }
         }
 

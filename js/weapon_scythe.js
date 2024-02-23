@@ -29,7 +29,7 @@ class Weapon_scythe extends Weapon {
         this.secondaryEchoDelay = 0.66;
     }
 
-    performPrimaryAttack(player) {
+    performPrimaryAttack(player, cheating) {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         let defaultPrimaryDamage = player.atkPow / 1.5;
         let defaultDualBladeRadius = this.primaryAttackRadius * .67;
@@ -37,7 +37,7 @@ class Weapon_scythe extends Weapon {
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
-        if (currentTime - this.lastPrimaryAttackTime >= this.primaryCool) {
+        if ((currentTime - this.lastPrimaryAttackTime >= this.primaryCool) || cheating) {
             ASSET_MANAGER.playAsset(this.primarySound);
             const clickPos = this.game.mouse; // Use the current mouse position instead of the click position
 
@@ -171,14 +171,14 @@ class Weapon_scythe extends Weapon {
         }
     }
 
-    performSecondaryAttack(player) {
+    performSecondaryAttack(player, cheating) {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         let defaultSecondaryDamage = player.atkPow * 1.15;
 
         const currentTime = this.game.timer.gameTime;
 
         // if true, perform the attack
-        if (currentTime - this.lastSecondAttackTime >= this.secondCool) {
+        if ((currentTime - this.lastSecondAttackTime >= this.secondCool) || cheating) {
             ASSET_MANAGER.playAsset(this.secondarySound);
             this.lastSecondAttackTime = currentTime;
 
