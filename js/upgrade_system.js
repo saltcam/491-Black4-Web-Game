@@ -963,7 +963,6 @@ class Upgrade_System {
 
         if (this.currentMenu === 0) {
             this.drawMenuZero(ctx);
-            this.drawPlayerStatsMenu(ctx);
         } else if (this.currentMenu === 1) {
             this.drawMenuOne(ctx);
         } else if(this.currentMenu === 4) {
