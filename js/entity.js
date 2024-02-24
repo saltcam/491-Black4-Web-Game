@@ -51,10 +51,27 @@ class Entity {
         this.relocateMode = true; // Does this entity 'relocate' to opposite parts of screen when player gets too far.
         this.outOfBoundsOffset = 250; // Buffer distance outside the camera view to consider for relocation
         this.lastMove = "right";
+
+        // Follow entity stuff
+        this.followedEntity = null;
+        this.followXOffset = 0;
+        this.followYOffset = 0;
+
+        // Rotate to 'look at' entity stuff
+        this.shouldLookAtEntity = false; // Flag to enable looking at the target entity
+        this.rotationAngle = 0; // Rotation angle in radians
+        this.rotationOffset = 0; // Offset for rotation angle adjustment
     }
 
     update() {
-        this.relocate();
+        if (this.followedEntity === null) {
+            this.relocate();
+        }
+        else {
+            // Follow the set entity
+            this.worldX = this.followedEntity.worldX + this.followXOffset;
+            this.worldY = this.followedEntity.worldY + this.followYOffset;
+        }
 
         // Calculate the scaled center of the sprite
         const scaledCenterX = this.worldX + (this.animator.width) / 2;
@@ -62,6 +79,26 @@ class Entity {
 
         // Update the bounding box to be centered around the scaled sprite
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
+    }
+
+    // Call this to pass a separate entity for this entity to match the movement of. Good for god boss with the eyeball entity.
+    followEntity(entity, xOffset, yOffset) {
+        this.followedEntity = entity;
+        this.followXOffset = xOffset;
+        this.followYOffset = yOffset;
+    }
+
+    // Call this to have this entity 'try' to always rotate its sprite to look at the passed entity
+    lookAtEntity(entity, rotationOffset = 0) {
+        this.shouldLookAtEntity = true;
+        this.rotationOffset = rotationOffset;
+
+        // Calculate the angle towards the target entity
+        const targetCenter = entity.calculateCenter();
+        const selfCenter = this.calculateCenter();
+        const dx = targetCenter.x - selfCenter.x;
+        const dy = targetCenter.y - selfCenter.y;
+        this.rotationAngle = Math.atan2(dy, dx) + this.rotationOffset;
     }
 
     // Call this on update to re-locate this entity to the opposite side of the screen of the player if the player moves too far from this enemy
@@ -265,12 +302,32 @@ class Entity {
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
     }
 
+
     draw(ctx, game) {
         let screenX = this.worldX - this.game.camera.x;
         let screenY = this.worldY - this.game.camera.y;
 
-        this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+        if (this.shouldLookAtEntity) {
+            // Save the current context state
+            ctx.save();
 
+            // Translate context to entity's position for rotation
+            ctx.translate(screenX + this.animator.width / 2, screenY + this.animator.height / 2);
+
+            // Rotate the context
+            ctx.rotate(this.rotationAngle);
+
+            // Draw the frame with adjusted coordinates
+            this.animator.drawFrame(this.game.clockTick, ctx, -this.animator.width / 2, -this.animator.height / 2, this.lastMove);
+
+            // Restore the context to its original state
+            ctx.restore();
+        } else {
+            // Draw normally if not rotating
+            this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+        }
+
+        // Draw bounding box if needed
         this.boundingBox.draw(ctx, game);
     }
 }

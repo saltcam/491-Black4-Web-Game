@@ -95,6 +95,7 @@ class BossTwo extends Entity {
         if (this.currHP <= 0)
         {
             this.isDead = true;
+            this.game.killAllEnemies();
         }
 
         const player = this.game.player;

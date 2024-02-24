@@ -160,12 +160,17 @@ class GameEngine {
         }
     }
 
-    /** Call this method to spawn boss one (Knight - Orange Bro). This was made to be a test method. */
+    /** Call this method to spawn boss one (Knight - Orange Bro) */
     spawnBossOne() {
         this.boss = this.addEntity(new BossOne(this, 250, 0));
     }
+    /** Call this method to spawn boss two (Dragon - ???). */
     spawnBossTwo() {
         this.boss = this.addEntity(new BossTwo(this, 250, 0));
+    }
+    /** Call this method to spawn boss three (God - Wrath of God) */
+    spawnBossThree() {
+        this.boss = this.addEntity(new BossThree(this, 250, 0));
     }
 
     /**
@@ -409,7 +414,6 @@ class GameEngine {
         // Clear the canvas.
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        // Draw the background of the map.
         this.drawBackground('./sprites/map_space_background.png', 1, true);
 
         // Draw the map texture.
@@ -1007,8 +1011,8 @@ class GameEngine {
 
         // Apply parallax effect if enabled
         if (enableParallax && this.player) {
-            const parallaxFactorX = 0.15; // Adjusted lower for a more subtle effect
-            const parallaxFactorY = 0.15; // Adjusted lower for a more subtle effect
+            const parallaxFactorX = 0.23; // Adjust lower for a more subtle effect
+            const parallaxFactorY = 0.23; // Adjust lower for a more subtle effect
             offsetX = Math.round(this.player.worldX * parallaxFactorX) % textureWidth;
             offsetY = Math.round(this.player.worldY * parallaxFactorY) % textureHeight;
         }
@@ -1038,7 +1042,8 @@ class GameEngine {
         if ((this.elapsedTime / 60000) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss && this.currMap === 1) {
             this.spawnBossOne();
         } else if ((this.elapsedTime / 60000) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss && this.currMap === 2) {
-            this.spawnBossTwo();
+            //this.spawnBossTwo();
+            this.spawnBossThree(); // Until boss 2 is ready, or map 3 is implemented
         }
 
         // Update entities only while the game is un-paused.
@@ -1318,6 +1323,12 @@ class GameEngine {
 
         // Update Spawn_System (Spawn enemies)
         this.SPAWN_SYSTEM.update();
+    }
+
+    killAllEnemies() {
+        this.enemies.forEach(enemy => {
+           enemy.currHP = 0;
+        });
     }
 
     respondToCollision(enemy1, enemy2) {

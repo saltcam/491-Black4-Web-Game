@@ -127,7 +127,7 @@ class BossOne extends Entity {
             this.targetMarker.removeFromWorld = true;
 
             this.removeFromWorld = true;
-
+            this.game.killAllEnemies();
             return;
         }
 
@@ -217,7 +217,7 @@ class BossOne extends Entity {
         }
 
         // Check if it's time to potentially enter an attack mode
-        if ((!this.enterChargeMode && !this.enterGroundSmashMode) && currentTime - this.lastAttackCheckTime >= this.attackCheckInterval) {
+        if ((!this.enterChargeMode && !this.enterGroundSmashMode) && currentTime - this.lastAttackCheckTime >= this.attackModeCooldown) {
             const bossCenterX = this.worldX + this.animator.width/2;
             const bossCenterY = this.worldY + this.animator.height/2;
 

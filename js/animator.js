@@ -19,6 +19,7 @@ class Animator {
         // Outline stuff
         this.outlineMode = false;
         this.outlineColor = 'yellow';
+        this.outlineBlur = 10; // Adjust for desired glow size
     };
 
     // Call this to tell the animator to pause at the given frame.
@@ -69,7 +70,7 @@ class Animator {
 
         // Apply a outline glow effect (if on)
         if (this.outlineMode) {
-            ctx.shadowBlur = 10; // Adjust for desired glow size
+            ctx.shadowBlur = this.outlineBlur;
             ctx.shadowColor = this.outlineColor; // Adjust for desired glow color
         }
 

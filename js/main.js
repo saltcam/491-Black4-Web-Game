@@ -65,6 +65,14 @@ ASSET_MANAGER.queueDownload("./sprites/boar_walk_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/boar_walk.png");
 ASSET_MANAGER.queueDownload("./sprites/boar_charge.png");
 ASSET_MANAGER.queueDownload("./sprites/boar_charge_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/god_idle.png");
+ASSET_MANAGER.queueDownload("./sprites/god_idle_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/god_walk.png");
+ASSET_MANAGER.queueDownload("./sprites/god_walk_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/god_wings.png");
+ASSET_MANAGER.queueDownload("./sprites/god_wings_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/god_eye.png");
+ASSET_MANAGER.queueDownload("./sprites/god_eye_DAMAGED.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
