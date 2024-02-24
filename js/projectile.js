@@ -13,6 +13,8 @@ class Projectile extends Entity{
             pushbackForce,
             spriteRotationSpeed, attackTick));
 
+        this.duration = duration * 60;
+
         this.maxHits = -1;   // Effectively how many targets can this projectile pierce through, -1 means infinite hits
         this.bouncesLeft = 0; // How many bounces this projectile has left
         this.speed = speed;
@@ -84,6 +86,11 @@ class Projectile extends Entity{
     update() {
         super.update();
 
+        if (this.duration < 0) {
+            this.removeFromWorld = true;
+        }
+        // TODO please convert this strategy to work with the timer so it behaves on all frame rates
+        this.duration--;
         // Delete this projectile when its attack circle is deleted.
         if (this.attackCirc.removeFromWorld) {
             this.removeFromWorld = true;
@@ -104,6 +111,7 @@ class Projectile extends Entity{
         // This makes sure that the projectile moves at a consistent speed of 200 units/second when given the same movementSpeed value
         this.worldX += this.angleX * this.movementSpeed * deltaTime;
         this.worldY += this.angleY * this.movementSpeed * deltaTime;
+
     }
 
     draw(ctx, game) {
