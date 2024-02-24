@@ -358,7 +358,10 @@ class GameEngine {
             }
         } else if (entity.boundingBox.type === "ally") {
             this.allies.push(entity);
-        } else if (entity.boundingBox.type.includes("attack") || entity.boundingBox.type.includes("Attack")) {
+        } else if (entity.boundingBox.type.toLowerCase().includes("attack")) {
+            // if (entity instanceof AttackCirc) {
+            //     console.log(entity.entity.name + " has spawned an attack circle.");
+            // }
             this.attacks.push(entity);
         } else if (entity.boundingBox.type === "object") {
             this.objects.push(entity);
@@ -1145,7 +1148,7 @@ class GameEngine {
                         let wasKilledByExplosion = false;
 
                         this.attacks.forEach(attack => {
-                            if (attack.type === "explosionAttack" && attack.collisionDetection(this.enemies[i].boundingBox)) {
+                            if (attack.type === "playerAttack_ExplosionAttack" && attack.collisionDetection(this.enemies[i].boundingBox)) {
                                 wasKilledByExplosion = true;
                             }
                         });
@@ -1196,6 +1199,15 @@ class GameEngine {
             // Remove 'attack' entities that are marked for deletion.
             for (let i = this.attacks.length - 1; i >= 0; --i) {
                 if (this.attacks[i].removeFromWorld) {
+                    // if (this.attacks[i] instanceof AttackCirc) {
+                    //     console.log("game.update() is DELETING an attack spawned from" + this.attacks[i].entity.name + ".");
+                    // }
+
+                    // Remove the reference to this attack circle if it was summoned via projectile
+                    if (this.attacks[i] instanceof AttackCirc && this.attacks[i].entity instanceof Projectile) {
+                        this.attacks[i].entity.attackCirc = null;
+                    }
+
                     this.attacks.splice(i, 1);
                 }
             }
@@ -1291,14 +1303,13 @@ class GameEngine {
         }
 
         // Loop through 'attack' entities and set removeFromWorld flags.
-        for (let i = 0; i < this.attacks.length; i++) {
-            // Removes any attack circles if their duration is depleted.
-            // Or delete them if their attacker is being deleted too.
-            if(this.attacks[i].duration <= 0 || (this.attacks[i].entity && this.attacks[i].entity.removeFromWorld)) {
-                this.attacks[i].removeFromWorld = true;
-            }
-
-        }
+        // for (let i = 0; i < this.attacks.length; i++) {
+        //     // Removes any attack circles if their duration is depleted.
+        //     // Or delete them if their attacker is being deleted too.
+        //     if(this.attacks[i].duration <= 0 || (this.attacks[i].entity && this.attacks[i].entity.removeFromWorld)) {
+        //         this.attacks[i].removeFromWorld = true;
+        //     }
+        // }
 
         // Check if player is dead, if so: mark player for deletion.
         if (this.player && this.player.isDead) {

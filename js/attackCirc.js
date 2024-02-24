@@ -8,8 +8,8 @@ class AttackCirc {
      * @param radius    The radius of the attack
      * @param type 'playerAttack': does damage when colliding with enemy boundingBox
      *              'enemyAttack': does damage when colliding with player boundingBox
-     *              'necromancyAttack': does damage when colliding with tombstone and enemy boundingBox
-     *              'explosionAttack': does damage when colliding with tombstones and enemy bounding boxes. Meant to chain react.
+     *              'playerAttack_NecromancyAttack': does damage when colliding with tombstone and enemy boundingBox
+     *              'playerAttack_ExplosionAttack': does damage when colliding with tombstones and enemy bounding boxes. Meant to chain react.
      * @param dx    x-offset from parent entity
      * @param dy    y-offset from parent entity
      * @param duration  How long in frames the attack animation stays on screen
@@ -43,17 +43,17 @@ class AttackCirc {
         this.drawCircle = false;
 
         // When this attack circle came to life
-        this.startTime = game.elapsedTime;
+        this.startTime = game.elapsedTime / 1000;
 
         // Duration of the attack circle in seconds
         this.duration = duration;
 
         // Handle delayed attack logic
         if (this.delayedAttackDamage !== 0) {
-            this.endTime = this.startTime + (duration * 1000);
-            this.delayedEndTime = this.endTime + (0.66 * 1000);
+            this.endTime = this.startTime + (duration);
+            this.delayedEndTime = this.endTime + (0.66);
         } else {
-            this.endTime = this.startTime + (duration * 1000);
+            this.endTime = this.startTime + (duration);
         }
 
         // Assign an attack sprite if we were passed one
@@ -108,7 +108,7 @@ class AttackCirc {
         const currentTime = this.game.elapsedTime / 1000;
 
         // increase in size each frame if of type explosion
-        if (this.type === "explosionAttack" && (currentTime - this.lastGrowthTime) >= this.growthCooldown) {
+        if (this.type === "playerAttack_ExplosionAttack" && ((currentTime - this.lastGrowthTime) >= this.growthCooldown)) {
             this.radius += EXPLOSION_GROWTH;
             this.lastGrowthTime = currentTime;
         }
@@ -120,6 +120,7 @@ class AttackCirc {
                 this.endTime = this.delayedEndTime;
                 this.delayedAttackDamage = 0;
             } else {
+                //console.log("AttackCirc: currentTime(" + currentTime + ") < endTime(" + this.endTime + ") so setting removeFromWorld!");
                 this.removeFromWorld = true;
                 return;
             }
@@ -149,11 +150,11 @@ class AttackCirc {
             });
 
             //handles collisions with tombstones
-            if (["necromancyAttack", "explosionAttack"].includes(this.type)) {
+            if (this.type === "playerAttack_NecromancyAttack" || this.type === "playerAttack_ExplosionAttack") {
                 this.game.objects.forEach((object) => {
                     if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
                         switch (this.type) {
-                            case "necromancyAttack":
+                            case "playerAttack_NecromancyAttack":
                                 let enemyClass = Math.floor(Math.random() * 2);
                                 switch(enemyClass){
                                     case 0:
@@ -178,7 +179,7 @@ class AttackCirc {
                                 object.removeFromWorld = true;
                                 this.lastAttackTime = currentTime;
                                 break;
-                            case "explosionAttack":
+                            case "playerAttack_ExplosionAttack":
                                 object.willExplode(this);
                                 //object.removeFromWorld = true;
                                 this.lastAttackTime = currentTime;
@@ -212,8 +213,8 @@ class AttackCirc {
         else if (this.pulsatingDamage && this.attackDamage !== 0 && (currentTime - this.lastAttackTime >= this.attackCooldown)) { // Convert attackCooldown to milliseconds
             this.damageDealt = false; // Flag to track if damage was dealt
 
-            // Handling different player vs enemy attack types
-            if (["playerAttack", "necromancyAttack", "explosionAttack"].includes(this.type)) {
+            // Handling player vs enemy pulsating attack damage
+            if (this.type.includes("playerAttack")) {
                 this.game.enemies.forEach(enemy => {
                     if (this.collisionDetection(enemy.boundingBox) /*&& (enemy.boundingBox.type !== "ally")*/) {
                         if (this.attackDamage > 0) {
@@ -233,7 +234,7 @@ class AttackCirc {
                     }
                 });
             }
-            // Handle enemy vs player pulsating damage attack
+            // Handle enemy vs player pulsating attack damage
             else if (this.type.includes("enemyAttack") && this.collisionDetection(this.game.player.boundingBox)) {
                 if (this.attackDamage > 0) this.game.player.takeDamage(this.attackDamage);
                 else if (this.attackDamage < 0) this.game.player.heal(-this.attackDamage);
@@ -290,9 +291,10 @@ class AttackCirc {
     }
 
     draw(ctx) {
-        const currentTime = this.game.elapsedTime;
+        const currentTime = this.game.elapsedTime / 1000;
         const lifeProgress = (currentTime - this.startTime) / (this.endTime - this.startTime);
         const opacity = Math.max(0, Math.min(1, 1 - lifeProgress)); // Ensure opacity is between 0 and 1
+        //console.log("Opacity = " + opacity);
 
         // Draw the circle indicator for attacks if no sprite
         if (this.game.debugMode || this.drawCircle) {
@@ -346,6 +348,7 @@ class AttackCirc {
             }
 
             if (opacity === 0) {
+                //console.log("AttackCirc is deleting settings its own removeFromWorld because OP===0");
                 this.removeFromWorld = true;
             }
 

@@ -55,7 +55,7 @@ class Map_object extends Entity {
         // Do we want to take more info from player here?
         if (this.isExploding) {
             let newProjectile = this.game.addEntity(new Projectile(this.game, this.explosion.attackDamage,
-                this.worldX, this.worldY, 10, 10, "explosionAttack", 0,
+                this.worldX, this.worldY, 10, 10, "playerAttack_ExplosionAttack", 0,
                 "./sprites/transparent.png",
                 0, 0, 17, 17, 3, 0.2, 0.01, 0, 0,
                 this.game.player.weapons[2].secondaryAttackDuration, 2, 5, 0, 1));

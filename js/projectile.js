@@ -1,8 +1,10 @@
 class Projectile extends Entity{
     constructor(game, atkPow, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, angleX, angleY, duration, radius, pushbackForce, spriteRotationSpeed, attackTick) {
         super(1, 1, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, 0);
+        this.name = "Projectile"; // For debug logging
         this.angleX = angleX;
         this.angleY = angleY;
+        //console.log("Projectile summoned 1 attack circle!");
         this.attackCirc = this.game.addEntity(new AttackCirc(this.game, this,
             radius,
             boxType,
@@ -12,8 +14,6 @@ class Projectile extends Entity{
             atkPow, 0,
             pushbackForce,
             spriteRotationSpeed, attackTick));
-
-        this.duration = duration * 60;
 
         this.maxHits = -1;   // Effectively how many targets can this projectile pierce through, -1 means infinite hits
         this.bouncesLeft = 0; // How many bounces this projectile has left
@@ -33,8 +33,9 @@ class Projectile extends Entity{
                 this.updateDirection(newTarget);
             }
         } else {
-            this.removeFromWorld = true;
+            console.log("Projectile is setting it's child attack circle removeFromWorld! ID#3");
             this.attackCirc.removeFromWorld = true;
+            this.removeFromWorld = true;
         }
     }
 
@@ -86,22 +87,21 @@ class Projectile extends Entity{
     update() {
         super.update();
 
-        if (this.duration < 0) {
+        if (this.attackCirc === null) {
+            console.log("Projectile is setting it's child attack circle removeFromWorld! ID#1");
+            this.attackCirc.removeFromWorld = true;
             this.removeFromWorld = true;
         }
-        // TODO please convert this strategy to work with the timer so it behaves on all frame rates
-        this.duration--;
         // Delete this projectile when its attack circle is deleted.
-        if (this.attackCirc.removeFromWorld) {
+        else if (this.attackCirc.removeFromWorld) {
             this.removeFromWorld = true;
-            return
         }
 
         // If we hit our max hits, then delete this projectile and it's attack circ
         if (this.maxHits === 0) {
-            this.removeFromWorld = true;
+            console.log("Projectile is setting it's child attack circle removeFromWorld! ID#2");
             this.attackCirc.removeFromWorld = true;
-            return;
+            this.removeFromWorld = true;
         }
 
         // Calculate the delta time for consistent movement across different frame rates

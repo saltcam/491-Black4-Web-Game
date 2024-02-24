@@ -18,9 +18,11 @@ class Weapon_tome extends Weapon {
             0, 0,
             1, 1,
             20, 75,
-            3, 5,
+            1.5, 3.5,
             "./sprites/Tome.png",
             "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40, upgrades);
+
+        this.name = "Tome"; // For debug logging
 
         // Save these values for calculations later
         this.initialPrimaryAttackRadius = this.primaryAttackRadius;
@@ -109,6 +111,7 @@ class Weapon_tome extends Weapon {
 
     addPrimaryProjectile(player, dx, dy, damageMultiplier) {
         let defaultPrimaryDamage = player.atkPow * damageMultiplier;
+        //console.log("Tome Primary summoned a projectile!");
         let newProjectile = this.game.addEntity(new Projectile(this.game, defaultPrimaryDamage,
             player.worldX, player.worldY, 10, 10, "playerAttack_TomeAttack", this.primaryProjectileMovementSpeed,
             "./sprites/MagicBall.png",
@@ -172,6 +175,7 @@ class Weapon_tome extends Weapon {
 
             }
 
+            //console.log("Tome Secondary summoned a projectile!");
             let newProjectile = this.game.addEntity(new Projectile(this.game, defaultSecondaryDamage,
                 player.worldX, player.worldY, 10, 10, "playerAttack_TomeAttack", this.secondaryProjectileMovementSpeed,
                 "./sprites/ElectricOrb.png",

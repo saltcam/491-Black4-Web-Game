@@ -15,6 +15,8 @@ class Weapon_staff extends Weapon {
             "./sprites/NecromancyStaff.png",
             "./sounds/SE_staff_secondary.mp3", "./sounds/SE_staff_primary.mp3", 26, 70, upgrades);
 
+        this.name = "Staff"; // For debug logging
+
         // Save these values for calculations later (for sprite scaling)
         this.initialPrimaryAttackRadius = 115;
         this.initialSecondaryAttackRadius = 2;
@@ -55,7 +57,7 @@ class Weapon_staff extends Weapon {
             this.lastPrimaryAttackTime = currentTime;
 
             let newProjectile = this.game.addEntity(new Projectile(this.game, defaultPrimaryDamage,
-                xWorld + 7, yWorld + 7, 10, 10, "necromancyAttack", 0,
+                xWorld + 7, yWorld + 7, 10, 10, "playerAttack_NecromancyAttack", 0,
                 "./sprites/exp_orb.png",
                 0, 0, 17, 17, 3, 0.2, 13 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), 0, 0,
                 this.primaryAttackDuration, this.primaryAttackRadius, this.primaryAttackPushbackForce, 0, 1));
@@ -98,7 +100,7 @@ class Weapon_staff extends Weapon {
             this.lastSecondAttackTime = currentTime;
 
             let newProjectile = this.game.addEntity(new Projectile(this.game, defaultSecondaryDamage,
-                xWorld + 7, yWorld + 7, 10, 10, "explosionAttack", 0,
+                xWorld + 7, yWorld + 7, 10, 10, "playerAttack_ExplosionAttack", 0,
                 "./sprites/transparent.png",
                 0, 0, 17, 17, 3, 0.001, 13 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), 0, 0,
                 this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 1));
