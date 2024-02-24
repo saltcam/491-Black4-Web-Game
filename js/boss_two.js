@@ -1,91 +1,68 @@
-class Enemy_Ranged extends Entity {
-    /**
-     *
-     * @param name
-     * @param maxHP
-     * @param currHP
-     * @param atkPow
-     * @param game
-     * @param worldX
-     * @param worldY
-     * @param boxWidth
-     * @param boxHeight
-     * @param boxType
-     * @param speed
-     * @param spritePath
-     * @param shootSpritePath
-     * @param animXStart
-     * @param animYStart
-     * @param animW
-     * @param animH
-     * @param animFCount
-     * @param animFDur
-     * @param scale
-     * @param shootAnimXStart
-     * @param shootAnimYStart
-     * @param shootAnimW
-     * @param shootAnimH
-     * @param shootAnimFCount
-     * @param shootAnimFDur
-     * @param shootScale
-     * @param exp
-     * @param projectileFreq how often the entity fires its attack pattern
-     * @param projectileSpeed speed of the projectile
-     * @param projectileSize how big each bullet is
-     * @param projectilePulse if the projectile should be pulsating
-     * @param projectileCount number of projectiles fired in an attack cycle
-     * @param projectileSpread complete range for projectiles to be fired. the projectiles will be shot evenly within this range (0 means no difference and they fire in a straight line)
-     * @param shootRange
-     */
-    constructor(name, maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath,
-                shootSpritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale,
-                shootAnimXStart, shootAnimYStart, shootAnimW,
-                shootAnimH, shootAnimFCount, shootAnimFDur,
-                shootScale, exp, projectileFreq, projectileSpeed, projectileSize, projectilePulse,
-                projectileCount, projectileSpread, fleeDist, approachDist, shootRange = 375) {
-        super(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp);
+class BossTwo extends Entity {
 
-        this.name = name;
-        this.shootRange = shootRange;
+    constructor(game, worldX, worldY) {
+        super(1500, 1500, 20,
+            game, worldX, worldY,
+            20, 35, "enemyBoss",
+            400,
+            "./sprites/boss_dragon_walk.png",
+            0, 0, 542/4, 98, 4, 1, 3.5,
+            -1);
+
+        this.name = "Gold Dragon the Dreadful";
+        this.shootRange = 1000;
         this.lastMove = "right"; // Default direction
         this.isMoving = false;  // Is the character currently moving?
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
         this.boundingBox.drawBoundingBox = false;
 
         // Properties to track cooldown of being able to damage the player
-        this.projectileAttackCooldown = projectileFreq;    // in seconds
+        this.projectileAttackCooldown = 0.5;    // in seconds
         this.attackCooldown = 1;
         this.lastAttackTime = 0;    // time since last attack
 
         this.pushbackVector = { x: 0, y: 0 };
         this.pushbackDecay = 0.9; // Determines how quickly the pushback force decays
 
-        this.projectileSpeed = projectileSpeed;
-
-        this.projectileSize = projectileSize;
-        this.pulse = projectilePulse;
-        this.projectileCount = projectileCount;
-        this.projectileSpread = projectileSpread;
+        this.projectileSpeed = 45;
+        this.projectileSize = 25;
+        this.pulse = false;
+        this.projectileCount = 5;
+        this.projectileSpread = 90; // the angle of range the projectiles are fired in evenly
 
         // For shooting sprite change
-        this.spritePath = spritePath;
-        this.animXStart = animXStart;
-        this.animYStart = animYStart;
-        this.animW = animW;
-        this.animH = animH;
-        this.animFCount = animFCount;
-        this.animFDur = animFDur;
-        this.shootingSpritePath = shootSpritePath;
-        this.shootingAnimXStart = shootAnimXStart;
-        this.shootingAnimYStart = shootAnimYStart;
-        this.shootingAnimW = shootAnimW;
-        this.shootingAnimH = shootAnimH;
-        this.shootingAnimFCount = shootAnimFCount;
-        this.shootingAnimFDur = shootAnimFDur;
-        this.isShooting = false; // Flag to indicate if shooting animation is active
+        this.spritePath = "./sprites/boss_dragon_walk.png";
+        this.animXStart = 0;
+        this.animYStart = 0;
+        this.animW = 524/4;
+        this.animH = 98;
+        this.animFCount = 4;
+        this.animFDur = 1;
+        this.shootingSpritePath = "./sprites/fireball.png";
+        //this.shootingAnimXStart = shootAnimXStart;
+        //this.shootingAnimYStart = shootAnimYStart;
+        //this.shootingAnimW = shootAnimW;
+        //this.shootingAnimH = shootAnimH;
+        //this.shootingAnimFCount = shootAnimFCount;
+        //this.shootingAnimFDur = shootAnimFDur;
+        //this.isShooting = false; // Flag to indicate if shooting animation is active
 
-        this.fleeDist = fleeDist;
-        this.approachDist = approachDist;
+        this.fleeDist = 0;
+        this.approachDist = 1000;
+
+        // normal = moving around, firing some projectiles occasionally
+        // roaring = staying put, shaking a little, not firing
+        // attacking = locked in attack animation cycle, casting special attack pattern
+        this.mode = "normal";
+        // 0 = spread of 3 projectiles to player
+        // 1 = more random fire aimed near player
+        // 2 = light 360 spread
+        // 3 = giant slow pulse ball
+        // 4 = very thicc 360 spread, the final attack
+        this.pattern = 0;
+
+        this.anchorX = this.worldX;
+        this.anchorY = this.worldY;
     }
 
     applyPushback(forceX, forceY) {
@@ -175,12 +152,12 @@ class Enemy_Ranged extends Entity {
         let dist = Math.sqrt(dirX * dirX + dirY * dirY);
         // console.log("dist: " + dist);
 
-        if (dist > this.approachDist) {
+        if (dist > this.approachDist && this.mode === "normal") {
             // console.log("approach");
             spacing = 1;
-        } else if (dist < this.fleeDist) {
+        } else if (dist < this.fleeDist && this.mode !== "normal") {
             // console.log("flee");
-            spacing = -2;
+            spacing = 0;
         } else if (dist > this.fleeDist && dist < this.approachDist) {
             // console.log("stay put");
             spacing = 0;
@@ -195,7 +172,7 @@ class Enemy_Ranged extends Entity {
 
         // Check collision and cooldown
         if (this.boundingBox.isColliding(player.boundingBox) && currentTime - this.lastAttackTime >= this.attackCooldown) {
-            console.log("Collision!");
+            //console.log("Collision!");
             player.takeDamage(this.atkPow / 3);
             this.lastAttackTime = currentTime; // Update last attack time
         }
@@ -203,22 +180,22 @@ class Enemy_Ranged extends Entity {
     castProjectile() {
         let currentTime = this.game.elapsedTime / 1000;
         if (currentTime - this.lastAttackTime >= this.projectileAttackCooldown) {
-            console.log("SHOOTING");
+            //console.log("SHOOTING");
             // Switch to shooting animation
-            this.isShooting = true;
+            //this.isShooting = true;
 
             // Switch to shoot animation sprite if this enemy has one, otherwise ignore and shoot the projectile
             if (this.shootingSpritePath !== null && this.animator.spritesheet !== ASSET_MANAGER.getAsset(this.shootingSpritePath)) {
-                this.animator.changeSpritesheet(
-                    ASSET_MANAGER.getAsset(this.shootingSpritePath),
-                    this.shootingAnimXStart,
-                    this.shootingAnimYStart,
-                    this.shootingAnimW,
-                    this.shootingAnimH,
-                    this.shootingAnimFCount,
-                    this.shootingAnimFDur
-                );
-                this.movementSpeed = 0;
+                // this.animator.changeSpritesheet(
+                //     ASSET_MANAGER.getAsset(this.shootingSpritePath),
+                //     this.shootingAnimXStart,
+                //     this.shootingAnimYStart,
+                //     this.shootingAnimW,
+                //     this.shootingAnimH,
+                //     this.shootingAnimFCount,
+                //     this.shootingAnimFDur
+                // );
+                // this.movementSpeed = 0;
 
                 // Set a timeout to revert to original animation after shooting ends
                 this.game.setManagedTimeout(() => {
@@ -273,21 +250,37 @@ class Enemy_Ranged extends Entity {
         }
     }
 
-    revertToOriginalSprite() {
-        this.isShooting = false; // Reset shooting flag
+    changeMode(modeNum){
+        switch (modeNum) {
+            case "normal":
+                this.worldX = this.anchorX;
+                this.worldY = this.anchorY;
+                this.animator.changeSpritesheet(
+                    ASSET_MANAGER.getAsset("./sprites/boss_dragon_walk.png"),
+                    0, 0,  542/4, 98, 4, 1);
+                break;
+            case "roaring":
+                this.anchorX = this.worldX;
+                this.anchorY = this.worldY;
+                this.animator.changeSpritesheet(
+                    ASSET_MANAGER.getAsset("./sprites/boss_dragon_roar.png"),
+                    0, 0, 144, 98, 1, 1);
+                break;
+            case "attacking" :
+                // TODO update the sprite info
+                this.worldX = this.anchorX;
+                this.worldY = this.anchorY;
+                this.animator.changeSpritesheet(
+                    ASSET_MANAGER.getAsset("./sprites/boss_dragon_roar.png"),
+                    0, 0, 698, 124, 98, 4);
+                break;
+        }
+    }
 
-        console.log("Reverting...");
-
-        //this.animator = new Animator(this.game, this.spritePath, this.animXStart)
-        // Switch back to original animation
-        this.animator.changeSpritesheet(
-            ASSET_MANAGER.getAsset(this.spritePath),
-            this.animXStart,
-            this.animYStart,
-            this.animW,
-            this.animH,
-            this.animFCount,
-            this.animFDur
-        );
+    shake() {
+        if (this.mode === "roaring") {
+            this.worldX += this.anchorX + Math.floor((Math.random() * 10)) - Math.floor((Math.random() * 10));
+            this.worldY += this.anchorY + Math.floor((Math.random() * 10)) - Math.floor((Math.random() * 10));
+        }
     }
 }

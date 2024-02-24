@@ -17,6 +17,9 @@ class Projectile extends Entity{
         this.bouncesLeft = 0; // How many bounces this projectile has left
         this.speed = speed;
         this.hitTargets = new Set();
+
+        // For growing sprites
+        this.initialScale = this.animator.scale;
     }
 
     bounceToNextTarget() {
@@ -101,5 +104,20 @@ class Projectile extends Entity{
         // This makes sure that the projectile moves at a consistent speed of 200 units/second when given the same movementSpeed value
         this.worldX += this.angleX * this.movementSpeed * deltaTime;
         this.worldY += this.angleY * this.movementSpeed * deltaTime;
+    }
+
+    draw(ctx, game) {
+        // If this attack type.includes("playerAttack_TomeAttack")
+        this.game.player.weapons[1].upgrades.forEach(upgrade => {
+            if (upgrade.name === "Expansion" && upgrade.active
+                && this.attackCirc.type.includes("playerAttack_TomeAttack")) {
+                if (this.attackCirc.radius !== this.attackCirc.savedRadius) {
+                    this.animator.scale = this.initialScale * (this.attackCirc.radius / this.attackCirc.initialRadius);
+                    this.attackCirc.savedRadius = this.attackCirc.radius;
+                }
+            }
+        });
+
+        super.draw(ctx, game);
     }
 }

@@ -61,6 +61,10 @@ ASSET_MANAGER.queueDownload("./sprites/wizard_walk.png");
 ASSET_MANAGER.queueDownload("./sprites/wizard_walk_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/wizard_shooting.png");
 ASSET_MANAGER.queueDownload("./sprites/wizard_shooting_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/boar_walk_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/boar_walk.png");
+ASSET_MANAGER.queueDownload("./sprites/boar_charge.png");
+ASSET_MANAGER.queueDownload("./sprites/boar_charge_DAMAGED.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
@@ -119,7 +123,9 @@ ASSET_MANAGER.queueDownload("./sprites/skeleton.png");
 ASSET_MANAGER.queueDownload("./sprites/skeleton_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/wizard.png");
 ASSET_MANAGER.queueDownload("./sprites/wizard_DAMAGED.png");
-
+ASSET_MANAGER.queueDownload("./sprites/boss_dragon_walk.png");
+ASSET_MANAGER.queueDownload("./sprites/boss_dragon_roar.png");
+ASSET_MANAGER.queueDownload("./sprites/fireball.png");
 
 //sounds
 ASSET_MANAGER.queueDownload("./sounds/SE_scythe_primary.mp3");

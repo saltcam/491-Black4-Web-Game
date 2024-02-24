@@ -88,6 +88,13 @@ class AttackCirc {
 
         this.damageDealt = false;
         this.trackToEntity = true;
+
+        this.lastGrowthTime = 0;
+        this.growthCooldown = 0.00001;
+
+        // For growing sprites
+        this.initialRadius = this.radius;
+        this.savedRadius = this.radius;
     }
 
 
@@ -98,14 +105,15 @@ class AttackCirc {
             this.worldY = this.entity.calculateCenter().y + this.dy;
         }
 
-        const currentTime = this.game.elapsedTime;
+        const currentTime = this.game.elapsedTime / 1000;
 
         // increase in size each frame if of type explosion
-        if (this.type === "explosionAttack") {
+        if (this.type === "explosionAttack" && (currentTime - this.lastGrowthTime) >= this.growthCooldown) {
             this.radius += EXPLOSION_GROWTH;
+            this.lastGrowthTime = currentTime;
         }
 
-        // Check for the end of duration
+        // Check for the end of duration and convert this attack to do damage if it has a delayedAttackDamage != 0
         if (currentTime >= this.endTime) {
             if (this.delayedAttackDamage !== 0 && this.attackDamage === 0 && currentTime < this.delayedEndTime) {
                 this.attackDamage = this.delayedAttackDamage;
@@ -131,6 +139,7 @@ class AttackCirc {
                     if (this.entity instanceof Projectile) {
                         if (this.entity instanceof Projectile && this.entity.bouncesLeft > 0) {
                             this.entity.hitTargets.add(enemy);
+                            this.attackDamage *= 0.9;
                             this.entity.bounceToNextTarget();
                         } else {
                             this.entity.maxHits -= 1;
@@ -175,7 +184,7 @@ class AttackCirc {
                                 this.lastAttackTime = currentTime;
                                 break;
                             default:
-                                console.log("Tombstone hit with something else");
+                                //console.log("Tombstone hit with something else");
                         }
                         //console.log("necromancy!");
                         // Push the enemy away
@@ -200,7 +209,7 @@ class AttackCirc {
             }
         }
         // Attack ticking logic (pulsating damage, ex: Tome Secondary Attack)
-        else if (this.attackDamage !== 0 && (currentTime - this.lastAttackTime >= this.attackCooldown * 1000)) { // Convert attackCooldown to milliseconds
+        else if (this.pulsatingDamage && this.attackDamage !== 0 && (currentTime - this.lastAttackTime >= this.attackCooldown)) { // Convert attackCooldown to milliseconds
             this.damageDealt = false; // Flag to track if damage was dealt
 
             // Handling different player vs enemy attack types
@@ -334,6 +343,10 @@ class AttackCirc {
             // Draw the attack sprite if it has one
             if (this.attackSpritePath) {
                 ctx.drawImage(this.attackSpritePath, -spriteWidth / 2, -spriteHeight / 2, spriteWidth, spriteHeight);
+            }
+
+            if (opacity === 0) {
+                this.removeFromWorld = true;
             }
 
             // Restore the context

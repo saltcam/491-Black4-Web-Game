@@ -44,7 +44,7 @@ class Weapon {
     }
 
     draw(ctx, slotNum){
-        const currentTime = this.game.elapsedTime / 1000;
+        //const currentTime = this.game.elapsedTime / 1000;
         // adjust these for easier menu debugging
         const weaponBoxHeight = 125;
         const weaponBoxWidth = 100;
@@ -52,7 +52,7 @@ class Weapon {
         const barWidth = weaponBoxWidth/8;
         // bow before my mathematical prowess!
         const slotX = canvas.width/2 - (weaponBoxWidth * this.game.player.weapons.length)/2 + slotNum * weaponBoxWidth;
-        const slotY = canvas.height - weaponBoxHeight;
+        const slotY = canvas.height - weaponBoxHeight - 25; // 25 is the height of the EXP bar
 
         // Primary attacks
         ctx.beginPath();

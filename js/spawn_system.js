@@ -71,13 +71,16 @@ class Spawn_System {
                 shootSpritePath: "./sprites/wizard_shooting.png" , animXStart: 0, animYStart: 0, animW: 418, animH: 145,
                 animFCount: 7, animFDur: 0.2, scale: 0.65, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 418,
                 shootAnimH: 145, shootAnimFCount: 7, shootAnimFDur: 0.2, shootScale: 0.65, exp: -1, projectileFreq: 3,
-                projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 1, projectileSpread: 0}
+                projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 1, projectileSpread: 0,
+                fleeDist: 200, approachDist: 350}
         ];
         /** An array of all potential enemies of type 'Enemy_Charger'. */
         this.chargerEnemyTypes = [
-            { enemyType: "charger", name: "AngryDude", maxHP: 80, currHP: 80, atkPow: 7, worldX: 0, worldY: 0, boxWidth: 19/2,
-                boxHeight: 28/2, boxType: "enemy", speed: 50, spritePath: "./sprites/Zombie_Run.png", animXStart: 0,
-                animYStart: 0, animW: 34, animH: 27, animFCount: 8, animFDur: 0.2, scale: 3, exp: -1}
+            { enemyType: "charger", name: "Boar", maxHP: 80, currHP: 80, atkPow: 7, worldX: 0, worldY: 0, boxWidth: 19,
+                boxHeight: 28, boxType: "enemy", speed: 50, spritePath: "./sprites/boar_walk.png", animXStart: 0,
+                animYStart: 0, animW: 95, animH: 46, animFCount: 7, animFDur: 0.2, scale: 1.5, chargeSpritePath: "./sprites/boar_charge.png",
+                chargeAnimXStart: 0, chargeAnimYStart: 0, chargeAnimW: 95, chargeAnimH: 46, chargeAnimFCount: 2, chargeAnimFDur: 1, chargeScale: 1.5, exp: -1,
+                fleeDist: 250, approachDist: 500}
         ];
         /** Sets the maximum allowed projectile/ranged enemies (Since too many will be way too hard/annoying) */
         this.maxRangedEnemies = 3
@@ -99,7 +102,7 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapOneEnemies = [
-            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
+            this.chargerEnemyTypes[0],  // Wave 0 (0:00 - 0:30) this.contactEnemyTypes[0]
             this.contactEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
             this.chargerEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
@@ -120,7 +123,7 @@ class Spawn_System {
             this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
             this.rangedEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
             this.contactEnemyTypes[3],  // Wave 4 (2:00 - 2:30)
-            this.contactEnemyTypes[2],  // Wave 5 (2:30 - 3:00)
+            this.chargerEnemyTypes[0],  // Wave 5 (2:30 - 3:00)
             this.contactEnemyTypes[2],  // Wave 6 (3:00 - 3:30)
             this.contactEnemyTypes[3],  // Wave 7 (3:30 - 4:00)
             this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
@@ -171,7 +174,7 @@ class Spawn_System {
         }
     }
 
-    /** Call this in updade() to keep enemy stats up to date with with latest DIFFICULTY_SCALE value. */
+    /** Call this in updade() to keep enemy stats up to date with latest DIFFICULTY_SCALE value. */
     updateEnemyStats() {
 
     }
@@ -357,7 +360,8 @@ class Spawn_System {
                     enemy.shootAnimFCount, enemy.shootAnimFDur, enemy.shootScale,
                     enemy.exp, enemy.projectileFreq, enemy.projectileSpeed,
                     enemy.projectileSize, enemy.projectilePulse,
-                    enemy.projectileCount, enemy.projectileSpread));
+                    enemy.projectileCount, enemy.projectileSpread,
+                    enemy.fleeDist, enemy.approachDist));
             }
             // If we hit the ranged enemy cap, try a passive spawn
             else {
@@ -371,8 +375,10 @@ class Spawn_System {
                 enemy.boxWidth, enemy.boxHeight, enemy.boxType,
                 enemy.speed, enemy.spritePath, enemy.animXStart,
                 enemy.animYStart, enemy.animW, enemy.animH,
-                enemy.animFCount, enemy.animFDur, enemy.scale,
-                enemy.exp));
+                enemy.animFCount, enemy.animFDur, enemy.scale, enemy.chargeSpritePath,
+                enemy.chargeAnimXStart, enemy.chargeAnimYStart, enemy.chargeAnimW,
+                enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
+                enemy.exp, enemy.fleeDist, enemy.approachDist));
             }
             // If we hit the charger enemy cap, try a passive spawn
             else {

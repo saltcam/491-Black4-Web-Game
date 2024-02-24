@@ -151,6 +151,8 @@ class Entity {
                 amount *= this.game.player.critDamage;
                 isCrit = true;
             }
+        } else {
+            this.game.player.updateScore(amount*-1);
         }
 
         this.game.player.weapons[0].upgrades.forEach(upgrade => {
@@ -163,6 +165,7 @@ class Entity {
                     this.game.setManagedTimeout(() => {
                         if (!this.isDead) {
                             this.currHP -= bleed;
+                            this.game.player.updateScore(bleed);
                             this.game.addEntity(new Floating_text(this.game, bleed, this.worldX, this.worldY, false,
                                 this instanceof Player || this.boundingBox.type.includes("ally"), isCrit));
                             this.animator.damageSprite(100);
@@ -182,6 +185,7 @@ class Entity {
 
         if(!isBleed) {
             this.currHP -= amount;
+            this.game.player.updateScore(amount);
             // Spawn floating damage number
             this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY,
                 false, this instanceof Player || this.boundingBox.type.includes("ally"), isCrit));

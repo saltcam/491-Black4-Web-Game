@@ -164,6 +164,9 @@ class GameEngine {
     spawnBossOne() {
         this.boss = this.addEntity(new BossOne(this, 250, 0));
     }
+    spawnBossTwo() {
+        this.boss = this.addEntity(new BossTwo(this, 250, 0));
+    }
 
     /**
      * Call this to spawn an upgrade chest at the given coordinates.
@@ -328,8 +331,8 @@ class GameEngine {
             this.rightClick = true; // Set the right-click flag.
         });
 
-        this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key] = true);
-        this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key] = false);
+        this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key.toLowerCase()] = true);
+        this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key.toLowerCase()] = false);
     }
 
     /**
@@ -1029,8 +1032,10 @@ class GameEngine {
     /** This method is called every tick to update all entities etc. */
     update() {
         // Handle boss spawn timer
-        if ((this.elapsedTime / 60000) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss) {
+        if ((this.elapsedTime / 60000) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss && this.currMap === 1) {
             this.spawnBossOne();
+        } else if ((this.elapsedTime / 60000) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss && this.currMap === 2) {
+            this.spawnBossTwo();
         }
 
         // Update entities only while the game is un-paused.
@@ -1324,10 +1329,12 @@ class GameEngine {
 
         // Move each enemy away from the other by the bounce distance
         if (enemy1.boundingBox.type !== "enemyBoss" && enemy1.boundingBox.type !== "player") {
+            if (enemy1 instanceof Enemy_Charger && enemy1.attackStatus === "Charging" && enemy1.attackStatus === "Preparing to Charge") return;
             enemy1.worldX += normalizedDirectionX * bounceDistance;
             enemy1.worldY += normalizedDirectionY * bounceDistance;
         }
         if (enemy2.boundingBox.type !== "enemyBoss" && enemy2.boundingBox.type !== "player") {
+            if (enemy2 instanceof Enemy_Charger && enemy2.attackStatus === "Charging" && enemy2.attackStatus === "Preparing to Charge") return;
             enemy2.worldX -= normalizedDirectionX * bounceDistance;
             enemy2.worldY -= normalizedDirectionY * bounceDistance;
 

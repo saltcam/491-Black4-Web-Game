@@ -42,6 +42,7 @@ class Player extends Entity {
         this.healthRegenTime = 3.5;
         this.timeSinceLastHealthRegen = 0;
 
+        this.score = 0;
         this.gold = 0;
         this.level = 1;
         this.expGain = 1; // EXP Gain multiplier
@@ -382,6 +383,7 @@ class Player extends Entity {
 
     gainExp(exp) {
         this.exp += exp * this.expGain;
+        this.updateScore(exp * this.expGain);
 
         // level up!
         if (this.exp >= (this.level * 10)) {
@@ -391,25 +393,42 @@ class Player extends Entity {
         }
     }
 
+    updateScore(value) {
+        this.score += Math.round(value);
+    }
+
     drawExp(ctx) {
+
+        const weaponBoxWidth = 100;
+        // bow before my mathematical prowess!
+        const left = canvas.width/2 - (weaponBoxWidth * this.game.player.weapons.length)/2;
+        const right = canvas.width/2 + (weaponBoxWidth * this.game.player.weapons.length)/2;
+        const height = 25;
         ctx.beginPath();
         ctx.fillStyle = "Black";
-        ctx.fillRect(this.boundingBox.left - this.game.camera.x,
-            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 20,
-            this.boundingBox.width, 10);
+        ctx.fillRect(left, canvas.height - height,
+            right - left, height);
         ctx.closePath();
 
         //draw the current exp value
         ctx.beginPath();
-        ctx.fillStyle = "Yellow";
+        ctx.fillStyle = 'rgb(129,0,152)';
         let meter = ((this.exp) / (this.level * 10));
         // prevents exp bar from going too far in any direction
         if (meter > 1) {
             meter = 1;
         }
-        ctx.fillRect(this.boundingBox.left - this.game.camera.x,
-            this.boundingBox.top + this.boundingBox.height - this.game.camera.y + 20,
-            this.boundingBox.width * meter, 10);
+        ctx.fillRect(left, canvas.height - height,
+            (right-left) * meter, height);
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.font = '18px Arial';
+        ctx.fillStyle = 'rgb(255,255,255)';
+        ctx.textAlign = 'center'
+        ctx.fillText("Lv: " + this.level, canvas.width/2, canvas.height - height/3);
+        ctx.textAlign = 'left'
+        ctx.fillText("Score: " + this.score, canvas.width*2/3, canvas.height - height/3);
         ctx.closePath();
     }
 
