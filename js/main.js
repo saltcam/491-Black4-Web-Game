@@ -133,6 +133,8 @@ ASSET_MANAGER.queueDownload("./sprites/wizard.png");
 ASSET_MANAGER.queueDownload("./sprites/wizard_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_dragon_walk.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_dragon_roar.png");
+ASSET_MANAGER.queueDownload("./sprites/boss_dragon_walk_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/boss_dragon_roar_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/fireball.png");
 
 //sounds

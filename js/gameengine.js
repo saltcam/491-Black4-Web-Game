@@ -1039,13 +1039,13 @@ class GameEngine {
     /** This method is called every tick to update all entities etc. */
     update() {
         // Handle boss spawn timer
-        if ((this.elapsedTime / 60000) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss && this.currMap === 1) {
-            this.spawnBossOne();
+        if ((this.elapsedTime / 10) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss && this.currMap === 1) {
+            this.spawnBossTwo();
         } else if ((this.elapsedTime / 60000) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss && this.currMap === 2) {
-            //this.spawnBossTwo();
-            this.spawnBossThree(); // Until boss 2 is ready, or map 3 is implemented
+            this.spawnBossTwo();
+        } else if ((this.elapsedTime / 60000) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss && this.currMap === 3) {
+            this.spawnBossThree();
         }
-
         // Update entities only while the game is un-paused.
         if (!this.isGamePaused) {
             // Update 'other' entities.
@@ -1376,6 +1376,7 @@ class GameEngine {
         // Calculate the time passed since the last frame
         this.clockTick = this.timer.tick();
 
+        // TODO if we could we should really make it so this only ever happens every 1/60 seconds. Then all update methods could assume 60 frames.
         // If the game is not paused, update game logic
         if (!this.isGamePaused) {
             this.update();

@@ -3,15 +3,15 @@ class BossTwo extends Entity {
     constructor(game, worldX, worldY) {
         super(1500, 1500, 20,
             game, worldX, worldY,
-            20, 35, "enemyBoss",
-            400,
+            80, 55, "enemyBoss",
+            100,
             "./sprites/boss_dragon_walk.png",
-            0, 0, 542/4, 98, 4, 1, 3.5,
+            0, 0, 542/4, 98, 4, 0.2, 3.5,
             -1);
 
-        this.name = "Gold Dragon the Dreadful";
+        this.name = "Gold-Dragon the Mirthful";
         this.shootRange = 1000;
-        this.lastMove = "right"; // Default direction
+        this.lastMove = "left"; // Default direction
         this.isMoving = false;  // Is the character currently moving?
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
         this.boundingBox.drawBoundingBox = false;
@@ -20,25 +20,19 @@ class BossTwo extends Entity {
         this.projectileAttackCooldown = 0.5;    // in seconds
         this.attackCooldown = 1;
         this.lastAttackTime = 0;    // time since last attack
+        this.downTime = 6 * 60; // the amount of time that must pass before roaring
 
         this.pushbackVector = { x: 0, y: 0 };
         this.pushbackDecay = 0.9; // Determines how quickly the pushback force decays
 
-        this.projectileSpeed = 45;
+        this.projectileSpeed = 25;
         this.projectileSize = 25;
         this.pulse = false;
-        this.projectileCount = 5;
-        this.projectileSpread = 90; // the angle of range the projectiles are fired in evenly
+        this.projectileCount = 1;
+        this.projectileSpread = 25; // the angle of range the projectiles are fired in evenly
+        this.projectilePow = 10;    // how much damage each projectile does. changes with the patterns
+        this.projectileDuration = 3; // how long each projectile should last
 
-        // For shooting sprite change
-        this.spritePath = "./sprites/boss_dragon_walk.png";
-        this.animXStart = 0;
-        this.animYStart = 0;
-        this.animW = 524/4;
-        this.animH = 98;
-        this.animFCount = 4;
-        this.animFDur = 1;
-        this.shootingSpritePath = "./sprites/fireball.png";
         //this.shootingAnimXStart = shootAnimXStart;
         //this.shootingAnimYStart = shootAnimYStart;
         //this.shootingAnimW = shootAnimW;
@@ -47,22 +41,31 @@ class BossTwo extends Entity {
         //this.shootingAnimFDur = shootAnimFDur;
         //this.isShooting = false; // Flag to indicate if shooting animation is active
 
-        this.fleeDist = 0;
-        this.approachDist = 1000;
+        // used for determining movement in calcDist
+        this.closestDist = 350;
+        this.furthestDist = 600;
+        this.approaching = false;
+
+        this.anchorX = worldX;
+        this.anchorY = worldY;
+
+        this.attackCount = 0; // refers to how many attacks we have left before switching to normal mode. handled in pattern
+        this.maxRoarTime = 0;  // how long we must continue to roar before switching to attack mode. handled in pattern
+        this.currRoarTime = 0;
+        //this.currentRoarTime = 0; // how long we've been roaring, once it reaches maxRoarTime, switch to attacking mode
+
+
+        //console.log("wX = " + worldX + "; wY = " + worldY +"\n" + "aX = " + this.anchorX + "; aY = " + this.anchorY);
 
         // normal = moving around, firing some projectiles occasionally
         // roaring = staying put, shaking a little, not firing
         // attacking = locked in attack animation cycle, casting special attack pattern
         this.mode = "normal";
-        // 0 = spread of 3 projectiles to player
-        // 1 = more random fire aimed near player
-        // 2 = light 360 spread
-        // 3 = giant slow pulse ball
-        // 4 = very thicc 360 spread, the final attack
-        this.pattern = 0;
+        this.changeMode("normal");   // debugging
 
-        this.anchorX = this.worldX;
-        this.anchorY = this.worldY;
+        // determines which attack pattern will be used for an attack mode
+        this.changePattern(0);
+        this.pattern = 0;   // debug value
     }
 
     applyPushback(forceX, forceY) {
@@ -73,6 +76,11 @@ class BossTwo extends Entity {
     // this is the movement pattern for enemies that just approach the player
     update() {
         super.update();
+        console.log("X = " + this.worldX + "; Y = " + this.worldY);
+
+        if (this.mode === "roaring") {
+            this.shake();
+        }
 
         // Apply pushback
         this.worldX += this.pushbackVector.x;
@@ -103,10 +111,10 @@ class BossTwo extends Entity {
         // Determine the direction to face based on the player's position
         if (player.worldX < this.worldX + this.animator.width/2) {
             // Player is to the left, face left
-            this.lastMove = "left";
+            this.lastMove = "right";
         } else if (player.worldX > this.worldX + this.animator.width/2) {
             // Player is to the right, face right
-            this.lastMove = "right";
+            this.lastMove = "left";
         }
 
         const targetDirection = this.calcTargetAngle(player);
@@ -126,12 +134,39 @@ class BossTwo extends Entity {
 
         this.checkCollisionAndDealDamage();
 
-        // Check if the player is within shooting range
-        const playerCenter = this.game.player.calculateCenter();
-        const selfCenter = this.calculateCenter();
-        const distanceToPlayer = Math.hypot(playerCenter.x - selfCenter.x, playerCenter.y - selfCenter.y);
+        //TODO adjust all frame based time calculations to the timer system (wish I knew how it worked)
 
-        if (distanceToPlayer <= this.shootRange) this.castProjectile();
+        // if in attack mode with attacks remaining, attack
+        if (this.mode === "attacking" && this.attackCount > 0) {
+            this.castProjectile();
+        }
+        if (this.mode === "roaring") {
+            this.currRoarTime--;
+        }
+        if (this.mode === "normal") {
+            this.downTime--;
+        }
+        // if we are out of attacks and in attack mode, go back to normal
+        if (this.attackCount <= 0 && this.mode === "attacking") {
+            this.changeMode("normal");
+            if (this.pattern < 4) {
+                this.pattern++;
+            }
+            this.changePattern(this.pattern);
+        }
+        // if we are out of roar time, and in roar mode, switch to attack mode
+        if (this.currRoarTime <= 0 && this.mode === "roaring") {
+            this.changeMode("attacking");
+            // changemode handles roar times
+        }
+        // if we have had enough downtime, begin roaring
+        if (this.downTime <= 0 && this.mode === "normal") {
+            this.changeMode("roaring");
+            this.currRoarTime = this.maxRoarTime;
+
+        }
+
+
     }
 
     /*
@@ -151,19 +186,24 @@ class BossTwo extends Entity {
         const dirY = targetCenter.y - selfCenter.y;
 
         let dist = Math.sqrt(dirX * dirX + dirY * dirY);
-        // console.log("dist: " + dist);
+        //console.log("dist: " + dist);
 
-        if (dist > this.approachDist && this.mode === "normal") {
-            // console.log("approach");
-            spacing = 1;
-        } else if (dist < this.fleeDist && this.mode !== "normal") {
-            // console.log("flee");
+        // when too far from player, will advance up until a certain point and will not advance again until too far away
+        if (dist < this.closestDist) { // A range
             spacing = 0;
-        } else if (dist > this.fleeDist && dist < this.approachDist) {
-            // console.log("stay put");
-            spacing = 0;
+            this.approaching = false;
         }
-        // console.log(spacing);
+        if (dist > this.closestDist && dist < this.furthestDist) {  // B range
+            if (this.approaching) {
+                spacing = 1;
+            } else {
+                spacing = 0;
+            }
+        }
+        if (dist > this.furthestDist) { // C range
+            spacing = 1;
+            this.approaching = true;
+        }
         return spacing;
     }
 
@@ -174,36 +214,13 @@ class BossTwo extends Entity {
         // Check collision and cooldown
         if (this.boundingBox.isColliding(player.boundingBox) && currentTime - this.lastAttackTime >= this.attackCooldown) {
             //console.log("Collision!");
-            player.takeDamage(this.atkPow / 3);
+            player.takeDamage(this.atkPow);
             this.lastAttackTime = currentTime; // Update last attack time
         }
     }
     castProjectile() {
         let currentTime = this.game.elapsedTime / 1000;
         if (currentTime - this.lastAttackTime >= this.projectileAttackCooldown) {
-            //console.log("SHOOTING");
-            // Switch to shooting animation
-            //this.isShooting = true;
-
-            // Switch to shoot animation sprite if this enemy has one, otherwise ignore and shoot the projectile
-            if (this.shootingSpritePath !== null && this.animator.spritesheet !== ASSET_MANAGER.getAsset(this.shootingSpritePath)) {
-                // this.animator.changeSpritesheet(
-                //     ASSET_MANAGER.getAsset(this.shootingSpritePath),
-                //     this.shootingAnimXStart,
-                //     this.shootingAnimYStart,
-                //     this.shootingAnimW,
-                //     this.shootingAnimH,
-                //     this.shootingAnimFCount,
-                //     this.shootingAnimFDur
-                // );
-                // this.movementSpeed = 0;
-
-                // Set a timeout to revert to original animation after shooting ends
-                this.game.setManagedTimeout(() => {
-                    this.movementSpeed = this.initialMovementSpeed;
-                    this.revertToOriginalSprite();
-                }, this.shootingAnimFCount * this.shootingAnimFDur * 1000); // Duration of the entire shooting animation
-            }
 
             const centerOfEntity = this.calculateCenter();
 
@@ -212,7 +229,7 @@ class BossTwo extends Entity {
 
             let currentTime = this.game.elapsedTime / 1000;
             // Check if the current frame is the shooting frame and if enough time has passed since the last attack
-            if (((this.shootingSpritePath !== null && this.animator.currentFrame() === shootingFrame) || this.shootingSpritePath === null) && currentTime - this.lastAttackTime >= this.projectileAttackCooldown) {
+            if (currentTime - this.lastAttackTime >= this.projectileAttackCooldown) {
                 const playerCenter = this.game.player.calculateCenter();
                 const thisCenter = this.calculateCenter();
                 // Calculate the angle towards the mouse position
@@ -226,12 +243,17 @@ class BossTwo extends Entity {
                     // trying to convert this to an angle
                     // odd -> i - 1     (mod 2 = 1)
                     // even -> i - 0.5 (mod 2 = 0)
-                    let adjust = this.projectileCount % 2;
-                    if (adjust !== 1) {
-                        adjust += 0.5;
-                    }
+                    // let adjust = this.projectileCount % 2;
+                    // if (adjust !== 1) {
+                    //     adjust += 0.5;
+                    // }
 
-                    let angle = (attackAngle + Math.PI/(180/360) * (((i-adjust) * (this.projectileSpread/this.projectileCount))/360));
+                    // start halfway back from the spread
+                    //attackAngle -= (this.projectileSpread/2)/360 * Math.PI/(1/2);
+
+                    // I wish this was easier to figure out
+                    let angle = (attackAngle + Math.PI/(1/2) * (i * (this.projectileSpread/this.projectileCount))/360
+                    - Math.PI/(1/2) * ((this.projectileSpread/2)/360));
                     dx = Math.cos(angle) * offsetDistance;
                     dy = Math.sin(angle) * offsetDistance;
 
@@ -239,49 +261,176 @@ class BossTwo extends Entity {
                     let projectileX = centerOfEntity.x - this.projectileSize / 2; // Center the projectile on the X axis
                     let projectileY = centerOfEntity.y - this.projectileSize / 2; // Center the projectile on the Y axis
 
-                    let newProjectile = this.game.addEntity(new Projectile(this.game, this.atkPow,
+                    let newProjectile = this.game.addEntity(new Projectile(this.game, this.projectilePow,
                         projectileX, projectileY, 10, 10, "enemyAttack", this.projectileSpeed,
                         "./sprites/MagicBall_red.png",
                         0, 0, 30, 30, 2, 0.2, 2, dx, dy,
-                        3, this.projectileSize, 1, 0, 0.3));
+                        this.projectileDuration, this.projectileSize, 1, 0, 0.3));
                     newProjectile.pulsatingDamage = this.pulse;
+                    this.attackCount--; // used an attack in its current amount of attacks in this pattern
+
                 }
                 this.lastAttackTime = currentTime; // Update last attack time
             }
         }
     }
 
-    changeMode(modeNum){
-        switch (modeNum) {
-            case "normal":
-                this.worldX = this.anchorX;
-                this.worldY = this.anchorY;
-                this.animator.changeSpritesheet(
-                    ASSET_MANAGER.getAsset("./sprites/boss_dragon_walk.png"),
-                    0, 0,  542/4, 98, 4, 1);
+    // 0 = spread of 5 projectiles to player
+    // 1 = more random fire aimed near player
+    // 2 = light 360 spread
+    // 3 = giant slow pulse ball
+    // 4 = very thicc 360 spread, the final attack
+    changePattern (patternNum) {
+        //this.pattern = patternNum; // might not need
+        switch(patternNum){
+            case 0:
+                this.maxRoarTime = 0.5 * 60;
+                this.projectileAttackCooldown = 0.5;
+                this.attackCount = 5;
+                this.projectileSpeed = 25;
+                this.projectileSize = 25;
+                this.pulse = false;
+                this.projectileCount = 5;
+                this.projectileSpread = 90;
+                this.projectilePow = 8;
+                this.projectileDuration = 3;
                 break;
-            case "roaring":
-                this.anchorX = this.worldX;
-                this.anchorY = this.worldY;
-                this.animator.changeSpritesheet(
-                    ASSET_MANAGER.getAsset("./sprites/boss_dragon_roar.png"),
-                    0, 0, 144, 98, 1, 1);
+            case 1:
+                this.maxRoarTime = 2.5 * 60;
+                this.projectileAttackCooldown = 0.15;
+                this.attackCount = 10;
+                this.projectileSpeed = 15;
+                this.projectileSize = Math.random()*25;
+                this.pulse = false;
+                this.projectileCount = 2 + Math.floor(Math.random()*4);
+                this.projectileSpread = 10 + Math.floor(Math.random()*90);
+                this.projectilePow = 4;
+                this.projectileDuration = 4;
                 break;
-            case "attacking" :
-                // TODO update the sprite info
-                this.worldX = this.anchorX;
-                this.worldY = this.anchorY;
-                this.animator.changeSpritesheet(
-                    ASSET_MANAGER.getAsset("./sprites/boss_dragon_roar.png"),
-                    0, 0, 698, 124, 98, 4);
+            case 2:
+                this.maxRoarTime = 4 * 60;
+                this.projectileAttackCooldown = 1;
+                this.attackCount = 5;
+                this.projectileSpeed = 50;
+                this.projectileSize = 20;
+                this.pulse = false;
+                this.projectileCount = 25;
+                this.projectileSpread = 360;
+                this.projectilePow = 10;
+                this.projectileDuration = 1.5;
                 break;
+            case 3:
+                this.maxRoarTime = 4.5 * 60;
+                this.projectileAttackCooldown = 5;
+                this.attackCount = 1;
+                this.projectileSpeed = 15;
+                this.projectileSize = 200;
+                this.pulse = true; // can we fix this?
+                this.projectileCount = 1;
+                this.projectileSpread = 0;
+                this.projectilePow = 10;
+                this.projectileDuration = 7;
+                break;
+            case 4:
+                this.maxRoarTime = 5.5 * 60;
+                this.projectileAttackCooldown = 0.2;
+                this.attackCount = 3;
+                this.projectileSpeed = 29;
+                this.projectileSize = 50;
+                this.pulse = false;
+                this.projectileCount = 100;
+                this.projectileSpread = 360;
+                this.projectilePow = 20;
+                this.projectileDuration = 5;
+                break;
+        }
+    }
+
+    // changes the mode of the dragon, quickly provides relevant spritesheet info
+    changeMode(mode) {
+        //console.log(this.mode);
+        if (this.mode !== mode) {
+            switch (mode) {
+                case "normal":
+                    this.worldX = this.anchorX;
+                    this.worldY = this.anchorY;
+                    this.animator.changeSpritesheet(
+                        ASSET_MANAGER.getAsset("./sprites/boss_dragon_walk.png"),
+                        0, 0, 542 / 4, 98, 4, 0.2);
+                    //console.log("normal mode");
+                    this.mode = mode;
+                    this.downTime = 6 * 60;
+                    break;
+                case "roaring":
+                    this.anchorX = this.worldX;
+                    this.anchorY = this.worldY;
+                    this.animator.changeSpritesheet(
+                        ASSET_MANAGER.getAsset("./sprites/boss_dragon_roar.png"),
+                        0, 0, 144, 98, 1, 1);
+                    //console.log("roaring mode");
+                    this.mode = mode;
+                    break;
+                case "attacking" :
+                    this.worldX = this.anchorX;
+                    this.worldY = this.anchorY;
+                    this.animator.changeSpritesheet(
+                        ASSET_MANAGER.getAsset("./sprites/boss_dragon_roar.png"),
+                        144, 0, 140, 124, 3, 0.2);
+                    //console.log("attacking mode");
+                    this.mode = mode;
+                    break;
+            }
         }
     }
 
     shake() {
         if (this.mode === "roaring") {
-            this.worldX += this.anchorX + Math.floor((Math.random() * 10)) - Math.floor((Math.random() * 10));
-            this.worldY += this.anchorY + Math.floor((Math.random() * 10)) - Math.floor((Math.random() * 10));
+            this.worldX = this.anchorX + Math.floor((Math.random() * 10)) - Math.floor((Math.random() * 10));
+            this.worldY = this.anchorY + Math.floor((Math.random() * 10)) - Math.floor((Math.random() * 10));
         }
+    }
+
+    drawBossHealthBar(ctx) {
+        // Current game time
+        const currentTime = this.game.elapsedTime / 1000;
+
+        // Check if more than 1 second has passed since the last damage
+        if (currentTime - this.lastDamageTime > this.damageDecayDelay && this.recentDamage > 0) {
+            // Gradually decrease recentDamage over time here
+            this.recentDamage -= 1; // Adjust this rate as needed
+        }
+
+        // Prevent recentDamage from going negative
+        if (this.recentDamage < 0) {
+            this.recentDamage = 0;
+        }
+
+        const barWidth = 750;
+        const barHeight = 15;
+        const xOffset = (ctx.canvas.width - barWidth) / 2;
+        const yOffset = 85;
+
+        // Draw the black background
+        ctx.fillStyle = "black";
+        ctx.fillRect(xOffset-3, yOffset-3, barWidth+6, barHeight+6);
+
+        // Draw the red current health
+        const currentHealthWidth = (this.currHP / this.maxHP) * barWidth;
+        ctx.fillStyle = "red";
+        ctx.fillRect(xOffset, yOffset, currentHealthWidth, barHeight);
+
+        // Draw the yellow recent damage
+        const recentDamageWidth = (this.recentDamage / this.maxHP) * barWidth;
+        if (recentDamageWidth > 0) {
+            const totalDamageWidth = Math.min(recentDamageWidth, barWidth - currentHealthWidth);
+            ctx.fillStyle = "yellow";
+            ctx.fillRect(xOffset + currentHealthWidth, yOffset, totalDamageWidth, barHeight);
+        }
+
+        // Draw boss' name
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'white';
+        ctx.font = '32px Arial';
+        ctx.fillText(this.name, ctx.canvas.width / 2, (yOffset - barHeight));
     }
 }
