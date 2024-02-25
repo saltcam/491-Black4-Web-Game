@@ -269,6 +269,13 @@ class BossTwo extends Entity {
                     newProjectile.pulsatingDamage = this.pulse;
                     this.attackCount--; // used an attack in its current amount of attacks in this pattern
 
+                    // randomize the fire breath pattern
+                    if (this.pattern === 1) {
+                        this.projectileSize = Math.random()*25;
+                        this.projectileCount = 2 + Math.floor(Math.random()*4);
+                        this.projectileSpread = 10 + Math.floor(Math.random()*90);
+                    }
+
                 }
                 this.lastAttackTime = currentTime; // Update last attack time
             }
@@ -281,7 +288,7 @@ class BossTwo extends Entity {
     // 3 = giant slow pulse ball
     // 4 = very thicc 360 spread, the final attack
     changePattern (patternNum) {
-        //this.pattern = patternNum; // might not need
+        this.pattern = patternNum; // might not need
         switch(patternNum){
             case 0:
                 this.maxRoarTime = 0.5 * 60;
@@ -298,7 +305,7 @@ class BossTwo extends Entity {
             case 1:
                 this.maxRoarTime = 2.5 * 60;
                 this.projectileAttackCooldown = 0.15;
-                this.attackCount = 10;
+                this.attackCount = 30;
                 this.projectileSpeed = 15;
                 this.projectileSize = Math.random()*25;
                 this.pulse = false;
