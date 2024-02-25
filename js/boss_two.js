@@ -236,8 +236,13 @@ class BossTwo extends Entity {
                 let dx = playerCenter.x - thisCenter.x;
                 let dy = playerCenter.y - thisCenter.y;
                 let attackAngle = Math.atan2(dy, dx);
+                let angle = Math.atan2(dy, dx);
 
                 const offsetDistance = (20) * 0.6;
+                if (this.projectileCount > 1) {
+                    // if we have to distribute projectiles, aim at half of range from player
+                    attackAngle += Math.PI/(1/2) * (this.projectileSpread/2/360)
+                }
 
                 for (let i = 0; i < this.projectileCount; i++) {
                     // trying to convert this to an angle
@@ -252,8 +257,12 @@ class BossTwo extends Entity {
                     //attackAngle -= (this.projectileSpread/2)/360 * Math.PI/(1/2);
 
                     // I wish this was easier to figure out
-                    let angle = (attackAngle + Math.PI/(1/2) * (i * (this.projectileSpread/this.projectileCount))/360
-                    - Math.PI/(1/2) * ((this.projectileSpread/2)/360));
+                    if (this.projectileCount > 1) {
+                        angle = (attackAngle -
+                            0.01745329 * (((this.projectileSpread/(this.projectileCount-1))* i))
+                        );
+                    }
+
                     dx = Math.cos(angle) * offsetDistance;
                     dy = Math.sin(angle) * offsetDistance;
 
@@ -299,20 +308,20 @@ class BossTwo extends Entity {
                 this.projectileSize = 25;
                 this.pulse = false;
                 this.projectileCount = 5;
-                this.projectileSpread = 90;
+                this.projectileSpread = 50;
                 this.projectilePow = 8;
                 this.projectileDuration = 3;
                 break;
             case 1:
                 this.maxRoarTime = 2.5 * 60;
-                this.projectileAttackCooldown = 0.15;
-                this.attackCount = 30;
-                this.projectileSpeed = 15;
+                this.projectileAttackCooldown = 0.10;
+                this.attackCount = 35;
+                this.projectileSpeed = 35;
                 this.projectileSize = Math.random()*25;
                 this.pulse = false;
                 this.projectileCount = 2 + Math.floor(Math.random()*4);
-                this.projectileSpread = 10 + Math.floor(Math.random()*90);
-                this.projectilePow = 4;
+                this.projectileSpread = 10 + Math.floor(Math.random()*55);
+                this.projectilePow = 3;
                 this.projectileDuration = 4;
                 break;
             case 2:
@@ -332,7 +341,7 @@ class BossTwo extends Entity {
                 this.projectileAttackCooldown = 5;
                 this.attackCount = 1;
                 this.projectileSpeed = 15;
-                this.projectileSize = 200;
+                this.projectileSize = 250;
                 this.pulse = true; // can we fix this?
                 this.projectileCount = 1;
                 this.projectileSpread = 0;
@@ -341,15 +350,15 @@ class BossTwo extends Entity {
                 break;
             case 4:
                 this.maxRoarTime = 5.5 * 60;
-                this.projectileAttackCooldown = 0.7;
+                this.projectileAttackCooldown = 0.4;
                 this.attackCount = 3;
                 this.projectileSpeed = 29;
                 this.projectileSize = 50;
                 this.pulse = false;
                 this.projectileCount = 100;
                 this.projectileSpread = 360;
-                this.projectilePow = 20;
-                this.projectileDuration = 5;
+                this.projectilePow = 8;
+                this.projectileDuration = 4;
                 break;
         }
     }
