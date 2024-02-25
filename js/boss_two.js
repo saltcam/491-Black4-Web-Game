@@ -76,7 +76,7 @@ class BossTwo extends Entity {
     // this is the movement pattern for enemies that just approach the player
     update() {
         super.update();
-        console.log("X = " + this.worldX + "; Y = " + this.worldY);
+        //console.log("X = " + this.worldX + "; Y = " + this.worldY);
 
         if (this.mode === "roaring") {
             this.shake();
@@ -267,7 +267,7 @@ class BossTwo extends Entity {
                         0, 0, 30, 30, 2, 0.2, 2, dx, dy,
                         this.projectileDuration, this.projectileSize, 1, 0, 0.3));
                     newProjectile.pulsatingDamage = this.pulse;
-                    this.attackCount--; // used an attack in its current amount of attacks in this pattern
+
 
                     // randomize the fire breath pattern
                     if (this.pattern === 1) {
@@ -277,6 +277,7 @@ class BossTwo extends Entity {
                     }
 
                 }
+                this.attackCount--; // used an attack in its current amount of attacks in this pattern
                 this.lastAttackTime = currentTime; // Update last attack time
             }
         }
@@ -293,7 +294,7 @@ class BossTwo extends Entity {
             case 0:
                 this.maxRoarTime = 0.5 * 60;
                 this.projectileAttackCooldown = 0.5;
-                this.attackCount = 5;
+                this.attackCount = 5; // how many times this attack happens
                 this.projectileSpeed = 25;
                 this.projectileSize = 25;
                 this.pulse = false;
@@ -340,7 +341,7 @@ class BossTwo extends Entity {
                 break;
             case 4:
                 this.maxRoarTime = 5.5 * 60;
-                this.projectileAttackCooldown = 0.2;
+                this.projectileAttackCooldown = 0.7;
                 this.attackCount = 3;
                 this.projectileSpeed = 29;
                 this.projectileSize = 50;
