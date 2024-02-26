@@ -232,7 +232,7 @@ class Entity {
             }
         });
 
-        if(!isBleed) {
+        if (!isBleed) {
             this.currHP -= amount;
             if (!(this instanceof Player)) {
                 this.game.player.updateScore(amount);
@@ -256,15 +256,15 @@ class Entity {
                 this.lives--;
                 ASSET_MANAGER.playAsset("./sounds/SE_staff_secondary.mp3");
                 if (this instanceof Player) {
-                    this.game.player.updateScore(-1 * this.game.player.score/2);
+                    this.game.player.updateScore(-1 * this.game.player.score / 2);
                 }
             } else {
                 this.isDead = true;
             }
         }
         // If crippling chill upgrade is active, slow this it is an enemy
-            this.applySlow();
-        }
+        this.applySlow();
+    }
 
 
     // Method to calculate and apply any cripple effects to the target from the crippling chill upgrade from scythe
