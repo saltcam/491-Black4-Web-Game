@@ -72,6 +72,8 @@ class Player extends Entity {
         this.initialAtkPow = this.atkPow;
         this.initialPickupRange = this.pickupRange;
         this.initialExpGain = this.expGain;
+
+        this.lives = 1; // start with 1 extra life.
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
@@ -164,11 +166,13 @@ class Player extends Entity {
         }
 
         // If health hits 0 or below, this entity is declared dead
-        if (this.currHP <= 0) {
-            this.isDead = true;
-            this.currentAnimation = "Dead";
-            this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McDead.png"),
-                0, 0, 32, 40, 8, 0.1);
+        if (this.currHP <= 0 && this.lives < 0) {
+
+                this.isDead = true;
+                this.currentAnimation = "Dead";
+                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McDead.png"),
+                    0, 0, 32, 40, 8, 0.1);
+
         }
 
         // Handle dashing duration and reset
@@ -394,7 +398,12 @@ class Player extends Entity {
     }
 
     updateScore(value) {
-        this.score += Math.round(value);
+        //console.log(value);
+        this.score += value;
+        this.score = Math.round(this.score);
+        if (this.score < 0){
+            this.score = 0;
+        }
     }
 
     drawExp(ctx) {
@@ -412,7 +421,7 @@ class Player extends Entity {
 
         //draw the current exp value
         ctx.beginPath();
-        ctx.fillStyle = 'rgb(129,0,152)';
+        ctx.fillStyle = 'rgb(62,148,255)';
         let meter = ((this.exp) / (this.level * 10));
         // prevents exp bar from going too far in any direction
         if (meter > 1) {
@@ -428,7 +437,8 @@ class Player extends Entity {
         ctx.textAlign = 'center'
         ctx.fillText("Lv: " + this.level, canvas.width/2, canvas.height - height/3);
         ctx.textAlign = 'left'
-        ctx.fillText("Score: " + this.score, canvas.width*2/3, canvas.height - height/3);
+        ctx.fillText("Score: " + this.score, canvas.width/2 - weaponBoxWidth*2/3 + 15, canvas.height - height/3 - 150);
+        ctx.fillText("Lives: " + this.lives, canvas.width/2 - weaponBoxWidth*3/2, canvas.height - height/3 - 150);
         ctx.closePath();
     }
 

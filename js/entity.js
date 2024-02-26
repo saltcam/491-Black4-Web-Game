@@ -61,6 +61,8 @@ class Entity {
         this.shouldLookAtEntity = false; // Flag to enable looking at the target entity
         this.rotationAngle = 0; // Rotation angle in radians
         this.rotationOffset = 0; // Offset for rotation angle adjustment
+
+        this.lives = 0; // mostly for player, just works better with inheritance.
     }
 
     update() {
@@ -189,7 +191,8 @@ class Entity {
                 isCrit = true;
             }
         } else {
-            this.game.player.updateScore(amount*-1);
+            //console.log("lose score!");
+            this.game.player.updateScore(-1 * amount);
         }
 
         this.game.player.weapons[0].upgrades.forEach(upgrade => {
@@ -202,7 +205,9 @@ class Entity {
                     this.game.setManagedTimeout(() => {
                         if (!this.isDead) {
                             this.currHP -= bleed;
-                            this.game.player.updateScore(bleed);
+                            if (!(this instanceof Player)) {
+                                this.game.player.updateScore(bleed);
+                            }
                             this.game.addEntity(new Floating_text(this.game, bleed, this.worldX, this.worldY, false,
                                 this instanceof Player || this.boundingBox.type.includes("ally"), isCrit));
                             this.animator.damageSprite(100);
@@ -222,7 +227,9 @@ class Entity {
 
         if(!isBleed) {
             this.currHP -= amount;
-            this.game.player.updateScore(amount);
+            if (!(this instanceof Player)) {
+                this.game.player.updateScore(amount);
+            }
             // Spawn floating damage number
             this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY,
                 false, this instanceof Player || this.boundingBox.type.includes("ally"), isCrit));
@@ -234,9 +241,26 @@ class Entity {
             this.lastDamageTime = this.game.elapsedTime / 1000;
         }
 
+        // if (this.currHP <= 0) {
+        //     this.currHP = 0;
+        //     this.isDead = true;
+        // }
+
+        // If health hits 0 or below, this entity is declared dead
         if (this.currHP <= 0) {
             this.currHP = 0;
-            this.isDead = true;
+            // if there are any remaining lives, resurrect with half score (if player), max health, and a huge explosion
+            if (this.lives > 0) {
+                this.heal(this.maxHP);
+                this.lives--;
+                ASSET_MANAGER.playAsset("./sounds/SE_staff_secondary.mp3");
+                if (this instanceof Player) {
+                    this.game.player.updateScore(-1 * this.game.player.score/2);
+                }
+            } else {
+                this.isDead = true;
+            }
+
         }
 
         this.game.player.weapons[0].upgrades.forEach(upgrade => {
