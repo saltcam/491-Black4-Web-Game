@@ -17,27 +17,33 @@ class Spawn_System {
          * Set this to something > 1 to make the enemies harder.
          */
         this.DIFFICULTY_SCALE = difficulty_scale;
+        /** Raises the difficulty scale every this many seconds. */
+        this.raiseDifficultyInterval = 5;
+        /** How much to raise the difficulty by (additive, 0.01 === 1% more stats on enemies) */
+        this.difficultyScaleAdder = 0.01;
+        /** Last time we raised the difficulty scale. */
+        this.lastDifficultyUpdateTime = null;
 
         /** Reference to the game engine. */
         this.game = game;
         /** Tracks if the spawn system has initialized. */
         this.initialized = false;
         /** Controls the max enemy count, gets doubled incrementally. */
-        this.baseMaxEnemies = 2;
+        this.baseMaxEnemies = 2 * (this.game.currMap);
         /** Tracks the current max enemy count. */
         this.currentMaxEnemies = 0;
         /** Controls how often (in seconds) to increment max enemy count. */
-        this.maxEnemyIncrementTime = 7.5;
+        this.maxEnemyIncrementTime = 7.5 / (this.game.currMap);
         /** Stores how many max enemy intervals have passed. */
         this.maxEnemyIntervals = 0;
         /** How much to lower the spawn delay each interval. */
-        this.spawnDelayDecreaseMultiplier = 0.88;
+        this.spawnDelayDecreaseMultiplier = 0.88 / (this.game.currMap);
         /** Controls how often (in seconds) we reduce the spawn delay of enemies. */
-        this.lowerSpawnDelayInterval = 12.5;
+        this.lowerSpawnDelayInterval = 12.5 / (this.game.currMap);
         /** Tracks when the last time we lowered the spawn delay was. */
         this.lastSpawnDelayDecreaseTime = 0;
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
-        this.baseEnemySpawnInterval = 4;
+        this.baseEnemySpawnInterval = 4 / (this.game.currMap);
         /** Tracks when the last enemy was spawned. */
         this.lastSpawnTime = 0;
         /** Setting this to true tells spawnRandomEnemy() to make the next enemy it spawns an elite. */
@@ -143,6 +149,7 @@ class Spawn_System {
 
     /** Called every frame/tick. */
     update() {
+        //console.log("Difficulty = " + this.DIFFICULTY_SCALE * 100 + "%\nZombie MaxHP = "+this.contactEnemyTypes[0].maxHP);
         // Call start() if the script has not been initialized yet (avoids bug like game engine not being initialized yet)
         if (!this.initialized) {
             this.start();
@@ -150,8 +157,8 @@ class Spawn_System {
         // Do nothing if game is paused
         if (this.game.isGamePaused) return;
 
-        // Update enemy stats based on DIFFICULTY_SCALE
-        this.updateEnemyStats();
+        // Update DIFFICULTY_SCALE
+        this.updateDifficultyScale();
 
         // Handle elite spawn timer
         // Check if this.eliteSpawnTimer time has passed since last elite spawn
@@ -174,9 +181,17 @@ class Spawn_System {
         }
     }
 
-    /** Call this in updade() to keep enemy stats up to date with latest DIFFICULTY_SCALE value. */
-    updateEnemyStats() {
+    /** This method is called in update to check if it's time to up the difficulty scaling of the game. */
+    updateDifficultyScale() {
+        const currentTimeInSeconds = this.game.elapsedTime / 1000;
+        // Assuming you have a property this.lastDifficultyUpdateTime to track the last update time
+        // If it doesn't exist, initialize it in the constructor or start method
+        if (!this.lastDifficultyUpdateTime) this.lastDifficultyUpdateTime = currentTimeInSeconds;
 
+        if (currentTimeInSeconds - this.lastDifficultyUpdateTime >= this.raiseDifficultyInterval) {
+            this.DIFFICULTY_SCALE += this.difficultyScaleAdder;
+            this.lastDifficultyUpdateTime = currentTimeInSeconds;
+        }
     }
 
 
@@ -328,6 +343,16 @@ class Spawn_System {
         return count;
     }
 
+    /** Pass an enemy into this to scale its stats with the difficulty scale. */
+    scaleStatsForDifficulty(enemy) {
+        // Scale current health and max health
+        enemy.maxHP = Math.round(enemy.maxHP * this.DIFFICULTY_SCALE);
+        enemy.currHP = enemy.maxHP; // Assuming current HP should match max HP initially
+
+        // Scale attack power
+        enemy.atkPow = Math.round(enemy.atkPow * this.DIFFICULTY_SCALE);
+    }
+
     /**
      * Call this method to spawn an enemy passed from one of the enemy arrays.
      * @param   enemy   The enemy info to use from an enemy array.
@@ -337,7 +362,7 @@ class Spawn_System {
     spawnEnemy(enemy, worldX, worldY) {
         if (enemy === null) return; // Passed a null entity, exit
 
-        let newEnemy = enemy;
+        let newEnemy = null;
 
         if (enemy.enemyType === "contact") {
             newEnemy = this.game.addEntity(new Enemy_Contact(enemy.name, enemy.maxHP,
@@ -386,6 +411,11 @@ class Spawn_System {
             }
         }
 
+        if(newEnemy === null) {
+            console.log("SS.spawnEnemy() failed! Tried to spawn null");
+            return;
+        }
+
         // Spawn an elite if this.spawnElite has been set to true
         if(this.spawnElite) {
             if (Math.random() < 1) {    // Can make it a chance if we lower the 1 to something < 1 (ex: 0.1 === 10% chance)
@@ -409,6 +439,8 @@ class Spawn_System {
 
         // Store this time as the last time we spawned an enemy
         this.lastSpawnTime = this.game.elapsedTime / 1000;
+
+        this.scaleStatsForDifficulty(newEnemy);
 
         return newEnemy;
     }
@@ -459,6 +491,8 @@ class Spawn_System {
      */
     updateSpawnSettings() {
         const currentTime = this.game.elapsedTime / 1000;
+
+        //
 
         // Update the max enemy interval
         this.maxEnemyIntervals = Math.floor(this.game.elapsedTime / (this.maxEnemyIncrementTime * 1000));

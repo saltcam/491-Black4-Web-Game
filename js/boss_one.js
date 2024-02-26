@@ -32,11 +32,11 @@ class BossOne extends Entity {
         /** For debugging purposes, default is off (false). */
         this.boundingBox.drawBoundingBox = false;
         /** The cooldown of how often this entity can damage the player with its attacks. */
-        this.attackCooldown = 1;    // in seconds
+        this.collisionAttackCooldown = 1;    // in seconds
         /** The damage done to player if hit by this entity's bounding box while this boss is charging. */
         this.chargeDamage = this.atkPow * 2;
         /** The time since this entity last damaged the player. */
-        this.lastAttackTime = 0;    // time since last attack
+        this.lastCollisionAttackTime = 0;    // time since last attack
         /** Controls whether this entity receives pushback force. */
         this.canBePushedBack = false;
         /** A multiplier applied to any pushback force on this entity. */
@@ -48,7 +48,7 @@ class BossOne extends Entity {
 
         /** Target direction marker. Tracks where the boss should be pathing to next. */
         this.targetMarker = this.game.addEntity(new Entity(1, 1, 0, this.game,
-            0, 0, 5, 5, "attackMarker",
+            0, 0, 5, 5, "targetMarker",
             0,
             "./sprites/attack_targeting.png",
             0, 0, 92, 92, 4, 0.25, 2, 0));
@@ -57,6 +57,8 @@ class BossOne extends Entity {
         // Attack Variables
         /** Flag that tracks if we are ready to perform another attack (ex: charge, ground smash). */
         this.readyForNextAttack = true;
+        /** How often to check if we are going to enter an attack mode. */
+        this.attackModeCooldown = 2.5;
         /** Last time we checked for an attack to possibly happen. */
         this.lastAttackCheckTime = 0;
         /** How often to check if we are going to enter an attack mode. */
@@ -125,14 +127,14 @@ class BossOne extends Entity {
 
             // Be sure to send the target marker entity to the garbage collector
             this.targetMarker.removeFromWorld = true;
-
-            this.removeFromWorld = true;
             this.game.killAllEnemies();
+            this.removeFromWorld = true;
             return;
         }
 
         // Decrease recent damage over time (for boss health bar calculations)
         const currentTime = this.game.elapsedTime / 1000;
+
         if (currentTime - this.lastDamageTime > this.damageDecayDelay && this.recentDamage > 0) {
             const timeSinceLastDamage = currentTime - this.lastDamageTime - this.damageDecayDelay;
             const decayAmount = this.damageDecayRate * (timeSinceLastDamage / 1000); // Calculate decay based on time passed
@@ -226,7 +228,7 @@ class BossOne extends Entity {
 
             const distanceX = Math.abs(bossCenterX - markerCenterX);
             const distanceY = Math.abs(bossCenterY - markerCenterY);
-            const proximity = 600; // Adjusted proximity threshold
+            const proximity = 425; // Under this range - ground smash, above this range - charge
 
             // Check if in proximity of target yet, if not, then charge to get closer
             // Adjusted condition to allow for charge if far enough in either X or Y direction
@@ -385,13 +387,13 @@ class BossOne extends Entity {
         const currentTime = this.game.elapsedTime / 1000;
 
         // Check collision and cooldown
-        if (this.boundingBox.isColliding(player.boundingBox) && currentTime - this.lastAttackTime >= this.attackCooldown) {
+        if (this.boundingBox.isColliding(player.boundingBox) && currentTime - this.lastCollisionAttackTime >= this.collisionAttackCooldown) {
             if (this.attackStatus === "Charging") {
                 player.takeDamage(this.chargeDamage);
             } else {
                 player.takeDamage(this.atkPow);
             }
-            this.lastAttackTime = currentTime; // Update last attack time
+            this.lastCollisionAttackTime = currentTime; // Update last attack time
         }
     }
 

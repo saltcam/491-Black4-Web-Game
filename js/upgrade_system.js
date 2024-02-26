@@ -846,7 +846,7 @@ class Upgrade_System {
         screenX += 140;
 
         // Player Dash CD
-        ctx.fillText("Dash CD: " + (Math.round(this.game.player.defaultDashCooldown * 10) / 10) + "s", screenX, screenY);
+        ctx.fillText("Dash CD: " + (Math.round(this.game.player.dashCooldown * 10) / 10) + "s", screenX, screenY);
         // Player Dash Distance
         ctx.fillText("Dash Dur: " + (Math.round(this.game.player.dashDuration * 10) / 10) + "s", screenX, screenY+(yIncrement));
         // Player Movement Speed

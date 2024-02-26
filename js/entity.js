@@ -25,6 +25,7 @@ class Entity {
      * @param exp   the amount of exp the entity gives when killed
      */
     constructor(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp) {
+        this.debugName = "Entity("+boxType+")";
         this.maxHP = maxHP;
         this.currHP = currHP;
         this.atkPow = atkPow;
@@ -67,7 +68,8 @@ class Entity {
         if (this.followedEntity === null) {
             this.relocate();
         }
-        else {
+
+        if (this.followedEntity !== null) {
             // Follow the set entity
             this.worldX = this.followedEntity.worldX + this.followXOffset;
             this.worldY = this.followedEntity.worldY + this.followYOffset;
@@ -168,12 +170,12 @@ class Entity {
         if (this.currHP + healHp <= this.maxHP) {
             this.currHP += healHp;
             // Spawn floating healing number
-            this.game.addEntity(new Floating_text(this.game, healHp, this.worldX, this.worldY, true, this instanceof Player || this.boundingBox.type.includes("ally")));
+            this.game.addEntity(new Floating_text(this.game, healHp, this.calculateCenter().x, this.calculateCenter().y, true, this instanceof Player || this.boundingBox.type.includes("ally")));
         }
         // If over-heal then just restore to max hp
         else {
             this.currHP = this.maxHP;
-            this.game.addEntity(new Floating_text(this.game, healHp, this.worldX, this.worldY, true, this instanceof Player || this.boundingBox.type.includes("ally")));
+            this.game.addEntity(new Floating_text(this.game, healHp, this.calculateCenter().x, this.calculateCenter().y, true, this instanceof Player || this.boundingBox.type.includes("ally")));
         }
     }
 
@@ -203,7 +205,7 @@ class Entity {
                         if (!this.isDead) {
                             this.currHP -= bleed;
                             this.game.player.updateScore(bleed);
-                            this.game.addEntity(new Floating_text(this.game, bleed, this.worldX, this.worldY, false,
+                            this.game.addEntity(new Floating_text(this.game, bleed, this.calculateCenter().x, this.calculateCenter().y, false,
                                 this instanceof Player || this.boundingBox.type.includes("ally"), isCrit));
                             this.animator.damageSprite(100);
 
@@ -224,7 +226,7 @@ class Entity {
             this.currHP -= amount;
             this.game.player.updateScore(amount);
             // Spawn floating damage number
-            this.game.addEntity(new Floating_text(this.game, amount, this.worldX, this.worldY,
+            this.game.addEntity(new Floating_text(this.game, amount, this.calculateCenter().x, this.calculateCenter().y,
                 false, this instanceof Player || this.boundingBox.type.includes("ally"), isCrit));
 
             // Apply the damage sprite to this entity
@@ -239,43 +241,46 @@ class Entity {
             this.isDead = true;
         }
 
-        this.game.player.weapons[0].upgrades.forEach(upgrade => {
-            if (upgrade.name === "Crippling Chill" && upgrade.active && !(this instanceof Player)
-                && !this.boundingBox.type.includes("ally")
-                && !this.boundingBox.type.includes("boss") && this.game.player.currentWeapon === 0) {
-                // Only apply the actual slow if their faster than what we are slowing them to.
-                if (this.movementSpeed > 30) {
-                    this.movementSpeed = 30;
-
-                    // Apply the visual chill effect outline
-                    this.animator.outlineMode = true;
-                    this.animator.outlineColor = 'lightblue';
-
-                    this.game.setManagedTimeout(() => {
-                        this.animator.outlineColor = 'yellow';  // Back to default
-                        if (!this.isElite) {
-                            this.animator.outlineMode = false;
-                        }
-                        this.movementSpeed = this.initialMovementSpeed
-                    }, 1000);
-                }
-                // If was slower or already had 30 speed, then just apply the visual chill outline.
-                else if (this.movementSpeed <= 30) {
-                    // Apply the visual chill effect outline
-                    this.animator.outlineMode = true;
-                    this.animator.outlineColor = 'lightblue';
-
-                    this.game.setManagedTimeout(() => {
-                        this.animator.outlineColor = 'yellow';  // Back to default
-                        if (!this.isElite) {
-                            this.animator.outlineMode = false;
-                        }
-                    }, 1000);
-                }
-            }
-        });
+        // If crippling chill upgrade is active, slow this it is an enemy
+        this.applySlow();
     }
 
+    // Method to calculate and apply any cripple effects to the target from the crippling chill upgrade from scythe
+    applySlow() {
+        if (this.game.player.weapons[0].upgrades[7].active && !(this instanceof Player)
+            && !this.boundingBox.type.includes("ally")
+            && !this.boundingBox.type.includes("boss") && this.game.player.currentWeapon === 0) {
+            // Only apply the actual slow if their faster than what we are slowing them to.
+            if (this.movementSpeed > 30) {
+                this.movementSpeed = 30;
+
+                // Apply the visual chill effect outline
+                this.animator.outlineMode = true;
+                this.animator.outlineColor = 'lightblue';
+
+                this.game.setManagedTimeout(() => {
+                    this.animator.outlineColor = 'yellow';  // Back to default
+                    if (!this.isElite) {
+                        this.animator.outlineMode = false;
+                    }
+                    this.movementSpeed = this.initialMovementSpeed
+                }, 1000);
+            }
+            // If was slower or already had 30 speed, then just apply the visual chill outline.
+            else if (this.movementSpeed <= 30) {
+                // Apply the visual chill effect outline
+                this.animator.outlineMode = true;
+                this.animator.outlineColor = 'lightblue';
+
+                this.game.setManagedTimeout(() => {
+                    this.animator.outlineColor = 'yellow';  // Back to default
+                    if (!this.isElite) {
+                        this.animator.outlineMode = false;
+                    }
+                }, 1000);
+            }
+        }
+    }
     // Method to calculate the angle between the entity and a target
     calcTargetAngle(target) {
         if (target) {

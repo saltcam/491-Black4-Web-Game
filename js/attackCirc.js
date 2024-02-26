@@ -21,6 +21,7 @@ class AttackCirc {
      * @param attackTick    How often this circle will tick damage to the things inside of it.
      */
     constructor(game, entity, radius, type, dx, dy, duration, attackSpritePath, attackDamage, delayedAttackDamage, damagePushbackForce, spriteRotationSpeed, attackTick) {
+        this.debugName = "AttackCirc("+type+")";
         this.game = game;
         // the entity the circle will attach to
         this.entity = entity;
@@ -100,12 +101,12 @@ class AttackCirc {
 
     // changes world position to match its attached entity, offset by dx and dy values.
     update() {
+        const currentTime = this.game.elapsedTime / 1000;
+        //console.log("ATTACKCIRC: Dur="+this.duration+"s, CurrTime="+(currentTime - this.startTime)+"s, rem="+this.removeFromWorld);
         if (this.trackToEntity) {
             this.worldX = this.entity.calculateCenter().x + this.dx;
             this.worldY = this.entity.calculateCenter().y + this.dy;
         }
-
-        const currentTime = this.game.elapsedTime / 1000;
 
         // increase in size each frame if of type explosion
         if (this.type === "playerAttack_ExplosionAttack" && ((currentTime - this.lastGrowthTime) >= this.growthCooldown)) {

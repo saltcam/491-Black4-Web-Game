@@ -1,21 +1,21 @@
 class Weapon_staff extends Weapon {
     constructor(game) {
         let upgrades = [
-            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 75),
-            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 35),
-            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
-            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 25),
-            new Upgrade("Corpse Explosion", "Enemies killed with explosions may explode.", true, "./sprites/upgrade_knockback.png", 25)];
+            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 175),
+            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 115),
+            new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 50),
+            new Upgrade("Corpse Explosion", "Enemies killed with explosions may explode.", true, "./sprites/upgrade_knockback.png", 350)];
 
         super(game, "Staff", 7, 7,
             0, 0,
             5, 5,
             115, 2,
-            1, 0.5,
+            1, 0.33,
             "./sprites/NecromancyStaff.png",
             "./sounds/SE_staff_secondary.mp3", "./sounds/SE_staff_primary.mp3", 26, 70, upgrades);
 
-        this.name = "Staff"; // For debug logging
+        this.debugName = "Staff"; // For debug logging
 
         // Save these values for calculations later (for sprite scaling)
         this.initialPrimaryAttackRadius = 115;

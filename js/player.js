@@ -26,17 +26,19 @@ class Player extends Entity {
             new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png")];
 
+        this.debugName = "Player";
+
         // Animation settings
         this.lastMove = "right"; // Default direction
         this.isMoving = false;  // Is the character currently moving?
         this.currentAnimation = "standing"; // Starts as "standing" and changes to "walking" when the character moves
 
         // Dash implementation
-        this.defaultDashCooldown = 2;   // This is the actual cooldown of dash that will be used each time we dash
-        this.currentDashCooldown = 0;    // This holds the current time left till we can dash again
+        this.dashCooldown = 2;   // This is the actual cooldown of dash that will be used each time we dash
         this.dashSpeedMultiplier = 3;
         this.dashDuration = 0.5;
-        this.lastDashTime = -this.defaultDashCooldown; // Tracks when the last dash happened
+        this.lastDashTime = this.game.elapsedTime - (this.dashCooldown * 2); // Tracks when the last dash happened
+        this.lastDashTimeVar = this.lastDashTime; // This is purely for a UI purpose, don't mind it in the actual mechanics of how Dashing works
 
         // Regen 1 health per this many seconds
         this.healthRegenTime = 3.5;
@@ -72,6 +74,13 @@ class Player extends Entity {
         this.initialAtkPow = this.atkPow;
         this.initialPickupRange = this.pickupRange;
         this.initialExpGain = this.expGain;
+
+        // Store a bank of all possible gold pickup sound effects
+        this.pickupSoundBank = [
+            "./sounds/Coin_Pickup1.mp3",
+            "./sounds/Coin_Pickup2.mp3",
+            "./sounds/Coin_Pickup3.mp3"
+        ];
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
@@ -88,7 +97,12 @@ class Player extends Entity {
                         this.healthRegenTime *= 0.8;
                         break;
                     case "Dash CD -10%":
-                        this.defaultDashCooldown *= 0.9;
+                        this.dashCooldown *= 0.9;
+
+                        // If we hit 1 sec CD on dash remove this upgrade as an option in for the future
+                        if (this.dashCooldown <= 1) {
+                            this.upgrades.splice(2, 1);
+                        }
                         break;
                     case "Movement Speed +10%":
                         this.movementSpeed *= 1.1;
@@ -101,6 +115,11 @@ class Player extends Entity {
                         break;
                     case "Dash Duration +15%":
                         this.dashDuration *= 1.15;
+
+                        // If we hit 2.5 sec duration on dash remove this upgrade as an option in for the future
+                        if (this.dashDuration >= 3) {
+                            this.upgrades.splice(6, 1);
+                        }
                         break;
                     case "Crit Damage +20%":
                         this.critDamage += 0.2;
@@ -173,7 +192,15 @@ class Player extends Entity {
 
         // Handle dashing duration and reset
         if (this.isDashing && ((this.game.elapsedTime / 1000) - this.lastDashTime >= this.dashDuration)) {
+            this.lastDashTime = this.game.elapsedTime / 1000;
+            this.lastDashTimeVar = this.lastDashTime;
             this.endDash();
+        }
+
+        this.lastDashTimeVar = this.lastDashTime;
+        // Update UI variable for dash CD
+        if (this.isDashing) {
+            this.lastDashTimeVar = this.game.elapsedTime / 1000;
         }
 
         // Handle if this frame has iFrame
@@ -315,15 +342,19 @@ class Player extends Entity {
             this.currentAnimation = "dashing";
         }
 
-        // decrements dash cooldown
-        this.currentDashCooldown -= this.game.clockTick;
+        // console.log("currDashCD="+this.currentDashCooldown);
+        // if (!this.isDashing) {
+        //     // decrements dash cooldown
+        //     this.currentDashCooldown -= this.game.clockTick;
+        // }
+        // if (this.currentDashCooldown < 0) {
+        //     this.currentDashCooldown = 0;
+        // }
 
-        if (this.currentDashCooldown < 0) {
-            this.currentDashCooldown = 0;
-        }
+
         if (this.controlsEnabled) {
             // checks if space bar has been pressed and the dash is not on cooldown
-            if (this.game.keys[" "] && (currentTime - this.lastDashTime >= this.defaultDashCooldown)) {
+            if (this.game.keys[" "] && (currentTime - this.lastDashTime >= this.dashCooldown)) {
                 this.performDash();
             }
         }
@@ -339,7 +370,7 @@ class Player extends Entity {
             return tempBoundingBox.isColliding(mapObject.boundingBox);
         }
         // If we collide with an unopened chest, open the chest
-        else if (mapObject.boundingBox.type === "chest" && !mapObject.hasBeenOpened) {
+        else if (mapObject.boundingBox.type.includes("chest") && !mapObject.hasBeenOpened) {
             // Create a temporary bounding box for the intended position
             let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
 
@@ -355,8 +386,7 @@ class Player extends Entity {
 
             // Check if this temporary bounding box collides with the map object's bounding box
             if (tempBoundingBox.isColliding(mapObject.boundingBox)) {
-                mapObject.collectGold();
-                mapObject.removeFromWorld = true;
+                if (!mapObject.collectingGold) mapObject.collectGold();
             }
         }
 
@@ -374,6 +404,7 @@ class Player extends Entity {
     // called when the user has a valid dash and presses space bar
     performDash() {
         this.lastDashTime = this.game.elapsedTime / 1000; // Record the start time of the dash
+        this.lastDashTimeVar = this.lastDashTime;
         this.isDashing = true; // Flag to indicate dashing state, this flag also will enable iFrames
     }
 
@@ -563,11 +594,11 @@ class Player extends Entity {
         const yOffset = 500;
 
         // Calculate the elapsed time since the last dash
-        const timeSinceLastDash = (this.game.elapsedTime / 1000) - this.lastDashTime;
+        const timeSinceLastDash = (this.game.elapsedTime / 1000) - this.lastDashTimeVar;
         // Calculate the remaining cooldown time
-        const remainingCooldown = Math.max(0, this.defaultDashCooldown - timeSinceLastDash);
+        const remainingCooldown = Math.max(0, this.dashCooldown - timeSinceLastDash);
         // Calculate the width of the filled portion based on the remaining cooldown
-        const filledWidth = barWidth * (1 - (remainingCooldown / this.defaultDashCooldown));
+        const filledWidth = barWidth * (1 - (remainingCooldown / this.dashCooldown));
 
         // Start fading out the bar 5 seconds after the last dash
         const fadeStartTime = 2.5; // Seconds after last dash when fading starts
@@ -591,6 +622,23 @@ class Player extends Entity {
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.66})`; // Foreground fades with the bar
         }
         ctx.fillRect(xOffset, yOffset, filledWidth, barHeight);
+    }
+
+    addGold(amount) {
+        this.gold += amount;
+
+        // Play sound effect of gold collection
+        ASSET_MANAGER.playAsset(this.pickupSoundBank[Math.round(Math.random() * this.pickupSoundBank.length)]);
+    }
+
+    removeGold(amount) {
+        if (this.gold - amount < 0) {
+            return;
+        }
+
+        this.gold -= amount;
+
+        // Play sound effect of gold removal
     }
 
     draw(ctx, game) {

@@ -12,6 +12,7 @@ class Floating_text {
         this.duration = 1.5 * 1000; // Duration in milliseconds
         this.startTime = Date.now();
         this.boundingBox = new BoundingBox(0, 0, 0, 0, "damageNumber");
+        this.debugName = "Floating_Text"+this.boundingBox.type+")";
         this.initialFontSize = 24; // Initial font size
         this.maxFontSize = 36; // Maximum font size when growsOverTime is true
     }

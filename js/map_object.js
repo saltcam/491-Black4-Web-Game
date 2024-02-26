@@ -1,17 +1,56 @@
 class Map_object extends Entity {
     constructor(game, worldX, worldY, boxWidth, boxHeight, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale) {
         super(0, 0, 0, game, worldX, worldY, boxWidth, boxHeight, "object", 0, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale);
+        this.debugName = "Map_Object("+this.boundingBox.type+")";
         this.hasBeenOpened = false;
         this.isExploding = false;
         this.explosion = null;
         this.arrowPointer = null;
         this.openedAtTime = null;
         this.deleteAfterOpenTime = 5; // Seconds to wait before deleting this after 'opening' it (if it's a chest type)
+
+        // Coin collection properties
+        this.coinCollectionSeperationDelay = 0.2;
+        this.lastCoinCollectionTime = 0;
+        this.coinsToCollect = 0; // How many coins left to collect
+        this.collectingGold = false; // Whether the gold collection process is active
+    }
+
+    update() {
+        // Calculate the scaled center of the sprite
+        const scaledCenterX = this.worldX + (this.animator.width) / 2;
+        const scaledCenterY = this.worldY + (this.animator.height) / 2;
+
+        // Update the bounding box to be centered around the scaled sprite
+        this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
+
+        if (this.coinsToCollect <= 0) {
+            return;
+        }
+
+        // Check if we are in the process of collecting gold
+        if (this.collectingGold && this.coinsToCollect > 0) {
+            // Check if enough time has passed since the last coin was collected
+            if (this.game.elapsedTime - this.lastCoinCollectionTime >= (this.coinCollectionSeperationDelay * 1000)) {
+                // Collect one coin
+                this.game.addEntity(new Gold_Coin_UI(this.game, this.worldX, this.worldY));
+                this.coinsToCollect--; // Decrement the coins left to collect
+                this.coinCollectionSeperationDelay *= 0.95; // Optional: Decrease the delay for the next coin
+                this.lastCoinCollectionTime = this.game.elapsedTime; // Update the last collection time
+
+                // If all coins have been collected, stop the collection process
+                if (this.coinsToCollect <= 0) {
+                    this.collectingGold = false;
+                    this.removeFromWorld = true; // Remove the gold bag object
+                }
+            }
+        }
     }
 
     openChest() {
         if (this.hasBeenOpened) return;
 
+        this.collectGold();
         this.animator.pauseAtFrame(-1);
         this.animator.pauseAtSpecificFrame(24); // Passing a -1 essentially unpauses the animator.
         this.animator.outlineMode = false; // Turn off the outline now that it has been opened
@@ -38,8 +77,11 @@ class Map_object extends Entity {
     }
 
     collectGold() {
-        this.game.player.gold += this.extractNumber(this.boundingBox.type);
-        this.removeFromWorld = true;
+        this.collectingGold = true;
+        let amount = this.extractNumber(this.boundingBox.type);
+        if (amount > 0) {
+            this.coinsToCollect += amount; // Set the number of coins to collect
+        }
     }
 
     // prepares the object with information letting the game know to make an explosion before removing it.
