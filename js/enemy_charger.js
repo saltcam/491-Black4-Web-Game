@@ -288,6 +288,13 @@ class Enemy_Charger extends Entity {
         }
     }
 
+    // Overwrite because we don't want to slow enemies while they are in the middle of charging
+    applySlow() {
+        if (this.attackStatus === "Charging") return;
+
+        super.applySlow();
+    }
+
     draw(ctx, game) {
         if (this.attackStatus === "Charging" || this.attackStatus === "Preparing to Charge") {
             const targetCenter = {

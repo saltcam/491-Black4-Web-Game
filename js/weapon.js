@@ -7,6 +7,7 @@ class Weapon {
                 spritePath, primarySound, secondarySound, spriteW, spriteH, upgrades) {
         this.game = game;
         this.name = name;
+        this.debugName = "Weapon";
         this.primaryCool = primaryCool;
         this.secondCool = secondCool;
 
@@ -120,7 +121,7 @@ class Weapon {
                 //console.log("CHOSE " + randomIndex);
                 if (!indexes.has(randomIndex) && !this.upgrades[randomIndex].active) {
                     // If the upgrade selected is 'special' lets add a rarity to it even being chosen
-                    if (this.upgrades[randomIndex].special && (Math.random() < 1)) { // % chance that we let special upgrades show up (0.75 means 75% chance)
+                    if (this.upgrades[randomIndex].special && (Math.random() < 0.5)) { // % chance that we let special upgrades show up (0.75 means 75% chance)
                         indexes.add(randomIndex);
                         result.push(this.upgrades[randomIndex]);
                     }

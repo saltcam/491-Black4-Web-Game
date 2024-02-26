@@ -5,6 +5,7 @@ class Exp_Orb extends Entity {
             17, 17, "orb", 0,
             "./sprites/exp_orb.png",
             0, 0, 17, 17, 3, 0.2, size, exp);
+        this.debugName = "Exp_Orb("+this.boundingBox.type+")";
         this.maxSpeed = 1000; // Set the maximum speed
         this.acceleration = 7.5; // Acceleration rate towards the player
         this.currentSpeed = 0; // Starting speed

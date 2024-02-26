@@ -76,6 +76,25 @@ class BossTwo extends Entity {
     // this is the movement pattern for enemies that just approach the player
     update() {
         super.update();
+
+        // Early exit if the player does not exist for some reason at this point
+        if (!this.game.player) {
+            return;
+        }
+
+        // If health hits 0 or below, this entity is declared dead
+        if (this.isDead) {
+            // Spawn a portal to rest area (because map is completed once boss is dead)
+            this.game.spawnPortal(0, 0, 0);
+
+            // Set the gameengine to roundOver
+            this.game.roundOver = true;
+
+            this.game.killAllEnemies();
+            this.removeFromWorld = true;
+            return;
+        }
+
         //console.log("X = " + this.worldX + "; Y = " + this.worldY);
 
         if (this.mode === "roaring") {
@@ -93,18 +112,6 @@ class BossTwo extends Entity {
         // If pushback is very small, reset it to 0 to stop movement
         if (Math.abs(this.pushbackVector.x) < 0.1) this.pushbackVector.x = 0;
         if (Math.abs(this.pushbackVector.y) < 0.1) this.pushbackVector.y = 0;
-
-        // Early exit if the player does not exist or enemy is dead
-        if (!this.game.player || this.isDead) {
-            return;
-        }
-
-        // If health hits 0 or below, this entity is declared dead
-        if (this.currHP <= 0)
-        {
-            this.isDead = true;
-            this.game.killAllEnemies();
-        }
 
         const player = this.game.player;
 

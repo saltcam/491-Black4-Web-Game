@@ -144,6 +144,9 @@ ASSET_MANAGER.queueDownload("./sounds/SE_tome_primary.mp3");
 ASSET_MANAGER.queueDownload("./sounds/SE_tome_secondary.mp3");
 ASSET_MANAGER.queueDownload("./sounds/SE_staff_primary.mp3");
 ASSET_MANAGER.queueDownload("./sounds/SE_staff_secondary.mp3");
+ASSET_MANAGER.queueDownload("./sounds/Coin_Pickup1.mp3");
+ASSET_MANAGER.queueDownload("./sounds/Coin_Pickup2.mp3");
+ASSET_MANAGER.queueDownload("./sounds/Coin_Pickup3.mp3");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");

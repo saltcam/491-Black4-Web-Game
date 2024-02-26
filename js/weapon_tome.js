@@ -1,15 +1,15 @@
 class Weapon_tome extends Weapon {
     constructor(game) {
         let upgrades = [
-            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 75),
-            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 35),
-            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 50),
-            new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 40),
-            new Upgrade("Projectile Speed +15%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 25),
-            new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_piercing.png", 120),
-            new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_piercing.png", 120),
-            new Upgrade("Doubletime", "(Unique) Secondary hits more often.", true, "./sprites/upgrade_piercing.png", 120),
-            new Upgrade("Expansion", "(Unique) Attack size grows as it moves.", true, "./sprites/upgrade_piercing.png", 120)
+            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 150),
+            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 100),
+            new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 100),
+            new Upgrade("Projectile Speed +15%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 75),
+            new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_piercing.png", 225),
+            new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_piercing.png", 200),
+            new Upgrade("Doubletime", "(Unique) Secondary hits more often.", true, "./sprites/upgrade_piercing.png", 250),
+            new Upgrade("Expansion", "(Unique) Attack size grows as it moves.", true, "./sprites/upgrade_piercing.png", 300)
             //new Upgrade("Big Finish", "(Unique) Attacks explode once expired", true, "./sprites/upgrade_piercing.png", 120)
             //new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 120)
         ];
@@ -22,7 +22,7 @@ class Weapon_tome extends Weapon {
             "./sprites/Tome.png",
             "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40, upgrades);
 
-        this.name = "Tome"; // For debug logging
+        this.debugName = "Tome"; // For debug logging
 
         // Save these values for calculations later
         this.initialPrimaryAttackRadius = this.primaryAttackRadius;
@@ -86,7 +86,9 @@ class Weapon_tome extends Weapon {
             if (expansionUpgrade) {
                 for (let i = 0; i < 3; i++)
                     this.game.setManagedTimeout(() => {
-                        projectile.attackCirc.radius += 10;
+                        if (projectile && projectile.attackCirc) {
+                            projectile.attackCirc.radius += 10;
+                        }
                     }, 950 * i);
             }
 
@@ -100,9 +102,11 @@ class Weapon_tome extends Weapon {
 
             if (doubleShotUpgrade) {
                 this.game.setManagedTimeout(() => {
-                    const secondProjectile = this.addPrimaryProjectile(player, dx, dy, doubleShotDamageMultiplier);
-                    if (secondProjectile && bouncingShotUpgrade) {
-                        secondProjectile.bouncesLeft = this.maxPrimaryHits;
+                    if (this) {
+                        const secondProjectile = this.addPrimaryProjectile(player, dx, dy, doubleShotDamageMultiplier);
+                        if (secondProjectile && bouncingShotUpgrade) {
+                            secondProjectile.bouncesLeft = this.maxPrimaryHits;
+                        }
                     }
                 }, 100);
             }
@@ -188,7 +192,9 @@ class Weapon_tome extends Weapon {
             if (expansionUpgrade) {
                 for (let i = 0; i < 5; i++)
                     this.game.setManagedTimeout(() => {
+                        if (newProjectile && newProjectile.attackCirc) {
                         newProjectile.attackCirc.radius += 10;
+                        }
                     }, 950 * i);
             }
         }

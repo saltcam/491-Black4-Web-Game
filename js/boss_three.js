@@ -102,7 +102,7 @@ class BossThree extends Entity {
         this.animationBank = [
             {name: "idle", spritePath: "./sprites/god_idle.png", animXStart: 0, animYStart: 0, animW: 158, animH: 177, animFCount: 10, animFDur: 0.25},
             {name: "walk", spritePath: "./sprites/god_walk.png", animXStart: 0, animYStart: 0, animW: 158, animH: 177, animFCount: 10, animFDur: 0.3}
-        ]
+        ];
     }
 
     /** This is the method called when an outside force (usually an attack) is trying to push this entity around. */

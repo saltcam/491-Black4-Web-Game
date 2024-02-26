@@ -14,7 +14,9 @@ class Animator {
         this.totalTime = this.frameCount * this.frameDuration;
         this.scale = scale;
         this.pauseFrame = -1;
-        this.beingDamaged = false;  // Is the sprite currently in damaged mode?
+        this.beingDamaged = false; // Is the sprite currently in damaged mode?
+        this.damageStartTime = 0; // Start time of the damage effect
+        this.damageDuration = 0; // Duration of the damage effect
 
         // Outline stuff
         this.outlineMode = false;
@@ -39,8 +41,16 @@ class Animator {
             this.elapsedTime += tick;
         }
 
+        // Check if the damage effect should still be applied
+        if (this.beingDamaged && (this.game.elapsedTime - this.damageStartTime < this.damageDuration)) {
+            // Continue showing the damaged sprite
+        } else {
+            this.beingDamaged = false;
+        }
+
         // If the elapsed time is greater than the total time, reset the elapsed time
         if (this.elapsedTime > this.totalTime) this.elapsedTime -= this.totalTime;
+
 
         // Get the current frame
         const frame = this.currentFrame();
@@ -51,7 +61,7 @@ class Animator {
             this.specificPauseFrame = null; // Reset specificPauseFrame to avoid repeated pausing in future loops
         }
 
-        // Save the current context state 
+        // Save the current context state
         ctx.save();
 
         // Calculate scale adjustments
@@ -144,13 +154,10 @@ class Animator {
     }
 
     // Method to switch to the damaged sprite and then switch back after a duration
+    // Method to switch to the damaged sprite and then switch back after a duration
     damageSprite(damageDuration) {
-        if (!this.beingDamaged) {
-            this.beingDamaged = true;
-
-            this.game.setManagedTimeout(() => {
-                this.beingDamaged = false;
-            }, damageDuration);
-        }
+        this.beingDamaged = true;
+        this.damageStartTime = this.game.elapsedTime; // Record the start time of the damage
+        this.damageDuration = damageDuration; // Set the duration of the damage effect
     }
 }

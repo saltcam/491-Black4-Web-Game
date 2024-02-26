@@ -16,6 +16,7 @@ class Weapon_scytoff extends Weapon {
             "./sprites/weapon_scythe.png",
             "./sounds/SE_scythe_primary.mp3", "./sounds/SE_scythe_secondary.mp3", 30, 50, upgrades);
 
+        this.debugName = "Scytoff";
         this.initialPrimaryCool = this.primaryCool;
         this.initialSecondaryCool = this.secondCool;
     }
