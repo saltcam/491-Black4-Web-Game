@@ -32,14 +32,7 @@ class BossTwo extends Entity {
         this.projectileSpread = 25; // the angle of range the projectiles are fired in evenly
         this.projectilePow = 10;    // how much damage each projectile does. changes with the patterns
         this.projectileDuration = 3; // how long each projectile should last
-
-        //this.shootingAnimXStart = shootAnimXStart;
-        //this.shootingAnimYStart = shootAnimYStart;
-        //this.shootingAnimW = shootAnimW;
-        //this.shootingAnimH = shootAnimH;
-        //this.shootingAnimFCount = shootAnimFCount;
-        //this.shootingAnimFDur = shootAnimFDur;
-        //this.isShooting = false; // Flag to indicate if shooting animation is active
+        this.projectileScale = 2;
 
         // used for determining movement in calcDist
         this.closestDist = 350;
@@ -52,6 +45,10 @@ class BossTwo extends Entity {
         this.attackCount = 0; // refers to how many attacks we have left before switching to normal mode. handled in pattern
         this.maxRoarTime = 0;  // how long we must continue to roar before switching to attack mode. handled in pattern
         this.currRoarTime = 0;
+
+        this.lastRoarTime = 0;
+        this.lastWalkTime = 0;
+        this.lastAttackTime = 0;
         //this.currentRoarTime = 0; // how long we've been roaring, once it reaches maxRoarTime, switch to attacking mode
 
 
@@ -142,21 +139,22 @@ class BossTwo extends Entity {
 
         this.checkCollisionAndDealDamage();
 
-        //TODO adjust all frame based time calculations to the timer system (wish I knew how it worked)
-
         // if in attack mode with attacks remaining, attack
         if (this.mode === "attacking" && this.attackCount > 0) {
             this.castProjectile();
         }
-        if (this.mode === "roaring") {
-            this.currRoarTime--;
-        }
-        if (this.mode === "normal") {
-            this.downTime--;
-        }
+        // // if (this.mode === "roaring") {
+        // //     this.currRoarTime--;
+        // // }
+        //
+        // // If it's time to stop down time, set flag
+        // if (this.mode === "normal") {
+        //     this.downTime--;
+        // }
         // if we are out of attacks and in attack mode, go back to normal
         if (this.attackCount <= 0 && this.mode === "attacking") {
             this.changeMode("normal");
+            // TODO make this health based
             if (this.pattern < 4) {
                 this.pattern++;
             }
@@ -170,10 +168,9 @@ class BossTwo extends Entity {
         // if we have had enough downtime, begin roaring
         if (this.downTime <= 0 && this.mode === "normal") {
             this.changeMode("roaring");
-            this.currRoarTime = this.maxRoarTime;
+            // this.currRoarTime = this.maxRoarTime;
 
         }
-
 
     }
 
@@ -270,7 +267,7 @@ class BossTwo extends Entity {
                     let newProjectile = this.game.addEntity(new Projectile(this.game, this.projectilePow,
                         projectileX, projectileY, 10, 10, "enemyAttack", this.projectileSpeed,
                         "./sprites/MagicBall_red.png",
-                        0, 0, 30, 30, 2, 0.2, 2, dx, dy,
+                        0, 0, 30, 30, 2, 0.2, this.projectileScale, dx, dy,
                         this.projectileDuration, this.projectileSize, 1, 0, 0.3));
                     newProjectile.pulsatingDamage = this.pulse;
 
@@ -298,7 +295,7 @@ class BossTwo extends Entity {
         this.pattern = patternNum; // might not need
         switch(patternNum){
             case 0:
-                this.maxRoarTime = 0.5 * 60;
+                this.roarDuration = 0.5;
                 this.projectileAttackCooldown = 0.5;
                 this.attackCount = 5; // how many times this attack happens
                 this.projectileSpeed = 25;
@@ -308,9 +305,10 @@ class BossTwo extends Entity {
                 this.projectileSpread = 50;
                 this.projectilePow = 8;
                 this.projectileDuration = 3;
+                this.projectileScale = 2;
                 break;
             case 1:
-                this.maxRoarTime = 2.5 * 60;
+                this.roarDuration = 2.5;
                 this.projectileAttackCooldown = 0.10;
                 this.attackCount = 35;
                 this.projectileSpeed = 35;
@@ -320,9 +318,10 @@ class BossTwo extends Entity {
                 this.projectileSpread = 10 + Math.floor(Math.random()*55);
                 this.projectilePow = 3;
                 this.projectileDuration = 4;
+                this.projectileScale = 2;
                 break;
             case 2:
-                this.maxRoarTime = 4 * 60;
+                this.roarDuration = 4;
                 this.projectileAttackCooldown = 1;
                 this.attackCount = 5;
                 this.projectileSpeed = 50;
@@ -332,9 +331,10 @@ class BossTwo extends Entity {
                 this.projectileSpread = 360;
                 this.projectilePow = 10;
                 this.projectileDuration = 1.5;
+                this.projectileScale = 2;
                 break;
             case 3:
-                this.maxRoarTime = 4.5 * 60;
+                this.roarDuration = 4.5;
                 this.projectileAttackCooldown = 5;
                 this.attackCount = 1;
                 this.projectileSpeed = 15;
@@ -344,9 +344,10 @@ class BossTwo extends Entity {
                 this.projectileSpread = 0;
                 this.projectilePow = 10;
                 this.projectileDuration = 7;
+                this.projectileScale = 15;
                 break;
             case 4:
-                this.maxRoarTime = 5.5 * 60;
+                this.roarDuration = 5.5;
                 this.projectileAttackCooldown = 0.4;
                 this.attackCount = 3;
                 this.projectileSpeed = 29;
@@ -356,6 +357,7 @@ class BossTwo extends Entity {
                 this.projectileSpread = 360;
                 this.projectilePow = 8;
                 this.projectileDuration = 4;
+                this.projectileScale = 2;
                 break;
         }
     }
@@ -373,7 +375,8 @@ class BossTwo extends Entity {
                         0, 0, 542 / 4, 98, 4, 0.2);
                     //console.log("normal mode");
                     this.mode = mode;
-                    this.downTime = 6 * 60;
+                    // this.downTime = 6 * 60;
+                    this.downTimeStartTime= this.game.elapsedTime / 1000;
                     break;
                 case "roaring":
                     this.anchorX = this.worldX;
@@ -384,6 +387,7 @@ class BossTwo extends Entity {
                     //console.log("roaring mode");
                     this.mode = mode;
                     ASSET_MANAGER.playAsset("./sounds/dragon_roar.mp3");
+                    this.roarStartTime = this.game.elapsedTime / 1000;
                     break;
                 case "attacking" :
                     this.worldX = this.anchorX;

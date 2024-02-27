@@ -31,7 +31,7 @@ class Weapon_staff extends Weapon {
         //this.upgrades[6].active = true;
         //this.upgrades[8].active = true;
         //this.upgrades[9].active = true;
-        this.upgrades[10].active = true;    // sets fiery explosion to true
+        //this.upgrades[10].active = true;    // sets fiery explosion to true
     }
 
     performPrimaryAttack(player, cheating) {
