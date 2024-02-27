@@ -112,7 +112,7 @@ class BossTwo extends Entity {
         // If health hits 0 or below, this entity is declared dead
         if (this.isDead) {
             // Spawn a portal to rest area (because map is completed once boss is dead)
-            this.game.spawnPortal(0, 0, 0);
+            this.game.spawnPortal(0, );
 
             // Set the gameengine to roundOver
             this.game.roundOver = true;

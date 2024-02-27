@@ -411,7 +411,7 @@ class Player extends Entity {
             }
         }
         // If we collide with an unopened chest, open the chest
-        else if (mapObject.boundingBox.type.includes("gold")) {
+        else if (mapObject.boundingBox.type.includes("gold_bag")) {
             // Create a temporary bounding box for the intended position
             let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
 

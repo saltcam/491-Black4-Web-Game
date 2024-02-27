@@ -54,6 +54,9 @@ class GameEngine {
          */
         this.currMap = -1;
 
+        /** Save the previous map index after map switching. */
+        this.prevMap = -10;
+
         // Map Scaling Variables
         /** Map scale for map 0 (Rest Area) */
         this.mapZeroScaleFactor = 1.5;
@@ -184,7 +187,7 @@ class GameEngine {
      */
     spawnUpgradeChest(worldX, worldY, goldAmount = 100) {
         let newEntity = this.addEntity(new Map_object(this, worldX, worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.03, 1.25));
-        newEntity.boundingBox.type = "chest" + goldAmount;
+        newEntity.boundingBox.type = "upgrade_chest" + goldAmount;
         newEntity.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
         newEntity.animator.outlineMode = true; // Turn on the outline
         this.addEntity(new Arrow_Pointer(newEntity, this)); // Attach an arrow pointer to the chest
@@ -207,7 +210,7 @@ class GameEngine {
         this.spawnUpgradeChest(1797, 2802);
 
         // Debug Portal
-        //this.spawnPortal(0, 100, 0);
+        //this.spawnPortal(0, 100);
 
         // Rocks
         let newEntity = this.addEntity(new Map_object(this, -250, 0, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
@@ -262,12 +265,19 @@ class GameEngine {
         this.spawnUpgradeChest(1846, -1943);
         this.spawnUpgradeChest(-1797, -2802);
 
+        // Debug Portal
+        //this.spawnPortal(0, 100);
+
         this.mapObjectsInitialized = true;
     }
+
 
     initSpaceMapObjects() {
         this.spawnUpgradeChest(-2546, -2343);
         this.spawnUpgradeChest(500, 3000);
+
+        // Debug Portal
+        //this.spawnPortal(0, 100);
 
         this.mapObjectsInitialized = true;
     }
@@ -773,8 +783,15 @@ class GameEngine {
     }
 
     /** Call this method to spawn a portal to the next area. */
-    spawnPortal(worldX, worldY, mapIndex) {
-        let newPortal = this.addEntity(new Portal(this, worldX, worldY, mapIndex));
+    spawnPortal(worldX, worldY) {
+        let newPortal;
+        if (this.currMap === 0) {
+            newPortal = this.addEntity(new Portal(this, worldX, worldY, this.prevMap + 1));
+        } else if (this.currMap < 3){
+            newPortal = this.addEntity(new Portal(this, worldX, worldY, 0));
+        } else { // update this to add a portal that sends to credits
+            newPortal = this.addEntity(new Portal(this, worldX, worldY, 1));
+        }
         this.addEntity(new Arrow_Pointer(newPortal, this, "./sprites/arrow_pointer_blue.png")); // Attach an arrow pointer
     }
 
@@ -889,7 +906,7 @@ class GameEngine {
 
             // Spawn the rest area exit portal at this precise location if we don't have a portal here already.
             if (!this.portal) {
-                this.spawnPortal(this.player.worldX + 350, this.player.worldY, 2)
+                this.spawnPortal(this.player.worldX + 350, this.player.worldY);
             }
 
             const spawnOffsetX = 170;
@@ -1179,7 +1196,7 @@ class GameEngine {
                         let percentToGoldDivider = 8;
                         let coinBag = new Map_object(this, this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y, 35, 35, "./sprites/object_coin_bag.png", 0, 0, 34, 34, 1, 1, 1);
                         this.addEntity(coinBag);
-                        coinBag.boundingBox.type = "gold" + Math.ceil(this.enemies[i].maxHP / percentToGoldDivider);
+                        coinBag.boundingBox.type = "gold_bag" + Math.ceil(this.enemies[i].maxHP / percentToGoldDivider);
                     }
                 }
 
@@ -1393,7 +1410,7 @@ class GameEngine {
         let goldAmount = 0;
 
         this.objects.forEach(object => {
-            if (object.boundingBox.type.includes("gold")) {
+            if (object.boundingBox.type.includes("gold_bag")) {
                 goldAmount += object.extractNumber(object.boundingBox.type) * 0.75; //0.5 means we tax off half the gold they would have naturally gotten
                 object.removeFromWorld = true; // Delete the gold bag object
             }
@@ -1417,7 +1434,7 @@ class GameEngine {
         // Set the calculated scale to the entity's animator
         newEntity.animator.scale = scale;
 
-        newEntity.boundingBox.type = "chest" + goldAmount;
+        newEntity.boundingBox.type = "gold_chest" + goldAmount;
         newEntity.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
         newEntity.animator.outlineMode = true; // Turn on the outline
         this.addEntity(new Arrow_Pointer(newEntity, this)); // Attach an arrow pointer to the chest
@@ -1710,6 +1727,7 @@ class GameEngine {
         });
 
         // Tell the game engine to switch to the map of the teleport index
+        this.prevMap = this.currMap;
         this.currMap = teleportIndex;
 
         // Reset spawn system on map change

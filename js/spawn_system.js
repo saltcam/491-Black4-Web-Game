@@ -108,7 +108,7 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapOneEnemies = [
-            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30) 
+            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
             this.contactEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
             this.chargerEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
