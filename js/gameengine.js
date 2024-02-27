@@ -362,7 +362,7 @@ class GameEngine {
         // Which lets us layer the most important entities over the less important ones (ex: player will be drawn over EVERYTHING.)
         if (entity.boundingBox.type === "player") {
             this.player = entity;
-        } else if (entity.boundingBox.type === "item") {
+        } else if (entity.boundingBox.type.toLowerCase().includes("item")) {
             this.items.push(entity);
         } else if (entity.boundingBox.type === "portal") {
             this.portal = entity;
@@ -410,14 +410,6 @@ class GameEngine {
         }
 
         return { x, y };
-    }
-
-    /** This will be called to let the portal execute map switching code only when the game engine is mid-fade-to-black. */
-    performPostFadeInActions() {
-        if (this.fadeInCompleteAction) {
-            this.fadeInCompleteAction();
-            this.fadeInCompleteAction = null; // Clear the action to ensure it's only performed once
-        }
     }
 
     /** Call this method on every frame to draw each entity or UI elements on the canvas. */
@@ -570,6 +562,19 @@ class GameEngine {
                 }
             }
 
+            // Draw treasure chests OVER the exp orbs and prior entities
+            for (let object of this.objects) {
+                if (object instanceof Map_object && object.boundingBox.type.includes("chest")) {
+                    object.draw(this.ctx, this);
+
+                    // If debug mode, then draw debug features.
+                    if (this.debugMode) {
+                        object.drawHealth(this.ctx);
+                        object.boundingBox.draw(this.ctx, this);
+                    }
+                }
+            }
+
             // Draw 'player' entity.
             if (this.player) {
                 this.player.draw(this.ctx, this);
@@ -607,7 +612,7 @@ class GameEngine {
             this.drawMouseTracker(this.ctx);
 
             // Draw the timer if we are not in rest area.
-            if (1) {
+            if (this.currMap > 0) {
                 this.drawTimer(this.ctx);
             }
 
@@ -1166,7 +1171,7 @@ class GameEngine {
                     // If elite or boss, drop a weapon upgrade chest
                     if (this.enemies[i].isElite || this.enemies[i].boundingBox.type === "enemyBoss") {
                         let percentToGoldDivider = 10;
-                        this.spawnUpgradeChest(this.enemies[i].worldX, this.enemies[i].worldY, this.enemies[i].maxHP / (percentToGoldDivider + (Math.random()*(percentToGoldDivider*0.75))));
+                        this.spawnUpgradeChest(this.enemies[i].worldX, this.enemies[i].worldY, Math.ceil(this.enemies[i].maxHP / percentToGoldDivider));
                     }
 
                     // % Chance to drop gold (gold amount based off of health), bosses and elites don't drop gold bags
@@ -1174,7 +1179,7 @@ class GameEngine {
                         let percentToGoldDivider = 8;
                         let coinBag = new Map_object(this, this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y, 35, 35, "./sprites/object_coin_bag.png", 0, 0, 34, 34, 1, 1, 1);
                         this.addEntity(coinBag);
-                        coinBag.boundingBox.type = "gold" + Math.ceil(this.enemies[i].maxHP / (percentToGoldDivider - (Math.random()*(percentToGoldDivider*0.75))));
+                        coinBag.boundingBox.type = "gold" + Math.ceil(this.enemies[i].maxHP / percentToGoldDivider);
                     }
                 }
 
@@ -1383,6 +1388,26 @@ class GameEngine {
         }
     }
 
+    // Call this to spawn the end chest of a round that collects a taxed amount of all gold left on the ground
+    spawnEndChest(worldX, worldY) {
+        let newEntity = this.addEntity(new Map_object(this, worldX, worldY, 35, 35, "./sprites/object_treasure_chest_gold.png", 0, 0, 54, 47, 25, 0.03, 1.25));
+        let goldAmount = 0;
+
+        this.objects.forEach(object => {
+            if (object.boundingBox.type.includes("gold")) {
+                goldAmount += object.extractNumber(object.boundingBox.type) * 0.5; //0.5 means we tax off half the gold they would have naturally gotten
+                object.removeFromWorld = true; // Delete the gold bag object
+            }
+        });
+
+        newEntity.boundingBox.type = "chest" + goldAmount;
+        newEntity.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
+        newEntity.animator.outlineMode = true; // Turn on the outline
+        this.addEntity(new Arrow_Pointer(newEntity, this)); // Attach an arrow pointer to the chest
+
+        return newEntity;
+    }
+
     // Call this to kill all alive enemies (drop XP too)
     killAllEnemies() {
         this.enemies.forEach(enemy => {
@@ -1477,7 +1502,7 @@ class GameEngine {
     // New method to set a managed timeout
     setManagedTimeout(callback, delay, ...args) {
         // Create a new Error object to capture the stack trace
-        const stack = new Error().stack;
+        // const stack = new Error().stack;
         //console.log("ManagedTimeout called from:", stack);
 
         const timeoutInfo = {

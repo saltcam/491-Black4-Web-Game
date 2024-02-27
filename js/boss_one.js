@@ -122,6 +122,9 @@ class BossOne extends Entity {
             // Spawn a portal to rest area (because map is completed once boss is dead)
             this.game.spawnPortal(0, 0, 0);
 
+            // Spawn the end chest
+            this.game.spawnEndChest(0, 200);
+
             // Set the gameengine to roundOver
             this.game.roundOver = true;
 

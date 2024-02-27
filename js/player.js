@@ -51,6 +51,7 @@ class Player extends Entity {
         this.gold = 0;
         this.level = 1;
         this.expGain = 1; // EXP Gain multiplier
+        this.goldGain = 1;
 
         // weapon handling
         this.allowWeaponSwitch = true;
@@ -111,22 +112,22 @@ class Player extends Entity {
                         case "Dash CD -10%":
                             this.dashCooldown *= 0.9;
 
-                        // If we hit 1 sec CD on dash remove this upgrade as an option in for the future
-                        if (this.dashCooldown <= 1) {
-                            this.upgrades.splice(2, 1);
-                        }
-                        break;
-                    case "Movement Speed +10%":
-                        this.movementSpeed *= 1.1;
-                        break;
-                    case "Attack Damage +7.5%":
-                        this.atkPow *= 1.075;
-                        break;
-                    case "Pickup Range +30%":
-                        this.pickupRange *= 1.3;
-                        break;
-                    case "Dash Duration +15%":
-                        this.dashDuration *= 1.15;
+                            // If we hit 1 sec CD on dash remove this upgrade as an option in for the future
+                            if (this.dashCooldown <= 1) {
+                                this.upgrades[i].relevant = false
+                            }
+                            break;
+                        case "Movement Speed +10%":
+                            this.movementSpeed *= 1.1;
+                            break;
+                        case "Attack Damage +7.5%":
+                            this.atkPow *= 1.075;
+                            break;
+                        case "Pickup Range +30%":
+                            this.pickupRange *= 1.3;
+                            break;
+                        case "Dash Duration +15%":
+                            this.dashDuration *= 1.15;
 
                             // If we hit 2.5 sec duration on dash remove this upgrade as an option in for the future
                             if (this.dashDuration >= 3) {
@@ -182,7 +183,7 @@ class Player extends Entity {
         let indexes = new Set(); // To keep track of already selected indexes
         while (indexes.size < 3) {
             let randomIndex = Math.floor(Math.random() * this.upgrades.length);
-            if (!indexes.has(randomIndex) && !this.upgrades[randomIndex].active) {
+            if (!indexes.has(randomIndex) && this.upgrades[randomIndex].relevant && !this.upgrades[randomIndex].active) {
                 // If the upgrade selected is 'special' lets add a rarity to it even being chosen
                 if (this.upgrades[randomIndex].special && (Math.random() < 1)) { // 20% chance that we let this special upgrade show up
                     indexes.add(randomIndex);
@@ -199,6 +200,7 @@ class Player extends Entity {
     }
 
     update() {
+        console.log("WEAPONS: "+this.weapons[0].debugName+", "+this.weapons[1].debugName+", "+this.weapons[2].debugName);
         super.update();
         // for (let i = 0; i < this.weapons.length; i++) {
         //     console.log(this.weapons[i]);
@@ -660,7 +662,7 @@ class Player extends Entity {
     }
 
     addGold(amount) {
-        this.gold += amount;
+        this.gold += Math.ceil(amount * this.goldGain);
 
         // Play sound effect of gold collection
         ASSET_MANAGER.playAsset(this.pickupSoundBank[Math.round(Math.random() * this.pickupSoundBank.length)]);

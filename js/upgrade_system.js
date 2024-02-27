@@ -29,9 +29,6 @@ class Upgrade_System {
          */
         this.currentMenu = -1;
 
-        /** This array holds generic upgrade types for all weapons types. */
-        //this.genericWeaponUpgrades = ["Attack Size +15%", "Primary CD -10%", "Secondary CD -10%", "Attack Size +15%", "Primary CD -10%", "Secondary CD -10%"];
-
         /** Cooldown in seconds of when the player can input another selection key. */
         this.selectionCooldown = 0.5;
         /** Tracks when the last selection key was pressed. Initialize with a negative value to allow immediate input. We use real time because we need to account for when the game is paused*/

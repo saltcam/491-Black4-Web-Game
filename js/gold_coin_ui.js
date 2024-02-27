@@ -5,7 +5,7 @@ class Gold_Coin_UI {
         this.worldX = worldX;
         this.worldY = worldY;
         this.speed = speed;
-        this.boundingBox = new BoundingBox(0, 0, 5, 5, "item");
+        this.boundingBox = new BoundingBox(0, 0, 5, 5, "item_coin");
         this.accelerationFactor = accelerationFactor;
 
         this.image = ASSET_MANAGER.getAsset("./sprites/object_coin.png");

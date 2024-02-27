@@ -21,7 +21,7 @@ class Weapon_scythe extends Weapon {
             "./sprites/weapon_scythe.png",
             "./sounds/SE_scythe_primary.mp3", "./sounds/SE_scythe_secondary.mp3", 30, 50, upgrades);
 
-        this.name = "Scythe"; // For debug logging
+        this.debugName = "Scythe"; // For debug logging
 
         this.initialPrimaryCool = this.primaryCool;
         this.initialSecondaryCool = this.secondCool;
