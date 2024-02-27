@@ -6,18 +6,18 @@ class Weapon_tome extends Weapon {
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 100),
             new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 100),
             new Upgrade("Projectile Speed +15%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 75),
-            new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_tome_doubeshot.png", 225),
+            new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_tome_doubleshot.png", 225),
             new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_tome_bounce.png", 200),
             new Upgrade("Doubletime", "(Unique) Secondary hits more often.", true, "./sprites/upgrade_tome_doubletime.png", 250),
             new Upgrade("Expansion", "(Unique) Attack size grows as it moves.", true, "./sprites/upgrade_tome_expansion.png", 300)
             //new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 120)
         ];
 
-        super(game, "Tome", 1, 7,
+        super(game, "Tome", 1, 6,
             0, 0,
             1, 1,
             20, 75,
-            1.5, 3.5,
+            3, 3.5,
             "./sprites/Tome.png",
             "./sounds/SE_tome_primary.mp3", "./sounds/SE_tome_secondary.mp3", 40, 40, upgrades);
 
@@ -42,7 +42,7 @@ class Weapon_tome extends Weapon {
         let bouncingShotUpgrade = false;
         let bigFinishUpgrade = false;
         let expansionUpgrade = false;
-        let doubleShotDamageMultiplier = 0.5;
+        let doubleShotDamageMultiplier = 0.75;
 
         this.upgrades.forEach(upgrade => {
             if (upgrade.name === "Double Shot") {
@@ -213,18 +213,24 @@ class Weapon_tome extends Weapon {
                         // TODO THIS IS NOT A PERFECT BUG-FIX, need to find the real issue!!!
                         this.primaryProjectileMovementSpeed *= 0.9;
                         this.secondaryProjectileMovementSpeed *= 0.9;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Primary CD -10%":
                         this.primaryCool *= 0.9;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Secondary CD -10%":
                         this.secondCool *= 0.9;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Primary Piercing +3":
                         this.maxPrimaryHits += 3;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
-                    case "Projectile Speed +10%":
+                    case "Projectile Speed +15":
                         this.primaryProjectileMovementSpeed *= 1.15;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
+                        break;
                 }
                 // Set generic to 'not active' so it can be re-used/activated in the future
                 this.upgrades[i].active = false;

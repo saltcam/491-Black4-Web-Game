@@ -13,9 +13,9 @@ class Weapon_scythe extends Weapon {
             new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg is now over-time.", true, "./sprites/upgrade_bleeding_edge.png", 235)
         ];
 
-        super(game, "Scythe", 1, 5,
+        super(game, "Scythe", 1.2, 5,
             0, 0,
-            5, 10,
+            3.5, 8,
             73, 115,
             0.6, 0.85,
             "./sprites/weapon_scythe.png",
@@ -45,7 +45,7 @@ class Weapon_scythe extends Weapon {
 
         // if true, perform the attack
         if ((currentTime - this.lastPrimaryAttackTime >= this.primaryCool) || cheating) {
-            ASSET_MANAGER.playAsset(this.primarySound);
+            ASSET_MANAGER.playAsset(this.primarySound, 0.09);
             const clickPos = this.game.mouse; // Use the current mouse position instead of the click position
 
             // Calculate the center of the character
@@ -255,18 +255,22 @@ class Weapon_scythe extends Weapon {
                     case "Attack Size +10%":
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Primary CD -10%":
                         this.primaryCool *= 0.9;
                         this.initialPrimaryCool *= 0.9;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Secondary CD -10%":
                         this.secondCool *= 0.9;
                         this.initialSecondaryCool *= 0.9;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Knockback +10%":
                         this.primaryAttackPushbackForce *= 1.1;
                         this.secondaryAttackPushbackForce *= 1.1;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                 }
                 // Set generic to 'false' so it can be re-used/activated in the future

@@ -1,7 +1,7 @@
 class BossTwo extends Entity {
 
     constructor(game, worldX, worldY) {
-        super(1500, 1500, 20,
+        super(3000, 3000, 20,
             game, worldX, worldY,
             80, 55, "enemyBoss",
             100,
@@ -79,6 +79,9 @@ class BossTwo extends Entity {
         this.lastDamageTime = 0;
         /** Time in seconds before recent damage (yellow HP) starts to decay. */
         this.damageDecayDelay = 0.1;
+
+        /** Tracks if this entity has been initialized. */
+        this.initialized = false;
     }
 
     /** This is the method called when an outside force (usually an attack) is trying to push this entity around. */
@@ -90,6 +93,15 @@ class BossTwo extends Entity {
     }
     // this is the movement pattern for enemies that just approach the player
     update() {
+        if(!this.initialized) {
+            // Scale this boss to the difficulty scale
+            this.maxHP = Math.round(this.maxHP * this.game.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+            this.currHP = this.maxHP;
+            this.atkPow = Math.round(this.atkPow * this.game.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+
+            this.initialized = true;
+        }
+
         super.update();
 
         const currentTime = this.game.elapsedTime / 1000;
@@ -112,7 +124,7 @@ class BossTwo extends Entity {
         // If health hits 0 or below, this entity is declared dead
         if (this.isDead) {
             // Spawn a portal to rest area (because map is completed once boss is dead)
-            this.game.spawnPortal(0, );
+            this.game.spawnPortal(0, 0);
 
             // Set the gameengine to roundOver
             this.game.roundOver = true;

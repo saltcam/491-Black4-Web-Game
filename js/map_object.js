@@ -14,6 +14,9 @@ class Map_object extends Entity {
         this.lastCoinCollectionTime = 0;
         this.coinsToCollect = 0; // How many coins left to collect
         this.collectingGold = false; // Whether the gold collection process is active
+
+        this.anvilSound = "./sounds/anvil.mp3";
+        this.upgradeScreenSound = "./sounds/upgrade_popup.mp3";
     }
 
     update() {
@@ -56,6 +59,7 @@ class Map_object extends Entity {
         this.animator.outlineMode = false; // Turn off the outline now that it has been opened
 
         if (this.boundingBox.type.includes("upgrade_chest")) {
+            ASSET_MANAGER.playAsset(this.upgradeScreenSound, 0.25);
             this.game.UPGRADE_SYSTEM.showWeaponUpgradeScreen();
         }
 
@@ -69,6 +73,7 @@ class Map_object extends Entity {
 
     openAnvil() {
         if (!this.hasBeenOpened) {
+            ASSET_MANAGER.playAsset(this.anvilSound, 0.2);
             this.game.UPGRADE_SYSTEM.showAnvilWeaponUpgradeScreen();
             this.hasBeenOpened = true;
         }

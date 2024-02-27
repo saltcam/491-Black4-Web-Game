@@ -4,7 +4,41 @@ class AssetManager {
         this.errorCount = 0;
         this.cache = [];
         this.downloadQueue = [];
+        this.currentBackgroundMusic = null; // Track the current background music
+        this.backgroundMusicPlaying = false;
     };
+
+    playBackgroundMusic(path, volume = 0.1, playbackRate = 1.0) {
+        // Stop current music if it's playing
+        if (this.currentBackgroundMusic && this.cache[this.currentBackgroundMusic]) {
+            let currentMusic = this.cache[this.currentBackgroundMusic];
+            currentMusic.pause();
+            currentMusic.currentTime = 0;
+        }
+
+        // Set the new background music
+        this.currentBackgroundMusic = path;
+
+        // Play the new background music
+        if (this.cache[path]) {
+            let audio = this.cache[path];
+            audio.volume = volume;
+            audio.playbackRate = playbackRate;
+            audio.loop = true; // Ensure the music loops
+            audio.play();
+            this.backgroundMusicPlaying = true;
+        }
+    }
+
+    stopBackgroundMusic() {
+        if (this.currentBackgroundMusic && this.cache[this.currentBackgroundMusic]) {
+            let music = this.cache[this.currentBackgroundMusic];
+            music.pause();
+            music.currentTime = 0;
+            this.currentBackgroundMusic = null; // Reset current background music
+            this.backgroundMusicPlaying = false;
+        }
+    }
 
     queueDownload(path) {
         console.log("Queueing " + path);
@@ -78,10 +112,11 @@ class AssetManager {
         return this.cache[path];
     };
 
-    playAsset(path, volume = 0.1) {
+    playAsset(path, volume = 0.1, playbackRate = 1.0) {
         if (this.cache[path]) {
             let audio = this.cache[path].cloneNode(); // Clone the audio element
             audio.volume = volume; // Set the volume for this instance
+            audio.playbackRate = playbackRate; // Set the playback rate (speed and pitch)
             audio.play();
             audio.addEventListener("ended", function () {
                 audio.remove(); // Optionally remove the cloned element once it has played
@@ -119,8 +154,9 @@ class AssetManager {
 
     autoRepeat(path) {
         let aud = this.cache[path];
-        aud.addEventListener("ended", function () {
-            aud.play();
-        });
+        if (aud) {
+            aud.loop = true; // Make the audio loop
+            aud.play(); // Start playing the looped audio
+        }
     }
 }

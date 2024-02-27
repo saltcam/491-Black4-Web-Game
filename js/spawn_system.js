@@ -18,7 +18,7 @@ class Spawn_System {
          */
         this.DIFFICULTY_SCALE = difficulty_scale;
         /** Raises the difficulty scale every this many seconds. */
-        this.raiseDifficultyInterval = 5;
+        this.raiseDifficultyInterval = 12;
         /** How much to raise the difficulty by (additive, 0.01 === 1% more stats on enemies) */
         this.difficultyScaleAdder = 0.01;
         /** Last time we raised the difficulty scale. */
@@ -29,21 +29,21 @@ class Spawn_System {
         /** Tracks if the spawn system has initialized. */
         this.initialized = false;
         /** Controls the max enemy count, gets doubled incrementally. */
-        this.baseMaxEnemies = 2 * (this.game.currMap);
+        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE);
         /** Tracks the current max enemy count. */
         this.currentMaxEnemies = 0;
         /** Controls how often (in seconds) to increment max enemy count. */
-        this.maxEnemyIncrementTime = 7.5 / (this.game.currMap);
+        this.maxEnemyIncrementTime = 9 / this.DIFFICULTY_SCALE;
         /** Stores how many max enemy intervals have passed. */
         this.maxEnemyIntervals = 0;
         /** How much to lower the spawn delay each interval. */
-        this.spawnDelayDecreaseMultiplier = 0.88 / (this.game.currMap);
+        this.spawnDelayDecreaseMultiplier = 0.95 / this.DIFFICULTY_SCALE;
         /** Controls how often (in seconds) we reduce the spawn delay of enemies. */
-        this.lowerSpawnDelayInterval = 12.5 / (this.game.currMap);
+        this.lowerSpawnDelayInterval = 18.5 / this.DIFFICULTY_SCALE;
         /** Tracks when the last time we lowered the spawn delay was. */
         this.lastSpawnDelayDecreaseTime = 0;
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
-        this.baseEnemySpawnInterval = 4 / (this.game.currMap);
+        this.baseEnemySpawnInterval = 5.5 / this.DIFFICULTY_SCALE;
         /** Tracks when the last enemy was spawned. */
         this.lastSpawnTime = 0;
         /** Setting this to true tells spawnRandomEnemy() to make the next enemy it spawns an elite. */
@@ -134,6 +134,22 @@ class Spawn_System {
             this.contactEnemyTypes[3],  // Wave 7 (3:30 - 4:00)
             this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
         ];
+        /**
+         * An array that stores enemies based on difficulty for Map#3 (Space)
+         * Each map is 5 minutes, with each minute representing one wave.
+         * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
+         */
+        this.mapThreeEnemies = [
+            this.contactEnemyTypes[3],  // Wave 0 (0:00 - 0:30)
+            this.chargerEnemyTypes[0],  // Wave 1 (0:30 - 1:00)
+            this.contactEnemyTypes[1],  // Wave 2 (1:00 - 1:30)
+            this.rangedEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
+            this.contactEnemyTypes[3],  // Wave 4 (2:00 - 2:30)
+            this.chargerEnemyTypes[0],  // Wave 5 (2:30 - 3:00)
+            this.contactEnemyTypes[3],  // Wave 6 (3:00 - 3:30)
+            this.rangedEnemyTypes[0],  // Wave 7 (3:30 - 4:00)
+            this.contactEnemyTypes[2]   // Wave 8 (4:00 - 4:30+)
+        ];
 
         /** This array stores enemies from previous waves for constant spawning. */
         this.passiveEnemySpawns = [];
@@ -149,7 +165,8 @@ class Spawn_System {
 
     /** Called every frame/tick. */
     update() {
-        //console.log("Difficulty = " + this.DIFFICULTY_SCALE * 100 + "%\nZombie MaxHP = "+this.contactEnemyTypes[0].maxHP);
+        const currentTime = this.game.elapsedTime / 1000;
+        console.log("Difficulty: " + this.DIFFICULTY_SCALE * 100 + "%");
         // Call start() if the script has not been initialized yet (avoids bug like game engine not being initialized yet)
         if (!this.initialized) {
             this.start();
@@ -168,13 +185,13 @@ class Spawn_System {
         }
 
         // Update the enemy spawn interval (make enemies spawn faster)
-        let currentSpawnInterval = this.updateSpawnSettings();
+        this.updateSpawnSettings();
 
-        if (this.game.elapsedTime > 0 && this.game.elapsedTime % currentSpawnInterval < this.game.clockTick * 1000) {
+        //if (this.game.elapsedTime > 0 && this.game.elapsedTime % currentSpawnInterval < this.game.clockTick * 1000) {
+        if (currentTime - this.lastSpawnTime >= this.baseEnemySpawnInterval) {
             // Conditions to spawn enemies: no boss, round not over, not in rest area, (this.game.elapsedTime / 1000) - this.lastSpawnTime >= this.baseEnemySpawnInterval
             if (this.game.boss === null && !this.game.roundOver && this.game.currMap !== 0 &&
-                this.game.enemies.length < this.currentMaxEnemies &&
-                ((this.game.elapsedTime / 1000) - this.lastSpawnTime >= this.baseEnemySpawnInterval)) {
+                this.game.enemies.length < this.currentMaxEnemies) {
                 this.spawnScalingEnemies();
                 //console.log("CURR = " + this.game.enemies.length + ", MAX = " + this.currentMaxEnemies);
             }
@@ -188,7 +205,7 @@ class Spawn_System {
         // If it doesn't exist, initialize it in the constructor or start method
         if (!this.lastDifficultyUpdateTime) this.lastDifficultyUpdateTime = currentTimeInSeconds;
 
-        if (currentTimeInSeconds - this.lastDifficultyUpdateTime >= this.raiseDifficultyInterval) {
+        if (currentTimeInSeconds - this.lastDifficultyUpdateTime >= this.raiseDifficultyInterval && this.game.currMap !== 0 && !this.game.roundOver) {
             this.DIFFICULTY_SCALE += this.difficultyScaleAdder;
             this.lastDifficultyUpdateTime = currentTimeInSeconds;
         }
@@ -266,6 +283,38 @@ class Spawn_System {
 
             //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapTwoEnemies.length - 1) + " enemies. Name = " + this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)].name);
             this.spawnEnemy(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)], randomXNumber, randomYNumber);
+        } else if (this.game.currMap === 3) {
+            // Increment current wave, and move previous enemy to passive spawn array
+            if (waveNumber > this.currentWave && this.currentWave !== this.mapTwoEnemies.length - 1) {
+                // Add the previous wave's enemy to the passive wave array
+                this.passiveEnemySpawns.push(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)]);
+
+                this.currentWave = waveNumber;
+            }
+
+            // Generate random off-screen coordinates for spawning
+            let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
+
+            // If this is a ranged enemy wave, temporarily double ranged enemies
+            if (this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)].enemyType === "ranged" && this.maxRangedEnemies === this.initialMaxRangedEnemies) {
+                this.maxRangedEnemies *= 2;
+            }
+            // Otherwise make sure we are at default ranged enemy cap
+            else if (this.maxRangedEnemies !== this.initialMaxRangedEnemies) {
+                this.maxRangedEnemies = this.initialMaxRangedEnemies;
+            }
+
+            // If this is a charger enemy wave, temporarily double charger enemies cap
+            if (this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].enemyType === "charger" && this.maxChargerEnemies === this.initialMaxChargerEnemies) {
+                this.maxChargerEnemies *= 2;
+            }
+            // Otherwise make sure we are at default charger enemy cap
+            else if (this.maxChargerEnemies !== this.initialMaxChargerEnemies) {
+                this.maxChargerEnemies = this.initialMaxChargerEnemies;
+            }
+
+            //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapThreeEnemies.length - 1) + " enemies. Name = " + this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)].name);
+            this.spawnEnemy(this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)], randomXNumber, randomYNumber);
         }
 
         // Passive spawning code
@@ -347,7 +396,7 @@ class Spawn_System {
     scaleStatsForDifficulty(enemy) {
         // Scale current health and max health
         enemy.maxHP = Math.round(enemy.maxHP * this.DIFFICULTY_SCALE);
-        enemy.currHP = enemy.maxHP; // Assuming current HP should match max HP initially
+        enemy.currHP = enemy.maxHP;
 
         // Scale attack power
         enemy.atkPow = Math.round(enemy.atkPow * this.DIFFICULTY_SCALE);
@@ -412,7 +461,7 @@ class Spawn_System {
         }
 
         if(newEnemy === null) {
-            console.log("SS.spawnEnemy() failed! Tried to spawn null");
+            //console.log("SS.spawnEnemy() failed! Tried to spawn null");
             return;
         }
 
@@ -492,8 +541,6 @@ class Spawn_System {
     updateSpawnSettings() {
         const currentTime = this.game.elapsedTime / 1000;
 
-        //
-
         // Update the max enemy interval
         this.maxEnemyIntervals = Math.floor(this.game.elapsedTime / (this.maxEnemyIncrementTime * 1000));
 
@@ -506,6 +553,5 @@ class Spawn_System {
             this.baseEnemySpawnInterval *= this.spawnDelayDecreaseMultiplier;
             this.lastSpawnDelayDecreaseTime = currentTime;
         }
-        return (this.baseEnemySpawnInterval * 1000);
     }
 }

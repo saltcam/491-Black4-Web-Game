@@ -18,7 +18,7 @@ class Weapon_staff extends Weapon {
             0, 0,
             5, 5,
             115, 2,
-            1, 0.5,
+            1, 0.33,
             "./sprites/NecromancyStaff.png",
             "./sounds/SE_staff_secondary.mp3", "./sounds/SE_staff_primary.mp3", 26, 70, upgrades);
 
@@ -143,25 +143,32 @@ class Weapon_staff extends Weapon {
                         this.primaryAttackRadius *= 1.10;
                         this.secondaryAttackRadius *= 1.10;
                         this.secondaryAttackDuration *= 1.10;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Primary CD -10%":
                         this.primaryCool *= 0.9;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Secondary CD -10%":
                         this.secondCool *= 0.9;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Knockback +10%":
                         this.primaryAttackPushbackForce *= 1.1;
                         this.secondaryAttackPushbackForce *= 1.1;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Summon Health +5":
                         this.game.player.summonHealth += 5;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Summon Speed +10%":
                         this.game.player.summonSpeed *= 1.10;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Summon Damage +10%":
                         this.game.player.summonDamage *= 1.10;
+                        this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                 }
                 // Set generic to not active so that it can be re-used/activated in the future

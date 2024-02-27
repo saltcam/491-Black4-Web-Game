@@ -185,7 +185,7 @@ class GameEngine {
      * @param   worldY  The y coordinate on the world to spawn the chest.
      * @param goldAmount The gold given by this box
      */
-    spawnUpgradeChest(worldX, worldY, goldAmount = 100) {
+    spawnUpgradeChest(worldX, worldY, goldAmount = 50) {
         let newEntity = this.addEntity(new Map_object(this, worldX, worldY, 35, 35, "./sprites/object_treasure_chest.png", 0, 0, 54, 47, 25, 0.03, 1.25));
         newEntity.boundingBox.type = "upgrade_chest" + goldAmount;
         newEntity.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
@@ -622,7 +622,7 @@ class GameEngine {
             this.drawMouseTracker(this.ctx);
 
             // Draw the timer if we are not in rest area.
-            if (this.currMap > 0) {
+            if (this.currMap > 0 && !this.roundOver) {
                 this.drawTimer(this.ctx);
             }
 
@@ -785,9 +785,11 @@ class GameEngine {
     /** Call this method to spawn a portal to the next area. */
     spawnPortal(worldX, worldY) {
         let newPortal;
+        if (this.currMap > 0) this.prevMap = this.currMap;
+
         if (this.currMap === 0) {
             newPortal = this.addEntity(new Portal(this, worldX, worldY, this.prevMap + 1));
-        } else if (this.currMap < 3){
+        } else if (this.currMap > 0){
             newPortal = this.addEntity(new Portal(this, worldX, worldY, 0));
         } else { // update this to add a portal that sends to credits
             newPortal = this.addEntity(new Portal(this, worldX, worldY, 1));
@@ -1114,11 +1116,6 @@ class GameEngine {
 
     /** This method is called every tick to update all entities etc. */
     update() {
-        //console.log("Attacks["+this.attacks.length+"]\nEnemies["+this.enemies.length+"]\nAllies["+this.allies.length+"]\nObjects["+this.objects.length+"]\nEntities["+this.entities.length+"]\nArrows["+this.arrowPointers.length+"]\nDmgText["+this.damageNumbers.length+"]");
-        // this.attacks.forEach(attack => {
-        //     console.log("Attack name: " + attack.debugName);
-        // });
-
         let currentTimer = this.elapsedTime / 1000;
 
         // Handle boss spawn timers
@@ -1187,13 +1184,13 @@ class GameEngine {
 
                     // If elite or boss, drop a weapon upgrade chest
                     if (this.enemies[i].isElite || this.enemies[i].boundingBox.type === "enemyBoss") {
-                        let percentToGoldDivider = 10;
-                        this.spawnUpgradeChest(this.enemies[i].worldX, this.enemies[i].worldY, Math.ceil(this.enemies[i].maxHP / percentToGoldDivider));
+                        let percentToGoldDivider = 20;
+                        this.spawnUpgradeChest(this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y, Math.ceil(this.enemies[i].maxHP / percentToGoldDivider));
                     }
 
                     // % Chance to drop gold (gold amount based off of health), bosses and elites don't drop gold bags
                     if (Math.random() < 0.05 && !this.enemies[i].isElite && this.enemies[i].boundingBox.type !== "enemyBoss") {
-                        let percentToGoldDivider = 8;
+                        let percentToGoldDivider = 10;
                         let coinBag = new Map_object(this, this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y, 35, 35, "./sprites/object_coin_bag.png", 0, 0, 34, 34, 1, 1, 1);
                         this.addEntity(coinBag);
                         coinBag.boundingBox.type = "gold_bag" + Math.ceil(this.enemies[i].maxHP / percentToGoldDivider);
@@ -1413,6 +1410,7 @@ class GameEngine {
             if (object.boundingBox.type.includes("gold_bag")) {
                 goldAmount += object.extractNumber(object.boundingBox.type) * 0.75; //0.5 means we tax off half the gold they would have naturally gotten
                 object.removeFromWorld = true; // Delete the gold bag object
+                //console.log("goldbag="+object.extractNumber(object.boundingBox.type)*0.75);
             }
         });
 
@@ -1426,10 +1424,10 @@ class GameEngine {
         const minScale = 1;
         const maxScale = 3;
         // Ensure goldAmount does not exceed maxGold for scaling calculation
-        goldAmount = Math.min((goldAmount * this.player.goldGain), maxGold);
+        goldAmount = Math.min(goldAmount, maxGold);
 
         // Linearly size up the scale based on goldAmount
-        const scale = minScale + (maxScale - minScale) * (goldAmount / maxGold);
+        const scale = minScale + (maxScale - minScale) * ((goldAmount * this.player.goldGain) / maxGold);
 
         // Set the calculated scale to the entity's animator
         newEntity.animator.scale = scale;
@@ -1438,6 +1436,8 @@ class GameEngine {
         newEntity.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
         newEntity.animator.outlineMode = true; // Turn on the outline
         this.addEntity(new Arrow_Pointer(newEntity, this)); // Attach an arrow pointer to the chest
+
+        //console.log("CHEST TYPE="+newEntity.boundingBox.type);
 
         return newEntity;
     }
@@ -1605,6 +1605,8 @@ class GameEngine {
     loadGame() {
         this.currMap = 1;
 
+        ASSET_MANAGER.playBackgroundMusic("./sounds/music_nameless_song.mp3");
+
         if(this.isGamePaused) {
             this.togglePause();
         }
@@ -1646,6 +1648,7 @@ class GameEngine {
                 const attackCircle = new AttackCirc(this, entity, circleRadius, "CAR_enemyAttack", x + dx, y + dy, attackDuration, null, 0, entity.atkPow / 3, 0, 0, 1);
                 attackCircle.drawCircle = true;
                 attackCircle.trackToEntity = false;
+                attackCircle.attackSound = "./sounds/boss_explosion.mp3";
                 this.addEntity(attackCircle);
             }, delay);
         }
@@ -1732,6 +1735,12 @@ class GameEngine {
 
         // Reset spawn system on map change
         this.SPAWN_SYSTEM = new Spawn_System(this, this.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+
+        // If we teleported to the first map again, then we are new game+, so shoot the difficulty up a lot
+        if (teleportIndex === 1) {
+            this.SPAWN_SYSTEM.DIFFICULTY_SCALE += 1;
+        }
+
 
         // If rest area, heal player
         if (teleportIndex === 0) {
