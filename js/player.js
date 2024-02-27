@@ -23,11 +23,11 @@ class Player extends Entity {
             new Upgrade("Attack Damage +7.5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Pickup Range +30%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png"),
             new Upgrade("Dash Duration +15%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
-            new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
-            new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
+            new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_damage.png"),
+            new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_chance.png"),
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png"),
-            new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_knockback.png", 50),
-            new Upgrade("Gold Gain +10%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_knockback.png", 50)];
+            new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 50),
+            new Upgrade("Gold Gain +10%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_gold_gain.png", 50)];
 
         this.debugName = "Player";
 
@@ -165,10 +165,10 @@ class Player extends Entity {
         this.lastWeaponSwitchTime = this.game.elapsedTime / 1000;
     }
 
-    takeDamage(amount) {
+    takeDamage(amount, attackType = "") {
         if (this.invincible) return;
 
-        super.takeDamage(amount);
+        super.takeDamage(amount, attackType);
     }
 
     /**

@@ -89,9 +89,10 @@ class BossTwo extends Entity {
 
             // Set the gameengine to roundOver
             this.game.roundOver = true;
-
             this.game.killAllEnemies();
+            this.game.spawnEndChest();
             this.removeFromWorld = true;
+
             return;
         }
 

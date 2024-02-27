@@ -135,6 +135,7 @@ class BossThree extends Entity {
             this.eyeBallEntity.removeFromWorld = true;
             this.removeFromWorld = true;
             this.game.killAllEnemies();
+            this.game.spawnEndChest();
 
             return;
         }

@@ -54,7 +54,11 @@ class Map_object extends Entity {
         this.animator.pauseAtFrame(-1);
         this.animator.pauseAtSpecificFrame(24); // Passing a -1 essentially unpauses the animator.
         this.animator.outlineMode = false; // Turn off the outline now that it has been opened
-        this.game.UPGRADE_SYSTEM.showWeaponUpgradeScreen();
+
+        if (this.boundingBox.type === "chest") {
+            this.game.UPGRADE_SYSTEM.showWeaponUpgradeScreen();
+        }
+
         this.hasBeenOpened = true;
         this.openedAtTime = this.game.elapsedTime / 1000;
 

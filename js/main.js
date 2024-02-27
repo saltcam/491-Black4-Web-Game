@@ -75,6 +75,22 @@ ASSET_MANAGER.queueDownload("./sprites/god_wings.png");
 ASSET_MANAGER.queueDownload("./sprites/god_wings_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/god_eye.png");
 ASSET_MANAGER.queueDownload("./sprites/god_eye_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_crit_chance.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_crit_damage.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_tomb_chance.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_gold_gain.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_summon_health.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_summon_damage.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_summon_speed.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_summon_ranged.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_summon_explode.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_summon_empower.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_staff_fire.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_corpse_explosion.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_tome_bounce.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_tome_doubletime.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_tome_expansion.png");
+ASSET_MANAGER.queueDownload("./sprites/hazard_fire.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");

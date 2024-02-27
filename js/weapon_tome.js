@@ -6,10 +6,10 @@ class Weapon_tome extends Weapon {
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 100),
             new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 100),
             new Upgrade("Projectile Speed +15%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 75),
-            new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_piercing.png", 225),
-            new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_piercing.png", 200),
-            new Upgrade("Doubletime", "(Unique) Secondary hits more often.", true, "./sprites/upgrade_piercing.png", 250),
-            new Upgrade("Expansion", "(Unique) Attack size grows as it moves.", true, "./sprites/upgrade_piercing.png", 300)
+            new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_tome_doubeshot.png", 225),
+            new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_tome_bounce.png", 200),
+            new Upgrade("Doubletime", "(Unique) Secondary hits more often.", true, "./sprites/upgrade_tome_doubletime.png", 250),
+            new Upgrade("Expansion", "(Unique) Attack size grows as it moves.", true, "./sprites/upgrade_tome_expansion.png", 300)
             //new Upgrade("Big Finish", "(Unique) Attacks explode once expired", true, "./sprites/upgrade_piercing.png", 120)
             //new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 120)
         ];

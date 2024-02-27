@@ -29,6 +29,11 @@ class Weapon_scythe extends Weapon {
         // How many seconds of delay before echoing attack (when echo slash upgrade is on)
         this.primaryEchoDelay = 0.33;
         this.secondaryEchoDelay = 0.66;
+
+        // Debug bleeding edge upgrade and chill upgrade
+        //this.upgrades[7].active = true;
+        //this.upgrades[8].active = true;
+        // this.handleUpgrade();
     }
 
     performPrimaryAttack(player, cheating) {
@@ -63,7 +68,7 @@ class Weapon_scythe extends Weapon {
             if (this.upgrades[4].active) {
                 this.game.addEntity(new AttackCirc(this.game, player,
                 this.primaryAttackRadius,
-                'playerAttack',
+                'playerAttack_ScytheAttack',
                 dx, dy,
                 this.primaryAttackDuration,
                 "./sprites/weapon_blood_scythe_primaryattack.png",
@@ -77,7 +82,7 @@ class Weapon_scythe extends Weapon {
                 if (this.upgrades[5].active) {
                     this.game.addEntity(new AttackCirc(this.game, player,
                         defaultDualBladeRadius,
-                        'VAMP_playerAttack',
+                        'playerAttack_ScytheAttack',
                         -dx, -dy,
                         this.primaryAttackDuration,
                         "./sprites/weapon_blood_scythe_primaryattack.png",
@@ -90,7 +95,7 @@ class Weapon_scythe extends Weapon {
                         this.game.setManagedTimeout(() => {
                             this.game.addEntity(new AttackCirc(this.game, player,
                                 defaultDualBladeRadius,
-                                'VAMP_playerAttack',
+                                'playerAttack_ScytheAttack',
                                 -dx, -dy,
                                 this.primaryAttackDuration,
                                 "./sprites/weapon_blood_scythe_primaryattack.png",
@@ -106,7 +111,7 @@ class Weapon_scythe extends Weapon {
                     this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.primaryAttackRadius,
-                            'VAMP_playerAttack',
+                            'playerAttack_ScytheAttack',
                             dx, dy,
                             this.primaryAttackDuration,
                             "./sprites/weapon_blood_scythe_primaryattack.png",
@@ -119,7 +124,7 @@ class Weapon_scythe extends Weapon {
             } else {
                 this.game.addEntity(new AttackCirc(this.game, player,
                     this.primaryAttackRadius,
-                    'playerAttack',
+                    'playerAttack_ScytheAttack',
                     dx, dy,
                     this.primaryAttackDuration,
                     "./sprites/weapon_scythe_primaryattack.png",
@@ -131,7 +136,7 @@ class Weapon_scythe extends Weapon {
                 if (this.upgrades[5].active) {
                     this.game.addEntity(new AttackCirc(this.game, player,
                         defaultDualBladeRadius,
-                        'playerAttack',
+                        'playerAttack_ScytheAttack',
                         -dx, -dy,
                         this.primaryAttackDuration,
                         "./sprites/weapon_scythe_primaryattack.png",
@@ -143,7 +148,7 @@ class Weapon_scythe extends Weapon {
                         this.game.setManagedTimeout(() => {
                             this.game.addEntity(new AttackCirc(this.game, player,
                                 defaultDualBladeRadius,
-                                'playerAttack',
+                                'playerAttack_ScytheAttack',
                                 -dx, -dy,
                                 this.primaryAttackDuration,
                                 "./sprites/weapon_scythe_primaryattack.png",
@@ -159,7 +164,7 @@ class Weapon_scythe extends Weapon {
                     this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.primaryAttackRadius,
-                            'playerAttack',
+                            'playerAttack_ScytheAttack',
                             dx, dy,
                             this.primaryAttackDuration,
                             "./sprites/weapon_scythe_primaryattack.png",
@@ -188,7 +193,7 @@ class Weapon_scythe extends Weapon {
             if (this.upgrades[4].active) {
                 this.game.addEntity(new AttackCirc(this.game, player,
                     this.secondaryAttackRadius,
-                    'VAMP_playerAttack',
+                    'playerAttack_ScytheAttack',
                     0, 0,
                     this.secondaryAttackDuration,
                     "./sprites/weapon_blood_scythe_secondaryattack.png",
@@ -203,7 +208,7 @@ class Weapon_scythe extends Weapon {
                     this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.secondaryAttackRadius,
-                            'VAMP_playerAttack',
+                            'playerAttack_ScytheAttack',
                             0, 0,
                             this.primaryAttackDuration,
                             "./sprites/weapon_blood_scythe_secondaryattack.png",
@@ -215,7 +220,7 @@ class Weapon_scythe extends Weapon {
             } else {
                 this.game.addEntity(new AttackCirc(this.game, player,
                     this.secondaryAttackRadius,
-                    'playerAttack',
+                    'playerAttack_ScytheAttack',
                     0, 0,
                     this.secondaryAttackDuration,
                     "./sprites/weapon_scythe_secondaryattack.png",
@@ -228,7 +233,7 @@ class Weapon_scythe extends Weapon {
                     this.game.setManagedTimeout(() => {
                         this.game.addEntity(new AttackCirc(this.game, player,
                             this.secondaryAttackRadius,
-                            'playerAttack',
+                            'playerAttack_ScytheAttack',
                             0, 0,
                             this.primaryAttackDuration,
                             "./sprites/weapon_scythe_secondaryattack.png",

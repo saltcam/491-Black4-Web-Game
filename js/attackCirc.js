@@ -96,6 +96,10 @@ class AttackCirc {
         // For growing sprites
         this.initialRadius = this.radius;
         this.savedRadius = this.radius;
+
+        // For ally healing
+        this.lastAllyHealTime = 0;
+        this.allyHealCooldown = 0.5;
     }
 
 
@@ -131,7 +135,7 @@ class AttackCirc {
         if (!this.type.includes("enemy") && !this.pulsatingDamage && this.attackDamage > 0) {
             this.game.enemies.forEach(enemy => {
                 if (!this.hitEntities.has(enemy) && this.collisionDetection(enemy.boundingBox) /* && (enemy.boundingBox.type !== "ally") */) {
-                    if (this.attackDamage > 0) enemy.takeDamage(this.attackDamage);
+                    if (this.attackDamage > 0) enemy.takeDamage(this.attackDamage, this.type);
                     else if (this.attackDamage < 0) enemy.heal(-this.attackDamage);
 
                     this.pushEnemy(enemy);
@@ -241,7 +245,7 @@ class AttackCirc {
                 this.game.enemies.forEach(enemy => {
                     if (this.collisionDetection(enemy.boundingBox) /*&& (enemy.boundingBox.type !== "ally")*/) {
                         if (this.attackDamage > 0) {
-                            enemy.takeDamage(this.attackDamage);
+                            enemy.takeDamage(this.attackDamage, this.type);
                             this.pushEnemy(enemy);
                         }
                         else if (this.attackDamage < 0) {

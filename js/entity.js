@@ -12,7 +12,7 @@ class Entity {
      * @param speed
      * @param boxType 'player': take damage when colliding with 'enemy' or 'enemyAttack'.
      *             'enemy': take damage when colliding with 'playerAttack'.
-     *             'enemyAttack': boxes labeled 'player' take damage upon collision.
+     *             'enemyAttack': boxes labeled 'player' ttaake damage upon collision.
      *             'playerAttack': boxes labeled 'enemy' take damage upon collision.
      * @param spritePath
      * @param animXStart
@@ -181,14 +181,10 @@ class Entity {
         }
     }
 
-    takeDamage(amount) {
+    takeDamage(amount, attackType = "") {
         // Check if the entity taking damage is an enemy and if a critical hit happens
         let isCrit = false;
         let isBleed = false;
-
-        console.log("Null? " + this.game.player.weapons[0] === null);
-        console.log("Null? " + this.game.player.weapons[1] === null);
-        console.log("Null? " + this.game.player.weapons[2] === null);
 
         if (!(this instanceof Player)) {
             const critRoll = Math.random();
@@ -201,8 +197,9 @@ class Entity {
             this.game.player.updateScore(-1 * amount);
         }
 
+        // If bleed upgrade active, and the enemy is hit by a scythe attack
         this.game.player.weapons[0].upgrades.forEach(upgrade => {
-            if (upgrade.name === "Bleeding Edge" && upgrade.active && !(this instanceof Player) && !this.boundingBox.type.includes("ally")
+            if (upgrade.name === "Bleeding Edge" && upgrade.active && !(this instanceof Player) && !this.boundingBox.type.includes("ally") && attackType === "playerAttack_ScytheAttack"
                 && this.game.player.currentWeapon === 0) {
                 isBleed = true;
                 let bleed = (amount * 1.5) / 6;
@@ -249,7 +246,7 @@ class Entity {
 
         this.attemptDie(); // cool name
         // If crippling chill upgrade is active, slow this it is an enemy
-        this.applySlow();
+        this.applySlow(attackType);
     }
 
     attemptDie() {
@@ -280,8 +277,8 @@ class Entity {
     }
 
     // Method to calculate and apply any cripple effects to the target from the crippling chill upgrade from scythe
-    applySlow() {
-        if (this.game.player.weapons[0].upgrades[7].active && !(this instanceof Player)
+    applySlow(attackType = "") {
+        if (this.game.player.weapons[0].upgrades[7].active && !(this instanceof Player) && attackType === "playerAttack_ScytheAttack"
             && !this.boundingBox.type.includes("ally")
             && !this.boundingBox.type.includes("boss") && this.game.player.currentWeapon === 0) {
             // Only apply the actual slow if their faster than what we are slowing them to.

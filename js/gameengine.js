@@ -1108,7 +1108,7 @@ class GameEngine {
         if ((currentTimer / 60) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss) {
             switch (this.currMap) {
                 case 1:
-                    this.spawnBossTwo();
+                    this.spawnBossOne();
                     break;
                 case 2:
                     this.spawnBossTwo();
@@ -1389,16 +1389,29 @@ class GameEngine {
     }
 
     // Call this to spawn the end chest of a round that collects a taxed amount of all gold left on the ground
-    spawnEndChest(worldX, worldY) {
+    spawnEndChest(worldX = 0, worldY = 200) {
         let newEntity = this.addEntity(new Map_object(this, worldX, worldY, 35, 35, "./sprites/object_treasure_chest_gold.png", 0, 0, 54, 47, 25, 0.03, 1.25));
         let goldAmount = 0;
 
         this.objects.forEach(object => {
             if (object.boundingBox.type.includes("gold")) {
-                goldAmount += object.extractNumber(object.boundingBox.type) * 0.5; //0.5 means we tax off half the gold they would have naturally gotten
+                goldAmount += object.extractNumber(object.boundingBox.type) * 0.75; //0.5 means we tax off half the gold they would have naturally gotten
                 object.removeFromWorld = true; // Delete the gold bag object
             }
         });
+
+        // Calculate the scale based on goldAmount, with a max of 1000 gold
+        const maxGold = 1000;
+        const minScale = 1;
+        const maxScale = 3;
+        // Ensure goldAmount does not exceed maxGold for scaling calculation
+        goldAmount = Math.min((goldAmount * this.player.goldGain), maxGold);
+
+        // Linearly size up the scale based on goldAmount
+        const scale = minScale + (maxScale - minScale) * (goldAmount / maxGold);
+
+        // Set the calculated scale to the entity's animator
+        newEntity.animator.scale = scale;
 
         newEntity.boundingBox.type = "chest" + goldAmount;
         newEntity.animator.pauseAtFrame(0); // Pause the chest animation to the first frame
@@ -1618,7 +1631,7 @@ class GameEngine {
     }
 
     switchMap(teleportIndex) {
-        let currentTime = this.elapsedTime / 1000;
+        let currentTime = this.elapsedTime / 1000
 
         // Delete old map stuff
         // Delete 'other' entities
@@ -1697,5 +1710,10 @@ class GameEngine {
 
         // Reset spawn system on map change
         this.SPAWN_SYSTEM = new Spawn_System(this, this.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+
+        // If rest area, heal player
+        if (teleportIndex === 0) {
+            this.player.heal(this.player.maxHP);
+        }
     }
 }

@@ -123,7 +123,7 @@ class BossOne extends Entity {
             this.game.spawnPortal(0, 0, 0);
 
             // Spawn the end chest
-            this.game.spawnEndChest(0, 200);
+            this.game.spawnEndChest();
 
             // Set the gameengine to roundOver
             this.game.roundOver = true;
