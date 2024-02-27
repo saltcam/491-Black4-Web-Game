@@ -51,6 +51,9 @@ class Ally_Ranged extends Entity {
         this.pulse = projectilePulse;
         this.projectileCount = projectileCount;
         this.projectileSpread = projectileSpread;
+
+        this.atkPow *= 1.25; // so they are a bit stronger than contact allies since these guys have a chance to miss and also die faster
+        this.empower = 1;
     }
 
     applyPushback(forceX, forceY) {
@@ -148,6 +151,16 @@ class Ally_Ranged extends Entity {
         }
         // console.log(spacing);
         return spacing;
+    }
+
+    draw(ctx, game) {
+        let screenX = this.worldX - this.game.camera.x;
+        let screenY = this.worldY - this.game.camera.y;
+
+        // Draw the player at the calculated screen position
+        this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+        this.drawHealth(ctx);
+        this.boundingBox.draw(ctx, game);
     }
 
     closestTarget(){

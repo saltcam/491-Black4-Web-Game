@@ -14,6 +14,14 @@ class Ally_Contact extends Entity {
 
         this.pushbackVector = { x: 0, y: 0 };
         this.pushbackDecay = 0.9; // Determines how quickly the pushback force decays
+        this.empower = 1;
+        this.lastEmpowerTick = 0;
+    }
+
+    // changes the empower multiplier to 2, resets buff timer
+    powerUp() {
+        this.empower = 2;
+        this.lastEmpowerTick = this.game.elapsedTime / 1000;
     }
 
     applyPushback(forceX, forceY) {
@@ -75,6 +83,10 @@ class Ally_Contact extends Entity {
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
 
         this.checkCollisionAndDealDamage();
+        // if 5 seconds have passed while buffed, reset.
+         if (this.game.elapsedTime / 1000 - this.lastEmpowerTick >= 5) {
+             this.empower = 1;
+         }
     }
 
     checkCollisionAndDealDamage() {
@@ -98,6 +110,14 @@ class Ally_Contact extends Entity {
 
         // Draw the player at the calculated screen position
         this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+
+        if (this.empower > 1) {
+            this.animator.outlineMode = true;
+            // this.animator.outlineColor = 'rgb()'
+        } else {
+            this.animator.outlineMode = false;
+        }
+
         this.drawHealth(ctx);
         this.boundingBox.draw(ctx, game);
     }

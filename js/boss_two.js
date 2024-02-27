@@ -393,6 +393,7 @@ class BossTwo extends Entity {
                         0, 0, 144, 98, 1, 1);
                     //console.log("roaring mode");
                     this.mode = mode;
+                    ASSET_MANAGER.playAsset("./sounds/dragon_roar.mp3");
                     break;
                 case "attacking" :
                     this.worldX = this.anchorX;

@@ -37,7 +37,7 @@ class Upgrade_System {
         /** Tracks when the last selection key was pressed. Initialize with a negative value to allow immediate input. We use real time because we need to account for when the game is paused*/
         this.lastRealTimeKeyPress = Date.now(); // Use real-time
 
-        this.player = null;
+        //this.player = game.player;
 
         this.weaponUISprites = ["./sprites/upgrade_scythe.png", "./sprites/upgrade_tome.png", "./sprites/upgrade_staff.png"]
 
@@ -912,13 +912,13 @@ class Upgrade_System {
         screenX += 140;
 
         // Summons' Health
-        ctx.fillText("Summ HP: N/A", screenX, screenY+(yIncrement));
+        ctx.fillText("Summ HP: " + Math.round(this.game.player.summonHealth), screenX, screenY+(yIncrement));
         // Summons' Speed
-        ctx.fillText("Summ Speed: N/A", screenX, screenY+(yIncrement * 2));
+        ctx.fillText("Summ Speed: " + Math.round(this.game.player.summonSpeed), screenX, screenY+(yIncrement * 2));
         // Summons' Dmg
-        ctx.fillText("Summ Dmg: N/A", screenX, screenY+(yIncrement * 3));
+        ctx.fillText("Summ Dmg: " + Math.round(this.game.player.summonDamage), screenX, screenY+(yIncrement * 3));
         // Summons' Dmg
-        ctx.fillText("Tomb Chance: N/A", screenX, screenY+(yIncrement * 4));
+        ctx.fillText("Tomb Chance: " + Math.round(this.game.player.tombstoneChance * 100) + "%", screenX, screenY+(yIncrement * 4));
 
 
 

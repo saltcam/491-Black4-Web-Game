@@ -1103,7 +1103,7 @@ class GameEngine {
         if ((currentTimer / 60) >= (this.SPAWN_SYSTEM.bossSpawnTimer / 60) && !this.roundOver && !this.boss) {
             switch (this.currMap) {
                 case 1:
-                    this.spawnBossOne();
+                    this.spawnBossTwo();
                     break;
                 case 2:
                     this.spawnBossTwo();
@@ -1152,7 +1152,7 @@ class GameEngine {
                     });
 
                     // Spawn Tombstones on killed enemies (only % of the time)
-                    if (Math.random() < 0.5 && (!wasKilledByExplosion || this.player.weapons[2].upgrades[4].active)) {
+                    if (Math.random() < this.player.tombstoneChance && (!wasKilledByExplosion || this.player.weapons[2].upgrades[4].active)) {
                         // Spawn Tombstone
                         let tombstone = new Map_object(this, this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
                         this.addEntity(tombstone);

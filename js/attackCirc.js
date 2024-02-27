@@ -150,27 +150,46 @@ class AttackCirc {
                 }
             });
 
-            //handles collisions with tombstones
+
             if (this.type === "playerAttack_NecromancyAttack" || this.type === "playerAttack_ExplosionAttack") {
+                //check all colliding allies and if an ally buffing upgrade is active to give them power/health
+
+                    // this.game.allies.forEach((ally) => {
+                    //     if (this.collisionDetection(ally.boundingBox) && this.type === "playerAttack_NecromancyAttack") {
+                    //         if (this.game.player.weapons[2].upgrades[8].active) {
+                    //             ally.powerUp();
+                    //         }
+                    //         if (this.game.player.weapons[2].upgrades[9].active) {
+                    //             ally.heal(5);
+                    //         }
+                    //     }
+                    // });
+
+
+
+                //handles collisions with tombstones
                 this.game.objects.forEach((object) => {
                     if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
                         switch (this.type) {
                             case "playerAttack_NecromancyAttack":
-                                let enemyClass = Math.floor(Math.random() * 2);
+                                let enemyClass = 0;
+                                if (this.game.player.weapons[2].upgrades[6].active) {   // if the player has the upgrade to summon ranged allies
+                                   enemyClass = Math.floor(Math.random() * 2);
+                                }
                                 switch(enemyClass){
                                     case 0:
                                         this.game.addEntity(new Ally_Contact(
-                                            "Ally", 25, 25,
-                                            15, this.game, object.worldX, object.worldY, 17,
-                                            29, "ally", 210, "./sprites/Ally_Contact_Walk.png",
+                                            "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
+                                            this.game.player.summonDamage, this.game, object.worldX, object.worldY, 17,
+                                            29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Contact_Walk.png",
                                             0, 0, 32, 28,
                                             8, 0.1, 2, 1));
                                         break;
                                     case 1:
                                         this.game.addEntity(new Ally_Ranged(
-                                            "Ally", 25, 25,
-                                            15, this.game, object.worldX, object.worldY, 17,
-                                            29, "ally", 200, "./sprites/Ally_Ranged_Walk.png",
+                                            "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
+                                            this.game.player.summonDamage, this.game, object.worldX, object.worldY, 17,
+                                            29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Ranged_Walk.png",
                                             0, 0, 32, 28,
                                             8, 0.1, 2, 1,
                                             3, 20, 20, false, 1, 0));

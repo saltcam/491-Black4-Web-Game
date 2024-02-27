@@ -186,6 +186,10 @@ class Entity {
         let isCrit = false;
         let isBleed = false;
 
+        console.log("Null? " + this.game.player.weapons[0] === null);
+        console.log("Null? " + this.game.player.weapons[1] === null);
+        console.log("Null? " + this.game.player.weapons[2] === null);
+
         if (!(this instanceof Player)) {
             const critRoll = Math.random();
             if (critRoll < this.game.player.critChance) {
@@ -217,12 +221,7 @@ class Entity {
                             //this.game.addEntity(new Floating_text(this.game, bleed, this.worldX, this.worldY, false,
 
 
-                            //TODO add resurrection feature
-
-                            if (this.currHP <= 0) {
-                                this.currHP = 0;
-                                this.isDead = true;
-                            }
+                            this.attemptDie();
 
                             this.recentDamage += bleed;
                             this.lastDamageTime = this.game.elapsedTime / 1000;
@@ -248,6 +247,12 @@ class Entity {
             this.lastDamageTime = this.game.elapsedTime / 1000;
         }
 
+        this.attemptDie(); // cool name
+        // If crippling chill upgrade is active, slow this it is an enemy
+        this.applySlow();
+    }
+
+    attemptDie() {
         if (this.currHP <= 0) {
             this.currHP = 0;
             // if there are any remaining lives, resurrect with half score (if player), max health, and a huge explosion
@@ -260,12 +265,19 @@ class Entity {
                 }
             } else {
                 this.isDead = true;
+                // if this is an ally and we have "Explosive Finish" active, cause a small explosion on death
+                if (this.boundingBox.type.includes("ally") && this.game.player.weapons[2].upgrades[7].active) {
+                    let newProjectile = this.game.addEntity(new Projectile(this.game, this.atkPow,
+                        this.worldX, this.worldY, 10, 10, "playerAttack_ExplosionAttack", 0,
+                        "./sprites/transparent.png",
+                        0, 0, 17, 17, 3, 0.2, 0.01, 0, 0,
+                        this.game.player.weapons[2].secondaryAttackDuration, 2, 5, 0, 1));
+                    newProjectile.attackCirc.drawCircle = true;
+                    ASSET_MANAGER.playAsset("./sounds/SE_staff_primary.mp3");
+                }
             }
         }
-        // If crippling chill upgrade is active, slow this it is an enemy
-        this.applySlow();
     }
-
 
     // Method to calculate and apply any cripple effects to the target from the crippling chill upgrade from scythe
     applySlow() {

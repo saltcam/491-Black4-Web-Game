@@ -33,7 +33,7 @@ class Projectile extends Entity{
                 this.updateDirection(newTarget);
             }
         } else {
-            //console.log("Projectile is setting it's child attack circle removeFromWorld! ID#3");
+            //console.log("Projectile is setting its child attack circle removeFromWorld! ID#3");
             this.attackCirc.removeFromWorld = true;
             this.removeFromWorld = true;
         }
@@ -97,7 +97,7 @@ class Projectile extends Entity{
 
         // If we hit our max hits, then delete this projectile and it's attack circ
         if (this.maxHits === 0) {
-            //console.log("Projectile is setting it's child attack circle removeFromWorld! ID#2");
+            //console.log("Projectile is setting its child attack circle removeFromWorld! ID#2");
             this.attackCirc.removeFromWorld = true;
             this.removeFromWorld = true;
         }
@@ -118,15 +118,15 @@ class Projectile extends Entity{
 
     draw(ctx, game) {
         // If this attack type.includes("playerAttack_TomeAttack")
-        this.game.player.weapons[1].upgrades.forEach(upgrade => {
-            if (upgrade.name === "Expansion" && upgrade.active
+if (!this.game.player.weapons) return;
+        // Check if the growth upgrade is active, then grow the projectile
+            if (this.game.player.weapons[1].upgrades[8].active
                 && this.attackCirc.type.includes("playerAttack_TomeAttack")) {
                 if (this.attackCirc.radius !== this.attackCirc.savedRadius) {
                     this.animator.scale = this.initialScale * (this.attackCirc.radius / this.attackCirc.initialRadius);
                     this.attackCirc.savedRadius = this.attackCirc.radius;
                 }
             }
-        });
 
         super.draw(ctx, game);
     }

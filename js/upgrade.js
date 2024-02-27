@@ -8,6 +8,7 @@ class Upgrade {
         this.special = special;
         this.sprite = sprite;
         this.goldCost = goldCost;
+        this.relevant = true; // if the upgrade does not need to be a menu option anymore, remove
     }
 
 }

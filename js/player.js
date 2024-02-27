@@ -14,6 +14,7 @@ class Player extends Entity {
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
 
+        // if adding a special upgrade, make that first so when index checking, nothing gets offset due to splicing.
         this.upgrades = [
             new Upgrade("Health +10", "(Stackable, Additive).", false, "./sprites/upgrade_max_health.png"),
             new Upgrade("Health Regen CD -20%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_health_regen.png"),
@@ -24,7 +25,9 @@ class Player extends Entity {
             new Upgrade("Dash Duration +15%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
             new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
             new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_attack_damage.png"),
-            new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png")];
+            new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png"),
+            new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_knockback.png", 50),
+            new Upgrade("Gold Gain +10%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_knockback.png", 50)];
 
         this.debugName = "Player";
 
@@ -82,23 +85,31 @@ class Player extends Entity {
             "./sounds/Coin_Pickup2.mp3",
             "./sounds/Coin_Pickup3.mp3"
         ];
+
+
+        // for summons, and prevent the need to check weapons for it since not all weapons can summon
+        this.summonHealth = 25;
+        this.summonSpeed = 210;
+        this.summonDamage = 15;
+        this.tombstoneChance = 0.5; // default is 0.5
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
     handleUpgrade() {
         for (let i = 0; i < this.upgrades.length; i++) {
             // If generic has been turned on
-            if (this.upgrades[i].active && !this.upgrades[i].special) {
-                switch (this.upgrades[i].name) {
-                    case "Health +10":
-                        this.maxHP += 10;
-                        this.heal(10);
-                        break;
-                    case "Health Regen CD -20%":
-                        this.healthRegenTime *= 0.8;
-                        break;
-                    case "Dash CD -10%":
-                        this.dashCooldown *= 0.9;
+                if (this.upgrades[i].active && !this.upgrades[i].special) {
+                    let remove = false;
+                    switch (this.upgrades[i].name) {
+                        case "Health +10":
+                            this.maxHP += 10;
+                            this.heal(10);
+                            break;
+                        case "Health Regen CD -20%":
+                            this.healthRegenTime *= 0.8;
+                            break;
+                        case "Dash CD -10%":
+                            this.dashCooldown *= 0.9;
 
                         // If we hit 1 sec CD on dash remove this upgrade as an option in for the future
                         if (this.dashCooldown <= 1) {
@@ -117,23 +128,35 @@ class Player extends Entity {
                     case "Dash Duration +15%":
                         this.dashDuration *= 1.15;
 
-                        // If we hit 2.5 sec duration on dash remove this upgrade as an option in for the future
-                        if (this.dashDuration >= 3) {
-                            this.upgrades.splice(6, 1);
-                        }
-                        break;
-                    case "Crit Damage +20%":
-                        this.critDamage += 0.2;
-                        break;
-                    case "Crit Chance +5%":
-                        this.critChance += 0.05;
-                        break;
-                    case "Experience Gain +10%":
-                        this.expGain *= 1.1;
+                            // If we hit 2.5 sec duration on dash remove this upgrade as an option in for the future
+                            if (this.dashDuration >= 3) {
+
+                                this.upgrades[i].relevant = false
+                            }
+                            break;
+                        case "Crit Damage +20%":
+                            this.critDamage += 0.2;
+                            break;
+                        case "Crit Chance +5%":
+                            this.critChance += 0.05;
+                            break;
+                        case "Experience Gain +10%":
+                            this.expGain *= 1.1;
+                            break;
+                        case "Tombstone Chance +5%":
+                            this.tombstoneChance += 0.05;
+                            // If we hit 100% tombstone chance, remove this upgrade as an option for the future
+                            if (this.tombstoneChance >= 1) {
+                                this.upgrades[i].relevant = false
+                            }
+                            break;
+                        case "Gold Gain +10%":
+                            this.goldGain *= 1.1;
+                            break;
+                    }
+                    // Set generic to 'false' so it can be re-used/activated in the future
+                    this.upgrades[i].active = false;
                 }
-                // Set generic to 'false' so it can be re-used/activated in the future
-                this.upgrades[i].active = false;
-            }
         }
     }
 
@@ -177,6 +200,9 @@ class Player extends Entity {
 
     update() {
         super.update();
+        // for (let i = 0; i < this.weapons.length; i++) {
+        //     console.log(this.weapons[i]);
+        // }
 
         // If player is dead, do nothing
         if (this.isDead) {

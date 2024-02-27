@@ -53,6 +53,7 @@ ASSET_MANAGER.queueDownload("./sprites/MagicBall.png");
 ASSET_MANAGER.queueDownload("./sprites/MagicBall_red.png");
 ASSET_MANAGER.queueDownload("./sprites/ElectricOrb.png");
 ASSET_MANAGER.queueDownload("./sprites/ElectricOrb_red.png");
+ASSET_MANAGER.queueDownload("./sprites/ElectricOrb_purple.png");
 ASSET_MANAGER.queueDownload("./sprites/transparent.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_generic.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_special.png");
@@ -147,6 +148,7 @@ ASSET_MANAGER.queueDownload("./sounds/SE_staff_secondary.mp3");
 ASSET_MANAGER.queueDownload("./sounds/Coin_Pickup1.mp3");
 ASSET_MANAGER.queueDownload("./sounds/Coin_Pickup2.mp3");
 ASSET_MANAGER.queueDownload("./sounds/Coin_Pickup3.mp3");
+ASSET_MANAGER.queueDownload("./sounds/dragon_roar.mp3");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");
