@@ -1390,7 +1390,6 @@ class GameEngine {
 
     // Call this to spawn the end chest of a round that collects a taxed amount of all gold left on the ground
     spawnEndChest(worldX = 0, worldY = 200) {
-        let newEntity = this.addEntity(new Map_object(this, worldX, worldY, 35, 35, "./sprites/object_treasure_chest_gold.png", 0, 0, 54, 47, 25, 0.03, 1.25));
         let goldAmount = 0;
 
         this.objects.forEach(object => {
@@ -1399,6 +1398,11 @@ class GameEngine {
                 object.removeFromWorld = true; // Delete the gold bag object
             }
         });
+
+        // Don't spawn the chest if its gonna be empty
+        if (goldAmount <= 0) return;
+
+        let newEntity = this.addEntity(new Map_object(this, worldX, worldY, 35, 35, "./sprites/object_treasure_chest_gold.png", 0, 0, 54, 47, 25, 0.03, 1.25));
 
         // Calculate the scale based on goldAmount, with a max of 1000 gold
         const maxGold = 1000;

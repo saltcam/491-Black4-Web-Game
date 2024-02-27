@@ -63,16 +63,46 @@ class BossTwo extends Entity {
         // determines which attack pattern will be used for an attack mode
         this.changePattern(0);
         this.pattern = 0;   // debug value
+
+        this.roarStartTime = 0;
+        this.roarDuration = 0.5;
+        this.downTimeStartTime = 0;
+        this.downTimeDuration = 6;
+        this.roarShakeCooldown = 1/60;
+        this.roarShakeStartTime = 0;
+        this.canBePushedBack = false;
+
+        // Stuff for boss health bar calculations
+        /** The rate at which the recent damage decays per second after 1 sec of no new damage. */
+        this.damageDecayRate = 7500;
+        /** Game time when the last damage was taken. */
+        this.lastDamageTime = 0;
+        /** Time in seconds before recent damage (yellow HP) starts to decay. */
+        this.damageDecayDelay = 0.1;
     }
 
+    /** This is the method called when an outside force (usually an attack) is trying to push this entity around. */
     applyPushback(forceX, forceY) {
-        this.pushbackVector.x += forceX;
-        this.pushbackVector.y += forceY;
+        if (this.canBePushedBack) {
+            this.pushbackVector.x += forceX * this.pushbackMultiplier;
+            this.pushbackVector.y += forceY * this.pushbackMultiplier;
+        }
     }
-
     // this is the movement pattern for enemies that just approach the player
     update() {
         super.update();
+
+        const currentTime = this.game.elapsedTime / 1000;
+
+        // Decrease recent damage over time (for boss health bar calculations)
+        if (currentTime - this.lastDamageTime > this.damageDecayDelay && this.recentDamage > 0) {
+            const timeSinceLastDamage = currentTime - this.lastDamageTime - this.damageDecayDelay;
+            const decayAmount = this.damageDecayRate * (timeSinceLastDamage / 1000); // Calculate decay based on time passed
+            this.recentDamage = Math.max(0, this.recentDamage - decayAmount); // Ensure recentDamage does not go negative
+            if (this.recentDamage === 0) {
+                this.lastDamageTime = currentTime; // Reset last damage time to prevent continuous decay
+            }
+        }
 
         // Early exit if the player does not exist for some reason at this point
         if (!this.game.player) {
@@ -161,12 +191,12 @@ class BossTwo extends Entity {
             this.changePattern(this.pattern);
         }
         // if we are out of roar time, and in roar mode, switch to attack mode
-        if (this.currRoarTime <= 0 && this.mode === "roaring") {
+        if ((currentTime - this.roarStartTime >= this.roarDuration) && this.mode === "roaring") {
             this.changeMode("attacking");
             // changemode handles roar times
         }
         // if we have had enough downtime, begin roaring
-        if (this.downTime <= 0 && this.mode === "normal") {
+        if ((currentTime - this.downTimeStartTime >= this.downTimeDuration) && this.mode === "normal") {
             this.changeMode("roaring");
             // this.currRoarTime = this.maxRoarTime;
 
@@ -403,9 +433,11 @@ class BossTwo extends Entity {
     }
 
     shake() {
-        if (this.mode === "roaring") {
+        const currentTime = this.game.elapsedTime / 1000;
+        if (currentTime - this.roarShakeStartTime >= this.roarShakeCooldown && this.mode === "roaring") {
             this.worldX = this.anchorX + Math.floor((Math.random() * 10)) - Math.floor((Math.random() * 10));
             this.worldY = this.anchorY + Math.floor((Math.random() * 10)) - Math.floor((Math.random() * 10));
+            this.roarShakeStartTime = currentTime;
         }
     }
 
