@@ -99,7 +99,7 @@ class Player extends Entity {
         for (let i = 0; i < this.upgrades.length; i++) {
             // If generic has been turned on
                 if (this.upgrades[i].active && !this.upgrades[i].special) {
-                    let remove = false;
+                    //let remove = false;
                     switch (this.upgrades[i].name) {
                         case "Health +10":
                             this.maxHP += 10;
