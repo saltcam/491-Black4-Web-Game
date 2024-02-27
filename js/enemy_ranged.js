@@ -241,19 +241,23 @@ class Enemy_Ranged extends Entity {
                 let dx = playerCenter.x - thisCenter.x;
                 let dy = playerCenter.y - thisCenter.y;
                 let attackAngle = Math.atan2(dy, dx);
+                let angle = Math.atan2(dy, dx);
 
                 const offsetDistance = (20) * 0.6;
+                if (this.projectileCount > 1) {
+                    // if we have to distribute projectiles, aim at half of range from player
+                    attackAngle += Math.PI/(1/2) * (this.projectileSpread/2/360)
+                }
 
                 for (let i = 0; i < this.projectileCount; i++) {
-                    // trying to convert this to an angle
-                    // odd -> i - 1     (mod 2 = 1)
-                    // even -> i - 0.5 (mod 2 = 0)
-                    let adjust = this.projectileCount % 2;
-                    if (adjust !== 1) {
-                        adjust += 0.5;
+
+                    if (this.projectileCount > 1) {
+                        angle = (attackAngle -
+                            0.01745329 * (((this.projectileSpread/(this.projectileCount-1))* i))
+                        );
                     }
 
-                    let angle = (attackAngle + Math.PI/(180/360) * (((i-adjust) * (this.projectileSpread/this.projectileCount))/360));
+                    //let angle = (attackAngle + Math.PI/(180/360) * (((i-adjust) * (this.projectileSpread/this.projectileCount))/360));
                     dx = Math.cos(angle) * offsetDistance;
                     dy = Math.sin(angle) * offsetDistance;
 

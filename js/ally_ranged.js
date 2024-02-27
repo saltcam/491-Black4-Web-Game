@@ -56,6 +56,12 @@ class Ally_Ranged extends Entity {
         this.empower = 1;
     }
 
+    // changes the empower multiplier to 2, resets buff timer
+    powerUp() {
+        this.empower = 2;
+        this.lastEmpowerTick = this.game.elapsedTime / 1000;
+    }
+
     applyPushback(forceX, forceY) {
         this.pushbackVector.x += forceX;
         this.pushbackVector.y += forceY;
@@ -116,6 +122,10 @@ class Ally_Ranged extends Entity {
 
         //this.checkCollisionAndDealDamage();
         this.castProjectile();
+        // if 1 second has passed while buffed, reset.
+        if (this.game.elapsedTime / 1000 - this.lastEmpowerTick >= 1) {
+            this.empower = 1;
+        }
 
     }
 
@@ -159,6 +169,14 @@ class Ally_Ranged extends Entity {
 
         // Draw the player at the calculated screen position
         this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+
+        if (this.empower > 1) {
+            this.animator.outlineMode = true;
+            // this.animator.outlineColor = 'rgb()'
+        } else {
+            this.animator.outlineMode = false;
+        }
+
         this.drawHealth(ctx);
         this.boundingBox.draw(ctx, game);
     }
@@ -195,30 +213,33 @@ class Ally_Ranged extends Entity {
     castProjectile(){
         // if it has been enough time since last attack, shoot an orb
         let currentTime = this.game.elapsedTime / 1000;
-        if (currentTime - this.lastAttackTime >= this.attackCooldown) {
+        if (currentTime - this.lastAttackTime >= this.attackCooldown / (this.empower * 2)) {
             const targetCenter = this.closestTarget().calculateCenter();
             const thisCenter = this.calculateCenter();
             // Calculate the angle towards the mouse position
             let dx = targetCenter.x - thisCenter.x;
             let dy = targetCenter.y - thisCenter.y;
             let attackAngle = Math.atan2(dy, dx);
+            let angle = Math.atan2(dy, dx);
 
             const offsetDistance = (20) * 0.6;
-
+            if (this.projectileCount > 1) {
+                // if we have to distribute projectiles, aim at half of range from player
+                attackAngle += Math.PI/(1/2) * (this.projectileSpread/2/360)
+            }
             for (let i = 0; i < this.projectileCount; i++) {
-                // trying to convert this to an angle
-                // odd -> i - 1     (mod 2 = 1)
-                // even -> i - 0.5 (mod 2 = 0)
-                let adjust = this.projectileCount % 2;
-                if (adjust !== 1) {
-                    adjust += 0.5;
+
+                if (this.projectileCount > 1) {
+                    angle = (attackAngle -
+                        0.01745329 * (((this.projectileSpread/(this.projectileCount-1))* i))
+                    );
                 }
 
-                let angle = (attackAngle + Math.PI/(180/360) * (((i-adjust) * (this.projectileSpread/this.projectileCount))/360));
+                //let angle = (attackAngle + Math.PI/(180/360) * (((i-adjust) * (this.projectileSpread/this.projectileCount))/360));
                 dx = Math.cos(angle) * offsetDistance;
                 dy = Math.sin(angle) * offsetDistance;
 
-                let newProjectile = this.game.addEntity(new Projectile(this.game, this.atkPow,
+                let newProjectile = this.game.addEntity(new Projectile(this.game, this.atkPow * this.empower,
                     this.worldX, this.worldY, 10, 10, "playerAttack", this.projectileSpeed,
                     "./sprites/MagicBall.png",
                     0, 0, 30, 30, 2, 0.2, 2, dx, dy,

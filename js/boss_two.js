@@ -252,17 +252,6 @@ class BossTwo extends Entity {
                 }
 
                 for (let i = 0; i < this.projectileCount; i++) {
-                    // trying to convert this to an angle
-                    // odd -> i - 1     (mod 2 = 1)
-                    // even -> i - 0.5 (mod 2 = 0)
-                    // let adjust = this.projectileCount % 2;
-                    // if (adjust !== 1) {
-                    //     adjust += 0.5;
-                    // }
-
-                    // start halfway back from the spread
-                    //attackAngle -= (this.projectileSpread/2)/360 * Math.PI/(1/2);
-
                     // I wish this was easier to figure out
                     if (this.projectileCount > 1) {
                         angle = (attackAngle -

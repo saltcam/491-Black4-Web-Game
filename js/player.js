@@ -92,7 +92,7 @@ class Player extends Entity {
         this.summonHealth = 25;
         this.summonSpeed = 210;
         this.summonDamage = 15;
-        this.tombstoneChance = 0.5; // default is 0.5
+        this.tombstoneChance = 0.33; // default is 0.33
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
@@ -200,7 +200,7 @@ class Player extends Entity {
     }
 
     update() {
-        console.log("WEAPONS: "+this.weapons[0].debugName+", "+this.weapons[1].debugName+", "+this.weapons[2].debugName);
+        //console.log("WEAPONS: "+this.weapons[0].debugName+", "+this.weapons[1].debugName+", "+this.weapons[2].debugName);
         super.update();
         // for (let i = 0; i < this.weapons.length; i++) {
         //     console.log(this.weapons[i]);

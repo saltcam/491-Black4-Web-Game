@@ -154,16 +154,19 @@ class AttackCirc {
             if (this.type === "playerAttack_NecromancyAttack" || this.type === "playerAttack_ExplosionAttack") {
                 //check all colliding allies and if an ally buffing upgrade is active to give them power/health
 
-                    // this.game.allies.forEach((ally) => {
-                    //     if (this.collisionDetection(ally.boundingBox) && this.type === "playerAttack_NecromancyAttack") {
-                    //         if (this.game.player.weapons[2].upgrades[8].active) {
-                    //             ally.powerUp();
-                    //         }
-                    //         if (this.game.player.weapons[2].upgrades[9].active) {
-                    //             ally.heal(5);
-                    //         }
-                    //     }
-                    // });
+                    this.game.allies.forEach((ally) => {
+                        if (this.collisionDetection(ally.boundingBox) && this.type === "playerAttack_NecromancyAttack") {
+                            if (this.game.player.weapons[2].upgrades[8].active) {
+                                ally.powerUp();
+                            }
+                            if (this.game.player.weapons[2].upgrades[9].active) {
+                                if (currentTime - this.lastAllyHealTime >= this.allyHealCooldown) {
+                                    ally.heal(ally.maxHP);
+                                    this.lastAllyHealTime = currentTime;
+                                }
+                            }
+                        }
+                    });
 
 
 

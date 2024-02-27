@@ -69,9 +69,11 @@ class Ally_Contact extends Entity {
 
         const targetDirection = this.calcTargetAngle(target);
 
+        let magnitude = (this.movementSpeed + (this.movementSpeed * (1.33*(this.empower-1)))) * this.game.clockTick;
+
         // Apply movement based on the direction and the zombie's speed
-        this.worldX += targetDirection.x * this.movementSpeed * this.game.clockTick;
-        this.worldY += targetDirection.y * this.movementSpeed * this.game.clockTick;
+        this.worldX += targetDirection.x * magnitude;
+        this.worldY += targetDirection.y * magnitude;
 
         // Calculate the scaled center of the sprite
         const scaledCenterX = this.worldX + (this.animator.width) / 2;
@@ -83,8 +85,8 @@ class Ally_Contact extends Entity {
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
 
         this.checkCollisionAndDealDamage();
-        // if 5 seconds have passed while buffed, reset.
-         if (this.game.elapsedTime / 1000 - this.lastEmpowerTick >= 5) {
+        // if 1 second has passed while buffed, reset.
+         if (this.game.elapsedTime / 1000 - this.lastEmpowerTick >= 1) {
              this.empower = 1;
          }
     }
@@ -96,8 +98,8 @@ class Ally_Contact extends Entity {
         this.game.enemies.forEach((enemy) => {
 
         // Check collision and cooldown
-        if (this.boundingBox.isColliding(enemy.boundingBox) && (currentTime - this.lastAttackTime >= this.attackCooldown)) {
-            enemy.takeDamage(this.atkPow);
+        if (this.boundingBox.isColliding(enemy.boundingBox) && (currentTime - this.lastAttackTime >= this.attackCooldown/this.empower)) {
+            enemy.takeDamage(this.atkPow * this.empower);
             this.takeDamage(5);
             this.lastAttackTime = currentTime; // Update last attack time
         }

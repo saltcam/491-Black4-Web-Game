@@ -28,7 +28,10 @@ class Weapon_staff extends Weapon {
         this.initialPrimaryAttackRadius = 115;
         this.initialSecondaryAttackRadius = 2;
 
+        //this.upgrades[6].active = true;
         //this.upgrades[8].active = true;
+        //this.upgrades[9].active = true;
+        this.upgrades[10].active = true;    // sets fiery explosion to true
     }
 
     performPrimaryAttack(player, cheating) {
@@ -116,6 +119,17 @@ class Weapon_staff extends Weapon {
                 this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 1));
             newProjectile.attackCirc.pulsatingDamage = false;
             newProjectile.attackCirc.drawCircle = true;
+
+            // TODO Align properly and add this logic to any time we make explosions.
+            if (this.upgrades[10].active) {
+                let coords = newProjectile.calculateCenter()
+                let newFireProjectile = this.game.addEntity(new Projectile(this.game, 5,
+                    coords.x, coords.y, 10, 10, "playerAttack_Fire", 0,
+                    "./sprites/hazard_fire.png",    // may need to keep hidden if debugging
+                    0, 0, 765/4, 153, 4, 0.2, 1, 0, 0,
+                    3, 75, 0, 0, 1));
+                newFireProjectile.attackCirc.pulsatingDamage = true;
+            }
         }
     }
 
