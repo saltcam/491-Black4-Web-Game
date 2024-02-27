@@ -64,6 +64,9 @@ class Entity {
         this.rotationOffset = 0; // Offset for rotation angle adjustment
 
         this.lives = 0; // mostly for player, just works better with inheritance.
+        this.reveal = false;
+
+        this.hitSound = "./sounds/hit.mp3";
     }
 
     update() {
@@ -75,6 +78,12 @@ class Entity {
             // Follow the set entity
             this.worldX = this.followedEntity.worldX + this.followXOffset;
             this.worldY = this.followedEntity.worldY + this.followYOffset;
+
+            // Very special occasion for boss #3
+            if (this.reveal) {
+                this.animator.pauseAtFrame(-1);
+                this.reveal = false;
+            }
         }
 
         // Calculate the scaled center of the sprite
@@ -86,11 +95,20 @@ class Entity {
     }
 
     // Call this to pass a separate entity for this entity to match the movement of. Good for god boss with the eyeball entity.
-    followEntity(entity, xOffset, yOffset) {
+    followEntity(entity, xOffset, yOffset, reveal = false) {
         this.followedEntity = entity;
         this.followXOffset = xOffset;
         this.followYOffset = yOffset;
+
+        this.reveal = reveal; // Very special occasion for boss #3
     }
+
+    // // Call this to stop following an entity
+    // unfollowEntity() {
+    //     this.worldX = this.followedEntity.worldX + this.followXOffset;
+    //     this.worldY = this.followedEntity.worldY + this.followYOffset;
+    //     this.followedEntity = null;
+    // }
 
     // Call this to have this entity 'try' to always rotate its sprite to look at the passed entity
     lookAtEntity(entity, rotationOffset = 0) {
@@ -207,6 +225,7 @@ class Entity {
                 for (let i = 0; i < 6; i++) {
                     this.game.setManagedTimeout(() => {
                         if (!this.isDead) {
+                            if (!this.boundingBox.type.toLowerCase().includes("player") && !this.boundingBox.type.toLowerCase().includes("ally")) ASSET_MANAGER.playAsset(this.hitSound, isCrit ? 0.1/2 : 0.075/2);
                             this.currHP -= bleed;
                             this.game.player.updateScore(bleed);
                             this.game.addEntity(new Floating_text(this.game, bleed, this.calculateCenter().x, this.calculateCenter().y, false,
@@ -229,6 +248,8 @@ class Entity {
         });
 
         if (!isBleed) {
+            if (!this.boundingBox.type.toLowerCase().includes("player") && !this.boundingBox.type.toLowerCase().includes("ally")) ASSET_MANAGER.playAsset(this.hitSound, isCrit ? 0.1 : 0.075);
+
             this.currHP -= amount;
             if (!(this instanceof Player)) {
                 this.game.player.updateScore(amount);

@@ -14,6 +14,8 @@ class BoundingBox {
         this.width = width;
         this.height = height;
         this.type = type;
+        this.xOffset = 0;
+        this.yOffset = 0;
     }
 
     get right() {
@@ -34,8 +36,8 @@ class BoundingBox {
     // Update the bounding box to be centered around a given point
     updateCentered(centerX, centerY, width, height) {
         // Calculate top-left corner based on center position
-        this.left = centerX - (width / 2);
-        this.top = centerY - (height / 2);
+        this.left = (centerX + this.xOffset) - (width / 2);
+        this.top = (centerY + this.yOffset) - (height / 2);
         this.width = width;
         this.height = height;
     }

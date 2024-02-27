@@ -98,6 +98,11 @@ class BossOne extends Entity {
         this.lastDamageTime = 0;
         /** Time in seconds before recent damage (yellow HP) starts to decay. */
         this.damageDecayDelay = 0.1;
+
+        /** Tracks if this entity has been initialized. */
+        this.initialized = false;
+
+        this.groundSlamSound = "./sounds/boss_ground_slam.mp3";
     }
 
     /** This is the method called when an outside force (usually an attack) is trying to push this entity around. */
@@ -110,6 +115,15 @@ class BossOne extends Entity {
 
     /** Called every tick to do movement updates and other various calculations like boss health bar math. */
     update() {
+        if(!this.initialized) {
+            // Scale this boss to the difficulty scale
+            this.maxHP = Math.round(this.maxHP * this.game.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+            this.currHP = this.maxHP;
+            this.atkPow = Math.round(this.atkPow * this.game.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+
+            this.initialized = true;
+        }
+
         super.update();
 
         // Early exit if the player does not exist for some reason at this point
@@ -120,7 +134,7 @@ class BossOne extends Entity {
         // If health hits 0 or below, this entity is declared dead
         if (this.isDead) {
             // Spawn a portal to rest area (because map is completed once boss is dead)
-            this.game.spawnPortal(0, );
+            this.game.spawnPortal(0, 0);
 
             // Spawn the end chest
             this.game.spawnEndChest();
@@ -131,6 +145,7 @@ class BossOne extends Entity {
             // Be sure to send the target marker entity to the garbage collector
             this.targetMarker.removeFromWorld = true;
             this.game.killAllEnemies();
+            ASSET_MANAGER.stopBackgroundMusic();
             this.removeFromWorld = true;
             return;
         }
@@ -317,7 +332,8 @@ class BossOne extends Entity {
 
                 this.groundSmashMainAttackCircle = this.game.addEntity(new AttackCirc(this.game, this, 150, "CAR_enemyAttack", int * 120, 130, 1.05, null, 0, this.atkPow * 2, 0, 0, 1));
                 this.groundSmashMainAttackCircle.drawCircle = true;
-                this.game.spawnSwirlingAttackCirclePattern(this, int * 120, 130, 30, 100, 100, 1.35, 2.5, 150);
+                this.groundSmashMainAttackCircle.attackSound = this.groundSlamSound;
+                this.game.spawnSwirlingAttackCirclePattern(this, int * 120, 130, 10, 250, 100, 1.2, 1.7, 125);
             }
 
             // If we reach the last frame of the ground smashing animation, pause the animation for this.groundSmashDelayTime

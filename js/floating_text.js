@@ -78,7 +78,13 @@ class Floating_text {
         }
 
         // Draw the text
-        ctx.fillText(Math.round(this.value), this.worldX - this.game.camera.x, this.worldY - this.game.camera.y);
+        if (this.value === -1) {
+            // Draw immune if passed a negative 1 for the value
+            ctx.fillStyle = "rgb(163, 163, 163)";
+            ctx.fillText("Immune", this.worldX - this.game.camera.x, this.worldY - this.game.camera.y);
+        } else {
+            ctx.fillText(Math.round(this.value), this.worldX - this.game.camera.x, this.worldY - this.game.camera.y);
+        }
         ctx.restore();
     }
 }

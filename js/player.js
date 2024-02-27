@@ -26,8 +26,8 @@ class Player extends Entity {
             new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_damage.png"),
             new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_chance.png"),
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png"),
-            new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 50),
-            new Upgrade("Gold Gain +10%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_gold_gain.png", 50)];
+            new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 50)
+        ];
 
         this.debugName = "Player";
 
@@ -86,6 +86,30 @@ class Player extends Entity {
             "./sounds/Coin_Pickup2.mp3",
             "./sounds/Coin_Pickup3.mp3"
         ];
+        this.dashSound = "./sounds/dash.mp3";
+        this.gainExpSoundBank = [
+            "./sounds/collect_exp5.mp3",
+            "./sounds/collect_exp10.mp3",
+            "./sounds/collect_exp15.mp3",
+            "./sounds/collect_exp20.mp3",
+            "./sounds/collect_exp25.mp3",
+            "./sounds/collect_exp30.mp3",
+            "./sounds/collect_exp35.mp3",
+            "./sounds/collect_exp40.mp3",
+            "./sounds/collect_exp45.mp3",
+            "./sounds/collect_exp50.mp3",
+            "./sounds/collect_exp55.mp3",
+            "./sounds/collect_exp60.mp3",
+            "./sounds/collect_exp65.mp3",
+            "./sounds/collect_exp70.mp3",
+            "./sounds/collect_exp75.mp3",
+            "./sounds/collect_exp80.mp3",
+            "./sounds/collect_exp85.mp3",
+            "./sounds/collect_exp90.mp3",
+            "./sounds/collect_exp95.mp3",
+            "./sounds/collect_exp100.mp3",
+        ];
+        this.levelupSound = "./sounds/levelup.mp3";
 
 
         // for summons, and prevent the need to check weapons for it since not all weapons can summon
@@ -140,6 +164,11 @@ class Player extends Entity {
                             break;
                         case "Crit Chance +5%":
                             this.critChance += 0.05;
+
+                            // If we hit 100% crit chance, this upgrade shouldn't be shown anymore
+                            if (this.critChance >= 1) {
+                                this.upgrades[i].relevant = false
+                            }
                             break;
                         case "Experience Gain +10%":
                             this.expGain *= 1.1;
@@ -150,9 +179,6 @@ class Player extends Entity {
                             if (this.tombstoneChance >= 1) {
                                 this.upgrades[i].relevant = false
                             }
-                            break;
-                        case "Gold Gain +10%":
-                            this.goldGain *= 1.1;
                             break;
                     }
                     // Set generic to 'false' so it can be re-used/activated in the future
@@ -383,9 +409,11 @@ class Player extends Entity {
         // }
 
 
+
+
         if (this.controlsEnabled) {
             // checks if space bar has been pressed and the dash is not on cooldown
-            if (this.game.keys[" "] && (currentTime - this.lastDashTime >= this.dashCooldown)) {
+            if (this.game.keys[" "] && !this.isDashing && (currentTime - this.lastDashTime >= this.dashCooldown)) {
                 this.performDash();
             }
         }
@@ -434,6 +462,7 @@ class Player extends Entity {
 
     // called when the user has a valid dash and presses space bar
     performDash() {
+        ASSET_MANAGER.playAsset(this.dashSound, 0.03);
         this.lastDashTime = this.game.elapsedTime / 1000; // Record the start time of the dash
         this.lastDashTimeVar = this.lastDashTime;
         this.isDashing = true; // Flag to indicate dashing state, this flag also will enable iFrames
@@ -445,12 +474,25 @@ class Player extends Entity {
 
     gainExp(exp) {
         this.exp += exp * this.expGain;
+
+        // Calculate current progress towards next level as a percentage
+        let progressPercentage = (this.exp / (this.level * 10)) * 100;
+
+        // Determine which sound to play based on 5% increments
+        let soundIndex = Math.floor(progressPercentage / 5);
+        soundIndex = Math.min(soundIndex, this.gainExpSoundBank.length - 1); // Ensure index does not exceed array bounds
+
+        // Play the corresponding sound
+        let soundToPlay = this.gainExpSoundBank[soundIndex];
+        ASSET_MANAGER.playAsset(soundToPlay);
+
         this.updateScore(exp * this.expGain);
 
         // level up!
         if (this.exp >= (this.level * 10)) {
             this.exp -= (this.level * 10);
             this.level++;
+            ASSET_MANAGER.playAsset(this.levelupSound);
             this.game.UPGRADE_SYSTEM.showPlayerUpgradeScreen();
         }
     }

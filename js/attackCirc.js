@@ -100,11 +100,18 @@ class AttackCirc {
         // For ally healing
         this.lastAllyHealTime = 0;
         this.allyHealCooldown = 0.5;
+
+        this.attackSound = null;
     }
 
 
     // changes world position to match its attached entity, offset by dx and dy values.
     update() {
+        // Handle sound
+        if (this.attackSound && this.attackDamage > 0) {
+            ASSET_MANAGER.playAsset(this.attackSound, 0.5);
+            this.attackSound = null;
+        }
         const currentTime = this.game.elapsedTime / 1000;
         //console.log("ATTACKCIRC: Dur="+this.duration+"s, CurrTime="+(currentTime - this.startTime)+"s, rem="+this.removeFromWorld);
         if (this.trackToEntity) {

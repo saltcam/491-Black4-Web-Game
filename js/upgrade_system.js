@@ -40,6 +40,8 @@ class Upgrade_System {
 
         // How long player gets iFrames after exiting the upgrade menus
         this.menuInvincibilityTime = 0.5;
+
+        this.spendGoldSound = "./sounds/spend_gold.mp3";
     }
 
     /** Called every tick. */
@@ -492,6 +494,7 @@ class Upgrade_System {
                 if (upgradeChoice !== -1 && this.upgradeOptions[upgradeChoice].goldCost <= this.game.player.gold) {
                     // Subtract the gold
                     this.game.player.gold -= this.upgradeOptions[upgradeChoice].goldCost;
+                    ASSET_MANAGER.playAsset(this.spendGoldSound, 0.3);
 
                     // Set the upgrade to active
                     this.upgradeOptions[upgradeChoice].active = true;
