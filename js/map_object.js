@@ -73,7 +73,7 @@ class Map_object extends Entity {
     }
 
     tiggerHealingHeart() {
-        this.game.player.heal(this.game.player.maxHP * 0.2);
+        this.game.player.heal(this.game.player.maxHP * 0.1);
         ASSET_MANAGER.playAsset(this.healingHeartSound);
         this.removeFromWorld = true;
     }

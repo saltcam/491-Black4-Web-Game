@@ -136,6 +136,9 @@ class Player extends Entity {
 
     // Handles code for turning on upgrades (Generic and Specific)
     handleUpgrade() {
+        // Turn off bad upgrades
+        this.upgrades[9].relevant = false; // Turn off EXP upgrade (too OP)
+
         for (let i = 0; i < this.upgrades.length; i++) {
             // If generic has been turned on
                 if (this.upgrades[i].active && !this.upgrades[i].special) {
