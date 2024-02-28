@@ -115,18 +115,6 @@ class AssetManager {
         return this.cache[path];
     };
 
-    // playAsset(path, volume = 0.1, playbackRate = 1.0) {
-    //     if (this.cache[path]) {
-    //         let audio = this.cache[path].cloneNode(); // Clone the audio element
-    //         audio.volume = volume; // Set the volume for this instance
-    //         audio.playbackRate = playbackRate; // Set the playback rate (speed and pitch)
-    //         audio.play();
-    //         audio.addEventListener("ended", function () {
-    //             audio.remove(); // Optionally remove the cloned element once it has played
-    //         });
-    //     }
-    // }
-
     playAsset(path, volume = 0.1, playbackRate = 1.0) {
         if (this.cache[path]) {
             // Special handling for hit sounds
