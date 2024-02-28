@@ -280,7 +280,15 @@ class Entity {
                 ASSET_MANAGER.playAsset("./sounds/SE_staff_secondary.mp3");
                 if (this instanceof Player) {
                     this.game.player.updateScore(-1 * this.game.player.score / 2);
-                    //TODO make an explosion or something
+                    let newProjectile = this.game.addEntity(new Projectile(this.game, 75,
+                        this.worldX, this.worldY, 10, 10, "playerAttack", 0,
+                        "./sprites/ElectricOrb_red.png",
+                        0, 0, 32, 32, 5, 0.1, 10, 0, 0,
+                        0.5, 150, 25, 0, 1));
+                    newProjectile.attackCirc.pulsatingDamage = false;
+                    if (this.lives < 1) {
+                        this.game.player.weapons[2].upgrades[11].relevant = true;
+                    }
                 }
             } else {
                 this.isDead = true;

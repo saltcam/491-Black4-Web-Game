@@ -52,7 +52,7 @@ class GameEngine {
          * 2 == Cave
          * 3 == Space
          */
-        this.currMap = 3;
+        this.currMap = -1;
 
         /** Save the previous map index after map switching. */
         this.prevMap = -10;
@@ -147,6 +147,8 @@ class GameEngine {
         this.mapThreeMusic = "./sounds/music_majula.mp3";
         this.mapThreeBossMusic = "./sounds/music_malenia.mp3";
         this.youWonScreenMusic = "./sounds/music_ave_maria.mp3";
+
+        this.youWonScreen = "./sprites/you_won_screen1.png";
 
         this.drawEndGameScreenFlag = false;
     }
@@ -782,8 +784,14 @@ class GameEngine {
     }
 
     /** Draws the game-time tracker on top of the game screen. */
-    drawTimer(ctx)
-    {
+    drawTimer(ctx) {
+        // Catch invalid elapsed time
+        if (this.elapsedTime < 0) {
+            this.elapsedTime = 0;
+            this.totalPausedTime = 0;
+            this.startTime = Date.now();
+        }
+
         ctx.font = '20px Arial';
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
@@ -822,15 +830,11 @@ class GameEngine {
         else if (this.prevMap > 2) this.prevMap = 0;
         else if (this.currMap !== 0) this.prevMap += 1;
 
-        console.log("Prev map = "+this.prevMap);
         if (this.currMap === 0) {
-            console.log("1");
             newPortal = this.addEntity(new Portal(this, worldX, worldY, this.prevMap + 1));
         } else if (this.currMap > 0){
-            console.log("2");
             newPortal = this.addEntity(new Portal(this, worldX, worldY, 0));
         } else { // update this to add a portal that sends to credits
-            console.log("3");
             newPortal = this.addEntity(new Portal(this, worldX, worldY, 1));
         }
         this.addEntity(new Arrow_Pointer(newPortal, this, "./sprites/arrow_pointer_blue.png")); // Attach an arrow pointer
@@ -1706,6 +1710,8 @@ class GameEngine {
     }
 
     handleEndGameScreenClick(event) {
+        if(!this.drawEndGameScreenFlag) return;
+
         // Convert click coordinates to canvas space
         const rect = this.ctx.canvas.getBoundingClientRect();
         const clickX = event.clientX - rect.left;
@@ -1715,10 +1721,9 @@ class GameEngine {
         if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
             clickY >= this.ctx.canvas.height / 2 + 250 && clickY <= this.ctx.canvas.height / 2 + 250 + 50) {
             // Handle Continue action
-            console.log("Continue clicked");
-            this.SPAWN_SYSTEM.DIFFICULTY_SCALE += 1;
             this.switchMap(1);
             this.drawEndGameScreenFlag = false;
+            if (this.isGamePaused) this.togglePause();
             // Remove event listener to prevent memory leaks
             this.ctx.canvas.removeEventListener('click', this.handleEndGameScreenClick.bind(this));
         }
@@ -1727,8 +1732,9 @@ class GameEngine {
         if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
             clickY >= this.ctx.canvas.height / 2 + 250 + 60 && clickY <= this.ctx.canvas.height / 2 + 250 + 60 + 50) {
             // Handle Start Over action
-            console.log("Start Over clicked");
             window.location.reload();
+            this.drawEndGameScreenFlag = false;
+            if (this.isGamePaused) this.togglePause();
             // Remove event listener to prevent memory leaks
             this.ctx.canvas.removeEventListener('click', this.handleEndGameScreenClick.bind(this));
         }
@@ -1747,12 +1753,31 @@ class GameEngine {
     }
 
     drawEndGameScreen() {
+        if (!this.isGamePaused) this.togglePause();
+
         // Clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
+        if (this.youWonScreen === "./sprites/you_won_screen1.png" && (Math.random() < 0.05)) {
+            this.youWonScreen = "./sprites/you_won_screen2.png";
+        }
+
         // Draw the background image
-        const bgImage = ASSET_MANAGER.getAsset("./sprites/you_won_screen1.png");
+        const bgImage = ASSET_MANAGER.getAsset(this.youWonScreen);
         this.ctx.drawImage(bgImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+        // Draw score
+        this.ctx.fillStyle = 'white';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
+        this.ctx.shadowBlur = 0; // How much the shadow should be blurred
+        this.ctx.shadowOffsetX = 2; // Horizontal shadow offset
+        this.ctx.shadowOffsetY = 2; // Vertical shadow offset
+        this.ctx.font = 'bold 36px Arial';
+        this.ctx.fillText("Score: " + this.player.score, this.ctx.canvas.width / 2, this.ctx.canvas.height / 2 + 243);
+
+        // Draw the stats screen
+        this.UPGRADE_SYSTEM.drawPlayerStatsMenu(this.ctx);
 
         // Draw buttons
         // Continue Button
@@ -1842,43 +1867,45 @@ class GameEngine {
             weapon.lastSecondAttackTime = currentTime - (weapon.secondCool * 2);
         });
 
+        // Tell the game engine to switch to the map of the teleport index
+        this.prevMap = this.currMap;
+        this.currMap = teleportIndex;
+
+        // Handle music changes
+        switch (this.currMap) {
+            case 0:
+                ASSET_MANAGER.stopBackgroundMusic();
+                ASSET_MANAGER.playBackgroundMusic(this.restAreaMusic);
+                break;
+            case 1:
+                ASSET_MANAGER.stopBackgroundMusic();
+                ASSET_MANAGER.playBackgroundMusic(this.mapOneMusic);
+                break;
+            case 2:
+                ASSET_MANAGER.stopBackgroundMusic();
+                ASSET_MANAGER.playBackgroundMusic(this.mapTwoMusic);
+                break;
+            case 3:
+                ASSET_MANAGER.stopBackgroundMusic();
+                ASSET_MANAGER.playBackgroundMusic(this.mapThreeMusic);
+                break;
+        }
+
+        // Ramp up the difficulty for new game plus
+        if (teleportIndex === 1) this.SPAWN_SYSTEM.DIFFICULTY_SCALE += 1;
+
+        // Reset spawn system on map change
+        this.SPAWN_SYSTEM = new Spawn_System(this, this.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+
+        // If rest area, heal player
+        if (teleportIndex === 0) {
+            this.player.heal(this.player.maxHP);
+        }
+
         if (teleportIndex === 4) {
             ASSET_MANAGER.stopBackgroundMusic();
             ASSET_MANAGER.playBackgroundMusic(this.youWonScreenMusic);
             this.drawEndGameScreen();
-
         }
-            // Tell the game engine to switch to the map of the teleport index
-            // this.prevMap = this.currMap;
-            this.currMap = teleportIndex;
-
-            // Handle music changes
-            switch (this.currMap) {
-                case 0:
-                    ASSET_MANAGER.stopBackgroundMusic();
-                    ASSET_MANAGER.playBackgroundMusic(this.restAreaMusic);
-                    break;
-                case 1:
-                    ASSET_MANAGER.stopBackgroundMusic();
-                    ASSET_MANAGER.playBackgroundMusic(this.mapOneMusic);
-                    break;
-                case 2:
-                    ASSET_MANAGER.stopBackgroundMusic();
-                    ASSET_MANAGER.playBackgroundMusic(this.mapTwoMusic);
-                    break;
-                case 3:
-                    ASSET_MANAGER.stopBackgroundMusic();
-                    ASSET_MANAGER.playBackgroundMusic(this.mapThreeMusic);
-                    break;
-            }
-
-            // Reset spawn system on map change
-            this.SPAWN_SYSTEM = new Spawn_System(this, this.SPAWN_SYSTEM.DIFFICULTY_SCALE);
-
-            // If rest area, heal player
-            if (teleportIndex === 0) {
-                this.player.heal(this.player.maxHP);
-            }
-
     }
 }

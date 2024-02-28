@@ -29,11 +29,11 @@ class Spawn_System {
         /** Tracks if the spawn system has initialized. */
         this.initialized = false;
         /** Controls the max enemy count, gets doubled incrementally. */
-        this.baseMaxEnemies = 100;//Math.round(1 + this.DIFFICULTY_SCALE);
+        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE);
         /** Tracks the current max enemy count. */
         this.currentMaxEnemies = 0;
         /** Controls how often (in seconds) to increment max enemy count. */
-        this.maxEnemyIncrementTime = 1;//9 / this.DIFFICULTY_SCALE;
+        this.maxEnemyIncrementTime =9 / this.DIFFICULTY_SCALE;
         /** Stores how many max enemy intervals have passed. */
         this.maxEnemyIntervals = 0;
         /** How much to lower the spawn delay each interval. */
@@ -43,7 +43,7 @@ class Spawn_System {
         /** Tracks when the last time we lowered the spawn delay was. */
         this.lastSpawnDelayDecreaseTime = 0;
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
-        this.baseEnemySpawnInterval = 0.1;//5.5 / this.DIFFICULTY_SCALE;
+        this.baseEnemySpawnInterval = 5.5 / this.DIFFICULTY_SCALE;
         /** Tracks when the last enemy was spawned. */
         this.lastSpawnTime = 0;
         /** Setting this to true tells spawnRandomEnemy() to make the next enemy it spawns an elite. */
@@ -79,7 +79,23 @@ class Spawn_System {
                 shootAnimH: 145, shootAnimFCount: 7, shootAnimFDur: 0.2, shootScale: 0.65, exp: -1, projectileFreq: 3,
                 projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 1, projectileSpread: 0,
                 fleeDist: 200, approachDist: 350, projectileSprite: "./sprites/MagicBall_red.png",
-                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 30, projectileAnimH: 30, projectileAnimCount: 2, projectileAnimDurr: 0.2, projectileAnimScale: 2}
+                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 30, projectileAnimH: 30, projectileAnimCount: 2, projectileAnimDurr: 0.2, projectileAnimScale: 2},
+            { enemyType: "ranged", name: "Necro", maxHP: 75, currHP: 75, atkPow:7, worldX: 0, worldY: 0,
+                boxWidth: 20, boxHeight: 45, boxType: "enemy", speed: 40, spritePath: "./sprites/ranged_necro_walk.png",
+                shootSpritePath: "./sprites/ranged_necro_shoot.png" , animXStart: 0, animYStart: 0, animW: 84, animH: 137,
+                animFCount: 5, animFDur: 0.3, scale: 2, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 84,
+                shootAnimH: 137, shootAnimFCount: 5, shootAnimFDur: 0.2, shootScale: 1, exp: -1, projectileFreq: 5,
+                projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 10, projectileSpread: 360,
+                fleeDist: 200, approachDist: 350, projectileSprite: "./sprites/MagicBall_red.png",
+                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 30, projectileAnimH: 30, projectileAnimCount: 2, projectileAnimDurr: 0.2, projectileAnimScale: 2},
+            { enemyType: "ranged", name: "LegalMage", maxHP: 50, currHP: 50, atkPow: 2, worldX: 0, worldY: 0,
+                boxWidth: 15, boxHeight: 20, boxType: "enemy", speed: 20, spritePath: "./sprites/ranged_legal_walk.png",
+                shootSpritePath: "./sprites/ranged_legal_shoot.png" , animXStart: 0, animYStart: 0, animW: 25, animH: 30,
+                animFCount: 2, animFDur: 0.2, scale: 2, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 25,
+                shootAnimH: 30, shootAnimFCount: 8, shootAnimFDur: 0.5, shootScale: 0.65, exp: -1, projectileFreq: 2,
+                projectileSpeed: 35, projectileSize: 20, projectilePulse: false, projectileCount: 3, projectileSpread: 15,
+                fleeDist: 75, approachDist: 150, projectileSprite: "./sprites/Orby.png",
+                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 29, projectileAnimH: 31, projectileAnimCount: 10, projectileAnimDurr: 0.05, projectileAnimScale: 0.75, shootRange: 150}
         ];
         /** An array of all potential enemies of type 'Enemy_Charger'. */
         this.chargerEnemyTypes = [
@@ -124,12 +140,12 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapOneEnemies = [
-            this.chargerEnemyTypes[3],  // Wave 0 (0:00 - 0:30) this.contactEnemyTypes[0]
-            this.contactEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
-            this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
-            this.chargerEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
-            this.contactEnemyTypes[3],  // Wave 4 (2:00 - 2:30)
-            this.contactEnemyTypes[2],  // Wave 5 (2:30 - 3:00)
+            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
+            this.contactEnemyTypes[2],  // Wave 1 (0:30 - 1:00)
+            this.contactEnemyTypes[1],  // Wave 2 (1:00 - 1:30)
+            this.rangedEnemyTypes[2],   // Wave 3 (1:30 - 2:00)
+            this.chargerEnemyTypes[0],  // Wave 4 (2:00 - 2:30)
+            this.contactEnemyTypes[0],  // Wave 5 (2:30 - 3:00)
             this.rangedEnemyTypes[0],  // Wave 6 (3:00 - 3:30)
             this.contactEnemyTypes[3],  // Wave 7 (3:30 - 4:00)
             this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
@@ -140,13 +156,13 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapTwoEnemies = [
-            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
-            this.contactEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
-            this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
-            this.rangedEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
-            this.contactEnemyTypes[3],  // Wave 4 (2:00 - 2:30)
-            this.chargerEnemyTypes[0],  // Wave 5 (2:30 - 3:00)
-            this.contactEnemyTypes[2],  // Wave 6 (3:00 - 3:30)
+            this.contactEnemyTypes[3],  // Wave 0 (0:00 - 0:30)
+            this.chargerEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
+            this.contactEnemyTypes[1],  // Wave 2 (1:00 - 1:30)
+            this.rangedEnemyTypes[2],   // Wave 3 (1:30 - 2:00)
+            this.contactEnemyTypes[0],  // Wave 4 (2:00 - 2:30)
+            this.chargerEnemyTypes[2],  // Wave 5 (2:30 - 3:00)
+            this.rangedEnemyTypes[1],  // Wave 6 (3:00 - 3:30)
             this.contactEnemyTypes[3],  // Wave 7 (3:30 - 4:00)
             this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
         ];
@@ -156,15 +172,15 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapThreeEnemies = [
-            this.rangedEnemyTypes[0],  // Wave 0 (0:00 - 0:30) this.contactEnemyTypes[3]
-            this.chargerEnemyTypes[0],  // Wave 1 (0:30 - 1:00)
-            this.contactEnemyTypes[1],  // Wave 2 (1:00 - 1:30)
-            this.rangedEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
+            this.contactEnemyTypes[2],  // Wave 0 (0:00 - 0:30) this.contactEnemyTypes[3]
+            this.contactEnemyTypes[2],  // Wave 1 (0:30 - 1:00)
+            this.chargerEnemyTypes[3],  // Wave 2 (1:00 - 1:30)
+            this.chargerEnemyTypes[3],   // Wave 3 (1:30 - 2:00)
             this.contactEnemyTypes[3],  // Wave 4 (2:00 - 2:30)
-            this.chargerEnemyTypes[0],  // Wave 5 (2:30 - 3:00)
-            this.contactEnemyTypes[3],  // Wave 6 (3:00 - 3:30)
-            this.rangedEnemyTypes[0],  // Wave 7 (3:30 - 4:00)
-            this.contactEnemyTypes[2]   // Wave 8 (4:00 - 4:30+)
+            this.rangedEnemyTypes[1],  // Wave 5 (2:30 - 3:00)
+            this.chargerEnemyTypes[1],  // Wave 6 (3:00 - 3:30)
+            this.rangedEnemyTypes[2],  // Wave 7 (3:30 - 4:00)
+            this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
         ];
 
         /** This array stores enemies from previous waves for constant spawning. */
@@ -453,7 +469,8 @@ class Spawn_System {
                     enemy.projectileCount, enemy.projectileSpread,
                     enemy.fleeDist, enemy.approachDist, enemy.projectileSprite,
                     enemy.projectileAnimX, enemy.projectileAnimY, enemy.projectileAnimW,
-                    enemy.projectileAnimH, enemy.projectileAnimCount, enemy.projectileAnimDurr, enemy.projectileAnimScale));
+                    enemy.projectileAnimH, enemy.projectileAnimCount, enemy.projectileAnimDurr,
+                    enemy.projectileAnimScale, enemy.shootRange));
             }
             // If we hit the ranged enemy cap, try a passive spawn
             else {

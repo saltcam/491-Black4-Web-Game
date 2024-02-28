@@ -28,7 +28,7 @@ class Weapon_staff extends Weapon {
         this.initialPrimaryAttackRadius = 115;
         this.initialSecondaryAttackRadius = 2;
 
-        this.upgrades[6].active = true;
+        // this.upgrades[6].active = true;
         // this.upgrades[7].active = true;
         //this.upgrades[8].active = true;
         //this.upgrades[9].active = true;

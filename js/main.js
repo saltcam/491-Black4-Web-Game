@@ -113,8 +113,18 @@ ASSET_MANAGER.queueDownload("./sprites/charger_doom_walk.png");
 ASSET_MANAGER.queueDownload("./sprites/charger_doom_walk_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/charger_doom_charge.png");
 ASSET_MANAGER.queueDownload("./sprites/charger_doom_charge_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/ranged_necro_walk.png");
+ASSET_MANAGER.queueDownload("./sprites/ranged_necro_walk_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/ranged_necro_shoot.png");
+ASSET_MANAGER.queueDownload("./sprites/ranged_necro_shoot_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/ranged_legal_walk.png");
+ASSET_MANAGER.queueDownload("./sprites/ranged_legal_walk_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/ranged_legal_shoot.png");
+ASSET_MANAGER.queueDownload("./sprites/ranged_legal_shoot_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/smoke.png");
 ASSET_MANAGER.queueDownload("./sprites/you_won_screen1.png");
+ASSET_MANAGER.queueDownload("./sprites/you_won_screen2.png");
+ASSET_MANAGER.queueDownload("./sprites/Orby.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");

@@ -9,7 +9,7 @@
 class Player extends Entity {
 
     constructor(game) {
-        super(10000, 10000, 2500, game, 0, 0,
+        super(100, 100, 25, game, 0, 0,
             17, 29, "player", 160,
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
@@ -28,12 +28,12 @@ class Player extends Entity {
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png"),
             new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 50),
             // TODO need assets for these
-            new Upgrade("Extra Life", "Fully heal instead of dying (Once).", true, "./sprites/upgrade_tomb_chance.png", 1000),
-            new Upgrade("Gravewalker", "(Unique) Create Tombstones every 10 seconds.", true, "./sprites/upgrade_tomb_chance.png", 1000),
+            new Upgrade("Extra Life", "Fully heal instead of dying (Once).", false, "./sprites/upgrade_tomb_chance.png", 1000),
+            new Upgrade("Gravewalker", "(Unique) Drop tomb every 10s.", true, "./sprites/upgrade_tomb_chance.png", 1000),
             new Upgrade("It's what you do with it", "(Unique) 50% smaller.", false, "./sprites/upgrade_tomb_chance.png", 1000),
             new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 1000),
             // based on hades, maybe grab asset from there?
-            new Upgrade("Divine Dash", "(Unique) Reflect projectiles while dashing.", true, "./sprites/upgrade_tomb_chance.png", 1000),
+            new Upgrade("Divine Dash", "(Unique) Dash reflects projectiles.", true, "./sprites/upgrade_tomb_chance.png", 1000),
             // based on vampire survivors, feel free to grab the sprite from there.
             new Upgrade("Glorious Moon", "(Unique) Suck all EXP every 2 minutes.", true, "./sprites/upgrade_tomb_chance.png", 1000)
         ];
@@ -130,7 +130,7 @@ class Player extends Entity {
         this.lastGraveWalkTime = 0;
         this.lastMoonTime = 0;
 
-        this.upgrades[15].active = true;
+        // this.upgrades[15].active = true;
         // this.handleUpgrade();
     };
 
@@ -192,11 +192,12 @@ class Player extends Entity {
                             this.tombstoneChance += 0.05;
                             // If we hit 100% tombstone chance, remove this upgrade as an option for the future
                             if (this.tombstoneChance >= 1) {
-                                this.upgrades[i].relevant = false
+                                this.upgrades[i].relevant = false;
                             }
                             break;
                         case "Extra Life":
                             this.lives++;
+                            this.upgrades[i].relevant = false;
                             break;
                         case "It's what you do with it":
                             this.boundingBox.height *= 0.5;
@@ -455,36 +456,40 @@ class Player extends Entity {
         // TODO add visual and audio indicator of the effect
         if (this.upgrades[15].active) {
             this.game.attacks.forEach(projectile => {
-                if (projectile.boundingBox.type === "enemyAttack_Projectile" &&
-                    projectile.attackCirc.collisionDetection(this.boundingBox) && this.isDashing) {
+                if (projectile.attackCirc) {
+                    if (projectile.boundingBox.type === "enemyAttack_Projectile" &&
+                        projectile.attackCirc.collisionDetection(this.boundingBox) && this.isDashing) {
 
 
-                    // Determine the path for the spritesheet
-                    let newSpritesheetPath = projectile.animator.spritesheet.src;
-                    // Find the index of "/sprites/"
-                    const spritesIndex = newSpritesheetPath.indexOf("/sprites/");
-                    // Ensure the path starts with "./sprites/" by reconstructing it if "/sprites/" is found
-                    if (spritesIndex !== -1) {
-                        newSpritesheetPath = "." + newSpritesheetPath.substring(spritesIndex);
+                        // Determine the path for the spritesheet
+                        let newSpritesheetPath = projectile.animator.spritesheet.src;
+                        // Find the index of "/sprites/"
+                        const spritesIndex = newSpritesheetPath.indexOf("/sprites/");
+                        // Ensure the path starts with "./sprites/" by reconstructing it if "/sprites/" is found
+                        if (spritesIndex !== -1) {
+                            newSpritesheetPath = "." + newSpritesheetPath.substring(spritesIndex);
+                        }
+
+                        console.log(newSpritesheetPath);
+
+                        let reflectedProjectile = this.game.addEntity(new Projectile(this.game, projectile.atkPow,
+                            projectile.worldX, projectile.worldY, projectile.boundingBox.width, projectile.boundingBox.height,
+                            "playerAttack_TomeAttack", projectile.speed,
+                            newSpritesheetPath,
+                            projectile.animator.xStart, projectile.animator.yStart,
+                            projectile.animator.width, projectile.animator.height, projectile.animator.frameCount,
+                            projectile.animator.frameDuration, projectile.animator.scale, projectile.angleX * -1, projectile.angleY * -1,
+                            2.5, 20, 1, 0,
+                            0.3));
+                        reflectedProjectile.pulsatingDamage = projectile.pulse;
+
+                        // TODO why does this not work?
+                        reflectedProjectile.animator.outlineMode = true;
+                        reflectedProjectile.animator.outlineColor = 'rgb(0,128,255)';
+
+                        projectile.removeFromWorld = true;
+                        projectile.attackCirc.removeFromWorld = true;
                     }
-
-                    console.log(newSpritesheetPath);
-
-                    let reflectedProjectile = this.game.addEntity(new Projectile(this.game, projectile.atkPow,
-                        projectile.worldX, projectile.worldY, projectile.boundingBox.width, projectile.boundingBox.height,
-                        "playerAttack_TomeAttack", projectile.speed * 1.5,
-                        newSpritesheetPath,
-                        projectile.animator.xStart, projectile.animator.yStart,
-                        projectile.animator.width, projectile.animator.height, projectile.animator.frameCount,
-                        projectile.animator.frameDuration, projectile.animator.scale, projectile.angleX*-1, projectile.angleY*-1,
-                        2.5, projectile.projectileSize, 1, 0,
-                        projectile.attackCirc.attackCooldown));
-                    reflectedProjectile.pulsatingDamage = projectile.pulse;
-
-                    reflectedProjectile.animator.outlineMode = true;
-                    reflectedProjectile.animator.outlineColor = 'rgb(0,128,255)';
-
-                    projectile.removeFromWorld = true;
                 }
             });
         }
@@ -552,7 +557,7 @@ class Player extends Entity {
         this.isDashing = false; // Reset dashing state, this flag also will enable iFrames
         if (this.upgrades[14].active) {
             let newProjectile = this.game.addEntity(new Projectile(this.game, 10,
-                this.worldX, this.worldY, 10, 10, "playerAttack_NecromancyAttack", 0,
+                this.worldX, this.worldY, 10, 10, "playerAttack_Smoke", 0,
                 "./sprites/smoke.png",
                 0, 0, 32, 32, 5, 0.1, 5, 0, 0,
                 0.5, 100, 14, 0, 1));
