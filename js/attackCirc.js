@@ -1,4 +1,4 @@
-const EXPLOSION_GROWTH = 3;
+const EXPLOSION_GROWTH = 5;
 class AttackCirc {
 
     /**
@@ -119,8 +119,8 @@ class AttackCirc {
             this.worldY = this.entity.calculateCenter().y + this.dy;
         }
 
-        // increase in size each frame if of type explosion
-        if (this.type === "playerAttack_ExplosionAttack" && ((currentTime - this.lastGrowthTime) >= this.growthCooldown)) {
+        // increase in size each 1/60th of a second if of type explosion
+        if (this.type === "playerAttack_ExplosionAttack" && ((currentTime - this.lastGrowthTime) >= 1/60)) {
             this.radius += EXPLOSION_GROWTH;
             this.lastGrowthTime = currentTime;
         }
