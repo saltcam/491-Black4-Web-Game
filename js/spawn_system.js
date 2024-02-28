@@ -51,7 +51,7 @@ class Spawn_System {
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
         this.eliteSpawnTimer = 60;
         /** Spawn the boss after this many seconds of game time. */
-        this.bossSpawnTimer = 300;
+        this.bossSpawnTimer = 10;
         /** Tracks how long it has been since we last spawned an elite. */
         this.lastEliteSpawnTime = 0;
 

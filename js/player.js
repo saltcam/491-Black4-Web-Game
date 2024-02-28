@@ -650,7 +650,7 @@ class Player extends Entity {
                 ctx.closePath();
 
                 attackRadius = this.weapons[this.currentWeapon].secondaryAttackDuration *
-                    60 * EXPLOSION_GROWTH + this.weapons[this.currentWeapon].secondaryAttackRadius;
+                    30 * EXPLOSION_GROWTH + this.weapons[this.currentWeapon].secondaryAttackRadius;
 
                 ctx.beginPath();
                 ctx.arc(mouseX, mouseY, attackRadius, 0, 2 * Math.PI, false)
