@@ -29,11 +29,11 @@ class Spawn_System {
         /** Tracks if the spawn system has initialized. */
         this.initialized = false;
         /** Controls the max enemy count, gets doubled incrementally. */
-        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE);
+        this.baseMaxEnemies = 100;//Math.round(1 + this.DIFFICULTY_SCALE);
         /** Tracks the current max enemy count. */
         this.currentMaxEnemies = 0;
         /** Controls how often (in seconds) to increment max enemy count. */
-        this.maxEnemyIncrementTime = 9 / this.DIFFICULTY_SCALE;
+        this.maxEnemyIncrementTime = 1;//9 / this.DIFFICULTY_SCALE;
         /** Stores how many max enemy intervals have passed. */
         this.maxEnemyIntervals = 0;
         /** How much to lower the spawn delay each interval. */
@@ -43,7 +43,7 @@ class Spawn_System {
         /** Tracks when the last time we lowered the spawn delay was. */
         this.lastSpawnDelayDecreaseTime = 0;
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
-        this.baseEnemySpawnInterval = 5.5 / this.DIFFICULTY_SCALE;
+        this.baseEnemySpawnInterval = 0.1;//5.5 / this.DIFFICULTY_SCALE;
         /** Tracks when the last enemy was spawned. */
         this.lastSpawnTime = 0;
         /** Setting this to true tells spawnRandomEnemy() to make the next enemy it spawns an elite. */
@@ -51,7 +51,7 @@ class Spawn_System {
         /** How often to set spawnElite to true (in seconds). Basically how often are we spawning an elite? */
         this.eliteSpawnTimer = 60;
         /** Spawn the boss after this many seconds of game time. */
-        this.bossSpawnTimer = 10;
+        this.bossSpawnTimer = 300; // 300 by default
         /** Tracks how long it has been since we last spawned an elite. */
         this.lastEliteSpawnTime = 0;
 
@@ -78,7 +78,8 @@ class Spawn_System {
                 animFCount: 7, animFDur: 0.2, scale: 0.65, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 418,
                 shootAnimH: 145, shootAnimFCount: 7, shootAnimFDur: 0.2, shootScale: 0.65, exp: -1, projectileFreq: 3,
                 projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 1, projectileSpread: 0,
-                fleeDist: 200, approachDist: 350}
+                fleeDist: 200, approachDist: 350, projectileSprite: "./sprites/MagicBall_red.png",
+                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 30, projectileAnimH: 30, projectileAnimCount: 2, projectileAnimDurr: 0.2, projectileAnimScale: 2}
         ];
         /** An array of all potential enemies of type 'Enemy_Charger'. */
         this.chargerEnemyTypes = [
@@ -86,6 +87,21 @@ class Spawn_System {
                 boxHeight: 28, boxType: "enemy", speed: 50, spritePath: "./sprites/boar_walk.png", animXStart: 0,
                 animYStart: 0, animW: 95, animH: 46, animFCount: 7, animFDur: 0.2, scale: 1.5, chargeSpritePath: "./sprites/boar_charge.png",
                 chargeAnimXStart: 0, chargeAnimYStart: 0, chargeAnimW: 95, chargeAnimH: 46, chargeAnimFCount: 2, chargeAnimFDur: 1, chargeScale: 1.5, exp: -1,
+                fleeDist: 250, approachDist: 500},
+            { enemyType: "charger", name: "Horse", maxHP: 100, currHP: 100, atkPow: 15, worldX: 0, worldY: 0, boxWidth: 55,
+                boxHeight: 30, boxType: "enemy", speed: 100, spritePath: "./sprites/charger_horse_walk.png", animXStart: 0,
+                animYStart: 0, animW: 128, animH: 96, animFCount: 4, animFDur: 0.3, scale: 1.5, chargeSpritePath: "./sprites/charger_horse_charge.png",
+                chargeAnimXStart: 0, chargeAnimYStart: 0, chargeAnimW: 144, chargeAnimH: 96, chargeAnimFCount: 2, chargeAnimFDur: 1, chargeScale: 1.5, exp: -1,
+                fleeDist: 125, approachDist: 500},
+            { enemyType: "charger", name: "HellHound", maxHP: 50, currHP: 50, atkPow: 10, worldX: 0, worldY: 0, boxWidth: 27,
+                boxHeight: 21, boxType: "enemy", speed: 70, spritePath: "./sprites/charger_hound_walk.png", animXStart: 0,
+                animYStart: 0, animW: 64, animH: 32, animFCount: 12, animFDur: 0.1, scale: 2, chargeSpritePath: "./sprites/charger_hound_charge.png",
+                chargeAnimXStart: 0, chargeAnimYStart: 0, chargeAnimW: 67, chargeAnimH: 32, chargeAnimFCount: 2, chargeAnimFDur: 1, chargeScale: 2, exp: -1,
+                fleeDist: 250, approachDist: 500},
+            { enemyType: "charger", name: "Doom", maxHP: 200, currHP: 200, atkPow: 25, worldX: 0, worldY: 0, boxWidth: 40,
+                boxHeight: 30, boxType: "enemy", speed: 30, spritePath: "./sprites/charger_doom_walk.png", animXStart: 0,
+                animYStart: 0, animW: 64, animH: 41, animFCount: 6, animFDur: 0.2, scale: 2.5, chargeSpritePath: "./sprites/charger_doom_charge.png",
+                chargeAnimXStart: 0, chargeAnimYStart: 0, chargeAnimW: 64, chargeAnimH: 43, chargeAnimFCount: 2, chargeAnimFDur: 1, chargeScale: 2.5, exp: -1,
                 fleeDist: 250, approachDist: 500}
         ];
         /** Sets the maximum allowed projectile/ranged enemies (Since too many will be way too hard/annoying) */
@@ -108,7 +124,7 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapOneEnemies = [
-            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
+            this.chargerEnemyTypes[3],  // Wave 0 (0:00 - 0:30) this.contactEnemyTypes[0]
             this.contactEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[2],  // Wave 2 (1:00 - 1:30)
             this.chargerEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
@@ -140,7 +156,7 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapThreeEnemies = [
-            this.contactEnemyTypes[3],  // Wave 0 (0:00 - 0:30)
+            this.rangedEnemyTypes[0],  // Wave 0 (0:00 - 0:30) this.contactEnemyTypes[3]
             this.chargerEnemyTypes[0],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[1],  // Wave 2 (1:00 - 1:30)
             this.rangedEnemyTypes[0],   // Wave 3 (1:30 - 2:00)
@@ -435,7 +451,9 @@ class Spawn_System {
                     enemy.exp, enemy.projectileFreq, enemy.projectileSpeed,
                     enemy.projectileSize, enemy.projectilePulse,
                     enemy.projectileCount, enemy.projectileSpread,
-                    enemy.fleeDist, enemy.approachDist));
+                    enemy.fleeDist, enemy.approachDist, enemy.projectileSprite,
+                    enemy.projectileAnimX, enemy.projectileAnimY, enemy.projectileAnimW,
+                    enemy.projectileAnimH, enemy.projectileAnimCount, enemy.projectileAnimDurr, enemy.projectileAnimScale));
             }
             // If we hit the ranged enemy cap, try a passive spawn
             else {

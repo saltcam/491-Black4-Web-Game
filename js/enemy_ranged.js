@@ -42,7 +42,10 @@ class Enemy_Ranged extends Entity {
                 shootAnimXStart, shootAnimYStart, shootAnimW,
                 shootAnimH, shootAnimFCount, shootAnimFDur,
                 shootScale, exp, projectileFreq, projectileSpeed, projectileSize, projectilePulse,
-                projectileCount, projectileSpread, fleeDist, approachDist, shootRange = 375) {
+                projectileCount, projectileSpread, fleeDist, approachDist, projectileSprite,
+                projectileAnimX, projectileAnimY, projectileAnimW, projectileAnimH,
+                projectileAnimCount, projectileAnimDurr, projectileAnimScale,
+                shootRange = 375) {
         super(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp);
 
         this.name = name;
@@ -64,7 +67,11 @@ class Enemy_Ranged extends Entity {
 
         this.projectileSize = projectileSize;
         this.pulse = projectilePulse;
+        // how many projectiles are shot in a single attack. odds directly target at player, evens target around player.
         this.projectileCount = projectileCount;
+        // how wide the angle the shots are distributed.
+        // if 1 projectile, aims like normal.
+        // Any more shoots one shot at the edges of the range and everything else is distributed evenly in between.
         this.projectileSpread = projectileSpread;
 
         // For shooting sprite change
@@ -86,6 +93,15 @@ class Enemy_Ranged extends Entity {
 
         this.fleeDist = fleeDist;
         this.approachDist = approachDist;
+        this.projectileSprite = projectileSprite;
+
+        this.projectileAnimX = projectileAnimX;
+        this.projectileAnimY = projectileAnimY;
+        this.projectileAnimW = projectileAnimW;
+        this.projectileAnimH = projectileAnimH;
+        this.projectileAnimCount = projectileAnimCount;
+        this.projectileAnimDurr = projectileAnimDurr;
+        this.projectileAnimScale = projectileAnimScale;
     }
 
     applyPushback(forceX, forceY) {
@@ -195,7 +211,7 @@ class Enemy_Ranged extends Entity {
 
         // Check collision and cooldown
         if (this.boundingBox.isColliding(player.boundingBox) && currentTime - this.lastAttackTime >= this.attackCooldown) {
-            console.log("Collision!");
+            //console.log("Collision!");
             player.takeDamage(this.atkPow / 3);
             this.lastAttackTime = currentTime; // Update last attack time
         }
@@ -203,7 +219,7 @@ class Enemy_Ranged extends Entity {
     castProjectile() {
         let currentTime = this.game.elapsedTime / 1000;
         if (currentTime - this.lastAttackTime >= this.projectileAttackCooldown) {
-            console.log("SHOOTING");
+            //console.log("SHOOTING");
             // Switch to shooting animation
             this.isShooting = true;
 
@@ -265,10 +281,13 @@ class Enemy_Ranged extends Entity {
                     let projectileX = centerOfEntity.x - this.projectileSize / 2; // Center the projectile on the X axis
                     let projectileY = centerOfEntity.y - this.projectileSize / 2; // Center the projectile on the Y axis
 
+
+
                     let newProjectile = this.game.addEntity(new Projectile(this.game, this.atkPow,
-                        projectileX, projectileY, 10, 10, "enemyAttack", this.projectileSpeed,
-                        "./sprites/MagicBall_red.png",
-                        0, 0, 30, 30, 2, 0.2, 2, dx, dy,
+                        projectileX, projectileY, 10, 10, "enemyAttack_Projectile", this.projectileSpeed,
+                        this.projectileSprite,
+                        this.projectileAnimX, this.projectileAnimY, this.projectileAnimW, this.projectileAnimH,
+                        this.projectileAnimCount, this.projectileAnimDurr, this.projectileAnimScale, dx, dy,
                         3, this.projectileSize, 1, 0, 0.3));
                     newProjectile.pulsatingDamage = this.pulse;
                 }
@@ -280,7 +299,7 @@ class Enemy_Ranged extends Entity {
     revertToOriginalSprite() {
         this.isShooting = false; // Reset shooting flag
 
-        console.log("Reverting...");
+        //console.log("Reverting...");
 
         //this.animator = new Animator(this.game, this.spritePath, this.animXStart)
         // Switch back to original animation

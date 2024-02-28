@@ -9,9 +9,9 @@ class Weapon_staff extends Weapon {
             new Upgrade("Summon Damage +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_summon_damage.png", 50),
             new Upgrade("Ranged Summons", "(Unique) Summons have a 50% chance to be ranged.", true, "./sprites/upgrade_summon_ranged.png", 50),
             new Upgrade("Explosive Finish", "(Unique) Summons explode on death.", true, "./sprites/upgrade_summon_explode.png", 50),
-            new Upgrade("Empower Summons", "(Unique) Grants Summons 2x Speed, Damage, and Attack Freq. for 5 Seconds.", true, "./sprites/upgrade_summon_empower.png", 50),
-            new Upgrade("Heal Summons", "(Unique) Heal 50% HP of Summons", true, "./sprites/upgrade_knockback.png", 50),
-            new Upgrade("Fiery Explosions", "(Unique) Explosions leave behind fire spaces (Player is immune to these).", true, "./sprites/upgrade_staff_fire.png", 50),
+            new Upgrade("Empower Summons", "(Unique) Brief 2x Speed, Damage, and Attack Freq.", true, "./sprites/upgrade_summon_empower.png", 50),
+            new Upgrade("Heal Summons", "(Unique) Heal HP of Summons", true, "./sprites/upgrade_knockback.png", 50),
+            new Upgrade("Fiery Explosions", "(Unique) Explosions leave behind fire spaces\n(Player is immune to these).", true, "./sprites/upgrade_staff_fire.png", 50),
             new Upgrade("Corpse Explosion", "(Unique) Enemies killed with explosions may explode.", true, "./sprites/upgrade_corpse_explosion.png", 350)];
 
         super(game, "Staff", 7, 11,
@@ -28,10 +28,12 @@ class Weapon_staff extends Weapon {
         this.initialPrimaryAttackRadius = 115;
         this.initialSecondaryAttackRadius = 2;
 
-        //this.upgrades[6].active = true;
+        this.upgrades[6].active = true;
+        // this.upgrades[7].active = true;
         //this.upgrades[8].active = true;
         //this.upgrades[9].active = true;
-        //this.upgrades[10].active = true;    // sets fiery explosion to true
+        // this.upgrades[10].active = true;    // sets fiery explosion to true
+        // this.handleUpgrade();
     }
 
     performPrimaryAttack(player, cheating) {
@@ -112,22 +114,21 @@ class Weapon_staff extends Weapon {
 
             this.lastSecondAttackTime = currentTime;
 
-            let newProjectile = this.game.addEntity(new Projectile(this.game, defaultSecondaryDamage,
+            let newProjectile = new Projectile(this.game, defaultSecondaryDamage,
                 xWorld + 7, yWorld + 7, 10, 10, "playerAttack_ExplosionAttack", 0,
                 "./sprites/transparent.png",
                 0, 0, 17, 17, 3, 0.001, 13 * (this.primaryAttackRadius/this.initialPrimaryAttackRadius), 0, 0,
-                this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 1));
+                this.secondaryAttackDuration, this.secondaryAttackRadius, this.secondaryAttackPushbackForce, 0, 1);
             newProjectile.attackCirc.pulsatingDamage = false;
             newProjectile.attackCirc.drawCircle = true;
+            this.game.addEntity(newProjectile);
 
-            // TODO Align properly and add this logic to any time we make explosions.
             if (this.upgrades[10].active) {
-                let coords = newProjectile.calculateCenter()
                 let newFireProjectile = this.game.addEntity(new Projectile(this.game, 5,
-                    coords.x, coords.y, 10, 10, "playerAttack_Fire", 0,
+                    newProjectile.attackCirc.worldX - 95, newProjectile.attackCirc.worldY - 77.5, 10, 10, "playerAttack_Fire", 0,
                     "./sprites/hazard_fire.png",    // may need to keep hidden if debugging
                     0, 0, 765/4, 153, 4, 0.2, 1, 0, 0,
-                    3, 75, 0, 0, 1));
+                    5, 75, 0, 0, 1));
                 newFireProjectile.attackCirc.pulsatingDamage = true;
             }
         }

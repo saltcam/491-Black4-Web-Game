@@ -280,6 +280,7 @@ class Entity {
                 ASSET_MANAGER.playAsset("./sounds/SE_staff_secondary.mp3");
                 if (this instanceof Player) {
                     this.game.player.updateScore(-1 * this.game.player.score / 2);
+                    //TODO make an explosion or something
                 }
             } else {
                 this.isDead = true;
@@ -292,6 +293,14 @@ class Entity {
                         this.game.player.weapons[2].secondaryAttackDuration, 2, 5, 0, 1));
                     newProjectile.attackCirc.drawCircle = true;
                     ASSET_MANAGER.playAsset("./sounds/SE_staff_primary.mp3");
+                    if (this.game.player.weapons[2].upgrades[10].active) {
+                        let newFireProjectile = this.game.addEntity(new Projectile(this.game, 5,
+                            this.worldX - 95, this.worldY - 77.5, 10, 10, "playerAttack_Fire", 0,
+                            "./sprites/hazard_fire.png",    // may need to keep hidden if debugging
+                            0, 0, 765/4, 153, 4, 0.2, 1, 0, 0,
+                            5, 75, 0, 0, 1));
+                        newFireProjectile.attackCirc.pulsatingDamage = true;
+                    }
                 }
             }
         }

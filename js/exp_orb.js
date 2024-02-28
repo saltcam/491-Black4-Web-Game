@@ -53,4 +53,5 @@ class Exp_Orb extends Entity {
             this.isMovingTowardsPlayer = true;
         }
     }
+
 }

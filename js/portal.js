@@ -1,8 +1,8 @@
 class Portal extends Entity {
-    constructor(game, worldX, worldY, teleportIndex) {
+    constructor(game, worldX, worldY, teleportIndex, spriteSheet = "./sprites/portal.png", animH = 58) {
         super(1, 1, 0, game, worldX, worldY, 1, 25, "portal", 0,
-            "./sprites/portal.png",
-            1, 0, 24, 58, 4, 0.18, 2.5);
+            spriteSheet,
+            1, 0, 24, animH, 4, 0.18, 2.5);
         this.debugName = "Portal("+this.boundingBox.type+")";
         this.teleportIndex = teleportIndex;
         this.interactionInitiated = false;

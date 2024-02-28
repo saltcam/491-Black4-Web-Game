@@ -17,6 +17,7 @@ class Map_object extends Entity {
 
         this.anvilSound = "./sounds/anvil.mp3";
         this.upgradeScreenSound = "./sounds/upgrade_popup.mp3";
+        this.healingHeartSound = "./sounds/healing_heart.mp3";
     }
 
     update() {
@@ -71,6 +72,12 @@ class Map_object extends Entity {
         }
     }
 
+    tiggerHealingHeart() {
+        this.game.player.heal(this.game.player.maxHP * 0.2);
+        ASSET_MANAGER.playAsset(this.healingHeartSound);
+        this.removeFromWorld = true;
+    }
+
     openAnvil() {
         if (!this.hasBeenOpened) {
             ASSET_MANAGER.playAsset(this.anvilSound, 0.2);
@@ -113,7 +120,16 @@ class Map_object extends Entity {
             this.isExploding = false;
             newProjectile.attackCirc.drawCircle = true;
             ASSET_MANAGER.playAsset("./sounds/SE_staff_primary.mp3");
+            if (this.game.player.weapons[2].upgrades[10].active) {
+                let newFireProjectile = this.game.addEntity(new Projectile(this.game, 5,
+                    this.worldX - 95, this.worldY - 77.5, 10, 10, "playerAttack_Fire", 0,
+                    "./sprites/hazard_fire.png",    // may need to keep hidden if debugging
+                    0, 0, 765/4, 153, 4, 0.2, 1, 0, 0,
+                    5, 75, 0, 0, 1));
+                newFireProjectile.attackCirc.pulsatingDamage = true;
+            }
         }
+
     }
 
     draw(ctx) {

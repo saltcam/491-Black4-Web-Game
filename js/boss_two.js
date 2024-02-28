@@ -186,21 +186,29 @@ class BossTwo extends Entity {
         if (this.mode === "attacking" && this.attackCount > 0) {
             this.castProjectile();
         }
-        // // if (this.mode === "roaring") {
-        // //     this.currRoarTime--;
-        // // }
-        //
-        // // If it's time to stop down time, set flag
-        // if (this.mode === "normal") {
-        //     this.downTime--;
-        // }
+
         // if we are out of attacks and in attack mode, go back to normal
         if (this.attackCount <= 0 && this.mode === "attacking") {
             this.changeMode("normal");
-            // TODO make this health based
-            if (this.pattern < 4) {
-                this.pattern++;
+
+            // 0 = spread of 5 projectiles to player
+            // 1 = more random fire aimed near player
+            // 2 = light 360 spread
+            // 3 = giant slow pulse ball
+            // 4 = very thicc 360 spread, the final attack
+            let hpRatio = this.currHP/this.maxHP;
+            if (hpRatio > .9) {
+                this.pattern = 0;
+            } else if (hpRatio > .7) {
+                this.pattern = 2;
+            } else if (hpRatio > .5) {
+                this.pattern = 1;
+            }  else if (hpRatio > .3) {
+                this.pattern = 3;
+            }  else if (hpRatio > .2) {
+                this.pattern = 4;
             }
+
             this.changePattern(this.pattern);
         }
         // if we are out of roar time, and in roar mode, switch to attack mode
@@ -308,11 +316,11 @@ class BossTwo extends Entity {
                     let projectileY = centerOfEntity.y - this.projectileSize / 2; // Center the projectile on the Y axis
 
                     let newProjectile = this.game.addEntity(new Projectile(this.game, this.projectilePow,
-                        projectileX, projectileY, 10, 10, "enemyAttack", this.projectileSpeed,
-                        "./sprites/MagicBall_red.png",
-                        0, 0, 30, 30, 2, 0.2, this.projectileScale, dx, dy,
+                        projectileX, projectileY, 10, 10, "enemyAttack_Projectile", this.projectileSpeed,
+                        "./sprites/fireball.png",
+                        32, 0, 32, 32, 3, 0.15, this.projectileScale, dx, dy,
                         this.projectileDuration, this.projectileSize, 1, 0, 0.3));
-                    newProjectile.pulsatingDamage = this.pulse;
+                    newProjectile.attackCirc.pulsatingDamage = this.pulse;
 
 
                     // randomize the fire breath pattern
@@ -323,6 +331,7 @@ class BossTwo extends Entity {
                     }
 
                 }
+                //TODO needs a sound
                 this.attackCount--; // used an attack in its current amount of attacks in this pattern
                 this.lastAttackTime = currentTime; // Update last attack time
             }
@@ -372,7 +381,7 @@ class BossTwo extends Entity {
                 this.pulse = false;
                 this.projectileCount = 25;
                 this.projectileSpread = 360;
-                this.projectilePow = 10;
+                this.projectilePow = 7;
                 this.projectileDuration = 1.5;
                 this.projectileScale = 2;
                 break;
@@ -394,11 +403,11 @@ class BossTwo extends Entity {
                 this.projectileAttackCooldown = 0.4;
                 this.attackCount = 3;
                 this.projectileSpeed = 29;
-                this.projectileSize = 50;
+                this.projectileSize = 20;
                 this.pulse = false;
                 this.projectileCount = 100;
                 this.projectileSpread = 360;
-                this.projectilePow = 8;
+                this.projectilePow = 5;
                 this.projectileDuration = 4;
                 this.projectileScale = 2;
                 break;
@@ -420,6 +429,7 @@ class BossTwo extends Entity {
                     this.mode = mode;
                     // this.downTime = 6 * 60;
                     this.downTimeStartTime= this.game.elapsedTime / 1000;
+                    this.relocateMode = true;
                     break;
                 case "roaring":
                     this.anchorX = this.worldX;
@@ -431,6 +441,7 @@ class BossTwo extends Entity {
                     this.mode = mode;
                     ASSET_MANAGER.playAsset("./sounds/dragon_roar.mp3");
                     this.roarStartTime = this.game.elapsedTime / 1000;
+                    this.relocateMode = false;
                     break;
                 case "attacking" :
                     this.worldX = this.anchorX;
@@ -440,6 +451,7 @@ class BossTwo extends Entity {
                         144, 0, 140, 124, 3, 0.2);
                     //console.log("attacking mode");
                     this.mode = mode;
+                    this.relocateMode = true;
                     break;
             }
         }
@@ -496,5 +508,20 @@ class BossTwo extends Entity {
         ctx.fillStyle = 'white';
         ctx.font = '32px Arial';
         ctx.fillText(this.name, ctx.canvas.width / 2, (yOffset - barHeight));
+    }
+
+    draw(ctx, game){
+        super.draw(ctx, game);
+
+        if(this.mode === "roaring"){
+            let glowStrength = (this.game.elapsedTime / 1000 - this.lastRoarTime) / this.roarDuration;
+
+            this.animator.outlineMode = true;
+            this.animator.outlineColor = `rgba(255, 0, 0, ${glowStrength})`;
+
+        } else {
+            this.animator.outlineMode = false;
+        }
+
     }
 }

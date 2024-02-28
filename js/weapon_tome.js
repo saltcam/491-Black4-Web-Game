@@ -40,7 +40,6 @@ class Weapon_tome extends Weapon {
     performPrimaryAttack(player, cheating) {
         let doubleShotUpgrade = false;
         let bouncingShotUpgrade = false;
-        let bigFinishUpgrade = false;
         let expansionUpgrade = false;
         let doubleShotDamageMultiplier = 0.75;
 
@@ -51,8 +50,6 @@ class Weapon_tome extends Weapon {
                 bouncingShotUpgrade = upgrade.active;
             } else if (upgrade.name === "Expansion") {
                 expansionUpgrade = upgrade.active;
-            } else if (upgrade.name === "Big Finish") {
-                bigFinishUpgrade = upgrade.active;
             }
         });
 
@@ -83,20 +80,16 @@ class Weapon_tome extends Weapon {
             const projectile = this.addPrimaryProjectile(player, dx, dy, 0.75);
 
             if (expansionUpgrade) {
-                for (let i = 0; i < 3; i++)
+                for (let i = 0; i < 3*2; i++)
                     this.game.setManagedTimeout(() => {
                         if (projectile && projectile.attackCirc) {
-                            projectile.attackCirc.radius += 10;
+                            projectile.attackCirc.radius += 10/2;
                         }
-                    }, 950 * i);
+                    }, 950/2 * i);
             }
 
             if (projectile && bouncingShotUpgrade) {
                 projectile.bouncesLeft = this.maxPrimaryHits;
-            }
-
-            if (bigFinishUpgrade) {
-
             }
 
             if (doubleShotUpgrade) {
@@ -189,12 +182,12 @@ class Weapon_tome extends Weapon {
             newProjectile.attackCirc.pulsatingDamage = true; // Tell the projectile that this attack pulsates damage.
 
             if (expansionUpgrade) {
-                for (let i = 0; i < 5; i++)
+                for (let i = 0; i < 5*2; i++)
                     this.game.setManagedTimeout(() => {
                         if (newProjectile && newProjectile.attackCirc) {
-                        newProjectile.attackCirc.radius += 10;
+                        newProjectile.attackCirc.radius += 10/2;
                         }
-                    }, 950 * i);
+                    }, 950/2 * i);
             }
         }
     }
@@ -227,7 +220,7 @@ class Weapon_tome extends Weapon {
                         this.maxPrimaryHits += 3;
                         this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
-                    case "Projectile Speed +15":
+                    case "Projectile Speed +15%":
                         this.primaryProjectileMovementSpeed *= 1.15;
                         this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;

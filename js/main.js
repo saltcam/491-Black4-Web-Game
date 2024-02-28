@@ -7,6 +7,7 @@ ASSET_MANAGER.queueDownload("./sprites/map_stone_background.png");
 ASSET_MANAGER.queueDownload("./sprites/map_space_background.png");
 ASSET_MANAGER.queueDownload("./sprites/map_space_background2.gif");
 ASSET_MANAGER.queueDownload("./sprites/portal.png");
+ASSET_MANAGER.queueDownload("./sprites/portal_white.png");
 ASSET_MANAGER.queueDownload("./sprites/grass.png");
 ASSET_MANAGER.queueDownload("./sprites/map_rock_object.png");
 ASSET_MANAGER.queueDownload("./sprites/exp_orb.png");
@@ -99,6 +100,21 @@ ASSET_MANAGER.queueDownload("./sprites/upgrade_tome_doubletime.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_tome_doubleshot.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_tome_expansion.png");
 ASSET_MANAGER.queueDownload("./sprites/hazard_fire.png");
+ASSET_MANAGER.queueDownload("./sprites/heart.png");
+ASSET_MANAGER.queueDownload("./sprites/charger_horse_walk.png"); //128x96
+ASSET_MANAGER.queueDownload("./sprites/charger_horse_walk_DAMAGED.png"); //128x96
+ASSET_MANAGER.queueDownload("./sprites/charger_horse_charge.png"); //144x96
+ASSET_MANAGER.queueDownload("./sprites/charger_horse_charge_DAMAGED.png"); //144x96
+ASSET_MANAGER.queueDownload("./sprites/charger_hound_walk.png"); //67x32
+ASSET_MANAGER.queueDownload("./sprites/charger_hound_walk_DAMAGED.png"); //67x32
+ASSET_MANAGER.queueDownload("./sprites/charger_hound_charge.png"); //67x32
+ASSET_MANAGER.queueDownload("./sprites/charger_hound_charge_DAMAGED.png"); //67x32
+ASSET_MANAGER.queueDownload("./sprites/charger_doom_walk.png");
+ASSET_MANAGER.queueDownload("./sprites/charger_doom_walk_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/charger_doom_charge.png");
+ASSET_MANAGER.queueDownload("./sprites/charger_doom_charge_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/smoke.png");
+ASSET_MANAGER.queueDownload("./sprites/you_won_screen1.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
@@ -219,6 +235,8 @@ ASSET_MANAGER.queueDownload("./sounds/music_malenia.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_capra.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_erdtree_knights.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_dragonlord.mp3");
+ASSET_MANAGER.queueDownload("./sounds/healing_heart.mp3");
+ASSET_MANAGER.queueDownload("./sounds/music_ave_maria.mp3");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");

@@ -1,4 +1,4 @@
-const EXPLOSION_GROWTH = 5;
+const EXPLOSION_GROWTH = 7;
 class AttackCirc {
 
     /**
@@ -244,6 +244,7 @@ class AttackCirc {
             }
         }
         // Attack ticking logic (pulsating damage, ex: Tome Secondary Attack)
+        //console.log(this.pulsatingDamage+" && "+(this.attackDamage !== 0)+" && "+(currentTime - this.lastAttackTime >= this.attackCooldown));
         else if (this.pulsatingDamage && this.attackDamage !== 0 && (currentTime - this.lastAttackTime >= this.attackCooldown)) { // Convert attackCooldown to milliseconds
             this.damageDealt = false; // Flag to track if damage was dealt
 
@@ -269,7 +270,7 @@ class AttackCirc {
                 });
             }
             // Handle enemy vs player pulsating attack damage
-            else if (this.type.includes("enemyAttack") && this.collisionDetection(this.game.player.boundingBox)) {
+            else if (this.type.includes("enemyAttack") && this.pulsatingDamage && this.collisionDetection(this.game.player.boundingBox)) {
                 if (this.attackDamage > 0) this.game.player.takeDamage(this.attackDamage);
                 else if (this.attackDamage < 0) this.game.player.heal(-this.attackDamage);
                 this.damageDealt = true;

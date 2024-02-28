@@ -90,7 +90,7 @@ class Weapon_scythe extends Weapon {
                         this.primaryAttackPushbackForce,
                         0, 1));
 
-                    // If echo slash is active
+                    // If dual blade (behind) + echo slash is active
                     if (this.upgrades[6].active) {
                         this.game.setManagedTimeout(() => {
                             this.game.addEntity(new AttackCirc(this.game, player,

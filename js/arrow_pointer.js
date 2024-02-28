@@ -28,7 +28,7 @@ class Arrow_Pointer {
 
         // Define the scale of the arrow sprite and how far from the border it should be
         const arrowScale = 0.35; // Scale down to 50% of the original size
-        const additionalMargin = 10; // Adjust this value to move the arrow closer or further from the border
+        const additionalMargin = 50; // Adjust this value to move the arrow closer or further from the border
 
         // Check if the entity is outside the viewport
         if (relativeX < 0 || relativeX > this.canvasWidth || relativeY < 0 || relativeY > this.canvasHeight) {

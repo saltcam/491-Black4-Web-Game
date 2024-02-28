@@ -52,7 +52,7 @@ class GameEngine {
          * 2 == Cave
          * 3 == Space
          */
-        this.currMap = -1;
+        this.currMap = 3;
 
         /** Save the previous map index after map switching. */
         this.prevMap = -10;
@@ -146,6 +146,9 @@ class GameEngine {
         this.mapTwoBossMusic = "./sounds/music_capra.mp3";
         this.mapThreeMusic = "./sounds/music_majula.mp3";
         this.mapThreeBossMusic = "./sounds/music_malenia.mp3";
+        this.youWonScreenMusic = "./sounds/music_ave_maria.mp3";
+
+        this.drawEndGameScreenFlag = false;
     }
 
     /**
@@ -284,6 +287,13 @@ class GameEngine {
         //this.spawnPortal(0, 100);
 
         this.mapObjectsInitialized = true;
+    }
+
+    spawnHealingHeart(worldX, worldY) {
+        let healingHeart = this.addEntity(new Map_object(this, worldX, worldY, 35, 35, "./sprites/heart.png", 0, 0, 43, 41, 4, 0.15, 1));
+        healingHeart.boundingBox.type = "item_healingHeart";
+
+        return healingHeart;
     }
 
 
@@ -600,6 +610,19 @@ class GameEngine {
                 }
             }
 
+            // Draw healing hearts OVER the prior
+            for (let object of this.objects) {
+                if (object instanceof Map_object && object.boundingBox.type.includes("healingHeart")) {
+                    object.draw(this.ctx, this);
+
+                    // If debug mode, then draw debug features.
+                    if (this.debugMode) {
+                        object.drawHealth(this.ctx);
+                        object.boundingBox.draw(this.ctx, this);
+                    }
+                }
+            }
+
             // Draw 'player' entity.
             if (this.player) {
                 this.player.draw(this.ctx, this);
@@ -632,9 +655,6 @@ class GameEngine {
             if (this.UPGRADE_SYSTEM) {
                 this.UPGRADE_SYSTEM.draw(this.ctx);
             }
-
-            // Draw the mouse tracker.
-            this.drawMouseTracker(this.ctx);
 
             // Draw the timer if we are not in rest area.
             if (this.currMap > 0 && !this.roundOver) {
@@ -734,6 +754,13 @@ class GameEngine {
             // Reset globalAlpha to ensure other drawing operations are unaffected
             this.ctx.globalAlpha = 1;
 
+            if (this.drawEndGameScreenFlag) {
+                this.drawEndGameScreen();
+            }
+
+            // Draw the mouse tracker.
+            this.drawMouseTracker(this.ctx);
+
             // Calculate and draw FPS if debugMode is true
             if (this.debugMode) {
                 const currentTime = Date.now();
@@ -757,15 +784,6 @@ class GameEngine {
     /** Draws the game-time tracker on top of the game screen. */
     drawTimer(ctx)
     {
-        // console.log("gameTime = " + this.timer.gameTime);
-        // console.log("elapsedTime = " + this.elapsedTime);
-        // console.log("elapsedTime(in seconds) = " + this.elapsedTime / 1000);
-
-        // Fix elapsed time if negative
-        // if (this.elapsedTime < 0) {
-        //     this.elapsedTime = 0;
-        // }
-
         ctx.font = '20px Arial';
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
@@ -815,6 +833,13 @@ class GameEngine {
             console.log("3");
             newPortal = this.addEntity(new Portal(this, worldX, worldY, 1));
         }
+        this.addEntity(new Arrow_Pointer(newPortal, this, "./sprites/arrow_pointer_blue.png")); // Attach an arrow pointer
+    }
+
+    /** Call this method to spawn  the end game divine portal. */
+    spawnEndPortal(worldX, worldY) {
+        let newPortal = this.addEntity(new Portal(this, worldX, worldY, 4, "./sprites/portal_white.png"), 49);
+
         this.addEntity(new Arrow_Pointer(newPortal, this, "./sprites/arrow_pointer_blue.png")); // Attach an arrow pointer
     }
 
@@ -1215,6 +1240,10 @@ class GameEngine {
                         let coinBag = new Map_object(this, this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y, 35, 35, "./sprites/object_coin_bag.png", 0, 0, 34, 34, 1, 1, 1);
                         this.addEntity(coinBag);
                         coinBag.boundingBox.type = "gold_bag" + Math.ceil(this.enemies[i].maxHP / percentToGoldDivider);
+                    }
+                    // If we did not spawn a gold bag, then try spawning a healing heart
+                    else if (Math.random() < 0.025) {
+                        this.spawnHealingHeart(this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y);
                     }
                 }
 
@@ -1676,6 +1705,68 @@ class GameEngine {
         }
     }
 
+    handleEndGameScreenClick(event) {
+        // Convert click coordinates to canvas space
+        const rect = this.ctx.canvas.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const clickY = event.clientY - rect.top;
+
+        // Check if click was on 'Continue' button
+        if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
+            clickY >= this.ctx.canvas.height / 2 + 250 && clickY <= this.ctx.canvas.height / 2 + 250 + 50) {
+            // Handle Continue action
+            console.log("Continue clicked");
+            this.SPAWN_SYSTEM.DIFFICULTY_SCALE += 1;
+            this.switchMap(1);
+            this.drawEndGameScreenFlag = false;
+            // Remove event listener to prevent memory leaks
+            this.ctx.canvas.removeEventListener('click', this.handleEndGameScreenClick.bind(this));
+        }
+
+        // Check if click was on 'Start Over' button
+        if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
+            clickY >= this.ctx.canvas.height / 2 + 250 + 60 && clickY <= this.ctx.canvas.height / 2 + 250 + 60 + 50) {
+            // Handle Start Over action
+            console.log("Start Over clicked");
+            window.location.reload();
+            // Remove event listener to prevent memory leaks
+            this.ctx.canvas.removeEventListener('click', this.handleEndGameScreenClick.bind(this));
+        }
+    }
+
+    drawButton(x, y, width, height, text) {
+        // Draw button background
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(x, y, width, height);
+
+        // Draw button text
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.font = 'bold 20px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(text, x + width / 2, y + height / 2 + 10);
+    }
+
+    drawEndGameScreen() {
+        // Clear the canvas
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+        // Draw the background image
+        const bgImage = ASSET_MANAGER.getAsset("./sprites/you_won_screen1.png");
+        this.ctx.drawImage(bgImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+        // Draw buttons
+        // Continue Button
+        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250, 300, 50, 'Continue');
+
+        // Start Over Button
+        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + + 250+ 60, 300, 50, 'Start Over');
+
+        // Listen for mouse clicks on buttons
+        this.ctx.canvas.addEventListener('click', this.handleEndGameScreenClick.bind(this));
+
+        this.drawEndGameScreenFlag = true;
+    }
+
     switchMap(teleportIndex) {
         let currentTime = this.elapsedTime / 1000
 
@@ -1751,42 +1842,43 @@ class GameEngine {
             weapon.lastSecondAttackTime = currentTime - (weapon.secondCool * 2);
         });
 
-        // Tell the game engine to switch to the map of the teleport index
-        // this.prevMap = this.currMap;
-        this.currMap = teleportIndex;
+        if (teleportIndex === 4) {
+            ASSET_MANAGER.stopBackgroundMusic();
+            ASSET_MANAGER.playBackgroundMusic(this.youWonScreenMusic);
+            this.drawEndGameScreen();
 
-        // Handle music changes
-        switch (this.currMap) {
-            case 0:
-                ASSET_MANAGER.stopBackgroundMusic();
-                ASSET_MANAGER.playBackgroundMusic(this.restAreaMusic);
-                break;
-            case 1:
-                ASSET_MANAGER.stopBackgroundMusic();
-                ASSET_MANAGER.playBackgroundMusic(this.mapOneMusic);
-                break;
-            case 2:
-                ASSET_MANAGER.stopBackgroundMusic();
-                ASSET_MANAGER.playBackgroundMusic(this.mapTwoMusic);
-                break;
-            case 3:
-                ASSET_MANAGER.stopBackgroundMusic();
-                ASSET_MANAGER.playBackgroundMusic(this.mapThreeMusic);
-                break;
         }
+            // Tell the game engine to switch to the map of the teleport index
+            // this.prevMap = this.currMap;
+            this.currMap = teleportIndex;
 
-        // Reset spawn system on map change
-        this.SPAWN_SYSTEM = new Spawn_System(this, this.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+            // Handle music changes
+            switch (this.currMap) {
+                case 0:
+                    ASSET_MANAGER.stopBackgroundMusic();
+                    ASSET_MANAGER.playBackgroundMusic(this.restAreaMusic);
+                    break;
+                case 1:
+                    ASSET_MANAGER.stopBackgroundMusic();
+                    ASSET_MANAGER.playBackgroundMusic(this.mapOneMusic);
+                    break;
+                case 2:
+                    ASSET_MANAGER.stopBackgroundMusic();
+                    ASSET_MANAGER.playBackgroundMusic(this.mapTwoMusic);
+                    break;
+                case 3:
+                    ASSET_MANAGER.stopBackgroundMusic();
+                    ASSET_MANAGER.playBackgroundMusic(this.mapThreeMusic);
+                    break;
+            }
 
-        // If we teleported to the first map again, then we are new game+, so shoot the difficulty up a lot
-        if (teleportIndex === 1) {
-            this.SPAWN_SYSTEM.DIFFICULTY_SCALE += 1;
-        }
+            // Reset spawn system on map change
+            this.SPAWN_SYSTEM = new Spawn_System(this, this.SPAWN_SYSTEM.DIFFICULTY_SCALE);
 
+            // If rest area, heal player
+            if (teleportIndex === 0) {
+                this.player.heal(this.player.maxHP);
+            }
 
-        // If rest area, heal player
-        if (teleportIndex === 0) {
-            this.player.heal(this.player.maxHP);
-        }
     }
 }

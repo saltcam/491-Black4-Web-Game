@@ -40,7 +40,7 @@ class Ally_Ranged extends Entity {
 
         // Properties to track cooldown of being able to damage the player
         this.attackCooldown = projectileFreq;    // in seconds
-        this.lastAttackTime = 0;    // time since last attack
+        this.lastAttackTime = 0     // time since last attack
 
         this.pushbackVector = { x: 0, y: 0 };
         this.pushbackDecay = 0.9; // Determines how quickly the pushback force decays
@@ -240,10 +240,12 @@ class Ally_Ranged extends Entity {
                 dy = Math.sin(angle) * offsetDistance;
 
                 let newProjectile = this.game.addEntity(new Projectile(this.game, this.atkPow * this.empower,
-                    this.worldX, this.worldY, 10, 10, "playerAttack", this.projectileSpeed,
+                    this.worldX, this.worldY, 10, 10, "playerAttack", 25,
                     "./sprites/MagicBall.png",
-                    0, 0, 30, 30, 2, 0.2, 2, dx, dy,
-                    3, this.projectileSize, 1, 0, 0.3));
+                    0, 0, 30, 30,
+                    2, 0.2, 2, dx, dy,
+                    3, 15, 1, 0, 0.3));
+
                 newProjectile.maxHits = 2;
                 newProjectile.pulsatingDamage = this.pulse;
             }

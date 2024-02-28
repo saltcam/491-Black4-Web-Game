@@ -9,7 +9,7 @@
 class Player extends Entity {
 
     constructor(game) {
-        super(100, 100, 25, game, 0, 0,
+        super(10000, 10000, 2500, game, 0, 0,
             17, 29, "player", 160,
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
@@ -26,7 +26,16 @@ class Player extends Entity {
             new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_damage.png"),
             new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_chance.png"),
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png"),
-            new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 50)
+            new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 50),
+            // TODO need assets for these
+            new Upgrade("Extra Life", "Fully heal instead of dying (Once).", true, "./sprites/upgrade_tomb_chance.png", 1000),
+            new Upgrade("Gravewalker", "(Unique) Create Tombstones every 10 seconds.", true, "./sprites/upgrade_tomb_chance.png", 1000),
+            new Upgrade("It's what you do with it", "(Unique) 50% smaller.", false, "./sprites/upgrade_tomb_chance.png", 1000),
+            new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 1000),
+            // based on hades, maybe grab asset from there?
+            new Upgrade("Divine Dash", "(Unique) Reflect projectiles while dashing.", true, "./sprites/upgrade_tomb_chance.png", 1000),
+            // based on vampire survivors, feel free to grab the sprite from there.
+            new Upgrade("Glorious Moon", "(Unique) Suck all EXP every 2 minutes.", true, "./sprites/upgrade_tomb_chance.png", 1000)
         ];
 
         this.debugName = "Player";
@@ -117,6 +126,12 @@ class Player extends Entity {
         this.summonSpeed = 210;
         this.summonDamage = 15;
         this.tombstoneChance = 0.33; // default is 0.33
+
+        this.lastGraveWalkTime = 0;
+        this.lastMoonTime = 0;
+
+        this.upgrades[15].active = true;
+        // this.handleUpgrade();
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
@@ -179,6 +194,16 @@ class Player extends Entity {
                             if (this.tombstoneChance >= 1) {
                                 this.upgrades[i].relevant = false
                             }
+                            break;
+                        case "Extra Life":
+                            this.lives++;
+                            break;
+                        case "It's what you do with it":
+                            this.boundingBox.height *= 0.5;
+                            this.animator.scale *= 0.5;
+                            this.upgrades[i].relevant = false;
+                            this.animator.outlineMode = true;
+                            this.animator.outlineColor = 'rgb(255,255,255)';
                             break;
                     }
                     // Set generic to 'false' so it can be re-used/activated in the future
@@ -399,25 +424,72 @@ class Player extends Entity {
             this.currentAnimation = "dashing";
         }
 
-        // console.log("currDashCD="+this.currentDashCooldown);
-        // if (!this.isDashing) {
-        //     // decrements dash cooldown
-        //     this.currentDashCooldown -= this.game.clockTick;
-        // }
-        // if (this.currentDashCooldown < 0) {
-        //     this.currentDashCooldown = 0;
-        // }
-
-
-
-
         if (this.controlsEnabled) {
             // checks if space bar has been pressed and the dash is not on cooldown
             if (this.game.keys[" "] && !this.isDashing && (currentTime - this.lastDashTime >= this.dashCooldown)) {
                 this.performDash();
             }
         }
-    };
+
+        // if 10 seconds have passed, and we have Gravewalker, spawn a tombstone.
+        if (this.upgrades[12].active && (this.game.elapsedTime / 1000 - this.lastGraveWalkTime) >= 10) {
+            let tombstone = new Map_object(this.game, this.worldX, this.worldY, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
+            this.game.addEntity(tombstone);
+            tombstone.boundingBox.type = "tombstone";
+            this.lastGraveWalkTime = this.game.elapsedTime / 1000;
+        }
+
+        // if 2 minutes have passed, and we have Glorious Moon, suck all EXP.
+        if (this.upgrades[16].active && (this.game.elapsedTime / 1000 - this.lastMoonTime) >= 120) {
+            // TODO add visual and audio indicator of the effect
+            this.game.entities.forEach(orb => {
+                if (orb.boundingBox.type === "orb") {
+                    orb.isMovingTowardsPlayer = true;
+                }
+                }
+            );
+            this.lastMoonTime = this.game.elapsedTime / 1000;
+        }
+
+        // if dashing and we have Divine Dash, reflect all colliding enemy projectiles.
+        // TODO add visual and audio indicator of the effect
+        if (this.upgrades[15].active) {
+            this.game.attacks.forEach(projectile => {
+                if (projectile.boundingBox.type === "enemyAttack_Projectile" &&
+                    projectile.attackCirc.collisionDetection(this.boundingBox) && this.isDashing) {
+
+
+                    // Determine the path for the spritesheet
+                    let newSpritesheetPath = projectile.animator.spritesheet.src;
+                    // Find the index of "/sprites/"
+                    const spritesIndex = newSpritesheetPath.indexOf("/sprites/");
+                    // Ensure the path starts with "./sprites/" by reconstructing it if "/sprites/" is found
+                    if (spritesIndex !== -1) {
+                        newSpritesheetPath = "." + newSpritesheetPath.substring(spritesIndex);
+                    }
+
+                    console.log(newSpritesheetPath);
+
+                    let reflectedProjectile = this.game.addEntity(new Projectile(this.game, projectile.atkPow,
+                        projectile.worldX, projectile.worldY, projectile.boundingBox.width, projectile.boundingBox.height,
+                        "playerAttack_TomeAttack", projectile.speed * 1.5,
+                        newSpritesheetPath,
+                        projectile.animator.xStart, projectile.animator.yStart,
+                        projectile.animator.width, projectile.animator.height, projectile.animator.frameCount,
+                        projectile.animator.frameDuration, projectile.animator.scale, projectile.angleX*-1, projectile.angleY*-1,
+                        2.5, projectile.projectileSize, 1, 0,
+                        projectile.attackCirc.attackCooldown));
+                    reflectedProjectile.pulsatingDamage = projectile.pulse;
+
+                    reflectedProjectile.animator.outlineMode = true;
+                    reflectedProjectile.animator.outlineColor = 'rgb(0,128,255)';
+
+                    projectile.removeFromWorld = true;
+                }
+            });
+        }
+
+    }
 
     checkCollisionWithMapObject(intendedX, intendedY, mapObject) {
         // Check collision with map objects ONLY if it is a map object type
@@ -448,7 +520,6 @@ class Player extends Entity {
                 if (!mapObject.collectingGold) mapObject.collectGold();
             }
         }
-
         else if (mapObject.boundingBox.type === "anvil" && !mapObject.hasBeenOpened) {
             // Create a temporary bounding box for the intended position
             let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
@@ -456,6 +527,15 @@ class Player extends Entity {
             // Check if this temporary bounding box collides with the map object's bounding box
             if (tempBoundingBox.isColliding(mapObject.boundingBox)) {
                 mapObject.openAnvil();
+            }
+        }
+        else if (mapObject.boundingBox.type.includes("healingHeart") && !mapObject.hasBeenOpened) {
+            // Create a temporary bounding box for the intended position
+            let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
+
+            // Check if this temporary bounding box collides with the map object's bounding box
+            if (tempBoundingBox.isColliding(mapObject.boundingBox)) {
+                mapObject.tiggerHealingHeart();
             }
         }
     }
@@ -470,6 +550,14 @@ class Player extends Entity {
 
     endDash() {
         this.isDashing = false; // Reset dashing state, this flag also will enable iFrames
+        if (this.upgrades[14].active) {
+            let newProjectile = this.game.addEntity(new Projectile(this.game, 10,
+                this.worldX, this.worldY, 10, 10, "playerAttack_NecromancyAttack", 0,
+                "./sprites/smoke.png",
+                0, 0, 32, 32, 5, 0.1, 5, 0, 0,
+                0.5, 100, 14, 0, 1));
+            newProjectile.attackCirc.pulsatingDamage = false;
+        }
     }
 
     gainExp(exp) {
