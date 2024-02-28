@@ -231,6 +231,7 @@ class GameEngine {
 
         // Debug Portal
         //this.spawnPortal(0, 100);
+        //this.spawnEndPortal(0, 100);
 
         // Rocks
         let newEntity = this.addEntity(new Map_object(this, -250, 0, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
@@ -1752,13 +1753,13 @@ class GameEngine {
         this.ctx.fillText(text, x + width / 2, y + height / 2 + 10);
     }
 
-    drawEndGameScreen() {
+    drawEndGameScreen(easterEgg) {
         if (!this.isGamePaused) this.togglePause();
 
         // Clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        if (this.youWonScreen === "./sprites/you_won_screen1.png" && (Math.random() < 0.05)) {
+        if (this.youWonScreen === "./sprites/you_won_screen1.png" && easterEgg) {
             this.youWonScreen = "./sprites/you_won_screen2.png";
         }
 
@@ -1905,7 +1906,7 @@ class GameEngine {
         if (teleportIndex === 4) {
             ASSET_MANAGER.stopBackgroundMusic();
             ASSET_MANAGER.playBackgroundMusic(this.youWonScreenMusic);
-            this.drawEndGameScreen();
+            this.drawEndGameScreen(Math.random() < 0.03);
         }
     }
 }
