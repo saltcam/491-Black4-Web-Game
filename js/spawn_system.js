@@ -580,9 +580,9 @@ class Spawn_System {
         const currentTime = this.game.elapsedTime / 1000;
 
         this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE) * this.game.currMap;
-        this.maxEnemyIncrementTime = 8 / (this.DIFFICULTY_SCALE * this.game.currMap);
-        this.spawnDelayDecreaseMultiplier = 0.94 / (this.DIFFICULTY_SCALE * this.game.currMap);
-        this.lowerSpawnDelayInterval = 4 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.maxEnemyIncrementTime = 13.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.spawnDelayDecreaseMultiplier = 0.95 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.lowerSpawnDelayInterval = 5.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
         //this.baseEnemySpawnInterval = 4 / (this.DIFFICULTY_SCALE * this.game.currMap);
         //console.log(this.spawnDelayDecreaseMultiplier);
 
