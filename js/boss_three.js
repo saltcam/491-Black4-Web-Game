@@ -39,7 +39,7 @@ class BossThree extends Entity {
 
         /** Target direction marker. Tracks where the boss should be pathing to next. */
         this.targetMarker = this.game.addEntity(new Entity(1, 1, 0, this.game,
-            0, 0, 5, 5, "attackMarker",
+            0, 0, 5, 5, "attackMarker_boss",
             0,
             "./sprites/attack_targeting.png",
             0, 0, 92, 92, 4, 0.25, 2, 0));
@@ -47,13 +47,13 @@ class BossThree extends Entity {
 
         /** This is the eyeball entity that is going to be drawn over the boss' body itself. It will be rotating to always look at the player. */
         this.eyeBallEntity = this.game.addEntity(new Entity(1, 1, 0, this.game,
-            this.worldX, this.worldY, 25, 25, "eyeEntity", 0,
+            this.worldX, this.worldY, 25, 25, "eyeEntity_boss", 0,
             "./sprites/god_eye.png", 0, 0, 63, 63, 1, 1, 2.4, 0));
         this.eyeBallEntity.followEntity(this, 45, -12);
 
         /** This is the wings sprite that we will be attaching to the back of this boss. */
         this.wingsEntity = this.game.addEntity(new Entity(1, 1, 0, this.game,
-            this.calculateCenter().x, this.calculateCenter().y, 25, 25, "wingsEntity", 0,
+            this.calculateCenter().x, this.calculateCenter().y, 25, 25, "wingsEntity_boss", 0,
             "./sprites/god_wings.png", 0, 0, 498, 415, 6, 0.3, 2.5, 0));
         this.wingsEntity.followEntity(this, -150, -350);
         this.wingsEntity.animator.outlineMode = true;
@@ -73,7 +73,7 @@ class BossThree extends Entity {
         /** If true, this boss cannot be harmed. */
         this.immune = false;
         /** This controls what health % this boss enters phase two at. */
-        this.phaseTwoHealthThreshhold = 0.33; // ex: 0.25 = 25% health
+        this.phaseTwoHealthThreshhold = 0.01; // ex: 0.25 = 25% health
         /** Tracks if it's time to enter phase two for this boss. */
         this.enterPhaseTwo = false;
         /** Tracks if we have finished entering phase two already. */
@@ -95,7 +95,7 @@ class BossThree extends Entity {
         /** How much damage each tick of the attack beam does. */
         this.beamTickDamage = this.atkPow / 4;
         /** How often to tick damage if the player is caught in the beam attack. */
-        this.beamTickRate = 0.25;
+        this.beamTickRate = 0.18;
         /** When did we start 'beaming' (AKA: actually shooting the laser beam. This needs to be defaulted to -1 for a conditional check in the code. */
         this.beamingStartTime = -1;
         /** How often we increase this entity's outline as it is 'preparing to beam'. */
@@ -123,6 +123,22 @@ class BossThree extends Entity {
         /** How much to decay movement while preparing to charge state is active. */
         this.decayMovementAmount = 10;
 
+        // Stuff for summon attack
+        /** Controls if it is time to enter summon attack mode. */
+        this.enterSummAttackMode = false;
+        /** Sets how many big enemies are summoned. */
+        this.summAttackBigEnemyCount = 1;
+        /** Sets how many small enemies are summoned. */
+        this.summAttackSmallEnemyCount = 4;
+        /** How long the cooldown of the summon attack is. */
+        this.summAttackCooldown = 10;
+        /** Tracks when the last summon attack was. */
+        this.lastSummAttackTime = 0;
+        /** Tracks when we started the last summon attack. */
+        this.summAttackStartTime = 0;
+        /** Tracks how long the boss is stuck in the 'summoning' attack. */
+        this.summAttackDuration = 6.1;
+
         /** Flag to track whether we are still going to track the target marker to the player. 0.75 = 75% chance. */
         this.trackMode = true;
         /** Flag to decide if we should invert the target movement direction. */
@@ -149,8 +165,9 @@ class BossThree extends Entity {
         this.laserBeamingSound = "./sounds/boss_laser_beaming.mp3";
         this.hurtSound = "./sounds/boss_hurt_yell.mp3";
         this.goreSound = "./sounds/boss_gore.mp3";
+        this.summonSound = "./sounds/boss_summon.mp3";
 
-        this.randomSoundCooldown = 6.5;
+        this.randomSoundCooldown = 4.5;
         this.lastRandomSound = 0;
 
         // Store random creature sounds for this boss
@@ -159,7 +176,10 @@ class BossThree extends Entity {
             "./sounds/boss_creature_sound2.mp3",
             "./sounds/boss_creature_sound3.mp3",
             "./sounds/boss_creature_sound4.mp3",
-            "./sounds/boss_creature_sound5.mp3"
+            "./sounds/boss_creature_sound5.mp3",
+            "./sounds/boss_creature_sound6.mp3",
+            "./sounds/boss_creature_sound7.mp3",
+            "./sounds/boss_creature_sound8.mp3"
         ];
 
         /** Tracks if this entity has been initialized. */
@@ -185,6 +205,33 @@ class BossThree extends Entity {
             this.initialized = true;
         }
 
+        if ((this.currHP <= 0 || this.currHP / this.maxHP <= this.phaseTwoHealthThreshhold)) {
+            if (!this.phaseTwoActivated) {
+                this.immune = true;
+                this.currHP = this.maxHP * 0.66;
+                this.maxHP = this.currHP;
+                this.isDead = false;
+                this.enterPhaseTwo = true;
+            } else {
+                // Spawn a portal to rest area (because map is completed once boss is dead)
+                //this.game.spawnPortal(0, 0);
+                this.game.spawnEndPortal(0,0);
+
+                // Set the gameengine to roundOver
+                this.game.roundOver = true;
+
+                // Send the right stuff to garbage collection
+                if (this.targetMarker) this.targetMarker.removeFromWorld = true;
+                if (this.eyeBallEntity) this.eyeBallEntity.removeFromWorld = true;
+                if (this.wingsEntity) this.wingsEntity.removeFromWorld = true;
+                this.game.killAllEnemies();
+                this.game.spawnEndChest();
+                ASSET_MANAGER.stopBackgroundMusic();
+                this.removeFromWorld = true;
+                return;
+            }
+        }
+
         super.update();
 
         // Early exit if the player does not exist for some reason at this point
@@ -192,25 +239,25 @@ class BossThree extends Entity {
             return;
         }
 
-        // If health hits 0 or below, this entity is declared dead
-        if (this.isDead) {
-            // Spawn a portal to rest area (because map is completed once boss is dead)
-            //this.game.spawnPortal(0, 0);
-            this.game.spawnEndPortal(0,0);
-
-            // Set the gameengine to roundOver
-            this.game.roundOver = true;
-
-            // Send the right stuff to garbage collection
-            if (this.targetMarker) this.targetMarker.removeFromWorld = true;
-            if (this.eyeBallEntity) this.eyeBallEntity.removeFromWorld = true;
-            if (this.wingsEntity) this.wingsEntity.removeFromWorld = true;
-            this.game.killAllEnemies();
-            this.game.spawnEndChest();
-            ASSET_MANAGER.stopBackgroundMusic();
-            this.removeFromWorld = true;
-            return;
-        }
+        // // If health hits 0 or below, this entity is declared dead
+        // if (this.isDead) {
+        //     // Spawn a portal to rest area (because map is completed once boss is dead)
+        //     //this.game.spawnPortal(0, 0);
+        //     this.game.spawnEndPortal(0,0);
+        //
+        //     // Set the gameengine to roundOver
+        //     this.game.roundOver = true;
+        //
+        //     // Send the right stuff to garbage collection
+        //     if (this.targetMarker) this.targetMarker.removeFromWorld = true;
+        //     if (this.eyeBallEntity) this.eyeBallEntity.removeFromWorld = true;
+        //     if (this.wingsEntity) this.wingsEntity.removeFromWorld = true;
+        //     this.game.killAllEnemies();
+        //     this.game.spawnEndChest();
+        //     ASSET_MANAGER.stopBackgroundMusic();
+        //     this.removeFromWorld = true;
+        //     return;
+        // }
 
         // Make sure the eyeball entity is always 'looking' at the player
         this.eyeBallEntity.lookAtEntity(this.game.player, 3.1);
@@ -320,7 +367,7 @@ class BossThree extends Entity {
 
         // Play random creature sounds if not yet attacking
         if (this.attackStatus === "none" && currentTime - this.lastRandomSound >= this.randomSoundCooldown) {
-            ASSET_MANAGER.playAsset(this.creatureSoundBank[Math.round(Math.random() * this.creatureSoundBank.length-1)]);
+            ASSET_MANAGER.playAsset(this.creatureSoundBank[Math.round(Math.random() * this.creatureSoundBank.length-1)], 0.22);
             this.lastRandomSound = currentTime;
         }
 
@@ -346,11 +393,6 @@ class BossThree extends Entity {
 
         const targetDirection = this.calcTargetAngle(this.targetMarker);
 
-        // Check if it's time to enter phase two
-        if (this.currHP / this.maxHP <= this.phaseTwoHealthThreshhold && this.attackStatus === "none") {
-            this.enterPhaseTwo = true;
-        }
-
         // Check if it's time to enter an attack mode again
         if (this.attackStatus === "none" && currentTime - this.lastAttackCheckTime >= this.attackModeCooldown) {
             // Attempt phase 1 attacks
@@ -365,6 +407,11 @@ class BossThree extends Entity {
                 if (currentTime - this.lastChargeAttackTime >= this.chargeAttackCooldown) {
                     this.enterChargeMode = true;
                 }
+            }
+
+            // Attempt to summon attack (call allies)
+            if (currentTime - this.lastSummAttackTime >= this.summAttackCooldown) {
+                this.enterSummAttackMode = true;
             }
 
             this.lastAttackCheckTime = currentTime;
@@ -392,6 +439,11 @@ class BossThree extends Entity {
             this.performChargeAttack();
         }
 
+        // Attempt Summon attack
+        if (this.enterSummAttackMode) {
+            this.performSummAttack();
+        }
+
         // Apply movement based on the direction and the entity's speed
         if (!this.invertMovementDirection) {
             this.worldX += targetDirection.x * this.movementSpeed * this.game.clockTick;
@@ -408,6 +460,28 @@ class BossThree extends Entity {
     /** This method performs all the necessary actions to start phase two. */
     startPhaseTwo() {
         if (this.phaseTwoActivated) return;
+
+        this.lastAttackCheckTime = this.game.elapsedTime / 1000;
+
+        // Immediately stop any laser beam attack preparations or actions
+        if (this.enterLaserAttackMode || this.attackStatus === "Beaming" || this.attackStatus === "Preparing to Beam") {
+            // Reset laser beam attack variables
+            this.enterLaserAttackMode = false;
+            this.attackStatus = "none";
+            this.beamingStartTime = -1;
+
+            // Stop any laser beam sound effects
+            // ASSET_MANAGER.stopAsset(this.laserChargingSound);
+            // ASSET_MANAGER.stopAsset(this.laserBeamingSound);
+
+            // Reset visual effects associated with the laser beam attack
+            this.animator.outlineMode = false;
+            this.animator.outlineBlur = 0;
+            this.beamGeometry = { isActive: false };
+
+            // Ensure the tracking mode is reset
+            this.trackMode = true;
+        }
 
         // Stop the boss from being able to move
         this.movementSpeed = 0;
@@ -443,6 +517,7 @@ class BossThree extends Entity {
         }
         else if (this.animator.currentFrame() === 9) {
             this.movementSpeed = this.initialMovementSpeed * 2.75;
+            this.initialMovementSpeed = this.movementSpeed;
             this.animationBank[0] = this.animationBank[3]; // Set the idle to the fallen idle anim
             this.animationBank[1] = this.animationBank[4]; // Set the walk to the fallen walk anim
 
@@ -455,7 +530,6 @@ class BossThree extends Entity {
             this.lastChargeAttackTime = this.game.elapsedTime / 1000;
             this.immune = false; // Make boss damage-able again
             this.phaseTwoActivated = true; // We are done entering phase two
-
         }
 }
 
@@ -549,7 +623,7 @@ class BossThree extends Entity {
             this.trackMode = false;
             this.tempTimer = -1;
             this.attackStatus = "Charging"
-            this.movementSpeed = this.initialMovementSpeed * 7.5;
+            this.movementSpeed = this.initialMovementSpeed*3;
             this.targetMarker.animator.pauseAtFrame(10);
         }
 
@@ -568,7 +642,7 @@ class BossThree extends Entity {
             // Check if in proximity of target yet, if so then stop the charge and return to normal stance
             if (distanceX < proximity && distanceY < proximity) {
                 this.trackMode = true;
-                this.movementSpeed = this.initialMovementSpeed * 2.3;
+                this.movementSpeed = this.initialMovementSpeed;
                 this.tempTimer = -1;
                 this.attackStatus = "none";
                 this.enterChargeMode = false;
@@ -577,13 +651,89 @@ class BossThree extends Entity {
         }
     }
 
+    performSummAttack() {
+        const currentTime = this.game.elapsedTime / 1000;
+
+        if (this.attackStatus !== "Summoning") {
+            this.summAttackStartTime = currentTime;
+            this.attackStatus = "Summoning";
+            this.animator.outlineColor = "purple";
+            this.animator.outlineMode = true;
+            this.animator.outlineBlur = 25;
+            this.relocateMode = false;
+            this.trackMode = false;
+            this.movementSpeed = 0;
+            // Switch sprite animation to idle (if not already set)
+            if (!this.animator.spritesheet.src.includes(this.animationBank[0].spritePath.replace(/^\./, ""))) {
+                this.animator.changeSpritesheet(ASSET_MANAGER.getAsset(this.animationBank[0].spritePath), this.animationBank[0].animXStart, this.animationBank[0].animYStart, this.animationBank[0].animW, this.animationBank[0].animH, this.animationBank[0].animFCount, this.animationBank[0].animFDur);
+            }
+            ASSET_MANAGER.playAsset(this.summonSound, 0.2);
+
+            for(let i = 0; i < this.summAttackBigEnemyCount; i++) {
+                let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
+                let enemy = this.game.SPAWN_SYSTEM.chargerEnemyTypes[3];
+
+                this.game.addEntity(new Enemy_Charger(enemy.name, enemy.maxHP,
+                    enemy.currHP, enemy.atkPow, this.game, randomXNumber, randomYNumber,
+                    enemy.boxWidth, enemy.boxHeight, enemy.boxType,
+                    enemy.speed, enemy.spritePath, enemy.animXStart,
+                    enemy.animYStart, enemy.animW, enemy.animH,
+                    enemy.animFCount, enemy.animFDur, enemy.scale, enemy.chargeSpritePath,
+                    enemy.chargeAnimXStart, enemy.chargeAnimYStart, enemy.chargeAnimW,
+                    enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
+                    enemy.exp, enemy.fleeDist, enemy.approachDist));
+
+                this.game.SPAWN_SYSTEM.scaleStatsForDifficulty(enemy);
+            }
+
+            for(let i = 0; i < this.summAttackSmallEnemyCount; i++) {
+                let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
+                let enemy = this.game.SPAWN_SYSTEM.contactEnemyTypes[2];
+
+                this.game.addEntity(new Enemy_Charger(enemy.name, enemy.maxHP,
+                    enemy.currHP, enemy.atkPow, this.game, randomXNumber, randomYNumber,
+                    enemy.boxWidth, enemy.boxHeight, enemy.boxType,
+                    enemy.speed, enemy.spritePath, enemy.animXStart,
+                    enemy.animYStart, enemy.animW, enemy.animH,
+                    enemy.animFCount, enemy.animFDur, enemy.scale, enemy.chargeSpritePath,
+                    enemy.chargeAnimXStart, enemy.chargeAnimYStart, enemy.chargeAnimW,
+                    enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
+                    enemy.exp, enemy.fleeDist, enemy.approachDist));
+
+                this.game.SPAWN_SYSTEM.scaleStatsForDifficulty(enemy);
+            }
+        }
+
+        if (currentTime - this.summAttackStartTime >= this.summAttackDuration) {
+            this.summAttackBigEnemyCount += 1;
+            this.summAttackBigEnemyCount += 4;
+            this.animator.outlineColor = "white";
+            this.animator.outlineMode = false;
+            this.animator.outlineBlur = 10;
+            this.enterSummAttackMode = false;
+            this.lastSummAttackTime = currentTime;
+            this.movementSpeed = this.initialMovementSpeed; // Let the entity move again
+            this.relocateMode = true;
+            this.trackMode = true;
+            this.attackStatus = "none";
+        }
+    }
+
     applyDampenedMovement(targetX, targetY) {
-        let lerpSpeed = 0.0125; // Control how quickly the marker catches up to the target position (0.01 to 0.1 are reasonable values)
+        // Calculate distance between boss and player for dampening adjustment
+        const playerCenter = this.game.player.calculateCenter();
+        const bossCenter = this.calculateCenter();
+        const distanceToPlayer = Math.sqrt(Math.pow(bossCenter.x - playerCenter.x, 2) + Math.pow(bossCenter.y - playerCenter.y, 2));
+
+        // Adjust lerp speed based on distance (the closer the player, the slower the tracking)
+        const lerpSpeedAdjustmentFactor = Math.max(0.002, 0.0185 - distanceToPlayer * 0.00001); // Example scaling
+
+        let lerpSpeed = 0.0185; // Control how quickly the marker catches up to the target position (0.01 to 0.1 are reasonable values)
         if (this.phaseTwoActivated) lerpSpeed = 0.002; // Phase two has a lot of movement speed, but boss can hardly control it's turning
 
         // Linearly interpolate (lerp) the targetMarker's position towards the target position
-        this.targetMarker.worldX += (targetX - this.targetMarker.worldX) * lerpSpeed;
-        this.targetMarker.worldY += (targetY - this.targetMarker.worldY) * lerpSpeed;
+        this.targetMarker.worldX += (targetX - this.targetMarker.worldX) * lerpSpeedAdjustmentFactor;
+        this.targetMarker.worldY += (targetY - this.targetMarker.worldY) * lerpSpeedAdjustmentFactor;
     }
 
     /** This method controls how damage is dealt through bounding box collisions with this entity. */

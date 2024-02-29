@@ -100,7 +100,7 @@ class Ally_Contact extends Entity {
 
         // Check collision and cooldown
         if (this.boundingBox.isColliding(enemy.boundingBox) && (currentTime - this.lastAttackTime >= this.attackCooldown/this.empower)) {
-            enemy.takeDamage(this.atkPow * this.empower);
+            enemy.takeDamage(this.atkPow * this.empower, "ally");
             this.takeDamage(Math.floor(5/this.empower));
             this.lastAttackTime = currentTime; // Update last attack time
         }

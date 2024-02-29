@@ -18,14 +18,68 @@ class Map_object extends Entity {
         this.anvilSound = "./sounds/anvil.mp3";
         this.upgradeScreenSound = "./sounds/upgrade_popup.mp3";
         this.healingHeartSound = "./sounds/healing_heart.mp3";
+
+        this.boundingCircle = null;
+        this.isFloatingObject = false;
+        this.maxRelocations = 10;
+        this.targetX = 0;
+        this.targetY = 0;
     }
 
     update() {
+        // If this object uses relocation and we hit the max count of relocations, delete this object
+        if (this.isFloatingObject && this.relocationCount >= this.maxRelocations) {
+            this.game.meteor = null;
+            this.removeFromWorld = true;
+        }
+
+        // Movement towards the player if this object is floating.
+        if (this.isFloatingObject) {
+            this.relocate();
+
+            // Target position of the player
+            // const targetX = this.game.player.worldX;
+            // const targetY = this.game.player.worldY;
+
+            // Calculate direction vector from this object to the target
+            const dirX = this.targetX - this.worldX;
+            const dirY = this.targetY - this.worldY;
+
+            // Calculate distance to the target
+            const distance = Math.sqrt(dirX * dirX + dirY * dirY);
+
+            // Normalize direction vector if distance is not 0 to avoid division by 0
+            const normalizedDirX = distance > 0 ? dirX / distance : 0;
+            const normalizedDirY = distance > 0 ? dirY / distance : 0;
+
+            // Adjust speed based on distance (the closer to the target, the slower it moves)
+            const minSpeed = 0.1; // Minimum movement speed to prevent stopping completely before reaching the target
+            const speedAdjustmentFactor = Math.max(minSpeed, distance / 100); // Adjust this divisor to control how quickly the speed decreases
+
+            // Calculate adjusted movement speed
+            const adjustedSpeed = this.movementSpeed * speedAdjustmentFactor;
+
+            // Calculate movement based on adjusted speed and the normalized direction
+            // Using game.clockTick to make movement framerate independent
+            this.worldX += normalizedDirX * adjustedSpeed * this.game.clockTick;
+            this.worldY += normalizedDirY * adjustedSpeed * this.game.clockTick;
+        }
 
         // If this is a chest, and we are stuck offscreen or in a map object, just give the upgrade and gold to the player
-        if (this.boundingBox.type.toLowerCase().includes("chest")) {
+        if (this.boundingBox.type.toLowerCase().includes("chest") && !this.hasBeenOpened) {
             this.game.objects.forEach(object => {
                 if (object.boundingBox.type === "object" && this.boundingBox.isColliding(object.boundingBox)) {
+                    this.openChest();
+                }
+
+                // Check if the chest is outside the map boundaries
+                const isOutOfBounds = this.worldX < this.game.mapBoundaries.left ||
+                    this.worldX > this.game.mapBoundaries.right ||
+                    this.worldY < this.game.mapBoundaries.top ||
+                    this.worldY > this.game.mapBoundaries.bottom;
+
+                if (isOutOfBounds) {
+                    // If the chest is out-of-bounds, open it automatically
                     this.openChest();
                 }
             });
@@ -38,7 +92,15 @@ class Map_object extends Entity {
         // Update the bounding box to be centered around the scaled sprite
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
 
-        if (this.coinsToCollect <= 0) {
+        // Update bounding circle if we have one on this entity
+        if (this.boundingCircle !== null) {
+            // Calculate the scaled center of the sprite
+            const scaledCenterX = this.worldX + (this.animator.width) / 2;
+            const scaledCenterY = this.worldY + (this.animator.height) / 2;
+            this.boundingCircle.updateCentered(scaledCenterX, scaledCenterY);
+        }
+
+        if (this.coinsToCollect <= 0) { // Seems redundant?
             return;
         }
 
@@ -142,6 +204,69 @@ class Map_object extends Entity {
 
     }
 
+    relocate() {
+        // Exit if this not a floating object
+        if (!this.relocateMode || !this.isFloatingObject) return;
+
+        const camera = this.game.camera;
+
+        // Calculate entity's position relative to the camera
+        const relativeX = this.worldX - camera.x;
+        const relativeY = this.worldY - camera.y;
+
+        let outsideHorizontalBounds = relativeX < -this.outOfBoundsOffset || relativeX > camera.width + this.outOfBoundsOffset;
+        let outsideVerticalBounds = relativeY < -this.outOfBoundsOffset || relativeY > camera.height + this.outOfBoundsOffset;
+
+        // Check if the entity is outside the bounds of the camera, plus a buffer
+        if (outsideHorizontalBounds || outsideVerticalBounds) {
+            //console.log("REACHED!");
+            // Generate new coordinates for relocation
+            let newCoords = this.game.randomOffscreenCoords();
+
+            // Update entity's position
+            this.worldX = newCoords.x;
+            this.worldY = newCoords.y;
+
+            // Immediately update the entity's bounding box or circle with the new position
+            this.updateBoundingBox();
+            if (this.boundingCircle !== null) {
+                // Calculate the scaled center of the sprite
+                const scaledCenterX = this.worldX + (this.animator.width) / 2;
+                const scaledCenterY = this.worldY + (this.animator.height) / 2;
+                this.boundingCircle.updateCentered(scaledCenterX, scaledCenterY);
+            }
+
+            // Calculate random factors for X and Y
+            const randomFactorX = 1 + (Math.random() - 0.5); // Generates a factor between 0.5 and 1.5
+            const randomFactorY = 1 + (Math.random() - 0.5); // Generates a factor between 0.5 and 1.5
+
+            // Target position should be the opposite side of the screen X and Y
+            if (relativeX < -this.outOfBoundsOffset) {
+                // Exited to the left, target the right side
+                this.targetX = (camera.x + camera.width + this.outOfBoundsOffset) * randomFactorX;
+            } else if (relativeX > camera.width + this.outOfBoundsOffset) {
+                // Exited to the right, target the left side
+                this.targetX = (camera.x - this.outOfBoundsOffset) * randomFactorX;
+            } else {
+                // Maintain current X if exited vertically
+                this.targetX = this.worldX * randomFactorX;
+            }
+
+            if (relativeY < -this.outOfBoundsOffset) {
+                // Exited to the top, target the bottom side
+                this.targetY = (camera.y + camera.height + this.outOfBoundsOffset) * randomFactorY;
+            } else if (relativeY > camera.height + this.outOfBoundsOffset) {
+                // Exited to the bottom, target the top side
+                this.targetY = (camera.y - this.outOfBoundsOffset) * randomFactorY;
+            } else {
+                // Maintain current Y if exited horizontally
+                this.targetY = this.worldY * randomFactorY;
+            }
+
+            this.relocationCount++;
+        }
+    }
+
     draw(ctx) {
         if (!this.game.camera) return;
 
@@ -163,5 +288,6 @@ class Map_object extends Entity {
             this.animator.outlineColor = 'rgb(255,255,255)';
         }
 
+        if (this.boundingCircle !== null) this.boundingCircle.draw(ctx, this.game);
     }
 }

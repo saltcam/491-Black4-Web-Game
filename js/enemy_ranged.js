@@ -44,7 +44,7 @@ class Enemy_Ranged extends Entity {
                 shootScale, exp, projectileFreq, projectileSpeed, projectileSize, projectilePulse,
                 projectileCount, projectileSpread, fleeDist, approachDist, projectileSprite,
                 projectileAnimX, projectileAnimY, projectileAnimW, projectileAnimH,
-                projectileAnimCount, projectileAnimDurr, projectileAnimScale,
+                projectileAnimCount, projectileAnimDur, projectileAnimScale,
                 shootRange = 375) {
         super(maxHP, currHP, atkPow, game, worldX, worldY, boxWidth, boxHeight, boxType, speed, spritePath, animXStart, animYStart, animW, animH, animFCount, animFDur, scale, exp);
 
@@ -100,7 +100,7 @@ class Enemy_Ranged extends Entity {
         this.projectileAnimW = projectileAnimW;
         this.projectileAnimH = projectileAnimH;
         this.projectileAnimCount = projectileAnimCount;
-        this.projectileAnimDurr = projectileAnimDurr;
+        this.projectileAnimDur = projectileAnimDur;
         this.projectileAnimScale = projectileAnimScale;
     }
 
@@ -287,7 +287,7 @@ class Enemy_Ranged extends Entity {
                         projectileX, projectileY, 10, 10, "enemyAttack_Projectile", this.projectileSpeed,
                         this.projectileSprite,
                         this.projectileAnimX, this.projectileAnimY, this.projectileAnimW, this.projectileAnimH,
-                        this.projectileAnimCount, this.projectileAnimDurr, this.projectileAnimScale, dx, dy,
+                        this.projectileAnimCount, this.projectileAnimDur, this.projectileAnimScale, dx, dy,
                         3, this.projectileSize, 1, 0, 0.3));
                     newProjectile.pulsatingDamage = this.pulse;
                 }

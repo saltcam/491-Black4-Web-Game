@@ -67,6 +67,7 @@ class Entity {
         this.reveal = false;
 
         this.hitSound = "./sounds/hit.mp3";
+        this.relocationCount = 0;
     }
 
     update() {
@@ -92,6 +93,48 @@ class Entity {
 
         // Update the bounding box to be centered around the scaled sprite
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, this.boundingBox.width, this.boundingBox.height);
+
+        // Handle collisions with bounding circle map objects
+        this.game.objects.forEach(object => {
+            if (object.boundingCircle) {
+                this.handleEntityCircleCollision(this, object.boundingCircle, 25*object.animator.scale);
+            }
+        });
+    }
+
+
+    handleEntityCircleCollision(entity, circle, offset = 25) {
+        // Don't push bosses around!
+        if (this.boundingBox.type.toLowerCase().includes("boss") || this.boundingBox.type.toLowerCase().includes("reflection")) return;
+        // Calculate the direction vector from the circle to the player
+        const centerX = entity.worldX + entity.boundingBox.width / 2;
+        const centerY = entity.worldY + entity.boundingBox.height / 2;
+        const directionX = centerX - circle.centerX;
+        const directionY = centerY - circle.centerY;
+
+        // Normalize the direction vector
+        const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
+        if (magnitude === 0) return; // Prevent division by zero
+        const normalizedDirectionX = directionX / magnitude;
+        const normalizedDirectionY = directionY / magnitude;
+
+        // Calculate the effective radius with offset
+        const effectiveRadius = circle.radius + offset;
+
+        // Calculate overlap based on the effective radius
+        const overlap = effectiveRadius + Math.min(entity.boundingBox.width, entity.boundingBox.height) / 2 - magnitude;
+
+        // Set a small bounce distance, adjusted by overlap if there's a collision
+        const bounceDistance = overlap > 0 ? overlap + 1 : 0; // Ensure a minimum separation on overlap
+
+        // Move the player away from the circle by the bounce distance only if there's an overlap
+        if (bounceDistance > 0) {
+            entity.worldX += normalizedDirectionX * bounceDistance;
+            entity.worldY += normalizedDirectionY * bounceDistance;
+
+            // Immediately update player's bounding box after changing position
+            entity.updateBoundingBox();
+        }
     }
 
     // Call this to pass a separate entity for this entity to match the movement of. Good for god boss with the eyeball entity.
@@ -151,6 +194,8 @@ class Entity {
 
                 // Immediately update the entity's bounding box with the new position
                 this.updateBoundingBox();
+
+                this.relocationCount++;
             }
         }
     }
@@ -203,6 +248,10 @@ class Entity {
     }
 
     takeDamage(amount, attackType = "") {
+        if (attackType.toLowerCase().includes("ally")) {
+            amount /= 4;
+        }
+
         // Check if the entity taking damage is an enemy and if a critical hit happens
         let isCrit = false;
         let isBleed = false;

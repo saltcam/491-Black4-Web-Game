@@ -48,7 +48,7 @@ class BossOne extends Entity {
 
         /** Target direction marker. Tracks where the boss should be pathing to next. */
         this.targetMarker = this.game.addEntity(new Entity(1, 1, 0, this.game,
-            0, 0, 5, 5, "targetMarker",
+            0, 0, 5, 5, "targetMarker_boss",
             0,
             "./sprites/attack_targeting.png",
             0, 0, 92, 92, 4, 0.25, 2, 0));

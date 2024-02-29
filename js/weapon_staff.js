@@ -4,15 +4,15 @@ class Weapon_staff extends Weapon {
             new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 175, 1),
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70, 1),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 115, 1),
-            new Upgrade("Summon Health +5", "(Stackable, Additive).", false, "./sprites/upgrade_summon_health.png", 50, 1),
-            new Upgrade("Summon Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_summon_speed.png", 50, 1),
+            new Upgrade("Summon Health +5", "(Stackable, Additive).", false, "./sprites/upgrade_summon_health.png", 35, 1),
+            new Upgrade("Summon Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_summon_speed.png", 85, 1),
             new Upgrade("Gravewalker", "(Stackable, Additive)\n+1 Tombstone every 15 sec.", false, "./sprites/upgrade_tomb_chance.png", 150, 1),
-            new Upgrade("Ranged Summons", "(Unique) 50% for ranged Summons.", true, "./sprites/upgrade_summon_ranged.png", 100, 0.25),
-            new Upgrade("Explosive Finish", "(Unique) Summons explode on death.", true, "./sprites/upgrade_summon_explode.png", 125, 0.2),
-            new Upgrade("Empower Summons", "(Unique) Brief 2x Speed, Damage, and Attack Freq.", true, "./sprites/upgrade_summon_empower.png", 175, 0.15),
-            new Upgrade("Heal Summons", "(Unique) Heal HP of Summons", true, "./sprites/upgrade_knockback.png", 200, 0.15),
-            new Upgrade("Fiery Explosions", "(Unique) Explosions make fire hazards.", true, "./sprites/upgrade_staff_fire.png", 110, 0.15),
-            new Upgrade("Corpse Explosion", "(Unique) Enemies killed with explosions may explode.", true, "./sprites/upgrade_corpse_explosion.png", 275, 0.1)];
+            new Upgrade("Ranged Summons", "(Unique) 50% for ranged Summons.", true, "./sprites/upgrade_summon_ranged.png", 350, 0.2),
+            new Upgrade("Explosive Finish", "(Unique) Summons explode on death.", true, "./sprites/upgrade_summon_explode.png", 400, 0.2),
+            new Upgrade("Empower Summons", "(Unique) Brief 2x Speed, Damage, and Attack Freq.", true, "./sprites/upgrade_summon_empower.png", 325, 0.15),
+            new Upgrade("Heal Summons", "(Unique) Heal HP of Summons", true, "./sprites/upgrade_knockback.png", 350, 0.15),
+            new Upgrade("Fiery Explosions", "(Unique) Explosions make fire hazards.", true, "./sprites/upgrade_staff_fire.png", 300, 0.15),
+            new Upgrade("Corpse Explosion", "(Unique) Enemies killed with explosions may explode.", true, "./sprites/upgrade_corpse_explosion.png", 450, 0.1)];
 
         super(game, "Staff", 4, 5,
             0, 0,
@@ -126,11 +126,11 @@ class Weapon_staff extends Weapon {
             this.game.addEntity(newProjectile);
 
             if (this.upgrades[10].active) {
-                let newFireProjectile = this.game.addEntity(new Projectile(this.game, 5,
+                let newFireProjectile = this.game.addEntity(new Projectile(this.game, this.game.player.atkPow/10,
                     newProjectile.attackCirc.worldX - 95, newProjectile.attackCirc.worldY - 77.5, 10, 10, "playerAttack_Fire", 0,
                     "./sprites/hazard_fire.png",    // may need to keep hidden if debugging
                     0, 0, 765/4, 153, 4, 0.2, 1, 0, 0,
-                    5, 75, 0, 0, 1));
+                    5, 75, 0, 0, 0.5));
                 newFireProjectile.attackCirc.pulsatingDamage = true;
             }
         }

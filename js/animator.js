@@ -22,6 +22,11 @@ class Animator {
         this.outlineMode = false;
         this.outlineColor = 'yellow';
         this.outlineBlur = 10; // Adjust for desired glow size
+
+        // Rotation properties
+        this.isRotating = false;
+        this.rotationSpeed = 50; // Degrees per frame
+        this.currentRotationAngle = 0;
     };
 
     // Call this to tell the animator to pause at the given frame.
@@ -39,6 +44,9 @@ class Animator {
         // Update the elapsed time (only if we are not paused)
         if (!this.game.isGamePaused) {
             this.elapsedTime += tick;
+            // Update the current rotation angle
+            this.currentRotationAngle += this.rotationSpeed * tick;
+            this.currentRotationAngle = this.currentRotationAngle % 360;
         }
 
         // Check if the damage effect should still be applied
@@ -78,10 +86,18 @@ class Animator {
             x = -x - (this.width * this.scale); // Adjust the x position when flipped
         }
 
-        // Apply a outline glow effect (if on)
+        // Apply an outline glow effect (if on)
         if (this.outlineMode) {
             ctx.shadowBlur = this.outlineBlur;
             ctx.shadowColor = this.outlineColor; // Adjust for desired glow color
+        }
+
+        // Apply rotation if enabled
+        if (this.isRotating) {
+            ctx.translate(x + scaledWidth / 2, y + scaledHeight / 2);
+            ctx.rotate(this.currentRotationAngle * Math.PI / 180);
+            x = -scaledWidth / 2;
+            y = -scaledHeight / 2;
         }
 
         // If flag is set to true, pause the animation to the first frame

@@ -241,7 +241,7 @@ class Ally_Ranged extends Entity {
                 dy = Math.sin(angle) * offsetDistance;
 
                 let newProjectile = this.game.addEntity(new Projectile(this.game, this.atkPow * this.empower,
-                    this.worldX, this.worldY, 10, 10, "playerAttack", 25,
+                    this.worldX, this.worldY, 10, 10, "playerAttack_ally", 25,
                     "./sprites/MagicBall.png",
                     0, 0, 30, 30,
                     2, 0.2, 2, dx, dy,

@@ -28,10 +28,10 @@ class Player extends Entity {
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png", 0,1),
             new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 0,1),
             // TODO need assets for these
-            new Upgrade("Extra Life", "Fully heal instead of dying (Once).", false, "./sprites/upgrade_tomb_chance.png", 0, 0.05),
+            new Upgrade("Extra Life", "+ 1 Life.", false, "./sprites/upgrade_tomb_chance.png", 0, 0.025),
             new Upgrade("Missingno", "(Unique) Drop tomb every 10s.", true, "./sprites/upgrade_tomb_chance.png", 0),
-            new Upgrade("It's what you do with it", "(Unique) 50% smaller.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.15),
-            new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.15),
+            new Upgrade("It's what you do with it", "(Unique) Player size -50%.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.15),
+            new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.2),
             // based on hades, maybe grab asset from there?
             new Upgrade("Divine Dash", "(Unique) Dash reflects projectiles.", true, "./sprites/upgrade_divine_dash.png", 0, 0.15),
             // based on vampire survivors, feel free to grab the sprite from there.
@@ -183,7 +183,6 @@ class Player extends Entity {
 
                             // If we hit 2.5 sec duration on dash remove this upgrade as an option in for the future
                             if (this.dashDuration >= 3) {
-
                                 this.upgrades[i].relevant = false
                             }
                             break;
@@ -203,6 +202,7 @@ class Player extends Entity {
                             break;
                         case "Tombstone Chance +5%":
                             this.tombstoneChance += 0.05;
+
                             // If we hit 100% tombstone chance, remove this upgrade as an option for the future
                             if (this.tombstoneChance >= 1) {
                                 this.upgrades[i].relevant = false;
@@ -221,16 +221,18 @@ class Player extends Entity {
                             this.boundingBox.height *= 0.5;
                             this.animator.scale *= 0.5;
                             this.game.playerReflection = null;
+                            this.upgrades[i].relevant = false;
                             break;
                         case "Smoke Bomb":
+                            this.upgrades[i].relevant = false;
                             break;
                         case "Divine Dash":
+                            this.upgrades[i].relevant = false;
                             break;
                         case "Glorious Moon":
+                            this.upgrades[i].relevant = false;
                             break;
                     }
-                    // Set generic to 'false' so it can be re-used/activated in the future
-                    this.upgrades[i].active = false;
                 }
         }
     }
@@ -258,7 +260,7 @@ class Player extends Entity {
             let randomIndex = Math.floor(Math.random() * this.upgrades.length);
             if (!indexes.has(randomIndex) && Math.random() < this.upgrades[randomIndex].rarity && this.upgrades[randomIndex].relevant && !this.upgrades[randomIndex].active) {
                 // If the upgrade selected is 'special' lets add a rarity to it even being chosen
-                if (this.upgrades[randomIndex].special && (Math.random() < 1)) { // 20% chance that we let this special upgrade show up
+                if (this.upgrades[randomIndex].special && (Math.random() < 1)) { // 0.2 here means 20% chance that we let this special upgrade show up
                     indexes.add(randomIndex);
                     result.push(this.upgrades[randomIndex]);
                 }
@@ -431,6 +433,14 @@ class Player extends Entity {
             this.worldY = Math.max(this.game.mapBoundaries.top, Math.min(this.game.mapBoundaries.bottom, intendedY));
         }
 
+        // Handle collisions with bounding circle map objects
+        // this.game.objects.forEach(object => {
+        //     if (object.boundingCircle) {
+        //         this.handlePlayerCircleCollision(this, object.boundingCircle, 25*object.animator.scale);
+        //     }
+        // });
+
+
         // Check if the animation state needs to be switched
         if (!this.isDashing && this.isMoving && this.currentAnimation !== "walking") {
             this.animator.pauseAtFrame(-1);
@@ -473,7 +483,7 @@ class Player extends Entity {
         }
 
         // if 2 minutes have passed, and we have Glorious Moon, suck all EXP.
-        if (this.upgrades[16].active && (this.game.elapsedTime / 1000 - this.lastMoonTime) >= 120) {
+        if (this.upgrades[16].active && (currentTime - this.lastMoonTime) >= 120) {
             // TODO add visual and audio indicator of the effect
             // ASSET_MANAGER.playAsset()
             this.game.entities.forEach(orb => {
@@ -527,15 +537,55 @@ class Player extends Entity {
         }
 
     }
+    //
+    // handlePlayerCircleCollision(player, circle, offset = 25) {
+    //     // Calculate the direction vector from the circle to the player
+    //     const playerCenterX = player.worldX + player.boundingBox.width / 2;
+    //     const playerCenterY = player.worldY + player.boundingBox.height / 2;
+    //     const directionX = playerCenterX - circle.centerX;
+    //     const directionY = playerCenterY - circle.centerY;
+    //
+    //     // Normalize the direction vector
+    //     const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
+    //     if (magnitude === 0) return; // Prevent division by zero
+    //     const normalizedDirectionX = directionX / magnitude;
+    //     const normalizedDirectionY = directionY / magnitude;
+    //
+    //     // Calculate the effective radius with offset
+    //     const effectiveRadius = circle.radius + offset;
+    //
+    //     // Calculate overlap based on the effective radius
+    //     const overlap = effectiveRadius + Math.min(player.boundingBox.width, player.boundingBox.height) / 2 - magnitude;
+    //
+    //     // Set a small bounce distance, adjusted by overlap if there's a collision
+    //     const bounceDistance = overlap > 0 ? overlap + 1 : 0; // Ensure a minimum separation on overlap
+    //
+    //     // Move the player away from the circle by the bounce distance only if there's an overlap
+    //     if (bounceDistance > 0) {
+    //         player.worldX += normalizedDirectionX * bounceDistance;
+    //         player.worldY += normalizedDirectionY * bounceDistance;
+    //
+    //         // Immediately update player's bounding box after changing position
+    //         player.updateBoundingBox();
+    //     }
+    // }
+
 
     checkCollisionWithMapObject(intendedX, intendedY, mapObject) {
         // Check collision with map objects ONLY if it is a map object type
         if (mapObject.boundingBox.type === "object") {
-            // Create a temporary bounding box for the intended position
-            let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
+            if (!mapObject.boundingCircle) {
+                // Create a temporary bounding box for the intended position
+                let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
 
-            // Check if this temporary bounding box collides with the map object's bounding box
-            return tempBoundingBox.isColliding(mapObject.boundingBox);
+                // Check if this temporary bounding box collides with the map object's bounding box
+                return tempBoundingBox.isColliding(mapObject.boundingBox);
+            } else {
+                let tempBoundingBox = new BoundingBox(intendedX, intendedY, this.boundingBox.width, this.boundingBox.height, this.boundingBox.type);
+
+                // If the map object uses a bounding circle, check collision with that circle
+                return tempBoundingBox.isCollidingWithCircle(mapObject.boundingCircle);
+            }
         }
         // If we collide with an unopened chest, open the chest
         else if (mapObject.boundingBox.type.includes("chest") && !mapObject.hasBeenOpened) {

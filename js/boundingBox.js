@@ -33,6 +33,17 @@ class BoundingBox {
             this.bottom > other.top;
     }
 
+    isCollidingWithCircle(circle) {
+        const closestX = Math.clamp(circle.centerX, this.left, this.right);
+        const closestY = Math.clamp(circle.centerY, this.top, this.bottom);
+
+        const distanceX = circle.centerX - closestX;
+        const distanceY = circle.centerY - closestY;
+
+        const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+        return distanceSquared < (circle.radius * circle.radius);
+    }
+
     // Update the bounding box to be centered around a given point
     updateCentered(centerX, centerY, width, height) {
         // Calculate top-left corner based on center position

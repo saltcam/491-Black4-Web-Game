@@ -14,6 +14,7 @@ class Portal extends Entity {
 
     handlePlayerInteraction(player) {
         if (this.collidesWithPlayer(player) && !this.interactionInitiated) {
+            ASSET_MANAGER.playAsset("./sounds/portal.mp3");
             this.interactionInitiated = true; // Set the flag to true to prevent re-entry
 
             this.game.fadeState = 'in';

@@ -30,7 +30,7 @@ class Upgrade_System {
         this.currentMenu = -1;
 
         /** Cooldown in seconds of when the player can input another selection key. */
-        this.selectionCooldown = 0.5;
+        this.selectionCooldown = 0.75;
         /** Tracks when the last selection key was pressed. Initialize with a negative value to allow immediate input. We use real time because we need to account for when the game is paused*/
         this.lastRealTimeKeyPress = Date.now(); // Use real-time
 
@@ -534,6 +534,7 @@ class Upgrade_System {
 
     /** Call this to pop up a weapon upgrade screen for the player. */
     showWeaponUpgradeScreen() {
+        this.lastRealTimeKeyPress = Date.now();
         // Set the animator to use the weapon upgrade menu sprite if it's not already set to that.
         if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/menu_weapon_upgrade.png")) {
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_weapon_upgrade.png"), 0, 0, 388, 413, 1, 1);
@@ -553,6 +554,7 @@ class Upgrade_System {
 
     /** Call this to pop up a player upgrade screen for the player. */
     showPlayerUpgradeScreen() {
+        this.lastRealTimeKeyPress = Date.now();
         // Reset upgrade options (fail-safe)
         this.upgradeOptions = null;
 
@@ -575,6 +577,7 @@ class Upgrade_System {
 
     /** Call this to draw menu #5 - 'Choose a Weapon to Upgrade' for anvil menu. */
     showAnvilWeaponUpgradeScreen() {
+        this.lastRealTimeKeyPress = Date.now();
         // Set the animator to use the weapon upgrade menu sprite if it's not already set to that.
         if (this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/menu_weapon_upgrade_withclosebutton.png")) {
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/menu_weapon_upgrade_withclosebutton.png"), 0, 0, 388, 413, 1, 1);

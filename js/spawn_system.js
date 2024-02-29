@@ -18,7 +18,7 @@ class Spawn_System {
          */
         this.DIFFICULTY_SCALE = difficulty_scale;
         /** Raises the difficulty scale every this many seconds. */
-        this.raiseDifficultyInterval = 7.5;
+        this.raiseDifficultyInterval = 5.5;
         /** How much to raise the difficulty by (additive, 0.01 === 1% more stats on enemies) */
         this.difficultyScaleAdder = 0.01;
         /** Last time we raised the difficulty scale. */
@@ -31,7 +31,7 @@ class Spawn_System {
         /** Controls the max enemy count, gets doubled incrementally. */
         this.baseMaxEnemies = 1;
         /** Tracks the current max enemy count. */
-        this.currentMaxEnemies = 0;
+        this.currentMaxEnemies = 1;
         /** Controls how often (in seconds) to increment max enemy count. */
         this.maxEnemyIncrementTime = 12;
         /** Stores how many max enemy intervals have passed. */
@@ -43,7 +43,7 @@ class Spawn_System {
         /** Tracks when the last time we lowered the spawn delay was. */
         this.lastSpawnDelayDecreaseTime = 0;
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
-        this.baseEnemySpawnInterval = 7.5;
+        this.baseEnemySpawnInterval = baseEnemySpawnInterval;
         /** Tracks when the last enemy was spawned. */
         this.lastSpawnTime = 0;
         /** Setting this to true tells spawnRandomEnemy() to make the next enemy it spawns an elite. */
@@ -159,7 +159,7 @@ class Spawn_System {
             this.contactEnemyTypes[3],  // Wave 0 (0:00 - 0:30)
             this.chargerEnemyTypes[2],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[1],  // Wave 2 (1:00 - 1:30)
-            this.rangedEnemyTypes[2],   // Wave 3 (1:30 - 2:00)
+            this.chargerEnemyTypes[1],   // Wave 3 (1:30 - 2:00)
             this.contactEnemyTypes[0],  // Wave 4 (2:00 - 2:30)
             this.chargerEnemyTypes[2],  // Wave 5 (2:30 - 3:00)
             this.rangedEnemyTypes[1],  // Wave 6 (3:00 - 3:30)
@@ -233,8 +233,6 @@ class Spawn_System {
     /** This method is called in update to check if it's time to up the difficulty scaling of the game. */
     updateDifficultyScale() {
         const currentTimeInSeconds = this.game.elapsedTime / 1000;
-        // Assuming you have a property this.lastDifficultyUpdateTime to track the last update time
-        // If it doesn't exist, initialize it in the constructor or start method
         if (!this.lastDifficultyUpdateTime) this.lastDifficultyUpdateTime = currentTimeInSeconds;
 
         if (currentTimeInSeconds - this.lastDifficultyUpdateTime >= this.raiseDifficultyInterval && this.game.currMap !== 0 && !this.game.roundOver && this.game.boss !== null) {
@@ -282,7 +280,10 @@ class Spawn_System {
             }
 
             //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapOneEnemies.length - 1) + " enemies. Name = " + this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].name);
-            this.spawnEnemy(this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)], randomXNumber, randomYNumber);
+            // If it's not time to spawn elite, spawn next enemy
+            if (!this.spawnElite) this.spawnEnemy(this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)], randomXNumber, randomYNumber);
+            // If it IS time to spawn an elite, make it a random one from the full list
+            else this.spawnEnemy(this.mapOneEnemies[Math.round(Math.random() * this.mapOneEnemies.length-1)], randomXNumber, randomYNumber);
         } else if (this.game.currMap === 2) {
             // Increment current wave, and move previous enemy to passive spawn array
             if (waveNumber > this.currentWave && this.currentWave !== this.mapTwoEnemies.length - 1) {
@@ -305,7 +306,7 @@ class Spawn_System {
             }
 
             // If this is a charger enemy wave, temporarily double charger enemies cap
-            if (this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].enemyType === "charger" && this.maxChargerEnemies === this.initialMaxChargerEnemies) {
+            if (this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)].enemyType === "charger" && this.maxChargerEnemies === this.initialMaxChargerEnemies) {
                 this.maxChargerEnemies *= 2;
             }
             // Otherwise make sure we are at default charger enemy cap
@@ -314,12 +315,15 @@ class Spawn_System {
             }
 
             //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapTwoEnemies.length - 1) + " enemies. Name = " + this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)].name);
-            this.spawnEnemy(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)], randomXNumber, randomYNumber);
+            // If it's not time to spawn elite, spawn next enemy
+            if (!this.spawnElite) this.spawnEnemy(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)], randomXNumber, randomYNumber);
+            // If it IS time to spawn an elite, make it a random one from the full list
+            else this.spawnEnemy(this.mapTwoEnemies[Math.round(Math.random() * this.mapTwoEnemies.length-1)], randomXNumber, randomYNumber);
         } else if (this.game.currMap === 3) {
             // Increment current wave, and move previous enemy to passive spawn array
-            if (waveNumber > this.currentWave && this.currentWave !== this.mapTwoEnemies.length - 1) {
+            if (waveNumber > this.currentWave && this.currentWave !== this.mapThreeEnemies.length - 1) {
                 // Add the previous wave's enemy to the passive wave array
-                this.passiveEnemySpawns.push(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)]);
+                this.passiveEnemySpawns.push(this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)]);
 
                 this.currentWave = waveNumber;
             }
@@ -337,7 +341,7 @@ class Spawn_System {
             }
 
             // If this is a charger enemy wave, temporarily double charger enemies cap
-            if (this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].enemyType === "charger" && this.maxChargerEnemies === this.initialMaxChargerEnemies) {
+            if (this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)].enemyType === "charger" && this.maxChargerEnemies === this.initialMaxChargerEnemies) {
                 this.maxChargerEnemies *= 2;
             }
             // Otherwise make sure we are at default charger enemy cap
@@ -346,7 +350,10 @@ class Spawn_System {
             }
 
             //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapThreeEnemies.length - 1) + " enemies. Name = " + this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)].name);
-            this.spawnEnemy(this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)], randomXNumber, randomYNumber);
+            // If it's not time to spawn elite, spawn next enemy
+            if (!this.spawnElite) this.spawnEnemy(this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)], randomXNumber, randomYNumber);
+            // If it IS time to spawn an elite, make it a random one from the full list
+            else this.spawnEnemy(this.mapThreeEnemies[Math.round(Math.random() * this.mapThreeEnemies.length-1)], randomXNumber, randomYNumber);
         }
 
         // Passive spawning code
@@ -433,7 +440,7 @@ class Spawn_System {
         // Scale attack power
         enemy.atkPow = Math.round(enemy.atkPow * this.DIFFICULTY_SCALE);
 
-        console.log("enemy hp="+enemy.currHP);
+        //console.log("enemy hp="+enemy.currHP);
     }
 
     /**
@@ -503,7 +510,7 @@ class Spawn_System {
         }
 
         // Spawn an elite if this.spawnElite has been set to true
-        if(this.spawnElite) {
+        if(this.spawnElite && this.game.boss === null) {
             if (Math.random() < 1) {    // Can make it a chance if we lower the 1 to something < 1 (ex: 0.1 === 10% chance)
                 newEnemy.maxHP *= 8;
                 newEnemy.currHP = newEnemy.maxHP;
@@ -581,10 +588,10 @@ class Spawn_System {
         }
         const currentTime = this.game.elapsedTime / 1000;
 
-        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE) * this.game.currMap;
-        this.maxEnemyIncrementTime = 20 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.baseMaxEnemies = Math.round(this.DIFFICULTY_SCALE) * this.game.currMap;
+        this.maxEnemyIncrementTime = 10 / (this.DIFFICULTY_SCALE * this.game.currMap);
         this.spawnDelayDecreaseMultiplier = 0.95 / (this.DIFFICULTY_SCALE * this.game.currMap);
-        this.lowerSpawnDelayInterval = 7.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.lowerSpawnDelayInterval = 8 / (this.DIFFICULTY_SCALE);
         //this.baseEnemySpawnInterval = 4 / (this.DIFFICULTY_SCALE * this.game.currMap);
         //console.log(this.spawnDelayDecreaseMultiplier);
 
@@ -595,13 +602,13 @@ class Spawn_System {
         this.currentMaxEnemies = this.baseMaxEnemies * this.maxEnemyIntervals;
 
         //console.log(this.baseEnemySpawnInterval);
-        console.log("MAX ENEMY: "+this.currentMaxEnemies);
+        //console.log("MAX ENEMY: "+this.currentMaxEnemies);
 
         //console.log(currentTime+" - "+this.lastSpawnDelayDecreaseTime+" >= "+this.lowerSpawnDelayInterval);
         // Update the spawn delay if the this.lowerSpawnDelayInterval has passed since the last time we did this
         if ((currentTime - this.lastSpawnDelayDecreaseTime) >= this.lowerSpawnDelayInterval && this.baseEnemySpawnInterval > 0) {
             //console.log("TRUE " + this.baseEnemySpawnInterval);
-            console.log("Lowering spawn delay from " + this.baseEnemySpawnInterval + " to " + (this.baseEnemySpawnInterval * this.spawnDelayDecreaseMultiplier));
+            //console.log("Lowering spawn delay from " + this.baseEnemySpawnInterval + " to " + (this.baseEnemySpawnInterval * this.spawnDelayDecreaseMultiplier));
             //console.log(+this.baseEnemySpawnInterval+" * "+this.spawnDelayDecreaseMultiplier+" = "+(this.baseEnemySpawnInterval * this.spawnDelayDecreaseMultiplier));
             this.baseEnemySpawnInterval *= this.spawnDelayDecreaseMultiplier;
 

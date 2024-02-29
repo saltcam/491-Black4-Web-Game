@@ -155,24 +155,23 @@ class GameEngine {
         this.levelTimes = [0, 0, 0];
         this.levelScores = [0, 0, 0];
         this.playerReflection = null;
+
+        this.meteor = null;
     }
 
     createPlayerReflection() {
         let ref = this.addEntity(new Entity(1, 1, 0, this,
-            this.player.worldX, this.player.worldY, 25, 25, "reflection", 0,
+            this.player.worldX, this.player.worldY, 25, 25, "player_reflection", 0,
             "./sprites/reflective_pane.png", 0, 0, 96, 48, 1, 1, 2, 0));
         ref.followEntity(this.player, -30, 20);
 
         // Don't make player reflection when player is small mode
         if (this.player.upgrades[13].active) {
-            console.log("NO");
             return;
         }
 
-        console.log("YES");
-
         ref = this.addEntity(new Entity(1, 1, 0, this,
-            this.player.worldX, this.player.worldY, 25, 25, "reflection", 0,
+            this.player.worldX, this.player.worldY, 25, 25, "player_reflection", 0,
             "./sprites/McIdle_reflection.png", 0, 0, 32, 28, 2, 0.5, 2, 0));
         ref.followEntity(this.player, 0, 75);
 
@@ -371,13 +370,35 @@ class GameEngine {
         return healingHeart;
     }
 
+    spawnMeteor(size, speed, rotationSpeed) {
+        // Don't spawn these while round over
+        if (this.roundOver) return;
+
+        let rotationDir = Math.random() < 0.5 ? -1 : 1;
+        let newCoords = this.randomOffscreenCoords();
+        let newEntity = this.addEntity(new Map_object(this, newCoords.x, newCoords.y, 10, 10, "./sprites/meteor.png", 0, 0, 159, 154, 1, 1, Math.max(1, size)));
+        newEntity.boundingCircle = new BoundingCircle(newEntity.calculateCenter().x, newEntity.calculateCenter().y, 50 * newEntity.animator.scale, "object");
+        newEntity.targetX = -500 * Math.random();
+        newEntity.targetY = 500 * Math.random();
+        newEntity.animator.isRotating = true;
+        newEntity.animator.rotationSpeed = rotationSpeed * rotationDir;
+        newEntity.isFloatingObject = true;
+        newEntity.movementSpeed = speed;
+        newEntity.maxRelocations = 2;
+        return newEntity;
+    }
 
     initSpaceMapObjects() {
+        this.createPlayerReflection();
+
         this.spawnUpgradeChest(-2546, -2343);
         this.spawnUpgradeChest(500, 3000);
 
         // Debug Portal
         //this.spawnPortal(0, 100);
+
+        // Meteors
+        this.meteor = this.spawnMeteor(3.22 * Math.random(), 25 * Math.random(), 50);
 
         this.mapObjectsInitialized = true;
     }
@@ -599,6 +620,7 @@ class GameEngine {
 
             // Draw 'object' entities.
             for (let object of this.objects) {
+                if (object.boundingBox.type === "meteor") continue;
                 object.draw(this.ctx, this);
 
                 // If debug mode, then draw debug features.
@@ -1052,8 +1074,8 @@ class GameEngine {
             this.drawBackground('./sprites/map_space_background.png', 1, true);
 
             // Spawn the rest area exit portal at this precise location if we don't have a portal here already.
-            if (!this.portal) {
-                this.spawnPortal(this.player.worldX + 350, this.player.worldY);
+            if (!this.portal && this.elapsedTime/1000 >= 6.6) {
+                this.spawnPortal(350, 0);
             }
 
             const spawnOffsetX = 170;
@@ -1178,6 +1200,8 @@ class GameEngine {
             if (!this.mapObjectsInitialized) {
                 this.initSpaceMapObjects();
             }
+
+            if(!this.meteor) this.meteor = this.spawnMeteor(3.22 * Math.random(), 25 * Math.random(), 50);
 
             this.drawBackground('./sprites/map_space_background.png', 1, true);
 
@@ -1605,7 +1629,11 @@ class GameEngine {
     // Call this to kill all alive enemies (drop XP too)
     killAllEnemies() {
         this.enemies.forEach(enemy => {
-           enemy.currHP = 0;
+            // Don't delete bosses because it creates bugs where this loop wont finish since the boss is calling it
+            if (enemy.boundingBox.type.toLowerCase().includes("boss")) return;
+
+            enemy.currHP = 0;
+            enemy.isDead = true;
         });
     }
 
@@ -2194,7 +2222,7 @@ class GameEngine {
 
         // Ramp up the difficulty for new game plus
         if (teleportIndex === 1) {
-            this.SPAWN_SYSTEM.DIFFICULTY_SCALE *= 4;
+            this.SPAWN_SYSTEM.DIFFICULTY_SCALE *= 3;
             this.SPAWN_SYSTEM.baseEnemySpawnInterval /= 2;
         }
 
@@ -2206,9 +2234,9 @@ class GameEngine {
             this.player.heal(this.player.maxHP);
         }
 
-        if (teleportIndex === 3) {
-            this.createPlayerReflection();
-        }
+        // if (teleportIndex === 3) {
+        //     this.createPlayerReflection();
+        // }
 
         if (teleportIndex === 4) {
             ASSET_MANAGER.stopBackgroundMusic();

@@ -6,11 +6,11 @@ class Weapon_scythe extends Weapon {
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70, 1),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 100, 1),
             new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 50, 1),
-            new Upgrade("Blood Scythe", "(Unique) Heal 1.5% HP per attack.", true, "./sprites/upgrade_blood_scythe.png", 200, 0.1),
-            new Upgrade("Dual Blade", "(Unique) Adds primary back attack.", true, "./sprites/upgrade_dual_blade.png", 225, 0.1),
-            new Upgrade("Echo Slash", "(Unique) Adds attack echoes.", true, "./sprites/upgrade_echo_slash.png", 250, 0.1),
-            new Upgrade("Crippling Chill", "(Unique) Cripple effect on attacks.", true, "./sprites/upgrade_crippling_chill.png", 150, 0.25),
-            new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg is now over-time.", true, "./sprites/upgrade_bleeding_edge.png", 235, 0.15),
+            new Upgrade("Blood Scythe", "(Unique) Heal 1.5% HP per attack.", true, "./sprites/upgrade_blood_scythe.png", 325, 0.25),
+            new Upgrade("Dual Blade", "(Unique) Adds primary back attack.", true, "./sprites/upgrade_dual_blade.png", 350, 0.1),
+            new Upgrade("Echo Slash", "(Unique) Adds attack echoes.", true, "./sprites/upgrade_echo_slash.png", 400, 0.1),
+            new Upgrade("Crippling Chill", "(Unique) Cripple effect on attacks.", true, "./sprites/upgrade_crippling_chill.png", 285, 0.3),
+            new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg is now over-time.", true, "./sprites/upgrade_bleeding_edge.png", 400, 0.15),
             //new Upgrade("Ramping Blade", "(Unique) Stats up per second scythe equipped.", true, "./sprites/upgrade_bleeding_edge.png", 235)
         ];
 

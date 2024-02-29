@@ -132,6 +132,7 @@ ASSET_MANAGER.queueDownload("./sprites/Orby.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_glorious_moon.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_divine_dash.png");
 ASSET_MANAGER.queueDownload("./sprites/run_stats_menu.png");
+ASSET_MANAGER.queueDownload("./sprites/meteor.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
@@ -249,12 +250,16 @@ ASSET_MANAGER.queueDownload("./sounds/boss_explosion.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_laser_charging.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_laser_beaming.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_gore.mp3");
+ASSET_MANAGER.queueDownload("./sounds/boss_summon.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_hurt_yell.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_creature_sound1.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_creature_sound2.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_creature_sound3.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_creature_sound4.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_creature_sound5.mp3");
+ASSET_MANAGER.queueDownload("./sounds/boss_creature_sound6.mp3");
+ASSET_MANAGER.queueDownload("./sounds/boss_creature_sound7.mp3");
+ASSET_MANAGER.queueDownload("./sounds/boss_creature_sound8.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_majula.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_firelink.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_malenia.mp3");
@@ -263,6 +268,7 @@ ASSET_MANAGER.queueDownload("./sounds/music_erdtree_knights.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_dragonlord.mp3");
 ASSET_MANAGER.queueDownload("./sounds/healing_heart.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_ave_maria.mp3");
+ASSET_MANAGER.queueDownload("./sounds/portal.mp3");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");
