@@ -52,7 +52,7 @@ class GameEngine {
          * 2 == Cave
          * 3 == Space
          */
-        this.currMap = 2;
+        this.currMap = -1;
 
         /** Save the previous map index after map switching. */
         this.prevMap = -10;

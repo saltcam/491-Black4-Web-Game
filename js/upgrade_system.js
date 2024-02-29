@@ -916,7 +916,7 @@ class Upgrade_System {
         // Summons' Speed
         ctx.fillText("Summ Speed: " + Math.round(this.game.player.summonSpeed), screenX, screenY+(yIncrement * 2));
         // Summons' Dmg
-        ctx.fillText("Summ Dmg: " + Math.round(this.game.player.summonDamage), screenX, screenY+(yIncrement * 3));
+        ctx.fillText("Graves / 10s: " + Math.round(this.game.player.graveWalkCount), screenX, screenY+(yIncrement * 3));
         // Summons' Dmg
         ctx.fillText("Tomb Chance: " + Math.round(this.game.player.tombstoneChance * 100) + "%", screenX, screenY+(yIncrement * 4));
 

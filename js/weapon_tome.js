@@ -9,8 +9,8 @@ class Weapon_tome extends Weapon {
             new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_tome_doubleshot.png", 225),
             new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_tome_bounce.png", 200),
             new Upgrade("Doubletime", "(Unique) Secondary hits more often.", true, "./sprites/upgrade_tome_doubletime.png", 250),
-            new Upgrade("Expansion", "(Unique) Attack size grows as it moves.", true, "./sprites/upgrade_tome_expansion.png", 300)
-            //new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 120)
+            new Upgrade("Expansion", "(Unique) Attack size grows as it moves.", true, "./sprites/upgrade_tome_expansion.png", 300),
+            new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 120)
         ];
 
         super(game, "Tome", 1.2, 6, //cool was 1s
@@ -167,10 +167,6 @@ class Weapon_tome extends Weapon {
                 secondaryAttackTickRate /= 2;
             }
 
-            if (singularityUpgrade) {
-
-            }
-
             //console.log("Tome Secondary summoned a projectile!");
             let newProjectile = this.game.addEntity(new Projectile(this.game, defaultSecondaryDamage,
                 player.worldX, player.worldY, 10, 10, "playerAttack_TomeAttack", this.secondaryProjectileMovementSpeed,
@@ -180,6 +176,10 @@ class Weapon_tome extends Weapon {
 
             newProjectile.maxHits = this.maxSecondaryHits; // Apply max pierce
             newProjectile.attackCirc.pulsatingDamage = true; // Tell the projectile that this attack pulsates damage.
+
+            if (singularityUpgrade) {
+                newProjectile.attackCirc.isSingularityActive = true;
+            }
 
             if (expansionUpgrade) {
                 for (let i = 0; i < 5*2; i++)

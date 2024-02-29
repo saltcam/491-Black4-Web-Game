@@ -29,7 +29,7 @@ class Player extends Entity {
             new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 50),
             // TODO need assets for these
             new Upgrade("Extra Life", "Fully heal instead of dying (Once).", false, "./sprites/upgrade_tomb_chance.png", 1000),
-            new Upgrade("Gravewalker", "(Unique) Drop tomb every 10s.", true, "./sprites/upgrade_tomb_chance.png", 1000),
+            new Upgrade("Missingno", "(Unique) Drop tomb every 10s.", true, "./sprites/upgrade_tomb_chance.png", 1000),
             new Upgrade("It's what you do with it", "(Unique) 50% smaller.", false, "./sprites/upgrade_tomb_chance.png", 1000),
             new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 1000),
             // based on hades, maybe grab asset from there?
@@ -68,7 +68,7 @@ class Player extends Entity {
         this.weapons = [new Weapon_scythe(game), new Weapon_tome(game), new Weapon_staff(game)];
         // index for current weapon: Weapon_scythe = 0; Weapon_tome = 1; Tome = 2;
         this.currentWeapon = 0;
-        this.weaponSwitchCooldown = 0.5; // Cooldown time in seconds to prevent rapid switching
+        this.weaponSwitchCooldown = 0.4; // Cooldown time in seconds to prevent rapid switching
         this.lastWeaponSwitchTime = 0;
         this.controlsEnabled = true;    // If false, player cannot input controls.
         this.pickupRange = 125;
@@ -124,7 +124,8 @@ class Player extends Entity {
         // for summons, and prevent the need to check weapons for it since not all weapons can summon
         this.summonHealth = 25;
         this.summonSpeed = 210;
-        this.summonDamage = 15;
+        // this.summonDamage = 15;
+        this.graveWalkCount = 0;
         this.tombstoneChance = 0.33; // default is 0.33
 
         this.lastGraveWalkTime = 0;
@@ -136,6 +137,7 @@ class Player extends Entity {
 
         // Turn off bad upgrades
         this.upgrades[9].relevant = false; // Turn off EXP upgrade (too OP)
+        this.upgrades[12].relevant = false; // Turn off Gravewalker (replaced summon damage elsewhere)
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
@@ -436,17 +438,23 @@ class Player extends Entity {
         }
 
         // if 10 seconds have passed, and we have Gravewalker, spawn a tombstone.
-        if (this.upgrades[12].active && (this.game.elapsedTime / 1000 - this.lastGraveWalkTime) >= 10) {
-            let tombstone = new Map_object(this.game, this.worldX, this.worldY, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
-            this.game.addEntity(tombstone);
-            tombstone.boundingBox.type = "tombstone";
+        if (this.game.elapsedTime / 1000 - this.lastGraveWalkTime >= 10) {
+            for (let i = 0; i < this.graveWalkCount; i++) {
+                let tombstone = new Map_object(this.game,
+                    this.worldX + Math.floor((Math.random() * 100)) - Math.floor((Math.random() * 100)),
+                    this.worldY + Math.floor((Math.random() * 100)) - Math.floor((Math.random() * 100)),
+                    35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
+                this.game.addEntity(tombstone);
+                tombstone.boundingBox.type = "tombstone";
+            }
+
             this.lastGraveWalkTime = this.game.elapsedTime / 1000;
         }
 
         // if 2 minutes have passed, and we have Glorious Moon, suck all EXP.
         if (this.upgrades[16].active && (this.game.elapsedTime / 1000 - this.lastMoonTime) >= 120) {
             // TODO add visual and audio indicator of the effect
-            ASSET_MANAGER.playAsset()
+            // ASSET_MANAGER.playAsset()
             this.game.entities.forEach(orb => {
                 if (orb.boundingBox.type === "orb") {
                     orb.isMovingTowardsPlayer = true;
@@ -487,7 +495,6 @@ class Player extends Entity {
                             0.3));
                         reflectedProjectile.pulsatingDamage = projectile.pulse;
 
-                        // TODO why does this not work?
                         reflectedProjectile.animator.outlineMode = true;
                         reflectedProjectile.animator.outlineColor = 'rgb(0,128,255)';
 
@@ -496,6 +503,8 @@ class Player extends Entity {
                     }
                 }
             });
+
+            // TODO GLOW
         }
 
     }

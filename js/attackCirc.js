@@ -102,8 +102,27 @@ class AttackCirc {
         this.allyHealCooldown = 0.5;
 
         this.attackSound = null;
+        this.isSingularityActive = false;
     }
 
+    applySingularity() {
+        if (this.isSingularityActive) {
+            const pullStrength = 5;
+            this.game.enemies.forEach(enemy => {
+                if (this.collisionDetection(enemy.boundingBox)) {
+                    const directionX = this.worldX - enemy.worldX;
+                    const directionY = this.worldY - enemy.worldY;
+                    const distance = Math.sqrt(directionX * directionX + directionY * directionY);
+
+                    const normalizedX = directionX / distance;
+                    const normalizedY = directionY / distance;
+
+                    enemy.worldX += normalizedX * pullStrength;
+                    enemy.worldY += normalizedY * pullStrength;
+                }
+            });
+        }
+    }
 
     // changes world position to match its attached entity, offset by dx and dy values.
     update() {
@@ -194,7 +213,7 @@ class AttackCirc {
                                     case 0:
                                         this.game.addEntity(new Ally_Contact(
                                             "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
-                                            this.game.player.summonDamage, this.game, object.worldX, object.worldY, 17,
+                                            this.game.player.atkPow, this.game, object.worldX, object.worldY, 17,
                                             29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Contact_Walk.png",
                                             0, 0, 32, 28,
                                             8, 0.1, 2, 1));
@@ -202,7 +221,7 @@ class AttackCirc {
                                     case 1:
                                         this.game.addEntity(new Ally_Ranged(
                                             "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
-                                            this.game.player.summonDamage, this.game, object.worldX, object.worldY, 17,
+                                            this.game.player.atkPow, this.game, object.worldX, object.worldY, 17,
                                             29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Ranged_Walk.png",
                                             0, 0, 32, 28,
                                             8, 0.1, 2, 1,
@@ -250,6 +269,9 @@ class AttackCirc {
 
             // Handling player vs enemy pulsating attack damage
             if (this.type.includes("playerAttack")) {
+                if (this.isSingularityActive) {
+                    this.applySingularity();
+                }
                 this.game.enemies.forEach(enemy => {
                     if (this.collisionDetection(enemy.boundingBox) /*&& (enemy.boundingBox.type !== "ally")*/) {
                         if (this.attackDamage > 0) {

@@ -137,5 +137,12 @@ class Map_object extends Entity {
         let screenY = this.worldY - this.game.camera.y;
 
         this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
+
+        if (this.game.player.currentWeapon === 2 && this.boundingBox.type === "tombstone") {
+            this.animator.outlineMode = true;
+            this.animator.outlineColor = 'rgb(232,0,255)';
+        } else {
+            this.animator.outlineMode = false;
+        }
     }
 }

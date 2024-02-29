@@ -187,16 +187,19 @@ class Entity {
 
     // Call this to heal entities/give them more currHP (without over-healing)
     heal(healHp) {
-        if (this.currHP + healHp <= this.maxHP) {
-            this.currHP += healHp;
-            // Spawn floating healing number
-            this.game.addEntity(new Floating_text(this.game, healHp, this.calculateCenter().x, this.calculateCenter().y, true, this instanceof Player || this.boundingBox.type.includes("ally")));
+        if (this.currHP < this.maxHP) {
+            if (this.currHP + healHp <= this.maxHP) {
+                this.currHP += healHp;
+                // Spawn floating healing number
+                this.game.addEntity(new Floating_text(this.game, healHp, this.calculateCenter().x, this.calculateCenter().y, true, this instanceof Player || this.boundingBox.type.includes("ally")));
+            }
+            // If over-heal then just restore to max hp
+            else {
+                this.currHP = this.maxHP;
+                this.game.addEntity(new Floating_text(this.game, healHp, this.calculateCenter().x, this.calculateCenter().y, true, this instanceof Player || this.boundingBox.type.includes("ally")));
+            }
         }
-        // If over-heal then just restore to max hp
-        else {
-            this.currHP = this.maxHP;
-            this.game.addEntity(new Floating_text(this.game, healHp, this.calculateCenter().x, this.calculateCenter().y, true, this instanceof Player || this.boundingBox.type.includes("ally")));
-        }
+
     }
 
     takeDamage(amount, attackType = "") {
