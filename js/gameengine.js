@@ -256,7 +256,7 @@ class GameEngine {
         this.spawnUpgradeChest(1797, 2802);
 
         // Debug Portal
-        this.spawnPortal(0, 100);
+        //this.spawnPortal(0, 100);
         //this.spawnEndPortal(0, -100);
 
         // Rocks
@@ -313,7 +313,7 @@ class GameEngine {
         this.spawnUpgradeChest(2778, 2844);
 
         // Debug Portal
-        this.spawnPortal(0, 100);
+        //this.spawnPortal(0, 100);
 
         // Rock objects
         let newEntity = this.addEntity(new Map_object(this, -450, 0, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
@@ -377,7 +377,7 @@ class GameEngine {
         this.spawnUpgradeChest(500, 3000);
 
         // Debug Portal
-        this.spawnPortal(0, 100);
+        //this.spawnPortal(0, 100);
 
         this.mapObjectsInitialized = true;
     }
