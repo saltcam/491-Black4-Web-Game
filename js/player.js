@@ -21,7 +21,7 @@ class Player extends Entity {
             new Upgrade("Dash CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_cooldown.png", 0 , 1),
             new Upgrade("Movement Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_movement_speed.png", 0, 1),
             new Upgrade("Attack Damage +7.5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png", 0, 1),
-            new Upgrade("Pickup Range +30%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png", 0,1),
+            new Upgrade("Pickup Range +30%", "(Stackable, Additive).", false, "./sprites/upgrade_pickup_range.png", 0,1),
             new Upgrade("Dash Duration +15%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png", 0,1),
             new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_damage.png", 0,1),
             new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_chance.png", 0,1),
@@ -176,7 +176,7 @@ class Player extends Entity {
                             this.atkPow *= 1.075;
                             break;
                         case "Pickup Range +30%":
-                            this.pickupRange *= 1.3;
+                            this.pickupRange = this.initialPickupRange * 1.3;
                             break;
                         case "Dash Duration +15%":
                             this.dashDuration *= 1.15;

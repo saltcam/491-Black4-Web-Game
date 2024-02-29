@@ -6,7 +6,7 @@
 class BossThree extends Entity {
     /** Default Constructor - Only needs to be passed the gameengine and worldX and Y coords. */
     constructor(game, worldX, worldY) {
-        super(5000, 5000, 40,
+        super(6500, 6500, 40,
             game, worldX, worldY,
             70, 120, "enemyBoss",
             100,
@@ -442,7 +442,7 @@ class BossThree extends Entity {
             this.boundingBox.height /= 1.75;
         }
         else if (this.animator.currentFrame() === 9) {
-            this.movementSpeed = this.initialMovementSpeed * 2.3;
+            this.movementSpeed = this.initialMovementSpeed * 2.75;
             this.animationBank[0] = this.animationBank[3]; // Set the idle to the fallen idle anim
             this.animationBank[1] = this.animationBank[4]; // Set the walk to the fallen walk anim
 
