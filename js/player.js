@@ -132,12 +132,14 @@ class Player extends Entity {
         this.lastMoonTime = 0;
 
         // this.upgrades[12].active = true; // gravewalker
+        // this.upgrades[13].active = true; // small
+        // this.upgrades[15].active = true;// Divine Dash
         // this.upgrades[16].active = true;
-        // this.handleUpgrade();
+        //this.handleUpgrade();
 
         // Turn off bad upgrades
         this.upgrades[9].relevant = false; // Turn off EXP upgrade (too OP)
-        this.upgrades[12].relevant = false; // Turn off Gravewalker (replaced summon damage elsewhere)
+        this.upgrades[12].relevant = false; // Turn off missingno (replaced summon damage elsewhere)
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
@@ -209,8 +211,6 @@ class Player extends Entity {
                             this.boundingBox.height *= 0.5;
                             this.animator.scale *= 0.5;
                             this.upgrades[i].relevant = false;
-                            this.animator.outlineMode = true;
-                            this.animator.outlineColor = 'rgb(255,255,255)';
                             break;
                     }
                     // Set generic to 'false' so it can be re-used/activated in the future
@@ -437,8 +437,8 @@ class Player extends Entity {
             }
         }
 
-        // if 10 seconds have passed, and we have Gravewalker, spawn a tombstone.
-        if (this.game.elapsedTime / 1000 - this.lastGraveWalkTime >= 10) {
+        // if 15 seconds have passed, and we have Gravewalker, spawn a tombstone.
+        if (this.game.elapsedTime / 1000 - this.lastGraveWalkTime >= 15) {
             for (let i = 0; i < this.graveWalkCount; i++) {
                 let tombstone = new Map_object(this.game,
                     this.worldX + Math.floor((Math.random() * 100)) - Math.floor((Math.random() * 100)),
@@ -503,8 +503,6 @@ class Player extends Entity {
                     }
                 }
             });
-
-            // TODO GLOW
         }
 
     }
@@ -853,5 +851,13 @@ class Player extends Entity {
         this.drawWeapons(ctx);
         this.drawStaffAttackIndicator(ctx);
         this.boundingBox.draw(ctx, game);
+
+        if (this.upgrades[15].active && this.isDashing) {   // divine dash
+            this.animator.outlineMode = true;
+            this.animator.outlineColor = 'rgb(255,222,88)';
+        } else {
+            this.animator.outlineMode = false;
+        }
+
     }
 }

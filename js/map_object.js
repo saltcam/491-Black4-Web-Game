@@ -138,11 +138,18 @@ class Map_object extends Entity {
 
         this.animator.drawFrame(this.game.clockTick, ctx, screenX, screenY, this.lastMove);
 
-        if (this.game.player.currentWeapon === 2 && this.boundingBox.type === "tombstone") {
-            this.animator.outlineMode = true;
-            this.animator.outlineColor = 'rgb(232,0,255)';
-        } else {
-            this.animator.outlineMode = false;
+        if (this.boundingBox.type === "tombstone") {
+            if (this.game.player.currentWeapon === 2) {
+                this.animator.outlineMode = true;
+                this.animator.outlineColor = 'rgb(232,0,255)';
+            } else {
+                this.animator.outlineMode = false;
+            }
         }
+        if (this.boundingBox.type === "anvil") {
+            this.animator.outlineMode = true;
+            this.animator.outlineColor = 'rgb(255,255,255)';
+        }
+
     }
 }
