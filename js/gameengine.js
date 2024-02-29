@@ -230,7 +230,7 @@ class GameEngine {
         this.spawnUpgradeChest(1797, 2802);
 
         // Debug Portal
-        this.spawnPortal(0, 100);
+        //this.spawnPortal(0, 100);
         //this.spawnEndPortal(0, 100);
 
         // Rocks
@@ -287,7 +287,7 @@ class GameEngine {
         this.spawnUpgradeChest(-1797, -2802);
 
         // Debug Portal
-        this.spawnPortal(0, 100);
+        //this.spawnPortal(0, 100);
 
         this.mapObjectsInitialized = true;
     }
@@ -305,7 +305,7 @@ class GameEngine {
         this.spawnUpgradeChest(500, 3000);
 
         // Debug Portal
-        this.spawnPortal(0, 100);
+        //this.spawnPortal(0, 100);
 
         this.mapObjectsInitialized = true;
     }
