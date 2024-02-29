@@ -172,7 +172,7 @@ class Spawn_System {
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
         this.mapThreeEnemies = [
-            this.contactEnemyTypes[2],  // Wave 0 (0:00 - 0:30) this.contactEnemyTypes[3]
+            this.contactEnemyTypes[3],  // Wave 0 (0:00 - 0:30)
             this.contactEnemyTypes[2],  // Wave 1 (0:30 - 1:00)
             this.chargerEnemyTypes[3],  // Wave 2 (1:00 - 1:30)
             this.contactEnemyTypes[3],   // Wave 3 (1:30 - 2:00)
@@ -237,7 +237,7 @@ class Spawn_System {
         // If it doesn't exist, initialize it in the constructor or start method
         if (!this.lastDifficultyUpdateTime) this.lastDifficultyUpdateTime = currentTimeInSeconds;
 
-        if (currentTimeInSeconds - this.lastDifficultyUpdateTime >= this.raiseDifficultyInterval && this.game.currMap !== 0 && !this.game.roundOver) {
+        if (currentTimeInSeconds - this.lastDifficultyUpdateTime >= this.raiseDifficultyInterval && this.game.currMap !== 0 && !this.game.roundOver && this.game.boss !== null) {
             this.DIFFICULTY_SCALE += this.difficultyScaleAdder;
             this.lastDifficultyUpdateTime = currentTimeInSeconds;
         }
