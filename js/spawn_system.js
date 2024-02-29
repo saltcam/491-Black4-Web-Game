@@ -10,7 +10,7 @@
  */
 class Spawn_System {
     /** Default Constructor */
-    constructor(game, difficulty_scale = 1.0) {
+    constructor(game, difficulty_scale = 1.0, baseEnemySpawnInterval = 6) {
         /**
          * Controls how scaled up enemy stats are.
          * Set this to something < 1 to make the enemies easier.
@@ -609,3 +609,12 @@ class Spawn_System {
         }
     }
 }
+
+
+/* Setting saves
+        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE) * this.game.currMap;
+        this.maxEnemyIncrementTime = 13.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.spawnDelayDecreaseMultiplier = 0.95 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.lowerSpawnDelayInterval = 5.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.baseEnemySpawnInterval = 5.5;
+ */

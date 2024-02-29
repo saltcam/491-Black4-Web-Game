@@ -2193,10 +2193,13 @@ class GameEngine {
         }
 
         // Ramp up the difficulty for new game plus
-        if (teleportIndex === 1) this.SPAWN_SYSTEM.DIFFICULTY_SCALE += 1;
+        if (teleportIndex === 1) {
+            this.SPAWN_SYSTEM.DIFFICULTY_SCALE *= 4;
+            this.SPAWN_SYSTEM.baseEnemySpawnInterval /= 2;
+        }
 
         // Reset spawn system on map change
-        this.SPAWN_SYSTEM = new Spawn_System(this, this.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+        this.SPAWN_SYSTEM = new Spawn_System(this, this.SPAWN_SYSTEM.DIFFICULTY_SCALE, this.SPAWN_SYSTEM.baseEnemySpawnInterval);
 
         // If rest area, heal player
         if (teleportIndex === 0) {
