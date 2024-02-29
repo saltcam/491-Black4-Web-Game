@@ -9,7 +9,7 @@
 class BossOne extends Entity {
     /** Default Constructor - Only needs to be passed the gameengine and worldX and Y coords. */
     constructor(game, worldX, worldY) {
-        super(1500, 1500, 20,
+        super(1200, 1200, 20,
             game, worldX, worldY,
             20, 35, "enemyBoss",
             600,

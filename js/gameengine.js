@@ -1294,7 +1294,7 @@ class GameEngine {
                         coinBag.boundingBox.type = "gold_bag" + Math.ceil(this.enemies[i].maxHP / percentToGoldDivider);
                     }
                     // If we did not spawn a gold bag, then try spawning a healing heart
-                    else if (Math.random() < 0.01) {
+                    else if (Math.random() < 0.03) {
                         this.spawnHealingHeart(this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y);
                     }
                 }

@@ -88,12 +88,12 @@ class Spawn_System {
                 projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 11, projectileSpread: 360,
                 fleeDist: 200, approachDist: 350, projectileSprite: "./sprites/MagicBall_red.png",
                 projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 30, projectileAnimH: 30, projectileAnimCount: 2, projectileAnimDurr: 0.2, projectileAnimScale: 2},
-            { enemyType: "ranged", name: "LegalMage", maxHP: 50, currHP: 50, atkPow: 5, worldX: 0, worldY: 0,
+            { enemyType: "ranged", name: "LegalMage", maxHP: 50, currHP: 50, atkPow: 3, worldX: 0, worldY: 0,
                 boxWidth: 15, boxHeight: 20, boxType: "enemy", speed: 30, spritePath: "./sprites/ranged_legal_walk.png",
                 shootSpritePath: "./sprites/ranged_legal_shoot.png" , animXStart: 0, animYStart: 0, animW: 25, animH: 30,
                 animFCount: 2, animFDur: 0.2, scale: 2, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 25,
                 shootAnimH: 30, shootAnimFCount: 8, shootAnimFDur: 0.35, shootScale: 0.65, exp: -1, projectileFreq: 2,
-                projectileSpeed: 35, projectileSize: 15, projectilePulse: false, projectileCount: 3, projectileSpread: 25,
+                projectileSpeed: 35, projectileSize: 15, projectilePulse: false, projectileCount: 3, projectileSpread: 30,
                 fleeDist: 100, approachDist: 250, projectileSprite: "./sprites/Orby.png",
                 projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 29, projectileAnimH: 31, projectileAnimCount: 10, projectileAnimDurr: 0.05, projectileAnimScale: 0.75, shootRange: 275}
         ];
@@ -237,7 +237,7 @@ class Spawn_System {
         // If it doesn't exist, initialize it in the constructor or start method
         if (!this.lastDifficultyUpdateTime) this.lastDifficultyUpdateTime = currentTimeInSeconds;
 
-        if (currentTimeInSeconds - this.lastDifficultyUpdateTime >= this.raiseDifficultyInterval && this.game.currMap !== 0 && !this.game.roundOver) {
+        if (currentTimeInSeconds - this.lastDifficultyUpdateTime >= this.raiseDifficultyInterval && this.game.currMap !== 0 && !this.game.roundOver && this.game.boss !== null) {
             this.DIFFICULTY_SCALE += this.difficultyScaleAdder;
             this.lastDifficultyUpdateTime = currentTimeInSeconds;
         }

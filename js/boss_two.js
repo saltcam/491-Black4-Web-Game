@@ -331,7 +331,7 @@ class BossTwo extends Entity {
                     }
 
                 }
-                //TODO needs a sound
+                ASSET_MANAGER.playAsset("./sounds/fireball.mp3");
                 this.attackCount--; // used an attack in its current amount of attacks in this pattern
                 this.lastAttackTime = currentTime; // Update last attack time
             }
