@@ -29,21 +29,21 @@ class Spawn_System {
         /** Tracks if the spawn system has initialized. */
         this.initialized = false;
         /** Controls the max enemy count, gets doubled incrementally. */
-        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE) * this.game.currMap;
+        this.baseMaxEnemies = 1;
         /** Tracks the current max enemy count. */
         this.currentMaxEnemies = 0;
         /** Controls how often (in seconds) to increment max enemy count. */
-        this.maxEnemyIncrementTime = 8 / this.DIFFICULTY_SCALE;
+        this.maxEnemyIncrementTime = 8;
         /** Stores how many max enemy intervals have passed. */
         this.maxEnemyIntervals = 0;
         /** How much to lower the spawn delay each interval. */
-        this.spawnDelayDecreaseMultiplier = 0.94 / this.DIFFICULTY_SCALE;
+        this.spawnDelayDecreaseMultiplier = 0.94;
         /** Controls how often (in seconds) we reduce the spawn delay of enemies. */
-        this.lowerSpawnDelayInterval = 16.5 / this.DIFFICULTY_SCALE;
+        this.lowerSpawnDelayInterval = 16.5;
         /** Tracks when the last time we lowered the spawn delay was. */
         this.lastSpawnDelayDecreaseTime = 0;
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
-        this.baseEnemySpawnInterval = 5.5 / this.DIFFICULTY_SCALE;
+        this.baseEnemySpawnInterval = 5.5;
         /** Tracks when the last enemy was spawned. */
         this.lastSpawnTime = 0;
         /** Setting this to true tells spawnRandomEnemy() to make the next enemy it spawns an elite. */
@@ -575,6 +575,12 @@ class Spawn_System {
      */
     updateSpawnSettings() {
         const currentTime = this.game.elapsedTime / 1000;
+
+        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE) * this.game.currMap;
+        this.maxEnemyIncrementTime = 8 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.spawnDelayDecreaseMultiplier = 0.94 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.lowerSpawnDelayInterval = 16.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.baseEnemySpawnInterval = 5.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
 
         // Update the max enemy interval
         this.maxEnemyIntervals = Math.floor(this.game.elapsedTime / (this.maxEnemyIncrementTime * 1000));
