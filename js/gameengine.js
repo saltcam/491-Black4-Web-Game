@@ -1782,7 +1782,7 @@ class GameEngine {
 
         // Draw buttons
         // Continue Button
-        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250, 300, 50, 'Continue');
+        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250, 300, 50, 'New Game +');
 
         // Start Over Button
         this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + + 250+ 60, 300, 50, 'Start Over');

@@ -4,7 +4,7 @@ class Weapon_tome extends Weapon {
             new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 150),
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 100),
-            new Upgrade("Primary Piercing +3", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 100),
+            new Upgrade("Primary Piercing +2", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 100),
             new Upgrade("Projectile Speed +15%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 75),
             new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_tome_doubleshot.png", 225),
             new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_tome_bounce.png", 200),
@@ -13,7 +13,7 @@ class Weapon_tome extends Weapon {
             //new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 120)
         ];
 
-        super(game, "Tome", 1, 6,
+        super(game, "Tome", 1.2, 6, //cool was 1s
             0, 0,
             1, 1,
             20, 75,
@@ -30,7 +30,7 @@ class Weapon_tome extends Weapon {
         // Effectively acts as max pierced targets before deleting projectiles
         this.maxPrimaryHits = 2;
         this.maxSecondaryHits = -1; // -1 Means infinite pierce
-        this.primaryProjectileMovementSpeed = 45;
+        this.primaryProjectileMovementSpeed = 37; // was 45
         this.secondaryProjectileMovementSpeed = 3.5;
 
         // Stats tracking
@@ -41,7 +41,7 @@ class Weapon_tome extends Weapon {
         let doubleShotUpgrade = false;
         let bouncingShotUpgrade = false;
         let expansionUpgrade = false;
-        let doubleShotDamageMultiplier = 0.75;
+        let doubleShotDamageMultiplier = 0.5; // was 0.75
 
         this.upgrades.forEach(upgrade => {
             if (upgrade.name === "Double Shot") {
@@ -216,8 +216,8 @@ class Weapon_tome extends Weapon {
                         this.secondCool *= 0.9;
                         this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
-                    case "Primary Piercing +3":
-                        this.maxPrimaryHits += 3;
+                    case "Primary Piercing +2":
+                        this.maxPrimaryHits += 2;
                         this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                     case "Projectile Speed +15%":

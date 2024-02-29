@@ -157,7 +157,7 @@ class Spawn_System {
          */
         this.mapTwoEnemies = [
             this.contactEnemyTypes[3],  // Wave 0 (0:00 - 0:30)
-            this.chargerEnemyTypes[1],  // Wave 1 (0:30 - 1:00)
+            this.chargerEnemyTypes[2],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[1],  // Wave 2 (1:00 - 1:30)
             this.rangedEnemyTypes[2],   // Wave 3 (1:30 - 2:00)
             this.contactEnemyTypes[0],  // Wave 4 (2:00 - 2:30)
@@ -175,11 +175,11 @@ class Spawn_System {
             this.contactEnemyTypes[2],  // Wave 0 (0:00 - 0:30) this.contactEnemyTypes[3]
             this.contactEnemyTypes[2],  // Wave 1 (0:30 - 1:00)
             this.chargerEnemyTypes[3],  // Wave 2 (1:00 - 1:30)
-            this.chargerEnemyTypes[3],   // Wave 3 (1:30 - 2:00)
-            this.contactEnemyTypes[3],  // Wave 4 (2:00 - 2:30)
+            this.contactEnemyTypes[3],   // Wave 3 (1:30 - 2:00)
+            this.chargerEnemyTypes[1],  // Wave 4 (2:00 - 2:30)
             this.rangedEnemyTypes[1],  // Wave 5 (2:30 - 3:00)
             this.chargerEnemyTypes[1],  // Wave 6 (3:00 - 3:30)
-            this.rangedEnemyTypes[2],  // Wave 7 (3:30 - 4:00)
+            this.rangedEnemyTypes[1],  // Wave 7 (3:30 - 4:00)
             this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
         ];
 
