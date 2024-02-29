@@ -6,6 +6,7 @@ ASSET_MANAGER.queueDownload("./sprites/map_grasslands.png");
 ASSET_MANAGER.queueDownload("./sprites/map_stone_background.png");
 ASSET_MANAGER.queueDownload("./sprites/map_space_background.png");
 ASSET_MANAGER.queueDownload("./sprites/map_space_background2.gif");
+ASSET_MANAGER.queueDownload("./sprites/map_cave_background.png");
 ASSET_MANAGER.queueDownload("./sprites/portal.png");
 ASSET_MANAGER.queueDownload("./sprites/portal_white.png");
 ASSET_MANAGER.queueDownload("./sprites/grass.png");

@@ -52,7 +52,7 @@ class GameEngine {
          * 2 == Cave
          * 3 == Space
          */
-        this.currMap = -1;
+        this.currMap = 2;
 
         /** Save the previous map index after map switching. */
         this.prevMap = -10;
@@ -230,7 +230,7 @@ class GameEngine {
         this.spawnUpgradeChest(1797, 2802);
 
         // Debug Portal
-        this.spawnPortal(0, 100);
+        //this.spawnPortal(0, 100);
         //this.spawnEndPortal(0, 100);
 
         // Rocks
@@ -283,11 +283,31 @@ class GameEngine {
     initCaveObjects() {
         // Visible Objects
         // Collectable Objects
-        this.spawnUpgradeChest(1846, -1943);
-        this.spawnUpgradeChest(-1797, -2802);
+        this.spawnUpgradeChest(-3026, -3027);
+        this.spawnUpgradeChest(2778, 2844);
 
         // Debug Portal
-        this.spawnPortal(0, 100);
+        //this.spawnPortal(0, 100);
+
+        // Invisible Objects
+        let newEntity = this.addEntity(new Map_object(this, -2035, 1180, 940, 2840, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);    // Essentially makes the sprite invisible by pausing on a frame that doesn't exist.
+        newEntity = this.addEntity(new Map_object(this, -200, 2560, 850, 2700, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, -1010, -905, 700, 480, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, -1010, -905, 700, 480, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, -2770, -1270, 1110, 810, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, -1025, -2830, 3300, 1000, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, 2758, -2740, 1820, 1820, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, 2265, -890, 1050, 550, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
+        newEntity = this.addEntity(new Map_object(this, 2500, 1200, 1750, 2220, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity.animator.pauseAtFrame(10);
 
         this.mapObjectsInitialized = true;
     }
@@ -305,7 +325,7 @@ class GameEngine {
         this.spawnUpgradeChest(500, 3000);
 
         // Debug Portal
-        this.spawnPortal(0, 100);
+        //this.spawnPortal(0, 100);
 
         this.mapObjectsInitialized = true;
     }
@@ -454,8 +474,6 @@ class GameEngine {
     draw() {
         // Clear the canvas.
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-
-        this.drawBackground('./sprites/map_space_background.png', 1, true);
 
         // Draw the map texture.
         this.drawMap();
@@ -971,13 +989,14 @@ class GameEngine {
                 }
             });
         }
-
         // If 0, then Rest Area Map is used.
         else if (this.currMap === 0) {
             // Initialize the map objects if we haven't already
             if (!this.mapObjectsInitialized) {
                 this.initRestAreaObjects();
             }
+
+            this.drawBackground('./sprites/map_space_background.png', 1, true);
 
             // Spawn the rest area exit portal at this precise location if we don't have a portal here already.
             if (!this.portal) {
@@ -1027,6 +1046,8 @@ class GameEngine {
                 this.initGrasslandsObjects();
             }
 
+            this.drawBackground('./sprites/map_space_background.png', 1, true);
+
             const map = ASSET_MANAGER.getAsset("./sprites/map_grasslands.png");
 
             this.mapWidth = map.width;
@@ -1064,6 +1085,9 @@ class GameEngine {
             if (!this.mapObjectsInitialized) {
                 this.initCaveObjects();
             }
+
+            this.drawBackground('./sprites/map_cave_background.png', 4, true, 0.1);
+
             const map = ASSET_MANAGER.getAsset("./sprites/map_cave.png");
 
             this.mapWidth = map.width;
@@ -1092,7 +1116,7 @@ class GameEngine {
                 left: -((this.mapWidth) * this.mapTwoScaleFactor)/2 + this.mapBoundaryOffset,
                 top: -((this.mapHeight) * this.mapTwoScaleFactor)/2 + this.mapBoundaryOffset,
                 right: ((this.mapWidth) * this.mapTwoScaleFactor)/2 - this.mapBoundaryOffset,
-                bottom: ((this.mapHeight) * this.mapTwoScaleFactor)/2 - this.mapBoundaryOffset
+                bottom: ((this.mapHeight) * this.mapTwoScaleFactor)/2 - this.mapBoundaryOffset - 23
             };
         }
         // If 3, then Space Map is used.
@@ -1150,8 +1174,9 @@ class GameEngine {
      * @param spritePath    The path of the sprite we are drawing.
      * @param scaleFactor   The scale of the sprite we want to use.
      * @param enableParallax    If true, then apply parallax effect to the background based on player coordinates.
+     * @param strength
      */
-    drawBackground(spritePath, scaleFactor, enableParallax) {
+    drawBackground(spritePath, scaleFactor, enableParallax, strength = 0.23) {
         const texture = ASSET_MANAGER.getAsset(spritePath);
         const textureWidth = Math.round(texture.width * scaleFactor);
         const textureHeight = Math.round(texture.height * scaleFactor);
@@ -1162,8 +1187,8 @@ class GameEngine {
 
         // Apply parallax effect if enabled
         if (enableParallax && this.player) {
-            const parallaxFactorX = 0.23; // Adjust lower for a more subtle effect
-            const parallaxFactorY = 0.23; // Adjust lower for a more subtle effect
+            const parallaxFactorX = strength; // Adjust lower for a more subtle effect
+            const parallaxFactorY = strength; // Adjust lower for a more subtle effect
             offsetX = Math.round(this.player.worldX * parallaxFactorX) % textureWidth;
             offsetY = Math.round(this.player.worldY * parallaxFactorY) % textureHeight;
         }

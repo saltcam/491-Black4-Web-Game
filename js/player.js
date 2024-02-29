@@ -9,8 +9,8 @@
 class Player extends Entity {
 
     constructor(game) {
-        super(100, 100, 25, game, 0, 0,
-            17, 29, "player", 160,
+        super(10000, 10000, 25, game, 0, 0,
+            17, 29, "player", 450, //160 speed
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
 
