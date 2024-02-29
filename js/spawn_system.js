@@ -29,17 +29,17 @@ class Spawn_System {
         /** Tracks if the spawn system has initialized. */
         this.initialized = false;
         /** Controls the max enemy count, gets doubled incrementally. */
-        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE);
+        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE) * this.game.currMap;
         /** Tracks the current max enemy count. */
         this.currentMaxEnemies = 0;
         /** Controls how often (in seconds) to increment max enemy count. */
-        this.maxEnemyIncrementTime =9 / this.DIFFICULTY_SCALE;
+        this.maxEnemyIncrementTime = 8 / this.DIFFICULTY_SCALE;
         /** Stores how many max enemy intervals have passed. */
         this.maxEnemyIntervals = 0;
         /** How much to lower the spawn delay each interval. */
-        this.spawnDelayDecreaseMultiplier = 0.95 / this.DIFFICULTY_SCALE;
+        this.spawnDelayDecreaseMultiplier = 0.94 / this.DIFFICULTY_SCALE;
         /** Controls how often (in seconds) we reduce the spawn delay of enemies. */
-        this.lowerSpawnDelayInterval = 18.5 / this.DIFFICULTY_SCALE;
+        this.lowerSpawnDelayInterval = 16.5 / this.DIFFICULTY_SCALE;
         /** Tracks when the last time we lowered the spawn delay was. */
         this.lastSpawnDelayDecreaseTime = 0;
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
