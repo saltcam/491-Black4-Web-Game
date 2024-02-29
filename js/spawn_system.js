@@ -18,7 +18,7 @@ class Spawn_System {
          */
         this.DIFFICULTY_SCALE = difficulty_scale;
         /** Raises the difficulty scale every this many seconds. */
-        this.raiseDifficultyInterval = 12;
+        this.raiseDifficultyInterval = 7.5;
         /** How much to raise the difficulty by (additive, 0.01 === 1% more stats on enemies) */
         this.difficultyScaleAdder = 0.01;
         /** Last time we raised the difficulty scale. */
