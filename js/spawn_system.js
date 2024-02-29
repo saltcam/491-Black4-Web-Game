@@ -33,7 +33,7 @@ class Spawn_System {
         /** Tracks the current max enemy count. */
         this.currentMaxEnemies = 0;
         /** Controls how often (in seconds) to increment max enemy count. */
-        this.maxEnemyIncrementTime = 8;
+        this.maxEnemyIncrementTime = 12;
         /** Stores how many max enemy intervals have passed. */
         this.maxEnemyIntervals = 0;
         /** How much to lower the spawn delay each interval. */
@@ -43,7 +43,7 @@ class Spawn_System {
         /** Tracks when the last time we lowered the spawn delay was. */
         this.lastSpawnDelayDecreaseTime = 0;
         /** How often to spawn enemies by default (this is automatically lowered exponentially as time goes on). */
-        this.baseEnemySpawnInterval = 5.5;
+        this.baseEnemySpawnInterval = 7.5;
         /** Tracks when the last enemy was spawned. */
         this.lastSpawnTime = 0;
         /** Setting this to true tells spawnRandomEnemy() to make the next enemy it spawns an elite. */
@@ -432,6 +432,8 @@ class Spawn_System {
 
         // Scale attack power
         enemy.atkPow = Math.round(enemy.atkPow * this.DIFFICULTY_SCALE);
+
+        console.log("enemy hp="+enemy.currHP);
     }
 
     /**
@@ -580,9 +582,9 @@ class Spawn_System {
         const currentTime = this.game.elapsedTime / 1000;
 
         this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE) * this.game.currMap;
-        this.maxEnemyIncrementTime = 13.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.maxEnemyIncrementTime = 20 / (this.DIFFICULTY_SCALE * this.game.currMap);
         this.spawnDelayDecreaseMultiplier = 0.95 / (this.DIFFICULTY_SCALE * this.game.currMap);
-        this.lowerSpawnDelayInterval = 5.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.lowerSpawnDelayInterval = 7.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
         //this.baseEnemySpawnInterval = 4 / (this.DIFFICULTY_SCALE * this.game.currMap);
         //console.log(this.spawnDelayDecreaseMultiplier);
 
@@ -612,9 +614,25 @@ class Spawn_System {
 
 
 /* Setting saves
-        this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE) * this.game.currMap;
-        this.maxEnemyIncrementTime = 13.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
-        this.spawnDelayDecreaseMultiplier = 0.95 / (this.DIFFICULTY_SCALE * this.game.currMap);
-        this.lowerSpawnDelayInterval = 5.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
-        this.baseEnemySpawnInterval = 5.5;
+    constructor(game, difficulty_scale = 1.0, baseEnemySpawnInterval = 6) {
+this.DIFFICULTY_SCALE = difficulty_scale;
+this.raiseDifficultyInterval = 7.5;
+this.difficultyScaleAdder = 0.01;
+this.lastDifficultyUpdateTime = null;
+
+this.game = game;
+this.initialized = false;
+this.baseMaxEnemies = 1;
+this.currentMaxEnemies = 0;
+this.maxEnemyIncrementTime = 8;
+this.maxEnemyIntervals = 0;
+this.spawnDelayDecreaseMultiplier = 0.94;
+this.lowerSpawnDelayInterval = 16.5;
+this.lastSpawnDelayDecreaseTime = 0;
+this.baseEnemySpawnInterval = 5.5;
+this.lastSpawnTime = 0;
+this.spawnElite = false;
+this.eliteSpawnTimer = 60;
+this.bossSpawnTimer = 300; // 300 by default
+this.lastEliteSpawnTime = 0;
  */
