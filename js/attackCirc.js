@@ -194,7 +194,7 @@ class AttackCirc {
                                     case 0:
                                         this.game.addEntity(new Ally_Contact(
                                             "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
-                                            this.game.player.summonDamage, this.game, object.worldX, object.worldY, 17,
+                                            this.game.player.atkPow, this.game, object.worldX, object.worldY, 17,
                                             29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Contact_Walk.png",
                                             0, 0, 32, 28,
                                             8, 0.1, 2, 1));
@@ -202,7 +202,7 @@ class AttackCirc {
                                     case 1:
                                         this.game.addEntity(new Ally_Ranged(
                                             "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
-                                            this.game.player.summonDamage, this.game, object.worldX, object.worldY, 17,
+                                            this.game.player.atkPow, this.game, object.worldX, object.worldY, 17,
                                             29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Ranged_Walk.png",
                                             0, 0, 32, 28,
                                             8, 0.1, 2, 1,

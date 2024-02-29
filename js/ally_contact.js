@@ -16,7 +16,7 @@ class Ally_Contact extends Entity {
         this.pushbackDecay = 0.9; // Determines how quickly the pushback force decays
         this.empower = 1;
         this.lastEmpowerTick = 0;
-        this.atkPow = this.game.player.atkPow/2;
+        this.atkPow = atkPow/2;
     }
 
     // changes the empower multiplier to 2, resets buff timer
