@@ -5,7 +5,7 @@ class Weapon_tome extends Weapon {
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 100),
             new Upgrade("Primary Piercing +2", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 100),
-            new Upgrade("Projectile Speed +15%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 75),
+            new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 75),
             new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_tome_doubleshot.png", 225),
             new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_tome_bounce.png", 200),
             new Upgrade("Doubletime", "(Unique) Secondary hits more often.", true, "./sprites/upgrade_tome_doubletime.png", 250),
@@ -220,8 +220,8 @@ class Weapon_tome extends Weapon {
                         this.maxPrimaryHits += 2;
                         this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
-                    case "Projectile Speed +15%":
-                        this.primaryProjectileMovementSpeed *= 1.15;
+                    case "Projectile Speed +10%":
+                        this.primaryProjectileMovementSpeed *= 1.1;
                         this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
                 }

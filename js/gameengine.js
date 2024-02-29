@@ -230,7 +230,7 @@ class GameEngine {
         this.spawnUpgradeChest(1797, 2802);
 
         // Debug Portal
-        //this.spawnPortal(0, 100);
+        this.spawnPortal(0, 100);
         //this.spawnEndPortal(0, 100);
 
         // Rocks
@@ -287,7 +287,7 @@ class GameEngine {
         this.spawnUpgradeChest(-1797, -2802);
 
         // Debug Portal
-        //this.spawnPortal(0, 100);
+        this.spawnPortal(0, 100);
 
         this.mapObjectsInitialized = true;
     }
@@ -305,7 +305,7 @@ class GameEngine {
         this.spawnUpgradeChest(500, 3000);
 
         // Debug Portal
-        //this.spawnPortal(0, 100);
+        this.spawnPortal(0, 100);
 
         this.mapObjectsInitialized = true;
     }
@@ -924,6 +924,28 @@ class GameEngine {
             this.ctx.fillText('WASD:    movement', 150, 130);
             this.ctx.fillText('Q, Mousewheel, or 1/2/3:     Switch weapons (Scythe, Tome, Staff)', 150, 160);
             this.ctx.fillText('Space:   Dash (with iFrames)', 150, 190);
+
+            this.ctx.fillText('Mechanics:', 100, 220);
+            this.ctx.fillText('-Follow yellow arrows to find upgrade chests and blue arrows to find portals to the next maps.', 150, 250);
+            this.ctx.fillText('-You can attack while dashing.', 150, 280);
+            this.ctx.fillText('-Enemies drop XP orbs to level your player up, you get to choose from a selection of random upgrades for your player upon leveling.', 150, 310);
+            this.ctx.fillText('-Enemies drop XP orbs to level your player up, you get to choose from a selection of random upgrades for your player upon leveling.', 150, 340);
+            this.ctx.fillText('-Enemies drop coins (This will let you purchase upgrades of your choice at the rest area between rounds).', 150, 370);
+            this.ctx.fillText('-Every 60 seconds an elite enemy spawns.', 150, 400);
+            this.ctx.fillText('-Elite enemies drop weapon upgrade chests, collect these to get special weapon upgrades.', 200, 430);
+            this.ctx.fillText('-At 5 min, the final boss of the map spawns, defeat him to get a portal to the rest area where buy can more upgrades using your coins, then portal to the next map.', 150, 460);
+            this.ctx.fillText('-At the end of the round, any gold bags left on the map are combined into a golden chest near the portal to the next map (with a 50% tax - so try to collect gold you see on the fly for min-maxing income!)', 150, 490);
+
+            this.ctx.fillText('Weapons:', 100, 520);
+            this.ctx.fillText('Scythe:', 150, 550);
+            this.ctx.fillText('-Left Click: Cone attack.', 200, 580);
+            this.ctx.fillText('-Right Click: Large Spin attack.', 200, 610);
+            this.ctx.fillText('Tome:', 150, 640);
+            this.ctx.fillText('-Left Click: Shoot small orb (Pierces one target, but that can be upgraded).', 200, 670);
+            this.ctx.fillText('-Right Click: Shoot big slow orb (Ticks damage over time).', 200, 700);
+            this.ctx.fillText('Staff:', 150, 730);
+            this.ctx.fillText('-Left Click: Weak explosion, but summon allies to help you if it hits tombstones with the explosion.', 200, 760);
+            this.ctx.fillText('-Right Click: Explode tombstones (Has potential to cause a chain reaction of tombstone explosions for huge damage).', 200, 790);
 
 
             const exitButtonWidth = 60;
@@ -1867,6 +1889,10 @@ class GameEngine {
             weapon.lastPrimaryAttackTime = currentTime - (weapon.primaryCool * 2);
             weapon.lastSecondAttackTime = currentTime - (weapon.secondCool * 2);
         });
+
+        // Reset cooldowns for upgrades
+        this.player.lastMoonTime = this.elapsedTime / 1000;
+        this.player.lastGraveWalkTime = this.elapsedTime / 1000;
 
         // Tell the game engine to switch to the map of the teleport index
         this.prevMap = this.currMap;

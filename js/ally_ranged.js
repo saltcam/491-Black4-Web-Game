@@ -52,6 +52,7 @@ class Ally_Ranged extends Entity {
         this.projectileCount = projectileCount;
         this.projectileSpread = projectileSpread;
 
+        this.atkPow = this.game.player.atkPow/2;
         this.atkPow *= 1.25; // so they are a bit stronger than contact allies since these guys have a chance to miss and also die faster
         this.empower = 1;
     }
@@ -122,8 +123,8 @@ class Ally_Ranged extends Entity {
 
         //this.checkCollisionAndDealDamage();
         this.castProjectile();
-        // if 1 second has passed while buffed, reset.
-        if (this.game.elapsedTime / 1000 - this.lastEmpowerTick >= 1) {
+        // if 1.5 seconds has passed while buffed, reset.
+        if (this.game.elapsedTime / 1000 - this.lastEmpowerTick >= 1.5) {
             this.empower = 1;
         }
 
@@ -249,7 +250,7 @@ class Ally_Ranged extends Entity {
                 newProjectile.maxHits = 2;
                 newProjectile.pulsatingDamage = this.pulse;
             }
-            this.takeDamage(5);
+            this.takeDamage(Math.floor(5/this.empower));
             this.lastAttackTime = currentTime; // Update last attack time
         }
     }

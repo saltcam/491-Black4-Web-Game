@@ -125,6 +125,8 @@ ASSET_MANAGER.queueDownload("./sprites/smoke.png");
 ASSET_MANAGER.queueDownload("./sprites/you_won_screen1.png");
 ASSET_MANAGER.queueDownload("./sprites/you_won_screen2.png");
 ASSET_MANAGER.queueDownload("./sprites/Orby.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_glorious_moon.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_divine_dash.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");

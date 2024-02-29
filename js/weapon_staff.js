@@ -4,17 +4,18 @@ class Weapon_staff extends Weapon {
             new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 175),
             new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70),
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 115),
-            new Upgrade("Summon Health +5", "Gives Summons +5 Health\n(Stackable, Additive).", false, "./sprites/upgrade_summon_health.png", 50),
+            new Upgrade("Summon Health +5", "(Stackable, Additive).", false, "./sprites/upgrade_summon_health.png", 50),
             new Upgrade("Summon Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_summon_speed.png", 50),
+        // TODO replace this!
             new Upgrade("Summon Damage +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_summon_damage.png", 50),
-            new Upgrade("Ranged Summons", "(Unique) Summons have a 50% chance to be ranged.", true, "./sprites/upgrade_summon_ranged.png", 50),
+            new Upgrade("Ranged Summons", "(Unique) 50% for ranged Summons.", true, "./sprites/upgrade_summon_ranged.png", 50),
             new Upgrade("Explosive Finish", "(Unique) Summons explode on death.", true, "./sprites/upgrade_summon_explode.png", 50),
             new Upgrade("Empower Summons", "(Unique) Brief 2x Speed, Damage, and Attack Freq.", true, "./sprites/upgrade_summon_empower.png", 50),
             new Upgrade("Heal Summons", "(Unique) Heal HP of Summons", true, "./sprites/upgrade_knockback.png", 50),
             new Upgrade("Fiery Explosions", "(Unique) Explosions leave behind fire spaces\n(Player is immune to these).", true, "./sprites/upgrade_staff_fire.png", 50),
             new Upgrade("Corpse Explosion", "(Unique) Enemies killed with explosions may explode.", true, "./sprites/upgrade_corpse_explosion.png", 350)];
 
-        super(game, "Staff", 7, 11,
+        super(game, "Staff", 4, 5,
             0, 0,
             5, 5,
             115, 2,
@@ -28,17 +29,19 @@ class Weapon_staff extends Weapon {
         this.initialPrimaryAttackRadius = 115;
         this.initialSecondaryAttackRadius = 2;
 
+        this.upgrades[5].relevant = false;
+        
         // this.upgrades[6].active = true;
         // this.upgrades[7].active = true;
-        //this.upgrades[8].active = true;
-        //this.upgrades[9].active = true;
+        // this.upgrades[8].active = true;
+        // this.upgrades[9].active = true;
         // this.upgrades[10].active = true;    // sets fiery explosion to true
         // this.handleUpgrade();
     }
 
     performPrimaryAttack(player, cheating) {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
-        let defaultPrimaryDamage = player.atkPow / 4;
+        let defaultPrimaryDamage = player.atkPow / 3;
 
         const currentTime = this.game.elapsedTime / 1000;
 
@@ -82,7 +85,7 @@ class Weapon_staff extends Weapon {
     performSecondaryAttack(player, cheating) {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         // let defaultSecondaryDamage = player.atkPow / 2;
-        let defaultSecondaryDamage = 20 + (player.atkPow / 10);
+        let defaultSecondaryDamage = 45 + (player.atkPow / 10);
 
         const currentTime = this.game.elapsedTime / 1000;
 

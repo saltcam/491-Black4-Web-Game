@@ -112,7 +112,7 @@ class Map_object extends Entity {
         // duration is a raw value because it otherwise lasts infinitely.
         // Do we want to take more info from player here?
         if (this.isExploding) {
-            let newProjectile = this.game.addEntity(new Projectile(this.game, this.explosion.attackDamage,
+            let newProjectile = this.game.addEntity(new Projectile(this.game, 45 + (this.game.player.atkPow / 10),
                 this.worldX, this.worldY, 10, 10, "playerAttack_ExplosionAttack", 0,
                 "./sprites/transparent.png",
                 0, 0, 17, 17, 3, 0.2, 0.01, 0, 0,

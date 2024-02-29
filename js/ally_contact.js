@@ -16,6 +16,7 @@ class Ally_Contact extends Entity {
         this.pushbackDecay = 0.9; // Determines how quickly the pushback force decays
         this.empower = 1;
         this.lastEmpowerTick = 0;
+        this.atkPow = this.game.player.atkPow/2;
     }
 
     // changes the empower multiplier to 2, resets buff timer
@@ -85,8 +86,8 @@ class Ally_Contact extends Entity {
         this.boundingBox.updateCentered(scaledCenterX, scaledCenterY, boxWidth, boxHeight);
 
         this.checkCollisionAndDealDamage();
-        // if 1 second has passed while buffed, reset.
-         if (this.game.elapsedTime / 1000 - this.lastEmpowerTick >= 1) {
+        // if 1.5 seconds has passed while buffed, reset.
+         if (this.game.elapsedTime / 1000 - this.lastEmpowerTick >= 1.5) {
              this.empower = 1;
          }
     }
@@ -100,7 +101,7 @@ class Ally_Contact extends Entity {
         // Check collision and cooldown
         if (this.boundingBox.isColliding(enemy.boundingBox) && (currentTime - this.lastAttackTime >= this.attackCooldown/this.empower)) {
             enemy.takeDamage(this.atkPow * this.empower);
-            this.takeDamage(5);
+            this.takeDamage(Math.floor(5/this.empower));
             this.lastAttackTime = currentTime; // Update last attack time
         }
         });

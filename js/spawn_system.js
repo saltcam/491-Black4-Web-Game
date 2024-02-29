@@ -85,7 +85,7 @@ class Spawn_System {
                 shootSpritePath: "./sprites/ranged_necro_shoot.png" , animXStart: 0, animYStart: 0, animW: 84, animH: 137,
                 animFCount: 5, animFDur: 0.3, scale: 2, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 84,
                 shootAnimH: 137, shootAnimFCount: 5, shootAnimFDur: 0.2, shootScale: 1, exp: -1, projectileFreq: 5,
-                projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 10, projectileSpread: 360,
+                projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 11, projectileSpread: 360,
                 fleeDist: 200, approachDist: 350, projectileSprite: "./sprites/MagicBall_red.png",
                 projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 30, projectileAnimH: 30, projectileAnimCount: 2, projectileAnimDurr: 0.2, projectileAnimScale: 2},
             { enemyType: "ranged", name: "LegalMage", maxHP: 50, currHP: 50, atkPow: 5, worldX: 0, worldY: 0,
@@ -93,9 +93,9 @@ class Spawn_System {
                 shootSpritePath: "./sprites/ranged_legal_shoot.png" , animXStart: 0, animYStart: 0, animW: 25, animH: 30,
                 animFCount: 2, animFDur: 0.2, scale: 2, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 25,
                 shootAnimH: 30, shootAnimFCount: 8, shootAnimFDur: 0.35, shootScale: 0.65, exp: -1, projectileFreq: 2,
-                projectileSpeed: 35, projectileSize: 20, projectilePulse: false, projectileCount: 3, projectileSpread: 15,
-                fleeDist: 75, approachDist: 150, projectileSprite: "./sprites/Orby.png",
-                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 29, projectileAnimH: 31, projectileAnimCount: 10, projectileAnimDurr: 0.05, projectileAnimScale: 0.75, shootRange: 150}
+                projectileSpeed: 35, projectileSize: 15, projectilePulse: false, projectileCount: 3, projectileSpread: 25,
+                fleeDist: 100, approachDist: 250, projectileSprite: "./sprites/Orby.png",
+                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 29, projectileAnimH: 31, projectileAnimCount: 10, projectileAnimDurr: 0.05, projectileAnimScale: 0.75, shootRange: 275}
         ];
         /** An array of all potential enemies of type 'Enemy_Charger'. */
         this.chargerEnemyTypes = [

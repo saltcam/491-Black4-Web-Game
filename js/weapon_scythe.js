@@ -8,7 +8,7 @@ class Weapon_scythe extends Weapon {
             new Upgrade("Knockback +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_knockback.png", 50),
             new Upgrade("Blood Scythe", "(Unique) Heal 1.5% HP per attack.", true, "./sprites/upgrade_blood_scythe.png", 200),
             new Upgrade("Dual Blade", "(Unique) Adds primary back attack.", true, "./sprites/upgrade_dual_blade.png", 225),
-            new Upgrade("Echo Slash", "(Unique) Adds attack echoes. CDs +30%", true, "./sprites/upgrade_echo_slash.png", 250),
+            new Upgrade("Echo Slash", "(Unique) Adds attack echoes.", true, "./sprites/upgrade_echo_slash.png", 250),
             new Upgrade("Crippling Chill", "(Unique) Cripple effect on attacks.", true, "./sprites/upgrade_crippling_chill.png", 150),
             new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg is now over-time.", true, "./sprites/upgrade_bleeding_edge.png", 235)
         ];
@@ -31,9 +31,10 @@ class Weapon_scythe extends Weapon {
         this.secondaryEchoDelay = 0.66;
 
         // Debug bleeding edge upgrade and chill upgrade
+        //this.upgrades[6].active = true;
         //this.upgrades[7].active = true;
         //this.upgrades[8].active = true;
-        // this.handleUpgrade();
+        //this.handleUpgrade();
     }
 
     performPrimaryAttack(player, cheating) {
@@ -115,7 +116,7 @@ class Weapon_scythe extends Weapon {
                             dx, dy,
                             this.primaryAttackDuration,
                             "./sprites/weapon_blood_scythe_primaryattack.png",
-                            defaultPrimaryDamage / 2, 0,
+                            defaultPrimaryDamage / 2.5, 0,
                             this.primaryAttackPushbackForce,
                             0, 1));
                     }, this.primaryEchoDelay * 1000);
@@ -152,7 +153,7 @@ class Weapon_scythe extends Weapon {
                                 -dx, -dy,
                                 this.primaryAttackDuration,
                                 "./sprites/weapon_scythe_primaryattack.png",
-                                defaultPrimaryDamage / 2, 0,
+                                defaultPrimaryDamage / 2.5, 0,
                                 this.primaryAttackPushbackForce,
                                 0, 1));
                         }, this.primaryEchoDelay * 1000);
@@ -168,7 +169,7 @@ class Weapon_scythe extends Weapon {
                             dx, dy,
                             this.primaryAttackDuration,
                             "./sprites/weapon_scythe_primaryattack.png",
-                            defaultPrimaryDamage / 2, 0,
+                            defaultPrimaryDamage / 2.5, 0,
                             this.primaryAttackPushbackForce,
                             0, 0.6));
                     }, this.primaryEchoDelay * 1000);
@@ -212,7 +213,7 @@ class Weapon_scythe extends Weapon {
                             0, 0,
                             this.primaryAttackDuration,
                             "./sprites/weapon_blood_scythe_secondaryattack.png",
-                            defaultSecondaryDamage / 2, 0,
+                            defaultSecondaryDamage / 2.5, 0,
                             this.primaryAttackPushbackForce,
                             0.3, 1));
                     }, this.secondaryEchoDelay * 1000);
@@ -237,7 +238,7 @@ class Weapon_scythe extends Weapon {
                             0, 0,
                             this.primaryAttackDuration,
                             "./sprites/weapon_scythe_secondaryattack.png",
-                            defaultSecondaryDamage / 2, 0,
+                            defaultSecondaryDamage / 2.5, 0,
                             this.primaryAttackPushbackForce,
                             0.3, 1));
                     }, this.secondaryEchoDelay * 1000);
@@ -315,12 +316,12 @@ class Weapon_scythe extends Weapon {
                                 this.spritePath = "./sprites/weapon_scythe_dual.png";
                             }
                         break;
-                    case "Echo Slash":
-                        if (this.primaryCool === this.initialPrimaryCool && this.secondCool === this.initialSecondaryCool) {
-                            this.primaryCool *= 1.3;
-                            this.secondCool *= 1.3;
-                        }
-                        break;
+                    // case "Echo Slash":
+                    //     if (this.primaryCool === this.initialPrimaryCool && this.secondCool === this.initialSecondaryCool) {
+                    //         this.primaryCool *= 1.3;
+                    //         this.secondCool *= 1.3;
+                    //     }
+                    //     break;
                 }
             }
 

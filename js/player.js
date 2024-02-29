@@ -33,9 +33,9 @@ class Player extends Entity {
             new Upgrade("It's what you do with it", "(Unique) 50% smaller.", false, "./sprites/upgrade_tomb_chance.png", 1000),
             new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 1000),
             // based on hades, maybe grab asset from there?
-            new Upgrade("Divine Dash", "(Unique) Dash reflects projectiles.", true, "./sprites/upgrade_tomb_chance.png", 1000),
+            new Upgrade("Divine Dash", "(Unique) Dash reflects projectiles.", true, "./sprites/upgrade_divine_dash.png", 1000),
             // based on vampire survivors, feel free to grab the sprite from there.
-            new Upgrade("Glorious Moon", "(Unique) Suck all EXP every 2 minutes.", true, "./sprites/upgrade_tomb_chance.png", 1000)
+            new Upgrade("Glorious Moon", "(Unique) Suck all EXP every 2 minutes.", true, "./sprites/upgrade_glorious_moon.png", 1000)
         ];
 
         this.debugName = "Player";
@@ -130,7 +130,8 @@ class Player extends Entity {
         this.lastGraveWalkTime = 0;
         this.lastMoonTime = 0;
 
-        // this.upgrades[15].active = true;
+        // this.upgrades[12].active = true; // gravewalker
+        // this.upgrades[16].active = true;
         // this.handleUpgrade();
 
         // Turn off bad upgrades
@@ -445,6 +446,7 @@ class Player extends Entity {
         // if 2 minutes have passed, and we have Glorious Moon, suck all EXP.
         if (this.upgrades[16].active && (this.game.elapsedTime / 1000 - this.lastMoonTime) >= 120) {
             // TODO add visual and audio indicator of the effect
+            ASSET_MANAGER.playAsset()
             this.game.entities.forEach(orb => {
                 if (orb.boundingBox.type === "orb") {
                     orb.isMovingTowardsPlayer = true;

@@ -171,10 +171,10 @@ class AttackCirc {
                                 ally.powerUp();
                             }
                             if (this.game.player.weapons[2].upgrades[9].active) {
-                                if (currentTime - this.lastAllyHealTime >= this.allyHealCooldown) {
+                                // if (currentTime - this.lastAllyHealTime >= this.allyHealCooldown) {
                                     ally.heal(ally.maxHP);
                                     this.lastAllyHealTime = currentTime;
-                                }
+                                // }
                             }
                         }
                     });
