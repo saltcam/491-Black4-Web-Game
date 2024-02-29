@@ -282,7 +282,7 @@ class Entity {
                 this.lives--;
                 ASSET_MANAGER.playAsset("./sounds/SE_staff_secondary.mp3");
                 if (this instanceof Player) {
-                    this.game.player.updateScore(-1 * this.game.player.score / 2);
+                    // this.game.player.updateScore(-1 * this.game.player.score / 2);
                     let newProjectile = this.game.addEntity(new Projectile(this.game, 75,
                         this.worldX, this.worldY, 10, 10, "playerAttack", 0,
                         "./sprites/ElectricOrb_red.png",

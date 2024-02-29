@@ -9,33 +9,33 @@
 class Player extends Entity {
 
     constructor(game) {
-        super(10000, 10000, 25, game, 0, 0,
-            17, 29, "player", 450, //160 speed
+        super(100, 100, 25, game, 0, 0,
+            17, 29, "player", 160, //160 speed is default
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
 
         // if adding a special upgrade, make that first so when index checking, nothing gets offset due to splicing.
         this.upgrades = [
-            new Upgrade("Health +10", "(Stackable, Additive).", false, "./sprites/upgrade_max_health.png"),
-            new Upgrade("Health Regen CD -20%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_health_regen.png"),
-            new Upgrade("Dash CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_cooldown.png"),
-            new Upgrade("Movement Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_movement_speed.png"),
-            new Upgrade("Attack Damage +7.5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png"),
-            new Upgrade("Pickup Range +30%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png"),
-            new Upgrade("Dash Duration +15%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png"),
-            new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_damage.png"),
-            new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_chance.png"),
-            new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png"),
-            new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 50),
+            new Upgrade("Health +10", "(Stackable, Additive).", false, "./sprites/upgrade_max_health.png", 0, 1),
+            new Upgrade("Health Regen CD -20%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_health_regen.png", 0, 1),
+            new Upgrade("Dash CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_cooldown.png", 0 , 1),
+            new Upgrade("Movement Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_movement_speed.png", 0, 1),
+            new Upgrade("Attack Damage +7.5%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_attack_damage.png", 0, 1),
+            new Upgrade("Pickup Range +30%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_pickup_range.png", 0,1),
+            new Upgrade("Dash Duration +15%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_dash_distance.png", 0,1),
+            new Upgrade("Crit Damage +20%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_damage.png", 0,1),
+            new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_chance.png", 0,1),
+            new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png", 0,1),
+            new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 0,1),
             // TODO need assets for these
-            new Upgrade("Extra Life", "Fully heal instead of dying (Once).", false, "./sprites/upgrade_tomb_chance.png", 1000),
-            new Upgrade("Missingno", "(Unique) Drop tomb every 10s.", true, "./sprites/upgrade_tomb_chance.png", 1000),
-            new Upgrade("It's what you do with it", "(Unique) 50% smaller.", false, "./sprites/upgrade_tomb_chance.png", 1000),
-            new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 1000),
+            new Upgrade("Extra Life", "Fully heal instead of dying (Once).", false, "./sprites/upgrade_tomb_chance.png", 0, 0.05),
+            new Upgrade("Missingno", "(Unique) Drop tomb every 10s.", true, "./sprites/upgrade_tomb_chance.png", 0),
+            new Upgrade("It's what you do with it", "(Unique) 50% smaller.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.15),
+            new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.15),
             // based on hades, maybe grab asset from there?
-            new Upgrade("Divine Dash", "(Unique) Dash reflects projectiles.", true, "./sprites/upgrade_divine_dash.png", 1000),
+            new Upgrade("Divine Dash", "(Unique) Dash reflects projectiles.", true, "./sprites/upgrade_divine_dash.png", 0, 0.15),
             // based on vampire survivors, feel free to grab the sprite from there.
-            new Upgrade("Glorious Moon", "(Unique) Suck all EXP every 2 minutes.", true, "./sprites/upgrade_glorious_moon.png", 1000)
+            new Upgrade("Glorious Moon", "(Unique) Suck all EXP every 2 minutes.", true, "./sprites/upgrade_glorious_moon.png", 0, 0.1)
         ];
 
         this.debugName = "Player";
@@ -132,7 +132,7 @@ class Player extends Entity {
         this.lastMoonTime = 0;
 
         // this.upgrades[12].active = true; // gravewalker
-        // this.upgrades[13].active = true; // small
+        //this.upgrades[13].active = true; // small
         // this.upgrades[15].active = true;// Divine Dash
         // this.upgrades[16].active = true;
         //this.handleUpgrade();
@@ -155,6 +155,11 @@ class Player extends Entity {
                             break;
                         case "Health Regen CD -20%":
                             this.healthRegenTime *= 0.8;
+
+                            // We don't want to go too low on the heal CD or it kinda just stops working
+                            if (this.healthRegenTime <= 0.15) {
+                                this.upgrades[i].relevant = false;
+                            }
                             break;
                         case "Dash CD -10%":
                             this.dashCooldown *= 0.9;
@@ -205,12 +210,23 @@ class Player extends Entity {
                             break;
                         case "Extra Life":
                             this.lives++;
-                            this.upgrades[i].relevant = false;
                             break;
+                    }
+                    // Set generic to 'false' so it can be re-used/activated in the future
+                    this.upgrades[i].active = false;
+                }
+                else if (this.upgrades[i].active && this.upgrades[i].relevant && this.upgrades[i].special) {
+                    switch (this.upgrades[i].name) {
                         case "It's what you do with it":
                             this.boundingBox.height *= 0.5;
                             this.animator.scale *= 0.5;
-                            this.upgrades[i].relevant = false;
+                            this.game.playerReflection = null;
+                            break;
+                        case "Smoke Bomb":
+                            break;
+                        case "Divine Dash":
+                            break;
+                        case "Glorious Moon":
                             break;
                     }
                     // Set generic to 'false' so it can be re-used/activated in the future
@@ -240,7 +256,7 @@ class Player extends Entity {
         let indexes = new Set(); // To keep track of already selected indexes
         while (indexes.size < 3) {
             let randomIndex = Math.floor(Math.random() * this.upgrades.length);
-            if (!indexes.has(randomIndex) && this.upgrades[randomIndex].relevant && !this.upgrades[randomIndex].active) {
+            if (!indexes.has(randomIndex) && Math.random() < this.upgrades[randomIndex].rarity && this.upgrades[randomIndex].relevant && !this.upgrades[randomIndex].active) {
                 // If the upgrade selected is 'special' lets add a rarity to it even being chosen
                 if (this.upgrades[randomIndex].special && (Math.random() < 1)) { // 20% chance that we let this special upgrade show up
                     indexes.add(randomIndex);
@@ -315,10 +331,12 @@ class Player extends Entity {
             if (this.game.keys["a"]) {
                 moveX -= 1;
                 this.lastMove = "left";     // Remember the last direction the character moved
+                if (this.game.playerReflection) this.game.playerReflection.lastMove = "left";
             }
             if (this.game.keys["d"]) {
                 moveX += 1;
                 this.lastMove = "right";    // Remember the last direction the character moved
+                if (this.game.playerReflection) this.game.playerReflection.lastMove = "right";
             }
         }
 
@@ -418,15 +436,18 @@ class Player extends Entity {
             this.animator.pauseAtFrame(-1);
             this.currentAnimation = "walking";
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McWalk.png"), 0, 0, 32, 28, 8, 0.1);
+            if (this.game.playerReflection && !this.upgrades[13].active) this.game.playerReflection.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McWalk_reflection.png"), 0, 0, 32, 28, 8, 0.1);
         } else if (!this.isDashing && !this.isMoving && this.currentAnimation !== "standing") {
             this.animator.pauseAtFrame(-1);
             this.currentAnimation = "standing";
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McIdle.png"), 0, 0, 32, 28, 2, 0.5);
+            if (this.game.playerReflection && !this.upgrades[13].active) this.game.playerReflection.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McIdle_reflection.png"), 0, 0, 32, 28, 2, 0.5);
         }
 
         // If still currently dashing, then play up to frame 3 of the McDash animation
         if (this.isDashing && this.animator.spritesheet !== ASSET_MANAGER.getAsset("./sprites/McDash.png")) {
             this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McDash.png"), 0, 0, 32, 28, 4, 0.15);
+            if (this.game.playerReflection && !this.upgrades[13].active) this.game.playerReflection.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/McDash_reflection.png"), 0, 0, 32, 28, 4, 0.15);
             this.currentAnimation = "dashing";
         }
 

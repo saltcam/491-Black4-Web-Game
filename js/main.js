@@ -7,10 +7,12 @@ ASSET_MANAGER.queueDownload("./sprites/map_stone_background.png");
 ASSET_MANAGER.queueDownload("./sprites/map_space_background.png");
 ASSET_MANAGER.queueDownload("./sprites/map_space_background2.gif");
 ASSET_MANAGER.queueDownload("./sprites/map_cave_background.png");
+ASSET_MANAGER.queueDownload("./sprites/map_cave_background2.png");
 ASSET_MANAGER.queueDownload("./sprites/portal.png");
 ASSET_MANAGER.queueDownload("./sprites/portal_white.png");
 ASSET_MANAGER.queueDownload("./sprites/grass.png");
 ASSET_MANAGER.queueDownload("./sprites/map_rock_object.png");
+ASSET_MANAGER.queueDownload("./sprites/map_rock_object_black.png");
 ASSET_MANAGER.queueDownload("./sprites/exp_orb.png");
 ASSET_MANAGER.queueDownload("./sprites/arrow.png");
 ASSET_MANAGER.queueDownload("./sprites/scythe_attack_slash.png");
@@ -123,11 +125,13 @@ ASSET_MANAGER.queueDownload("./sprites/ranged_legal_walk_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/ranged_legal_shoot.png");
 ASSET_MANAGER.queueDownload("./sprites/ranged_legal_shoot_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/smoke.png");
+ASSET_MANAGER.queueDownload("./sprites/you_died_screen.png");
 ASSET_MANAGER.queueDownload("./sprites/you_won_screen1.png");
 ASSET_MANAGER.queueDownload("./sprites/you_won_screen2.png");
 ASSET_MANAGER.queueDownload("./sprites/Orby.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_glorious_moon.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_divine_dash.png");
+ASSET_MANAGER.queueDownload("./sprites/run_stats_menu.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
@@ -158,6 +162,14 @@ ASSET_MANAGER.queueDownload("./sprites/McDead.png");
 ASSET_MANAGER.queueDownload("./sprites/McDead_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/McDash.png");
 ASSET_MANAGER.queueDownload("./sprites/McDash_DAMAGED.png");
+
+ASSET_MANAGER.queueDownload("./sprites/McIdle_reflection.png");
+ASSET_MANAGER.queueDownload("./sprites/McIdle_reflection_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/McWalk_reflection.png");
+ASSET_MANAGER.queueDownload("./sprites/McWalk_reflection_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/McDash_reflection.png");
+ASSET_MANAGER.queueDownload("./sprites/McDash_reflection_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/reflective_pane.png");
 
 //allies
 ASSET_MANAGER.queueDownload("./sprites/Ally_Contact_Walk.png");

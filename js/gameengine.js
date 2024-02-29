@@ -151,6 +151,32 @@ class GameEngine {
         this.youWonScreen = "./sprites/you_won_screen1.png";
 
         this.drawEndGameScreenFlag = false;
+
+        this.levelTimes = [0, 0, 0];
+        this.levelScores = [0, 0, 0];
+        this.playerReflection = null;
+    }
+
+    createPlayerReflection() {
+        let ref = this.addEntity(new Entity(1, 1, 0, this,
+            this.player.worldX, this.player.worldY, 25, 25, "reflection", 0,
+            "./sprites/reflective_pane.png", 0, 0, 96, 48, 1, 1, 2, 0));
+        ref.followEntity(this.player, -30, 20);
+
+        // Don't make player reflection when player is small mode
+        if (this.player.upgrades[13].active) {
+            console.log("NO");
+            return;
+        }
+
+        console.log("YES");
+
+        ref = this.addEntity(new Entity(1, 1, 0, this,
+            this.player.worldX, this.player.worldY, 25, 25, "reflection", 0,
+            "./sprites/McIdle_reflection.png", 0, 0, 32, 28, 2, 0.5, 2, 0));
+        ref.followEntity(this.player, 0, 75);
+
+        this.playerReflection = ref;
     }
 
     /**
@@ -231,7 +257,7 @@ class GameEngine {
 
         // Debug Portal
         //this.spawnPortal(0, 100);
-        //this.spawnEndPortal(0, 100);
+        //this.spawnEndPortal(0, -100);
 
         // Rocks
         let newEntity = this.addEntity(new Map_object(this, -250, 0, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
@@ -289,8 +315,34 @@ class GameEngine {
         // Debug Portal
         //this.spawnPortal(0, 100);
 
+        // Rock objects
+        let newEntity = this.addEntity(new Map_object(this, -450, 0, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 450, 0, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 0, 450, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 0, -450, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -1900, -650, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2.5));
+        newEntity = this.addEntity(new Map_object(this, -3260, 1525, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -3095, 1485, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -2625, 1525, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -2730, 1590, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -1555, 2590, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -3115, 2555, 65, 56-20, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 3.5));
+        newEntity = this.addEntity(new Map_object(this, -920, 1215, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 20, -1555, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 620, -2065, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 1810, -1555, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 2910, -360, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 1535, 2555, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -2730, -2360, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -2850, -2335, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -2925, -2375, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, -3290, -2590, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
+        newEntity = this.addEntity(new Map_object(this, 2426, 2835, 65, 56-20, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 3.5));
+        newEntity = this.addEntity(new Map_object(this, 2380, 2735, 65, 56-20, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 3.5));
+        newEntity = this.addEntity(new Map_object(this, 2515, 2930, 65, 56-20, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 3.5));
+
         // Invisible Objects
-        let newEntity = this.addEntity(new Map_object(this, -2035, 1180, 940, 2840, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
+        newEntity = this.addEntity(new Map_object(this, -2035, 1180, 940, 2840, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
         newEntity.animator.pauseAtFrame(10);    // Essentially makes the sprite invisible by pausing on a frame that doesn't exist.
         newEntity = this.addEntity(new Map_object(this, -200, 2560, 850, 2700, "./sprites/debug_warning.png", 0, 0, 0, 0, 1, 1, 1));
         newEntity.animator.pauseAtFrame(10);
@@ -685,6 +737,7 @@ class GameEngine {
             // If the player is dead, display 'You Died!' text.
             if (this.player && this.player.isDead) {
                 this.ctx.beginPath();
+                this.drawLoseScreen();
 
                 this.ctx.fillStyle = "black";
                 this.ctx.fillRect(this.ctx.canvas.width / 2 - 175, this.ctx.canvas.height / 2 - 75, 350, 95);
@@ -1086,7 +1139,7 @@ class GameEngine {
                 this.initCaveObjects();
             }
 
-            this.drawBackground('./sprites/map_cave_background.png', 4, true, 0.1);
+            this.drawBackground('./sprites/map_cave_background2.png', 5, true, 0.1);
 
             const map = ASSET_MANAGER.getAsset("./sprites/map_cave.png");
 
@@ -1125,6 +1178,9 @@ class GameEngine {
             if (!this.mapObjectsInitialized) {
                 this.initSpaceMapObjects();
             }
+
+            this.drawBackground('./sprites/map_space_background.png', 1, true);
+
             // Simulate infinite boundaries by setting them to very large numbers.
             this.mapBoundaries = {
                 left: -Infinity,
@@ -1517,7 +1573,9 @@ class GameEngine {
         });
 
         // Don't spawn the chest if its gonna be empty
-        if (goldAmount <= 0) return;
+        if (goldAmount < 25) {
+            goldAmount = 25;
+        }
 
         let newEntity = this.addEntity(new Map_object(this, worldX, worldY, 35, 35, "./sprites/object_treasure_chest_gold.png", 0, 0, 54, 47, 25, 0.03, 1.25));
 
@@ -1596,7 +1654,6 @@ class GameEngine {
         // Calculate the time passed since the last frame
         this.clockTick = this.timer.tick();
 
-        // TODO if we could we should really make it so this only ever happens every 1/60 seconds. Then all update methods could assume 60 frames.
         this.update();
 
         // Draw the game state regardless of pause state
@@ -1788,6 +1845,28 @@ class GameEngine {
         }
     }
 
+    handleLoseGameScreenClick(event) {
+        // if(!this.drawEndGameScreenFlag) return;
+
+        // Convert click coordinates to canvas space
+        const rect = this.ctx.canvas.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const clickY = event.clientY - rect.top;
+
+
+        // Check if click was on 'Start Over' button
+        if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
+            clickY >= this.ctx.canvas.height / 2 + 250 + 60 && clickY <= this.ctx.canvas.height / 2 + 250 + 60 + 50) {
+            // Handle Start Over action
+            //TODO fix this so it restarts
+            window.location.reload();
+            this.drawEndGameScreenFlag = false;
+            if (this.isGamePaused) this.togglePause();
+            // Remove event listener to prevent memory leaks
+            this.ctx.canvas.removeEventListener('click', this.handleLoseGameScreenClick.bind(this));
+        }
+    }
+
     drawButton(x, y, width, height, text) {
         // Draw button background
         this.ctx.fillStyle = '#000';
@@ -1806,15 +1885,56 @@ class GameEngine {
         // Clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        if (this.youWonScreen === "./sprites/you_won_screen1.png" && easterEgg) {
-            this.youWonScreen = "./sprites/you_won_screen2.png";
-        }
 
-        // Draw the background image
-        const bgImage = ASSET_MANAGER.getAsset(this.youWonScreen);
-        this.ctx.drawImage(bgImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+            if (this.youWonScreen === "./sprites/you_won_screen1.png" && easterEgg) {
+                this.youWonScreen = "./sprites/you_won_screen2.png";
+            }
+
+            // Draw the background image
+            const bgImage = ASSET_MANAGER.getAsset(this.youWonScreen);
+            this.ctx.drawImage(bgImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+            // Draw score
+            this.ctx.fillStyle = 'white';
+            this.ctx.textAlign = 'center';
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
+            this.ctx.shadowBlur = 0; // How much the shadow should be blurred
+            this.ctx.shadowOffsetX = 2; // Horizontal shadow offset
+            this.ctx.shadowOffsetY = 2; // Vertical shadow offset
+            this.ctx.font = 'bold 36px Arial';
+            this.ctx.fillText("Score: " + this.player.score, this.ctx.canvas.width / 2, this.ctx.canvas.height / 2 + 243);
+
+            // Draw the stats screen
+            this.UPGRADE_SYSTEM.drawPlayerStatsMenu(this.ctx);
+
+            // Draw buttons
+            // Continue Button
+            this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250, 300, 50, 'New Game +');
+
+            // Start Over Button
+            this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + +250 + 60, 300, 50, 'Start Over');
+
+            // Listen for mouse clicks on buttons
+            this.ctx.canvas.addEventListener('click', this.handleEndGameScreenClick.bind(this));
+
+        this.drawEndGameScreenFlag = true;
+    }
+
+    drawLoseScreen() {
+        if (!this.isGamePaused) this.togglePause();
+
+        // Clear the canvas
+        //this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+        // Draw the background red color
+        this.ctx.fillStyle = `rgba(255, 0, 0, 0.5)`;
+        this.ctx.beginPath();
+        // this.ctx.rect(0, 0, canvas.width, canvas.height);
+        this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+        this.ctx.closePath();
 
         // Draw score
+        this.ctx.beginPath();
         this.ctx.fillStyle = 'white';
         this.ctx.textAlign = 'center';
         this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
@@ -1822,26 +1942,155 @@ class GameEngine {
         this.ctx.shadowOffsetX = 2; // Horizontal shadow offset
         this.ctx.shadowOffsetY = 2; // Vertical shadow offset
         this.ctx.font = 'bold 36px Arial';
-        this.ctx.fillText("Score: " + this.player.score, this.ctx.canvas.width / 2, this.ctx.canvas.height / 2 + 243);
 
-        // Draw the stats screen
+        this.ctx.closePath();
+
         this.UPGRADE_SYSTEM.drawPlayerStatsMenu(this.ctx);
-
-        // Draw buttons
-        // Continue Button
-        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250, 300, 50, 'New Game +');
+        this.drawRunStatsUI(this.ctx);
 
         // Start Over Button
-        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + + 250+ 60, 300, 50, 'Start Over');
+        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + +250 + 60, 300, 50, 'Start Over');
 
         // Listen for mouse clicks on buttons
-        this.ctx.canvas.addEventListener('click', this.handleEndGameScreenClick.bind(this));
+        this.ctx.canvas.addEventListener('click', this.handleLoseGameScreenClick.bind(this));
 
-        this.drawEndGameScreenFlag = true;
+    }
+
+    drawRunStatsUI(ctx) {
+            let scale = 1;
+
+            // Set animator back to original menu sprite sheet
+        const bgImage = ASSET_MANAGER.getAsset("./sprites/run_stats_menu.png");
+        this.ctx.drawImage(bgImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+        // ctx.drawImage();
+            // this.animator.changeSpritesheet(ASSET_MANAGER.getAsset("./sprites/run_stats_menu.png"), 0, 0, canvas.width, canvas.height, 1, 1);
+            // this.animator.scale = (1.5) * scale;
+
+            // Calculate the center of the UI
+            let screenX = canvas.width*4/5;
+            let screenY = canvas.height*3/4;
+
+        this.ctx.fillText("Score: " + this.player.score, screenX, screenY);
+        this.ctx.fillText("More stats coming soon!", screenX, screenY + 20);
+
+
+            // let yIncrement = 24;
+
+
+
+            // // Player Attack Power
+            // ctx.fillText("Atk Pow: " + Math.round((this.game.player.atkPow / this.game.player.initialAtkPow) * 100) + "%", screenX, screenY);
+            // // Player Crit Chance
+            // ctx.fillText("Crit Chance: " + (Math.round((this.game.player.critChance * 100) * 10) / 10) + "%", screenX, screenY+(yIncrement));
+            // // Player Crit Dmg
+            // ctx.fillText("Crit Dmg: " + (Math.round((this.game.player.critDamage * 100) * 10) / 10) + "%", screenX, screenY+(yIncrement * 2));
+            // // Player Max Health
+            // ctx.fillText("Max HP: " + Math.round(this.game.player.maxHP), screenX, screenY+(yIncrement * 3));
+            // // Player Health Regen CD
+            // ctx.fillText("Regen: 1 hp / " + (Math.round(this.game.player.healthRegenTime * 10) / 10) + "s", screenX, screenY+(yIncrement * 4));
+            //
+            // // Next column
+            // screenX += 140;
+            //
+            // // Player Dash CD
+            // ctx.fillText("Dash CD: " + (Math.round(this.game.player.dashCooldown * 10) / 10) + "s", screenX, screenY);
+            // // Player Dash Distance
+            // ctx.fillText("Dash Dur: " + (Math.round(this.game.player.dashDuration * 10) / 10) + "s", screenX, screenY+(yIncrement));
+            // // Player Movement Speed
+            // ctx.fillText("Speed: " + Math.round((this.game.player.movementSpeed / this.game.player.initialMovementSpeed) * 100) + "%", screenX, screenY+(yIncrement * 2));
+            // // Player Pickup Range
+            // ctx.fillText("Pickup Range: " + Math.round((this.game.player.pickupRange / this.game.player.initialPickupRange) * 100) + "%", screenX, screenY+(yIncrement * 3));
+            // // Player Pickup Range
+            // ctx.fillText("Exp Gain: " + Math.round((this.game.player.expGain / this.game.player.initialExpGain) * 100) + "%", screenX, screenY+(yIncrement * 4));
+            //
+            // // Back to first column
+            // screenX -= 140;
+            // // Next row
+            // screenY += 107;
+            //
+            // // Scythe Attack Size
+            // ctx.fillText("Attack Size: " + Math.round((this.game.player.weapons[0].primaryAttackRadius / this.game.player.weapons[0].initialPrimaryAttackRadius) * 100) + "%", screenX, screenY+(yIncrement));
+            // // Scythe Primary CD
+            // ctx.fillText("Primary CD: " + (Math.round((this.game.player.weapons[0].primaryCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 2));
+            // // Scythe Secondary CD
+            // ctx.fillText("Secondary CD: " + (Math.round((this.game.player.weapons[0].secondCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 3));
+            //
+            // // Next column
+            // screenX += 140;
+            //
+            // // Scythe Knockback force
+            // ctx.fillText("Knockback: " + Math.round((this.game.player.weapons[0].primaryAttackPushbackForce / this.game.player.weapons[0].initialPrimaryAttackPushbackForce) * 100) + "%", screenX, screenY+(yIncrement));
+            //
+            // // Back to first column
+            // screenX -= 140;
+            // // Next row
+            // screenY += 90;
+            //
+            // // Tome Attack Size
+            // ctx.fillText("Attack Size: " + Math.round((this.game.player.weapons[1].primaryAttackRadius / this.game.player.weapons[1].initialPrimaryAttackRadius) * 100) + "%", screenX, screenY+(yIncrement));
+            // // Tome Primary CD
+            // ctx.fillText("Primary CD: " + (Math.round((this.game.player.weapons[1].primaryCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 2));
+            // // Tome Secondary CD
+            // ctx.fillText("Secondary CD: " + (Math.round((this.game.player.weapons[1].secondCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 3));
+            //
+            // // Next column
+            // screenX += 140;
+            //
+            // // Tome Piercing
+            // ctx.fillText("Piercing: " + this.game.player.weapons[1].maxPrimaryHits, screenX, screenY+(yIncrement));
+            // // Tome Projectile Speed
+            // ctx.fillText("Proj Speed: " + Math.round((this.game.player.weapons[1].primaryProjectileMovementSpeed / this.game.player.weapons[1].initialPrimaryProjectileMovementSpeed) * 100) + "%", screenX, screenY+(yIncrement * 2));
+            //
+            // // Back to first column
+            // screenX -= 140;
+            // // Next row
+            // screenY += 90;
+            //
+            // // Staff Attack Size
+            // ctx.fillText("Attack Size: " + Math.round((this.game.player.weapons[2].primaryAttackRadius / this.game.player.weapons[2].initialPrimaryAttackRadius) * 100) + "%", screenX, screenY+(yIncrement));
+            // // Staff Primary CD
+            // ctx.fillText("Primary CD: " + (Math.round((this.game.player.weapons[2].primaryCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 2));
+            // // Staff Secondary CD
+            // ctx.fillText("Secondary CD: " + (Math.round((this.game.player.weapons[2].secondCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 3));
+            // // Staff Knockback force (Assuming we only affect primary pushback)
+            // ctx.fillText("Knockback: " + Math.round((this.game.player.weapons[2].secondaryAttackPushbackForce / this.game.player.weapons[0].initialSecondaryAttackPushbackForce) * 100) + "%", screenX, screenY+(yIncrement * 4));
+            //
+            // // Next column
+            // screenX += 140;
+            //
+            // // Summons' Health
+            // ctx.fillText("Summ HP: " + Math.round(this.game.player.summonHealth), screenX, screenY+(yIncrement));
+            // // Summons' Speed
+            // ctx.fillText("Summ Speed: " + Math.round(this.game.player.summonSpeed), screenX, screenY+(yIncrement * 2));
+            // // Summons' Dmg
+            // ctx.fillText("Graves / 10s: " + Math.round(this.game.player.graveWalkCount), screenX, screenY+(yIncrement * 3));
+            // // Summons' Dmg
+            // ctx.fillText("Tomb Chance: " + Math.round(this.game.player.tombstoneChance * 100) + "%", screenX, screenY+(yIncrement * 4));
+
+
+
+            // Reset text font properties
+            ctx.font = '24px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
+            ctx.shadowBlur = 0; // How much the shadow should be blurred
+            ctx.shadowOffsetX = 2; // Horizontal shadow offset
+            ctx.shadowOffsetY = 2; // Vertical shadow offset
+
     }
 
     switchMap(teleportIndex) {
         let currentTime = this.elapsedTime / 1000
+
+        if (this.currMap > 0 && this.currMap < 4) {
+            this.levelTimes[this.currMap-1] = this.elapsedTime;
+            if (this.currMap === 1) {
+                this.levelScores[0] = this.player.score;
+            } else {
+                this.levelScores[this.currMap - 1] = this.player.score - this.levelScores[this.currMap - 2];
+            }
+        }
 
         // Delete old map stuff
         // Delete 'other' entities
@@ -1952,6 +2201,10 @@ class GameEngine {
         // If rest area, heal player
         if (teleportIndex === 0) {
             this.player.heal(this.player.maxHP);
+        }
+
+        if (teleportIndex === 3) {
+            this.createPlayerReflection();
         }
 
         if (teleportIndex === 4) {

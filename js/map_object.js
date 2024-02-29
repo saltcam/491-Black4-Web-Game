@@ -21,6 +21,16 @@ class Map_object extends Entity {
     }
 
     update() {
+
+        // If this is a chest, and we are stuck offscreen or in a map object, just give the upgrade and gold to the player
+        if (this.boundingBox.type.toLowerCase().includes("chest")) {
+            this.game.objects.forEach(object => {
+                if (object.boundingBox.type === "object" && this.boundingBox.isColliding(object.boundingBox)) {
+                    this.openChest();
+                }
+            });
+        }
+
         // Calculate the scaled center of the sprite
         const scaledCenterX = this.worldX + (this.animator.width) / 2;
         const scaledCenterY = this.worldY + (this.animator.height) / 2;
@@ -133,6 +143,8 @@ class Map_object extends Entity {
     }
 
     draw(ctx) {
+        if (!this.game.camera) return;
+
         let screenX = this.worldX - this.game.camera.x;
         let screenY = this.worldY - this.game.camera.y;
 

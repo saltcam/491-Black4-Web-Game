@@ -119,7 +119,7 @@ class Weapon {
             while (indexes.size < 3) {
                 let randomIndex = Math.floor(Math.random() * this.upgrades.length);
                 //console.log("CHOSE " + randomIndex);
-                if (!indexes.has(randomIndex) && this.upgrades[randomIndex].relevant && !this.upgrades[randomIndex].active) {
+                if (!indexes.has(randomIndex) && Math.random() < this.upgrades[randomIndex].rarity && this.upgrades[randomIndex].relevant && !this.upgrades[randomIndex].active) {
                     // If the upgrade selected is 'special' lets add a rarity to it even being chosen
                     if (this.upgrades[randomIndex].special && (Math.random() < 0.5)) { // % chance that we let special upgrades show up (0.75 means 75% chance)
                         indexes.add(randomIndex);

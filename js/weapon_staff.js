@@ -1,18 +1,18 @@
 class Weapon_staff extends Weapon {
     constructor(game) {
         let upgrades = [
-            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 175),
-            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70),
-            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 115),
-            new Upgrade("Summon Health +5", "(Stackable, Additive).", false, "./sprites/upgrade_summon_health.png", 50),
-            new Upgrade("Summon Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_summon_speed.png", 50),
-            new Upgrade("Gravewalker", "(Stackable, Additive)\n+1 Tombstone every 15 sec.", false, "./sprites/upgrade_tomb_chance.png", 150),
-            new Upgrade("Ranged Summons", "(Unique) 50% for ranged Summons.", true, "./sprites/upgrade_summon_ranged.png", 100),
-            new Upgrade("Explosive Finish", "(Unique) Summons explode on death.", true, "./sprites/upgrade_summon_explode.png", 125),
-            new Upgrade("Empower Summons", "(Unique) Brief 2x Speed, Damage, and Attack Freq.", true, "./sprites/upgrade_summon_empower.png", 175),
-            new Upgrade("Heal Summons", "(Unique) Heal HP of Summons", true, "./sprites/upgrade_knockback.png", 200),
-            new Upgrade("Fiery Explosions", "(Unique) Explosions make fire hazards.", true, "./sprites/upgrade_staff_fire.png", 110),
-            new Upgrade("Corpse Explosion", "(Unique) Enemies killed with explosions may explode.", true, "./sprites/upgrade_corpse_explosion.png", 275)];
+            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 175, 1),
+            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70, 1),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 115, 1),
+            new Upgrade("Summon Health +5", "(Stackable, Additive).", false, "./sprites/upgrade_summon_health.png", 50, 1),
+            new Upgrade("Summon Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_summon_speed.png", 50, 1),
+            new Upgrade("Gravewalker", "(Stackable, Additive)\n+1 Tombstone every 15 sec.", false, "./sprites/upgrade_tomb_chance.png", 150, 1),
+            new Upgrade("Ranged Summons", "(Unique) 50% for ranged Summons.", true, "./sprites/upgrade_summon_ranged.png", 100, 0.25),
+            new Upgrade("Explosive Finish", "(Unique) Summons explode on death.", true, "./sprites/upgrade_summon_explode.png", 125, 0.2),
+            new Upgrade("Empower Summons", "(Unique) Brief 2x Speed, Damage, and Attack Freq.", true, "./sprites/upgrade_summon_empower.png", 175, 0.15),
+            new Upgrade("Heal Summons", "(Unique) Heal HP of Summons", true, "./sprites/upgrade_knockback.png", 200, 0.15),
+            new Upgrade("Fiery Explosions", "(Unique) Explosions make fire hazards.", true, "./sprites/upgrade_staff_fire.png", 110, 0.15),
+            new Upgrade("Corpse Explosion", "(Unique) Enemies killed with explosions may explode.", true, "./sprites/upgrade_corpse_explosion.png", 275, 0.1)];
 
         super(game, "Staff", 4, 5,
             0, 0,

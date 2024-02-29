@@ -107,7 +107,7 @@ class AttackCirc {
 
     applySingularity() {
         if (this.isSingularityActive) {
-            const pullStrength = 5;
+            const pullStrength = 1.65;
             this.game.enemies.forEach(enemy => {
                 if (this.collisionDetection(enemy.boundingBox)) {
                     const directionX = this.worldX - enemy.worldX;
@@ -142,6 +142,10 @@ class AttackCirc {
         if (this.type === "playerAttack_ExplosionAttack" && ((currentTime - this.lastGrowthTime) >= 1/60)) {
             this.radius += EXPLOSION_GROWTH;
             this.lastGrowthTime = currentTime;
+        }
+
+        if (this.isSingularityActive) {
+            this.applySingularity();
         }
 
         // Check for the end of duration and convert this attack to do damage if it has a delayedAttackDamage != 0
@@ -269,9 +273,6 @@ class AttackCirc {
 
             // Handling player vs enemy pulsating attack damage
             if (this.type.includes("playerAttack")) {
-                if (this.isSingularityActive) {
-                    this.applySingularity();
-                }
                 this.game.enemies.forEach(enemy => {
                     if (this.collisionDetection(enemy.boundingBox) /*&& (enemy.boundingBox.type !== "ally")*/) {
                         if (this.attackDamage > 0) {

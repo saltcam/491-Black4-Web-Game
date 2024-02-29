@@ -1,16 +1,16 @@
 class Weapon_tome extends Weapon {
     constructor(game) {
         let upgrades = [
-            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 150),
-            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70),
-            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 100),
-            new Upgrade("Primary Piercing +2", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 100),
-            new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 75),
-            new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_tome_doubleshot.png", 225),
-            new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_tome_bounce.png", 200),
-            new Upgrade("Doubletime", "(Unique) Secondary hits more often.", true, "./sprites/upgrade_tome_doubletime.png", 250),
-            new Upgrade("Expansion", "(Unique) Attack size grows as it moves.", true, "./sprites/upgrade_tome_expansion.png", 300),
-            new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 120)
+            new Upgrade("Attack Size +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_size.png", 150, 1),
+            new Upgrade("Primary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 70, 1),
+            new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 100,1),
+            new Upgrade("Primary Piercing +2", "(Stackable, Additive).", false, "./sprites/upgrade_piercing.png", 100,1),
+            new Upgrade("Projectile Speed +10%", "(Stackable, Multiplicative) Primary attack only.", false, "./sprites/upgrade_projectile_speed.png", 75,1),
+            new Upgrade("Double Shot", "(Unique) Primary fires a second time.", true, "./sprites/upgrade_tome_doubleshot.png", 250, 0.15),
+            new Upgrade("Bouncing Shots", "(Unique) Primary attacks bounce.", true, "./sprites/upgrade_tome_bounce.png", 300, 0.15),
+            new Upgrade("Doubletime", "(Unique) Secondary hits more often.", true, "./sprites/upgrade_tome_doubletime.png", 200, 0.5),
+            new Upgrade("Expansion", "(Unique) Attack size grows as it moves.", true, "./sprites/upgrade_tome_expansion.png", 150, 0.5),
+            new Upgrade("Singularity", "(Unique) Secondary attack pulls enemies in.", true, "./sprites/upgrade_piercing.png", 200, 0.25)
         ];
 
         super(game, "Tome", 1.2, 6, //cool was 1s
