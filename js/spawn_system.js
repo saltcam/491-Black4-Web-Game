@@ -198,7 +198,7 @@ class Spawn_System {
     /** Called every frame/tick. */
     update() {
         const currentTime = this.game.elapsedTime / 1000;
-        console.log("Difficulty: " + Math.round(this.DIFFICULTY_SCALE * 100) + "%");
+        //console.log("Difficulty: " + Math.round(this.DIFFICULTY_SCALE * 100) + "%");
         // Call start() if the script has not been initialized yet (avoids bug like game engine not being initialized yet)
         if (!this.initialized) {
             this.start();
@@ -574,13 +574,17 @@ class Spawn_System {
      * @return  The current spawn interval.
      */
     updateSpawnSettings() {
+        if (this.game.currMap < 1) {
+            return;
+        }
         const currentTime = this.game.elapsedTime / 1000;
 
         this.baseMaxEnemies = Math.round(1 + this.DIFFICULTY_SCALE) * this.game.currMap;
         this.maxEnemyIncrementTime = 8 / (this.DIFFICULTY_SCALE * this.game.currMap);
         this.spawnDelayDecreaseMultiplier = 0.94 / (this.DIFFICULTY_SCALE * this.game.currMap);
-        this.lowerSpawnDelayInterval = 16.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
-        this.baseEnemySpawnInterval = 5.5 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        this.lowerSpawnDelayInterval = 4 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        //this.baseEnemySpawnInterval = 4 / (this.DIFFICULTY_SCALE * this.game.currMap);
+        //console.log(this.spawnDelayDecreaseMultiplier);
 
         // Update the max enemy interval
         this.maxEnemyIntervals = Math.floor(this.game.elapsedTime / (this.maxEnemyIncrementTime * 1000));
@@ -588,10 +592,19 @@ class Spawn_System {
         // Calculate the maximum number of enemies based on number of intervals that have passed
         this.currentMaxEnemies = this.baseMaxEnemies * this.maxEnemyIntervals;
 
+        //console.log(this.baseEnemySpawnInterval);
+        console.log("MAX ENEMY: "+this.currentMaxEnemies);
+
+        //console.log(currentTime+" - "+this.lastSpawnDelayDecreaseTime+" >= "+this.lowerSpawnDelayInterval);
         // Update the spawn delay if the this.lowerSpawnDelayInterval has passed since the last time we did this
-        if ((currentTime - this.lastSpawnDelayDecreaseTime) >= this.lowerSpawnDelayInterval) {
-            //console.log("Lowering spawn delay from " + this.baseEnemySpawnInterval + " to " + (this.baseEnemySpawnInterval * this.spawnDelayDecreaseMultiplier));
+        if ((currentTime - this.lastSpawnDelayDecreaseTime) >= this.lowerSpawnDelayInterval && this.baseEnemySpawnInterval > 0) {
+            //console.log("TRUE " + this.baseEnemySpawnInterval);
+            console.log("Lowering spawn delay from " + this.baseEnemySpawnInterval + " to " + (this.baseEnemySpawnInterval * this.spawnDelayDecreaseMultiplier));
+            //console.log(+this.baseEnemySpawnInterval+" * "+this.spawnDelayDecreaseMultiplier+" = "+(this.baseEnemySpawnInterval * this.spawnDelayDecreaseMultiplier));
             this.baseEnemySpawnInterval *= this.spawnDelayDecreaseMultiplier;
+
+            if (this.baseEnemySpawnInterval < 0.1) this.baseEnemySpawnInterval = 0;
+
             this.lastSpawnDelayDecreaseTime = currentTime;
         }
     }
