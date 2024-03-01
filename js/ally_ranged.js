@@ -53,7 +53,7 @@ class Ally_Ranged extends Entity {
         this.projectileSpread = projectileSpread;
 
         this.atkPow = atkPow/2;
-        this.atkPow *= 1.25; // so they are a bit stronger than contact allies since these guys have a chance to miss and also die faster
+        // this.atkPow *= 1.25; // so they are a bit stronger than contact allies since these guys have a chance to miss and also die faster
         this.empower = 1;
 
         this.lastHealTime = 0;
