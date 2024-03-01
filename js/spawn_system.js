@@ -72,7 +72,7 @@ class Spawn_System {
         ];
         /** An array of all potential enemies of type 'Enemy_Ranged'. */
         this.rangedEnemyTypes = [
-            { enemyType: "ranged", name: "Mage", maxHP: 35, currHP: 35, atkPow: 10, worldX: 0, worldY: 0,
+            { enemyType: "ranged", name: "Mage", maxHP: 34, currHP: 34, atkPow: 10, worldX: 0, worldY: 0,
                 boxWidth: 40, boxHeight: 60, boxType: "enemy", speed: 40, spritePath: "./sprites/wizard_walk.png",
                 shootSpritePath: "./sprites/wizard_shooting.png" , animXStart: 0, animYStart: 0, animW: 418, animH: 145,
                 animFCount: 7, animFDur: 0.2, scale: 0.65, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 418,
