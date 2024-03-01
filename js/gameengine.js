@@ -2312,6 +2312,9 @@ class GameEngine {
             this.ctx.font = '20px Arial';
             const mediumTextWidth = this.ctx.measureText('Medium').width;
             this.ctx.fillText('Medium', mediumButtonX + 76 - mediumTextWidth / 2, mediumButtonY + 25);
+            this.player.atkPow = 25;
+            this.player.maxHP = 100;
+            this.player.currHP = 100;
         }
 
         if(this.difficultySelected === 'hard') {
