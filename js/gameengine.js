@@ -1863,6 +1863,10 @@ class GameEngine {
 
     handlePauseGameScreenClick(event) {
 
+        if (this.isPauseMenu) {
+
+
+
         // Convert click coordinates to canvas space
         const rect = this.ctx.canvas.getBoundingClientRect();
         const clickX = event.clientX - rect.left;
@@ -1878,6 +1882,11 @@ class GameEngine {
             // Remove event listener to prevent memory leaks
             this.ctx.canvas.removeEventListener('click', this.handleEndGameScreenClick.bind(this));
             this.pauseMenuSetup = false;
+        }
+        } else {
+            // if (!this.isPauseMenu) {
+            this.ctx.canvas.removeEventListener('click', this.handlePauseGameScreenClick.bind(this));
+            // }
         }
     }
 
@@ -2008,6 +2017,7 @@ class GameEngine {
                 this.levelScores[this.currMap - 1] = this.player.score - this.levelScores[this.currMap - 2];
             }
         }
+
     }
     drawPauseMenu() {
 
