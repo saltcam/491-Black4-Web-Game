@@ -128,8 +128,6 @@ class Player extends Entity {
         this.lastGraveWalkTime = 0;
         this.lastMoonTime = 0;
 
-        this.attemptPause = false;
-
         // this.upgrades[12].active = true; // gravewalker
         //this.upgrades[13].active = true; // small
         // this.upgrades[15].active = true;// Divine Dash
