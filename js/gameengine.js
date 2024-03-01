@@ -157,6 +157,8 @@ class GameEngine {
         this.playerReflection = null;
 
         this.meteor = null;
+
+        this.isPauseMenu = false;
     }
 
     createPlayerReflection() {
@@ -255,8 +257,8 @@ class GameEngine {
         this.spawnUpgradeChest(1797, 2802);
 
         // Debug Portal
-        //this.spawnPortal(0, 100);
-        //this.spawnEndPortal(0, -100);
+        // this.spawnPortal(0, 100);
+        // this.spawnEndPortal(0, -100);
 
         // Rocks
         let newEntity = this.addEntity(new Map_object(this, -250, 0, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
@@ -477,8 +479,14 @@ class GameEngine {
             this.rightClick = true; // Set the right-click flag.
         });
 
-        this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key.toLowerCase()] = true);
-        this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key.toLowerCase()] = false);
+        this.ctx.canvas.addEventListener("keydown", event => {
+            this.keys[event.key.toLowerCase()] = true;
+        });
+
+
+        this.ctx.canvas.addEventListener("keyup", event =>{
+                this.keys[event.key.toLowerCase()] = false;
+        });
     }
 
     /**
@@ -775,6 +783,7 @@ class GameEngine {
                     this.roundOver = true;
                     this.togglePause();
                 }
+
             }
 
             // Temp win condition
@@ -874,6 +883,9 @@ class GameEngine {
                 this.ctx.textAlign = 'left';
                 this.ctx.fillText(`FPS: ${this.fps.toFixed(2)}`, 10, 400);
             }
+        }
+        if (this.isPauseMenu) {
+            this.drawPauseMenu();
         }
     }
 
@@ -1849,7 +1861,7 @@ class GameEngine {
         const clickX = event.clientX - rect.left;
         const clickY = event.clientY - rect.top;
 
-        // Check if click was on 'Continue' button
+        // Check if click was on 'New Game +' button
         if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
             clickY >= this.ctx.canvas.height / 2 + 250 && clickY <= this.ctx.canvas.height / 2 + 250 + 50) {
             // Handle Continue action
@@ -1894,6 +1906,25 @@ class GameEngine {
         }
     }
 
+    handlePauseGameScreenClick(event) {
+
+        // Convert click coordinates to canvas space
+        const rect = this.ctx.canvas.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const clickY = event.clientY - rect.top;
+
+        // Check if click was on 'Start Over' button
+        if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
+            clickY >= this.ctx.canvas.height / 2 + 250 + 60 && clickY <= this.ctx.canvas.height / 2 + 250 + 60 + 50) {
+            // Handle Start Over action
+            window.location.reload();
+            // this.drawEndGameScreenFlag = false;
+            if (this.isGamePaused) this.togglePause();
+            // Remove event listener to prevent memory leaks
+            this.ctx.canvas.removeEventListener('click', this.handleEndGameScreenClick.bind(this));
+        }
+    }
+
     drawButton(x, y, width, height, text) {
         // Draw button background
         this.ctx.fillStyle = '#000';
@@ -1908,6 +1939,7 @@ class GameEngine {
 
     drawEndGameScreen(easterEgg) {
         if (!this.isGamePaused) this.togglePause();
+
 
         // Clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
@@ -1929,17 +1961,18 @@ class GameEngine {
             this.ctx.shadowOffsetX = 2; // Horizontal shadow offset
             this.ctx.shadowOffsetY = 2; // Vertical shadow offset
             this.ctx.font = 'bold 36px Arial';
-            this.ctx.fillText("Score: " + this.player.score, this.ctx.canvas.width / 2, this.ctx.canvas.height / 2 + 243);
+            // this.ctx.fillText("Score: " + this.player.score, this.ctx.canvas.width / 2, this.ctx.canvas.height / 2 + 243);
 
             // Draw the stats screen
             this.UPGRADE_SYSTEM.drawPlayerStatsMenu(this.ctx);
+            this.drawRunStatsUI(this.ctx);
 
             // Draw buttons
             // Continue Button
             this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250, 300, 50, 'New Game +');
 
             // Start Over Button
-            this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + +250 + 60, 300, 50, 'Start Over');
+            this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250 + 60, 300, 50, 'Start Over');
 
             // Listen for mouse clicks on buttons
             this.ctx.canvas.addEventListener('click', this.handleEndGameScreenClick.bind(this));
@@ -1948,6 +1981,14 @@ class GameEngine {
     }
 
     drawLoseScreen() {
+        if (this.currMap > 0 && this.currMap < 4) {
+            this.levelTimes[this.currMap-1] = this.elapsedTime;
+            if (this.currMap === 1) {
+                this.levelScores[0] = this.player.score;
+            } else {
+                this.levelScores[this.currMap - 1] = this.player.score - this.levelScores[this.currMap - 2];
+            }
+        }
         if (!this.isGamePaused) this.togglePause();
 
         // Clear the canvas
@@ -1983,6 +2024,62 @@ class GameEngine {
 
     }
 
+    pauseMenu(){
+        if (this.isPauseMenu) {
+            this.isPauseMenu = false;
+        } else {
+            this.isPauseMenu = true;
+        }
+        this.togglePause();
+        ASSET_MANAGER.playAsset("./sounds/healing_heart.mp3");
+
+        if (this.currMap > 0 && this.currMap < 4) {
+            this.levelTimes[this.currMap-1] = this.elapsedTime;
+            if (this.currMap === 1) {
+                this.levelScores[0] = this.player.score;
+            } else {
+                this.levelScores[this.currMap - 1] = this.player.score - this.levelScores[this.currMap - 2];
+            }
+        }
+    }
+    drawPauseMenu() {
+
+
+        // Draw the background red color
+        this.ctx.fillStyle = `rgba(255, 255, 255, 0.42)`;
+        this.ctx.beginPath();
+        this.ctx.rect(0, 0, canvas.width, canvas.height);
+        this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+        this.ctx.closePath();
+
+        // Draw score
+        this.ctx.beginPath();
+        this.ctx.fillStyle = 'white';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
+        this.ctx.shadowBlur = 0; // How much the shadow should be blurred
+        this.ctx.shadowOffsetX = 2; // Horizontal shadow offset
+        this.ctx.shadowOffsetY = 2; // Vertical shadow offset
+        this.ctx.font = 'bold 36px Arial';
+
+        this.ctx.closePath();
+
+        this.UPGRADE_SYSTEM.drawPlayerStatsMenu(this.ctx);
+        this.drawRunStatsUI(this.ctx);
+
+        // Start Over Button
+        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250 + 60, 300, 50, 'Start Over');
+
+        // Listen for mouse clicks on buttons
+        this.ctx.canvas.addEventListener('click', this.handlePauseGameScreenClick.bind(this));
+
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0)'; // Shadow color (black with some transparency)
+        this.ctx.shadowBlur = 0; // How much the shadow should be blurred
+        this.ctx.shadowOffsetX = 0; // Horizontal shadow offset
+        this.ctx.shadowOffsetY = 0; // Vertical shadow offset
+
+    }
+
     drawRunStatsUI(ctx) {
             let scale = 1;
 
@@ -1994,108 +2091,35 @@ class GameEngine {
             // this.animator.scale = (1.5) * scale;
 
             // Calculate the center of the UI
-            let screenX = canvas.width*4/5;
-            let screenY = canvas.height*3/4;
+            let screenX = canvas.width - 215;
+            let screenY = canvas.height/2 + 55;
 
-        this.ctx.fillText("Score: " + this.player.score, screenX, screenY);
-        this.ctx.fillText("More stats coming soon!", screenX, screenY + 20);
+        // Draw score
+        this.ctx.beginPath();
+        this.ctx.fillStyle = 'white';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
+        this.ctx.shadowBlur = 0; // How much the shadow should be blurred
+        this.ctx.shadowOffsetX = 2; // Horizontal shadow offset
+        this.ctx.shadowOffsetY = 2; // Vertical shadow offset
+        this.ctx.font = 'bold 36px Arial';
 
+        this.ctx.fillText("Total Score:", screenX, screenY+5);
+        this.ctx.fillText(this.player.score, screenX, screenY + 45);
 
-            // let yIncrement = 24;
+        let levelNames = ["Grasslands", "Cave", "Space"];
 
+        for (let i = 0; i < this.levelTimes.length; i++) {
 
-
-            // // Player Attack Power
-            // ctx.fillText("Atk Pow: " + Math.round((this.game.player.atkPow / this.game.player.initialAtkPow) * 100) + "%", screenX, screenY);
-            // // Player Crit Chance
-            // ctx.fillText("Crit Chance: " + (Math.round((this.game.player.critChance * 100) * 10) / 10) + "%", screenX, screenY+(yIncrement));
-            // // Player Crit Dmg
-            // ctx.fillText("Crit Dmg: " + (Math.round((this.game.player.critDamage * 100) * 10) / 10) + "%", screenX, screenY+(yIncrement * 2));
-            // // Player Max Health
-            // ctx.fillText("Max HP: " + Math.round(this.game.player.maxHP), screenX, screenY+(yIncrement * 3));
-            // // Player Health Regen CD
-            // ctx.fillText("Regen: 1 hp / " + (Math.round(this.game.player.healthRegenTime * 10) / 10) + "s", screenX, screenY+(yIncrement * 4));
-            //
-            // // Next column
-            // screenX += 140;
-            //
-            // // Player Dash CD
-            // ctx.fillText("Dash CD: " + (Math.round(this.game.player.dashCooldown * 10) / 10) + "s", screenX, screenY);
-            // // Player Dash Distance
-            // ctx.fillText("Dash Dur: " + (Math.round(this.game.player.dashDuration * 10) / 10) + "s", screenX, screenY+(yIncrement));
-            // // Player Movement Speed
-            // ctx.fillText("Speed: " + Math.round((this.game.player.movementSpeed / this.game.player.initialMovementSpeed) * 100) + "%", screenX, screenY+(yIncrement * 2));
-            // // Player Pickup Range
-            // ctx.fillText("Pickup Range: " + Math.round((this.game.player.pickupRange / this.game.player.initialPickupRange) * 100) + "%", screenX, screenY+(yIncrement * 3));
-            // // Player Pickup Range
-            // ctx.fillText("Exp Gain: " + Math.round((this.game.player.expGain / this.game.player.initialExpGain) * 100) + "%", screenX, screenY+(yIncrement * 4));
-            //
-            // // Back to first column
-            // screenX -= 140;
-            // // Next row
-            // screenY += 107;
-            //
-            // // Scythe Attack Size
-            // ctx.fillText("Attack Size: " + Math.round((this.game.player.weapons[0].primaryAttackRadius / this.game.player.weapons[0].initialPrimaryAttackRadius) * 100) + "%", screenX, screenY+(yIncrement));
-            // // Scythe Primary CD
-            // ctx.fillText("Primary CD: " + (Math.round((this.game.player.weapons[0].primaryCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 2));
-            // // Scythe Secondary CD
-            // ctx.fillText("Secondary CD: " + (Math.round((this.game.player.weapons[0].secondCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 3));
-            //
-            // // Next column
-            // screenX += 140;
-            //
-            // // Scythe Knockback force
-            // ctx.fillText("Knockback: " + Math.round((this.game.player.weapons[0].primaryAttackPushbackForce / this.game.player.weapons[0].initialPrimaryAttackPushbackForce) * 100) + "%", screenX, screenY+(yIncrement));
-            //
-            // // Back to first column
-            // screenX -= 140;
-            // // Next row
-            // screenY += 90;
-            //
-            // // Tome Attack Size
-            // ctx.fillText("Attack Size: " + Math.round((this.game.player.weapons[1].primaryAttackRadius / this.game.player.weapons[1].initialPrimaryAttackRadius) * 100) + "%", screenX, screenY+(yIncrement));
-            // // Tome Primary CD
-            // ctx.fillText("Primary CD: " + (Math.round((this.game.player.weapons[1].primaryCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 2));
-            // // Tome Secondary CD
-            // ctx.fillText("Secondary CD: " + (Math.round((this.game.player.weapons[1].secondCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 3));
-            //
-            // // Next column
-            // screenX += 140;
-            //
-            // // Tome Piercing
-            // ctx.fillText("Piercing: " + this.game.player.weapons[1].maxPrimaryHits, screenX, screenY+(yIncrement));
-            // // Tome Projectile Speed
-            // ctx.fillText("Proj Speed: " + Math.round((this.game.player.weapons[1].primaryProjectileMovementSpeed / this.game.player.weapons[1].initialPrimaryProjectileMovementSpeed) * 100) + "%", screenX, screenY+(yIncrement * 2));
-            //
-            // // Back to first column
-            // screenX -= 140;
-            // // Next row
-            // screenY += 90;
-            //
-            // // Staff Attack Size
-            // ctx.fillText("Attack Size: " + Math.round((this.game.player.weapons[2].primaryAttackRadius / this.game.player.weapons[2].initialPrimaryAttackRadius) * 100) + "%", screenX, screenY+(yIncrement));
-            // // Staff Primary CD
-            // ctx.fillText("Primary CD: " + (Math.round((this.game.player.weapons[2].primaryCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 2));
-            // // Staff Secondary CD
-            // ctx.fillText("Secondary CD: " + (Math.round((this.game.player.weapons[2].secondCool) * 10) / 10) + "s", screenX, screenY+(yIncrement * 3));
-            // // Staff Knockback force (Assuming we only affect primary pushback)
-            // ctx.fillText("Knockback: " + Math.round((this.game.player.weapons[2].secondaryAttackPushbackForce / this.game.player.weapons[0].initialSecondaryAttackPushbackForce) * 100) + "%", screenX, screenY+(yIncrement * 4));
-            //
-            // // Next column
-            // screenX += 140;
-            //
-            // // Summons' Health
-            // ctx.fillText("Summ HP: " + Math.round(this.game.player.summonHealth), screenX, screenY+(yIncrement));
-            // // Summons' Speed
-            // ctx.fillText("Summ Speed: " + Math.round(this.game.player.summonSpeed), screenX, screenY+(yIncrement * 2));
-            // // Summons' Dmg
-            // ctx.fillText("Graves / 10s: " + Math.round(this.game.player.graveWalkCount), screenX, screenY+(yIncrement * 3));
-            // // Summons' Dmg
-            // ctx.fillText("Tomb Chance: " + Math.round(this.game.player.tombstoneChance * 100) + "%", screenX, screenY+(yIncrement * 4));
-
-
-
+            let minutes = Math.floor(this.levelTimes[i]/1000/60);
+            let seconds = Math.floor(this.levelTimes[i]/1000);
+            if (seconds < 10) {
+                seconds = "0" + seconds.toString();
+            }
+            let time = minutes.toString() + ":" + seconds
+            this.ctx.fillText(levelNames[i] + " (" + time + ")", screenX, screenY + 40 + 80*(i+1));
+            this.ctx.fillText("Score: " + this.levelScores[i], screenX, screenY + 80 + 80*(i+1));
+        }
             // Reset text font properties
             ctx.font = '24px Arial';
             ctx.fillStyle = 'white';

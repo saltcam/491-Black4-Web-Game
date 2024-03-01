@@ -110,10 +110,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             window.addEventListener('keydown', function(e) {
+                // console.log("Key " + e.key);
                 // Check if the pressed key is the spacebar (key code 32)
                 if (e.code === 'Space' || e.keyCode === 32) {
                     e.preventDefault(); // Prevent the default action (scrolling the page down)
                 }
+
+                if (e.code === 'Escape') gameEngine.pauseMenu();
             });
         });
     </script>

@@ -84,7 +84,7 @@ class Weapon_staff extends Weapon {
     performSecondaryAttack(player, cheating) {
         // Change these values for balancing (If you don't see what you want to balance here, change it in the constructor)
         // let defaultSecondaryDamage = player.atkPow / 2;
-        let defaultSecondaryDamage = 45 + (player.atkPow / 10);
+        let defaultSecondaryDamage = 30 + (player.atkPow / 2);
 
         const currentTime = this.game.elapsedTime / 1000;
 

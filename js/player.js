@@ -9,7 +9,7 @@
 class Player extends Entity {
 
     constructor(game) {
-        super(100, 100, 25, game, 0, 0,
+        super(100, 1, 25, game, 0, 0,
             17, 29, "player", 160, //160 speed is default
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
@@ -87,7 +87,7 @@ class Player extends Entity {
         this.initialPickupRange = this.pickupRange;
         this.initialExpGain = this.expGain;
 
-        this.lives = 1; // start with 1 extra life.
+        this.lives = 0; // start with 1 extra life.
         // Store a bank of all possible gold pickup sound effects
         this.pickupSoundBank = [
             "./sounds/Coin_Pickup1.mp3",
@@ -130,6 +130,8 @@ class Player extends Entity {
         this.lastGraveWalkTime = 0;
         this.lastMoonTime = 0;
 
+        this.attemptPause = false;
+
         // this.upgrades[12].active = true; // gravewalker
         //this.upgrades[13].active = true; // small
         // this.upgrades[15].active = true;// Divine Dash
@@ -139,6 +141,7 @@ class Player extends Entity {
         // Turn off bad upgrades
         this.upgrades[9].relevant = false; // Turn off EXP upgrade (too OP)
         this.upgrades[12].relevant = false; // Turn off missingno (replaced summon damage elsewhere)
+
     };
 
     // Handles code for turning on upgrades (Generic and Specific)
@@ -175,7 +178,7 @@ class Player extends Entity {
                             this.atkPow *= 1.075;
                             break;
                         case "Pickup Range +30%":
-                            this.pickupRange = this.initialPickupRange * 1.3;
+                            this.pickupRange *= 1.3;
                             break;
                         case "Dash Duration +15%":
                             this.dashDuration *= 1.15;
@@ -488,7 +491,6 @@ class Player extends Entity {
         }
 
         // if dashing and we have Divine Dash, reflect all colliding enemy projectiles.
-        // TODO add visual and audio indicator of the effect
         if (this.upgrades[15].active) {
             this.game.attacks.forEach(projectile => {
                 if (projectile.attackCirc) {
@@ -509,7 +511,7 @@ class Player extends Entity {
 
                         let reflectedProjectile = this.game.addEntity(new Projectile(this.game, projectile.atkPow,
                             projectile.worldX, projectile.worldY, projectile.boundingBox.width, projectile.boundingBox.height,
-                            "playerAttack_TomeAttack", projectile.speed,
+                            "playerAttack_TomeAttack", projectile.speed*2,
                             newSpritesheetPath,
                             projectile.animator.xStart, projectile.animator.yStart,
                             projectile.animator.width, projectile.animator.height, projectile.animator.frameCount,
