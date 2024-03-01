@@ -54,6 +54,9 @@ class GameEngine {
          */
         this.currMap = -1;
 
+        /** Keeps track of difficulty selected */
+        this.difficultySelected = 'medium';
+
         /** Save the previous map index after map switching. */
         this.prevMap = -10;
 
@@ -1013,6 +1016,7 @@ class GameEngine {
                     }
                 }
             });
+            this.difficultyButtonHelper();
         }
         // If -2, load the how to play screen
         else if (this.currMap === -2) {
@@ -1075,6 +1079,8 @@ class GameEngine {
                     this.currMap = -1;
                 }
             });
+
+
         }
         // If 0, then Rest Area Map is used.
         else if (this.currMap === 0) {
@@ -2266,5 +2272,101 @@ class GameEngine {
             ASSET_MANAGER.playBackgroundMusic(this.youWonScreenMusic);
             this.drawEndGameScreen(Math.random() < 0.03);
         }
+    }
+
+    difficultyButtonHelper() {
+        const easyButtonX = 580;
+        const easyButtonY = 700;
+        const mediumButtonX = 680;
+        const mediumButtonY = 700;
+        const hardButtonX = 780;
+        const hardButtonY = 700;
+
+
+        // Easy button
+        this.ctx.fillStyle = 'red';
+        this.ctx.fillRect(easyButtonX, easyButtonY, 80, 40);
+        this.ctx.fillStyle = 'black';
+        this.ctx.font = '24px Arial';
+        const easyTextWidth = this.ctx.measureText('Easy').width;
+        this.ctx.fillText('Easy', easyButtonX + 68 - easyTextWidth / 2, easyButtonY + 25);
+
+        // Medium button
+        this.ctx.fillStyle = 'red';
+        this.ctx.fillRect(mediumButtonX, mediumButtonY, 80, 40);
+        this.ctx.fillStyle = 'black';
+        this.ctx.font = '20px Arial';
+        const mediumTextWidth = this.ctx.measureText('Medium').width;
+        this.ctx.fillText('Medium', mediumButtonX + 76 - mediumTextWidth / 2, mediumButtonY + 25);
+
+        // Hard button
+        this.ctx.fillStyle = 'red';
+        this.ctx.fillRect(hardButtonX, hardButtonY, 80, 40);
+        this.ctx.fillStyle = 'black';
+        this.ctx.font = '24px Arial';
+        const hardTextWidth = this.ctx.measureText('Hard').width;
+        this.ctx.fillText('Hard', hardButtonX + 67 - hardTextWidth / 2, hardButtonY + 25);
+
+        if(this.difficultySelected === 'easy') {
+            this.ctx.fillStyle = 'yellow';
+            this.ctx.fillRect(easyButtonX, easyButtonY, 80, 40);
+            this.ctx.fillStyle = 'black';
+            this.ctx.font = '24px Arial'; // Adjust the font size
+            const easyTextWidth = this.ctx.measureText('Easy').width;
+            this.ctx.fillText('Easy', easyButtonX + 68 - easyTextWidth / 2, easyButtonY + 25);
+            this.player.atkPow = 50;
+            this.player.maxHP = 200;
+            this.player.currHP = 200;
+        }
+
+        if(this.difficultySelected === 'medium') {
+            this.ctx.fillStyle = 'yellow';
+            this.ctx.fillRect(mediumButtonX, mediumButtonY, 80, 40);
+            this.ctx.fillStyle = 'black';
+            this.ctx.font = '20px Arial';
+            const mediumTextWidth = this.ctx.measureText('Medium').width;
+            this.ctx.fillText('Medium', mediumButtonX + 76 - mediumTextWidth / 2, mediumButtonY + 25);
+        }
+
+        if(this.difficultySelected === 'hard') {
+            this.ctx.fillStyle = 'yellow';
+            this.ctx.fillRect(hardButtonX, hardButtonY, 80, 40);
+            this.ctx.fillStyle = 'black';
+            this.ctx.font = '24px Arial';
+            const hardTextWidth = this.ctx.measureText('Hard').width;
+            this.ctx.fillText('Hard', hardButtonX + 67 - hardTextWidth / 2, hardButtonY + 25);
+            this.player.atkPow = 12.5;
+            this.player.maxHP = 50;
+            this.player.currHP = 50;
+        }
+
+        this.drawMouseTracker(this.ctx);
+
+        // Event handling for clicks
+        this.ctx.canvas.addEventListener('click', (event) => {
+            const mouseX = event.clientX - this.ctx.canvas.getBoundingClientRect().left;
+            const mouseY = event.clientY - this.ctx.canvas.getBoundingClientRect().top;
+
+            // Check for easy button click
+            if (mouseX >= easyButtonX && mouseX <= easyButtonX + 80 &&
+                mouseY >= easyButtonY && mouseY <= easyButtonY + 40) {
+                console.log('Easy button clicked');
+                this.difficultySelected = 'easy';
+            }
+
+            // Check for medium button click
+            if (mouseX >= mediumButtonX && mouseX <= mediumButtonX + 80 &&
+                mouseY >= mediumButtonY && mouseY <= mediumButtonY + 40) {
+                console.log('Medium button clicked');
+                this.difficultySelected = 'medium';
+            }
+
+            // Check for hard button click
+            if (mouseX >= hardButtonX && mouseX <= hardButtonX + 80 &&
+                mouseY >= hardButtonY && mouseY <= hardButtonY + 40) {
+                console.log('Hard button clicked');
+                this.difficultySelected = 'hard';
+            }
+        });
     }
 }
