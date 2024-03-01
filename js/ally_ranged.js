@@ -53,8 +53,10 @@ class Ally_Ranged extends Entity {
         this.projectileSpread = projectileSpread;
 
         this.atkPow = atkPow/2;
-        this.atkPow *= 1.25; // so they are a bit stronger than contact allies since these guys have a chance to miss and also die faster
+        // this.atkPow *= 1.25; // so they are a bit stronger than contact allies since these guys have a chance to miss and also die faster
         this.empower = 1;
+
+        this.lastHealTime = 0;
     }
 
     // changes the empower multiplier to 2, resets buff timer
@@ -162,6 +164,26 @@ class Ally_Ranged extends Entity {
         }
         // console.log(spacing);
         return spacing;
+    }
+
+    heal(healHp) {
+        if (this.game.elapsedTime/1000 - this.lastHealTime > 1) {
+
+            if (this.currHP < this.maxHP) {
+                if (this.currHP + healHp <= this.maxHP) {
+                    this.currHP += healHp;
+                    // Spawn floating healing number
+                    this.game.addEntity(new Floating_text(this.game, healHp, this.calculateCenter().x, this.calculateCenter().y, true, this instanceof Player || this.boundingBox.type.includes("ally")));
+                }
+                // If over-heal then just restore to max hp
+                else {
+                    this.currHP = this.maxHP;
+                    this.game.addEntity(new Floating_text(this.game, healHp, this.calculateCenter().x, this.calculateCenter().y, true, this instanceof Player || this.boundingBox.type.includes("ally")));
+                }
+            }
+            this.lastHealTime = this.game.elapsedTime / 1000;
+        }
+
     }
 
     draw(ctx, game) {

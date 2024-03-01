@@ -341,6 +341,8 @@ class Entity {
                     if (this.lives < 1) {
                         this.game.player.weapons[2].upgrades[11].relevant = true;
                     }
+                    this.game.addEntity(new Floating_resurrect(this.game, "RESURRECTION!", this.calculateCenter().x, this.calculateCenter().y - 50,
+                        false, this instanceof Player || this.boundingBox.type.includes("ally"), true));
                 }
             } else {
                 this.isDead = true;

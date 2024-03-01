@@ -195,7 +195,7 @@ class AttackCirc {
                             }
                             if (this.game.player.weapons[2].upgrades[9].active) {
                                 // if (currentTime - this.lastAllyHealTime >= this.allyHealCooldown) {
-                                    ally.heal(ally.maxHP);
+                                    ally.heal(Math.round(ally.maxHP/2));
                                     this.lastAllyHealTime = currentTime;
                                 // }
                             }
@@ -209,32 +209,37 @@ class AttackCirc {
                     if (this.collisionDetection(object.boundingBox) && object.boundingBox.type === "tombstone") {
                         switch (this.type) {
                             case "playerAttack_NecromancyAttack":
-                                let enemyClass = 0;
-                                if (this.game.player.weapons[2].upgrades[6].active) {   // if the player has the upgrade to summon ranged allies
-                                   enemyClass = Math.floor(Math.random() * 2);
-                                }
-                                switch(enemyClass){
-                                    case 0:
-                                        this.game.addEntity(new Ally_Contact(
-                                            "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
-                                            this.game.player.atkPow, this.game, object.worldX, object.worldY, 17,
-                                            29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Contact_Walk.png",
-                                            0, 0, 32, 28,
-                                            8, 0.1, 2, 1));
-                                        break;
-                                    case 1:
-                                        this.game.addEntity(new Ally_Ranged(
-                                            "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
-                                            this.game.player.atkPow, this.game, object.worldX, object.worldY, 17,
-                                            29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Ranged_Walk.png",
-                                            0, 0, 32, 28,
-                                            8, 0.1, 2, 1,
-                                            3, 20, 20, false, 1, 0));
-                                        break;
-                                }
 
-                                object.removeFromWorld = true;
-                                this.lastAttackTime = currentTime;
+                                if (this.game.allies.length < 10) {
+                                    let enemyClass = 0;
+                                    if (this.game.player.weapons[2].upgrades[6].active) {   // if the player has the upgrade to summon ranged allies
+                                        enemyClass = Math.floor(Math.random() * 2);
+                                    }
+                                    switch (enemyClass) {
+                                        case 0:
+                                            this.game.addEntity(new Ally_Contact(
+                                                "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
+                                                this.game.player.atkPow, this.game, object.worldX, object.worldY, 17,
+                                                29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Contact_Walk.png",
+                                                0, 0, 32, 28,
+                                                8, 0.1, 2, 1));
+                                            break;
+                                        case 1:
+                                            this.game.addEntity(new Ally_Ranged(
+                                                "Ally", this.game.player.summonHealth, this.game.player.summonHealth,
+                                                this.game.player.atkPow, this.game, object.worldX, object.worldY, 17,
+                                                29, "ally", this.game.player.summonSpeed, "./sprites/Ally_Ranged_Walk.png",
+                                                0, 0, 32, 28,
+                                                8, 0.1, 2, 1,
+                                                3, 20, 20, false, 1, 0));
+
+
+                                            break;
+                                    }
+
+                                    object.removeFromWorld = true;
+                                    this.lastAttackTime = currentTime;
+                                }
                                 break;
                             case "playerAttack_ExplosionAttack":
                                 object.willExplode(this);

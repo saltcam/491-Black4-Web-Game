@@ -1354,7 +1354,6 @@ class GameEngine {
                         let tombstone = new Map_object(this, this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
                         this.addEntity(tombstone);
                         tombstone.boundingBox.type = "tombstone";
-
                         this.setManagedTimeout(() => {
                             tombstone.removeFromWorld = true;
                         }, 70000);

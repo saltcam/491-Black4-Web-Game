@@ -34,7 +34,6 @@ class Player extends Entity {
             new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.2),
             // based on hades, maybe grab asset from there?
             new Upgrade("Divine Dash", "(Unique) Dash reflects projectiles.", true, "./sprites/upgrade_divine_dash.png", 0, 0.15),
-            // based on vampire survivors, feel free to grab the sprite from there.
             new Upgrade("Glorious Moon", "(Unique) Suck all EXP every 2 minutes.", true, "./sprites/upgrade_glorious_moon.png", 0, 0.1)
         ];
 
@@ -204,7 +203,8 @@ class Player extends Entity {
                             this.tombstoneChance += 0.05;
 
                             // If we hit 100% tombstone chance, remove this upgrade as an option for the future
-                            if (this.tombstoneChance >= 1) {
+                            if (this.tombstoneChance >= 0.5) {
+                                this.tombstoneChance = 0.5;
                                 this.upgrades[i].relevant = false;
                             }
                             break;
@@ -433,14 +433,6 @@ class Player extends Entity {
             this.worldY = Math.max(this.game.mapBoundaries.top, Math.min(this.game.mapBoundaries.bottom, intendedY));
         }
 
-        // Handle collisions with bounding circle map objects
-        // this.game.objects.forEach(object => {
-        //     if (object.boundingCircle) {
-        //         this.handlePlayerCircleCollision(this, object.boundingCircle, 25*object.animator.scale);
-        //     }
-        // });
-
-
         // Check if the animation state needs to be switched
         if (!this.isDashing && this.isMoving && this.currentAnimation !== "walking") {
             this.animator.pauseAtFrame(-1);
@@ -537,39 +529,6 @@ class Player extends Entity {
         }
 
     }
-    //
-    // handlePlayerCircleCollision(player, circle, offset = 25) {
-    //     // Calculate the direction vector from the circle to the player
-    //     const playerCenterX = player.worldX + player.boundingBox.width / 2;
-    //     const playerCenterY = player.worldY + player.boundingBox.height / 2;
-    //     const directionX = playerCenterX - circle.centerX;
-    //     const directionY = playerCenterY - circle.centerY;
-    //
-    //     // Normalize the direction vector
-    //     const magnitude = Math.sqrt(directionX * directionX + directionY * directionY);
-    //     if (magnitude === 0) return; // Prevent division by zero
-    //     const normalizedDirectionX = directionX / magnitude;
-    //     const normalizedDirectionY = directionY / magnitude;
-    //
-    //     // Calculate the effective radius with offset
-    //     const effectiveRadius = circle.radius + offset;
-    //
-    //     // Calculate overlap based on the effective radius
-    //     const overlap = effectiveRadius + Math.min(player.boundingBox.width, player.boundingBox.height) / 2 - magnitude;
-    //
-    //     // Set a small bounce distance, adjusted by overlap if there's a collision
-    //     const bounceDistance = overlap > 0 ? overlap + 1 : 0; // Ensure a minimum separation on overlap
-    //
-    //     // Move the player away from the circle by the bounce distance only if there's an overlap
-    //     if (bounceDistance > 0) {
-    //         player.worldX += normalizedDirectionX * bounceDistance;
-    //         player.worldY += normalizedDirectionY * bounceDistance;
-    //
-    //         // Immediately update player's bounding box after changing position
-    //         player.updateBoundingBox();
-    //     }
-    // }
-
 
     checkCollisionWithMapObject(intendedX, intendedY, mapObject) {
         // Check collision with map objects ONLY if it is a map object type
