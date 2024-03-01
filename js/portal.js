@@ -6,6 +6,7 @@ class Portal extends Entity {
         this.debugName = "Portal("+this.boundingBox.type+")";
         this.teleportIndex = teleportIndex;
         this.interactionInitiated = false;
+        this.collisionAllowed = true;
     }
 
     collidesWithPlayer(player) {
@@ -13,7 +14,7 @@ class Portal extends Entity {
     }
 
     handlePlayerInteraction(player) {
-        if (this.collidesWithPlayer(player) && !this.interactionInitiated) {
+        if (this.collidesWithPlayer(player) && !this.interactionInitiated && this.collisionAllowed) {
             ASSET_MANAGER.playAsset("./sounds/portal.mp3");
             this.interactionInitiated = true; // Set the flag to true to prevent re-entry
 

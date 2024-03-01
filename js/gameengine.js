@@ -144,14 +144,17 @@ class GameEngine {
         this.newGamePlusCount = 0;
 
         // Music
+        this.titleScreenMusic = "./sounds/music_nameless_song.mp3";
         this.restAreaMusic = "./sounds/music_firelink.mp3";
-        this.mapOneMusic = "./sounds/music_nameless_song.mp3";
+        this.mapOneMusic = "./sounds/calm_song.mp3";
         this.mapOneBossMusic = "./sounds/music_erdtree_knights.mp3";
         this.mapTwoMusic = "./sounds/music_dragonlord.mp3";
         this.mapTwoBossMusic = "./sounds/music_capra.mp3";
         this.mapThreeMusic = "./sounds/music_majula.mp3";
-        this.mapThreeBossMusic = "./sounds/music_malenia.mp3";
+        this.mapThreeBossMusic = "./sounds/boss_music_god.mp3";
         this.youWonScreenMusic = "./sounds/music_ave_maria.mp3";
+
+        this.mapThreeMusicPlaying = false;
 
         this.youWonScreen = "./sprites/you_won_screen1.png";
 
@@ -225,8 +228,8 @@ class GameEngine {
     }
     /** Call this method to spawn boss three (God - Wrath of God) */
     spawnBossThree() {
-        ASSET_MANAGER.stopBackgroundMusic();
-        ASSET_MANAGER.playBackgroundMusic(this.mapThreeBossMusic);
+        // ASSET_MANAGER.stopBackgroundMusic();
+        // ASSET_MANAGER.playBackgroundMusic(this.mapThreeBossMusic);
         this.boss = this.addEntity(new BossThree(this, 250, 0));
     }
 
@@ -972,6 +975,12 @@ class GameEngine {
                 this.togglePause();
             }
 
+            // Start menu music
+            if (!ASSET_MANAGER.backgroundMusicPlaying) {
+                ASSET_MANAGER.stopBackgroundMusic();
+                ASSET_MANAGER.playBackgroundMusic(this.titleScreenMusic);
+            }
+
             this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
             this.ctx.font = '120px Serif';
             this.ctx.fillStyle = 'black';
@@ -1331,6 +1340,13 @@ class GameEngine {
                     this.spawnBossThree();
                     break;
             }
+        }
+
+        // Handle special boss three music timer
+        if (this.currMap === 3 && currentTimer >= 240 && !this.mapThreeMusicPlaying) {
+            ASSET_MANAGER.stopBackgroundMusic();
+            ASSET_MANAGER.playBackgroundMusic(this.mapThreeBossMusic);
+            this.mapThreeMusicPlaying = true;
         }
 
         // Remove 'other' entities that are marked for deletion.
@@ -1721,7 +1737,7 @@ class GameEngine {
         if (this.mouse) {
             const crossSize = 10; // Size of the cross
             if(this.currMap < 0) {
-                ctx.strokeStyle = 'black'; // black cursor for main menu
+                ctx.strokeStyle = 'white'; // black cursor for main menu
             }
             else {
                 ctx.strokeStyle = 'white'; // Color of the cross
@@ -1738,6 +1754,8 @@ class GameEngine {
             ctx.lineTo(this.mouse.x, this.mouse.y + crossSize);
 
             ctx.stroke();
+
+            ctx.strokeStyle = 'white'; // black cursor for main menu
         }
     }
 

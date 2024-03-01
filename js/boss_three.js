@@ -6,7 +6,7 @@
 class BossThree extends Entity {
     /** Default Constructor - Only needs to be passed the gameengine and worldX and Y coords. */
     constructor(game, worldX, worldY) {
-        super(6500, 6500, 40,
+        super(15000, 15000, 40,
             game, worldX, worldY,
             70, 120, "enemyBoss",
             100,
@@ -226,7 +226,8 @@ class BossThree extends Entity {
                 if (this.wingsEntity) this.wingsEntity.removeFromWorld = true;
                 this.game.killAllEnemies();
                 this.game.spawnEndChest();
-                ASSET_MANAGER.stopBackgroundMusic();
+                this.game.mapThreeMusicPlaying = false;
+                //ASSET_MANAGER.stopBackgroundMusic();
                 this.removeFromWorld = true;
                 return;
             }

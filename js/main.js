@@ -248,6 +248,8 @@ ASSET_MANAGER.queueDownload("./sounds/anvil.mp3");
 ASSET_MANAGER.queueDownload("./sounds/upgrade_popup.mp3");
 ASSET_MANAGER.queueDownload("./sounds/spend_gold.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_nameless_song.mp3");
+ASSET_MANAGER.queueDownload("./sounds/calm_song.mp3");
+ASSET_MANAGER.queueDownload("./sounds/boss_music_god.mp3");
 ASSET_MANAGER.queueDownload("./sounds/hit.mp3");
 ASSET_MANAGER.queueDownload("./sounds/hit2.mp3");
 ASSET_MANAGER.queueDownload("./sounds/boss_ground_slam.mp3");

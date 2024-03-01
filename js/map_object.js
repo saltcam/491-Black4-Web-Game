@@ -116,6 +116,9 @@ class Map_object extends Entity {
 
                 // If all coins have been collected, stop the collection process
                 if (this.coinsToCollect <= 0) {
+                    if (this.game.portal) {
+                        this.game.portal.collisionAllowed = true;
+                    }
                     this.collectingGold = false;
                     this.removeFromWorld = true; // Remove the gold bag object
                 }
@@ -166,6 +169,9 @@ class Map_object extends Entity {
 
     collectGold() {
         this.collectingGold = true;
+        if (this.game.portal) {
+            this.game.portal.collisionAllowed = false;
+        }
         let amount = this.extractNumber(this.boundingBox.type);
         if (amount > 0) {
             this.coinsToCollect += amount; // Set the number of coins to collect
