@@ -72,7 +72,7 @@ class Spawn_System {
         ];
         /** An array of all potential enemies of type 'Enemy_Ranged'. */
         this.rangedEnemyTypes = [
-            { enemyType: "ranged", name: "Mage", maxHP: 32, currHP: 32, atkPow: 10, worldX: 0, worldY: 0,
+            { enemyType: "ranged", name: "Mage", maxHP: 35, currHP: 35, atkPow: 10, worldX: 0, worldY: 0,
                 boxWidth: 40, boxHeight: 60, boxType: "enemy", speed: 40, spritePath: "./sprites/wizard_walk.png",
                 shootSpritePath: "./sprites/wizard_shooting.png" , animXStart: 0, animYStart: 0, animW: 418, animH: 145,
                 animFCount: 7, animFDur: 0.2, scale: 0.65, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 418,
@@ -88,7 +88,7 @@ class Spawn_System {
                 projectileSpeed: 15, projectileSize: 20, projectilePulse: false, projectileCount: 11, projectileSpread: 360,
                 fleeDist: 200, approachDist: 350, projectileSprite: "./sprites/MagicBall_red.png",
                 projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 30, projectileAnimH: 30, projectileAnimCount: 2, projectileAnimDurr: 0.2, projectileAnimScale: 2},
-            { enemyType: "ranged", name: "LegalMage", maxHP: 50, currHP: 50, atkPow: 3, worldX: 0, worldY: 0,
+            { enemyType: "ranged", name: "LegalMage", maxHP: 30, currHP: 30, atkPow: 3, worldX: 0, worldY: 0,
                 boxWidth: 15, boxHeight: 20, boxType: "enemy", speed: 30, spritePath: "./sprites/ranged_legal_walk.png",
                 shootSpritePath: "./sprites/ranged_legal_shoot.png" , animXStart: 0, animYStart: 0, animW: 25, animH: 30,
                 animFCount: 2, animFDur: 0.2, scale: 2, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 25,
