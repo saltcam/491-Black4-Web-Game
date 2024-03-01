@@ -157,6 +157,7 @@ ASSET_MANAGER.queueDownload("./sprites/menu_currency_bar.png");
 ASSET_MANAGER.queueDownload("./sprites/arrow_pointer.png");
 ASSET_MANAGER.queueDownload("./sprites/arrow_pointer_blue.png");
 ASSET_MANAGER.queueDownload("./sprites/map_cave.png");
+ASSET_MANAGER.queueDownload("./sprites/title_screen.png");
 
 //player
 ASSET_MANAGER.queueDownload("./sprites/McIdle.png");

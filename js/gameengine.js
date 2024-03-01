@@ -976,7 +976,9 @@ class GameEngine {
             this.ctx.font = '120px Serif';
             this.ctx.fillStyle = 'black';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('Guy with Scythe', this.ctx.canvas.width / 2, 100);
+            // Draw the background image
+            const bgImage = ASSET_MANAGER.getAsset("./sprites/title_screen.png");
+            this.ctx.drawImage(bgImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
             this.ctx.font = '40px Arial';
             const playButtonWidth = 150;
