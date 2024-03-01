@@ -101,7 +101,7 @@ class Weapon_scythe extends Weapon {
                                 this.primaryAttackDuration,
                                 "./sprites/weapon_blood_scythe_primaryattack.png",
                                 defaultPrimaryDamage / 2, 0,
-                                this.primaryAttackPushbackForce,
+                                0,
                                 0, 1));
                         }, this.primaryEchoDelay * 1000);
                     }
@@ -117,7 +117,7 @@ class Weapon_scythe extends Weapon {
                             this.primaryAttackDuration,
                             "./sprites/weapon_blood_scythe_primaryattack.png",
                             defaultPrimaryDamage / 2.5, 0,
-                            this.primaryAttackPushbackForce,
+                            0,
                             0, 1));
                     }, this.primaryEchoDelay * 1000);
                 }
@@ -154,7 +154,7 @@ class Weapon_scythe extends Weapon {
                                 this.primaryAttackDuration,
                                 "./sprites/weapon_scythe_primaryattack.png",
                                 defaultPrimaryDamage / 2.5, 0,
-                                this.primaryAttackPushbackForce,
+                                0,
                                 0, 1));
                         }, this.primaryEchoDelay * 1000);
                     }
@@ -170,7 +170,7 @@ class Weapon_scythe extends Weapon {
                             this.primaryAttackDuration,
                             "./sprites/weapon_scythe_primaryattack.png",
                             defaultPrimaryDamage / 2.5, 0,
-                            this.primaryAttackPushbackForce,
+                            0,
                             0, 0.6));
                     }, this.primaryEchoDelay * 1000);
                 }
@@ -214,7 +214,7 @@ class Weapon_scythe extends Weapon {
                             this.primaryAttackDuration,
                             "./sprites/weapon_blood_scythe_secondaryattack.png",
                             defaultSecondaryDamage / 2.5, 0,
-                            this.primaryAttackPushbackForce,
+                            0,
                             0.3, 1));
                     }, this.secondaryEchoDelay * 1000);
                 }
@@ -239,7 +239,7 @@ class Weapon_scythe extends Weapon {
                             this.primaryAttackDuration,
                             "./sprites/weapon_scythe_secondaryattack.png",
                             defaultSecondaryDamage / 2.5, 0,
-                            this.primaryAttackPushbackForce,
+                            0,
                             0.3, 1));
                     }, this.secondaryEchoDelay * 1000);
                 }

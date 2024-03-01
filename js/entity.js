@@ -371,8 +371,9 @@ class Entity {
     // Method to calculate and apply any cripple effects to the target from the crippling chill upgrade from scythe
     applySlow(attackType = "") {
         if (this.game.player.weapons[0].upgrades[7].active && !(this instanceof Player) && attackType === "playerAttack_ScytheAttack"
-            && !this.boundingBox.type.includes("ally")
-            && !this.boundingBox.type.includes("boss") && this.game.player.currentWeapon === 0) {
+            && !this.boundingBox.type.toLowerCase().includes("ally")
+            && !this.boundingBox.type.toLowerCase().includes("boss") && this.game.player.currentWeapon === 0) {
+
             // Only apply the actual slow if their faster than what we are slowing them to.
             if (this.movementSpeed > 30) {
                 this.movementSpeed = 30;

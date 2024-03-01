@@ -27,12 +27,10 @@ class Player extends Entity {
             new Upgrade("Crit Chance +5%", "(Stackable, Additive).", false, "./sprites/upgrade_crit_chance.png", 0,1),
             new Upgrade("Experience Gain +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_exp_gain.png", 0,1),
             new Upgrade("Tombstone Chance +5%", "(Passive, Stackable, Additive).", false, "./sprites/upgrade_tomb_chance.png", 0,1),
-            // TODO need assets for these
-            new Upgrade("Extra Life", "+ 1 Life.", false, "./sprites/upgrade_tomb_chance.png", 0, 0.025),
+            new Upgrade("Extra Life", "+ 1 Life.", false, "./sprites/upgrade_extra_life.png", 0, 0.025),
             new Upgrade("Missingno", "(Unique) Drop tomb every 10s.", true, "./sprites/upgrade_tomb_chance.png", 0),
-            new Upgrade("It's what you do with it", "(Unique) Player size -50%.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.15),
-            new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.2),
-            // based on hades, maybe grab asset from there?
+            new Upgrade("It's what you do with it", "(Unique) Player size -50%.", true, "./sprites/upgrade_smaller_player.png", 0, 0.15),
+            new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_smoke_bomb.png", 0, 0.2),
             new Upgrade("Divine Dash", "(Unique) Dash reflects projectiles.", true, "./sprites/upgrade_divine_dash.png", 0, 0.15),
             new Upgrade("Glorious Moon", "(Unique) Suck all EXP every 2 minutes.", true, "./sprites/upgrade_glorious_moon.png", 0, 0.1)
         ];

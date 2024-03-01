@@ -279,11 +279,13 @@ class Spawn_System {
                 this.maxChargerEnemies = this.initialMaxChargerEnemies;
             }
 
-            //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapOneEnemies.length - 1) + " enemies. Name = " + this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].name);
+            console.log("Spawning wave #" + Math.min(this.currentWave, this.mapOneEnemies.length - 1) + " enemies. Name = " + this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)].name);
             // If it's not time to spawn elite, spawn next enemy
-            if (!this.spawnElite) this.spawnEnemy(this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)], randomXNumber, randomYNumber);
-            // If it IS time to spawn an elite, make it a random one from the full list
-            else this.spawnEnemy(this.mapOneEnemies[Math.round(Math.random() * this.mapOneEnemies.length-1)], randomXNumber, randomYNumber);
+            // if (!this.spawnElite) this.spawnEnemy(this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)], randomXNumber, randomYNumber);
+            // // If it IS time to spawn an elite, make it a random one from the full list
+            // else this.spawnEnemy(this.mapOneEnemies[Math.round(Math.random() * this.mapOneEnemies.length-1)], randomXNumber, randomYNumber);
+
+            this.spawnEnemy(this.mapOneEnemies[Math.min(this.currentWave, this.mapOneEnemies.length - 1)], randomXNumber, randomYNumber);
         } else if (this.game.currMap === 2) {
             // Increment current wave, and move previous enemy to passive spawn array
             if (waveNumber > this.currentWave && this.currentWave !== this.mapTwoEnemies.length - 1) {
@@ -314,11 +316,13 @@ class Spawn_System {
                 this.maxChargerEnemies = this.initialMaxChargerEnemies;
             }
 
-            //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapTwoEnemies.length - 1) + " enemies. Name = " + this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)].name);
+            console.log("Spawning wave #" + Math.min(this.currentWave, this.mapTwoEnemies.length - 1) + " enemies. Name = " + this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)].name);
             // If it's not time to spawn elite, spawn next enemy
-            if (!this.spawnElite) this.spawnEnemy(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)], randomXNumber, randomYNumber);
-            // If it IS time to spawn an elite, make it a random one from the full list
-            else this.spawnEnemy(this.mapTwoEnemies[Math.round(Math.random() * this.mapTwoEnemies.length-1)], randomXNumber, randomYNumber);
+            // if (!this.spawnElite) this.spawnEnemy(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)], randomXNumber, randomYNumber);
+            // // If it IS time to spawn an elite, make it a random one from the full list
+            // else this.spawnEnemy(this.mapTwoEnemies[Math.round(Math.random() * this.mapTwoEnemies.length-1)], randomXNumber, randomYNumber);
+
+            this.spawnEnemy(this.mapTwoEnemies[Math.min(this.currentWave, this.mapTwoEnemies.length - 1)], randomXNumber, randomYNumber);
         } else if (this.game.currMap === 3) {
             // Increment current wave, and move previous enemy to passive spawn array
             if (waveNumber > this.currentWave && this.currentWave !== this.mapThreeEnemies.length - 1) {
@@ -349,11 +353,13 @@ class Spawn_System {
                 this.maxChargerEnemies = this.initialMaxChargerEnemies;
             }
 
-            //console.log("Spawning wave #" + Math.min(this.currentWave, this.mapThreeEnemies.length - 1) + " enemies. Name = " + this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)].name);
+            console.log("Spawning wave #" + Math.min(this.currentWave, this.mapThreeEnemies.length - 1) + " enemies. Name = " + this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)].name);
             // If it's not time to spawn elite, spawn next enemy
-            if (!this.spawnElite) this.spawnEnemy(this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)], randomXNumber, randomYNumber);
-            // If it IS time to spawn an elite, make it a random one from the full list
-            else this.spawnEnemy(this.mapThreeEnemies[Math.round(Math.random() * this.mapThreeEnemies.length-1)], randomXNumber, randomYNumber);
+            // if (!this.spawnElite) this.spawnEnemy(this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)], randomXNumber, randomYNumber);
+            // // If it IS time to spawn an elite, make it a random one from the full list
+            // else this.spawnEnemy(this.mapThreeEnemies[Math.round(Math.random() * this.mapThreeEnemies.length-1)], randomXNumber, randomYNumber);
+
+            this.spawnEnemy(this.mapThreeEnemies[Math.min(this.currentWave, this.mapThreeEnemies.length - 1)], randomXNumber, randomYNumber);
         }
 
         // Passive spawning code
@@ -450,7 +456,7 @@ class Spawn_System {
      * @param   worldY  The y-coordinate to spawn the enemy.
      */
     spawnEnemy(enemy, worldX, worldY) {
-        if (enemy === null) return; // Passed a null entity, exit
+        if (enemy === null || typeof enemy.enemyType === "undefined" || !enemy.enemyType) return; // Passed a null entity, exit
 
         let newEnemy = null;
 

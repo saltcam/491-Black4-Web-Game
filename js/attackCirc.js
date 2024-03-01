@@ -109,16 +109,19 @@ class AttackCirc {
         if (this.isSingularityActive) {
             const pullStrength = 1.65;
             this.game.enemies.forEach(enemy => {
-                if (this.collisionDetection(enemy.boundingBox)) {
-                    const directionX = this.worldX - enemy.worldX;
-                    const directionY = this.worldY - enemy.worldY;
-                    const distance = Math.sqrt(directionX * directionX + directionY * directionY);
+                if (!enemy.boundingBox.type.toLowerCase().includes("boss")) {
 
-                    const normalizedX = directionX / distance;
-                    const normalizedY = directionY / distance;
+                    if (this.collisionDetection(enemy.boundingBox)) {
+                        const directionX = this.worldX - enemy.worldX;
+                        const directionY = this.worldY - enemy.worldY;
+                        const distance = Math.sqrt(directionX * directionX + directionY * directionY);
 
-                    enemy.worldX += normalizedX * pullStrength;
-                    enemy.worldY += normalizedY * pullStrength;
+                        const normalizedX = directionX / distance;
+                        const normalizedY = directionY / distance;
+
+                        enemy.worldX += normalizedX * pullStrength;
+                        enemy.worldY += normalizedY * pullStrength;
+                    }
                 }
             });
         }

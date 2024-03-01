@@ -895,7 +895,7 @@ class Upgrade_System {
         // Tome Piercing
         ctx.fillText("Piercing: " + this.game.player.weapons[1].maxPrimaryHits, screenX, screenY+(yIncrement));
         // Tome Projectile Speed
-        ctx.fillText("Proj Speed: " + Math.round((this.game.player.weapons[1].primaryProjectileMovementSpeed / this.game.player.weapons[1].initialPrimaryProjectileMovementSpeed) * 100) + "%", screenX, screenY+(yIncrement * 2));
+        ctx.fillText("Proj Speed: " + Math.ceil((this.game.player.weapons[1].primaryProjectileMovementSpeed / this.game.player.weapons[1].initialPrimaryProjectileMovementSpeed) * 100) + "%", screenX, screenY+(yIncrement * 2));
 
         // Back to first column
         screenX -= 140;
