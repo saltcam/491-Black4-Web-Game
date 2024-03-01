@@ -134,6 +134,7 @@ ASSET_MANAGER.queueDownload("./sprites/upgrade_divine_dash.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_extra_life.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_smoke_bomb.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_smaller_player.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_singularity.png");
 ASSET_MANAGER.queueDownload("./sprites/run_stats_menu.png");
 ASSET_MANAGER.queueDownload("./sprites/meteor.png");
 
