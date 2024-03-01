@@ -2333,9 +2333,9 @@ class GameEngine {
             this.ctx.font = '24px Arial'; // Adjust the font size
             const easyTextWidth = this.ctx.measureText('Easy').width;
             this.ctx.fillText('Easy', easyButtonX + 68 - easyTextWidth / 2, easyButtonY + 25);
-            this.player.atkPow *= 2;
-            this.player.maxHP *= 2;
-            this.player.currHP *= 2;
+            this.player.atkPow = 50;
+            this.player.maxHP = 200;
+            this.player.currHP = 200;
         }
 
         if(this.difficultySelected === 'medium') {
@@ -2354,9 +2354,9 @@ class GameEngine {
             this.ctx.font = '24px Arial';
             const hardTextWidth = this.ctx.measureText('Hard').width;
             this.ctx.fillText('Hard', hardButtonX + 67 - hardTextWidth / 2, hardButtonY + 25);
-            this.player.atkPow *= 0.9;
-            this.player.maxHP *= 0.9;
-            this.player.currHP *= 0.9;
+            this.player.atkPow = 22.5;
+            this.player.maxHP = 45;
+            this.player.currHP = 45;
         }
 
         this.drawMouseTracker(this.ctx);
