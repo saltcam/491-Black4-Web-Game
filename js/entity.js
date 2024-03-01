@@ -248,7 +248,7 @@ class Entity {
     }
 
     takeDamage(amount, attackType = "") {
-        if (attackType.toLowerCase().includes("ally")) {
+        if (this.boundingBox.type.toLowerCase().includes("boss") && attackType.toLowerCase().includes("ally")) {
             amount /= 4;
         }
 
