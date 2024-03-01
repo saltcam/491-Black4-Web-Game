@@ -125,7 +125,7 @@ class Spawn_System {
         /** For use later, when we are changing the max ranged enemies. */
         this.initialMaxRangedEnemies = this.maxRangedEnemies;
         /** Sets the maximum allowed projectile/ranged enemies (Since too many will be way too hard/annoying) */
-        this.maxChargerEnemies = 2
+        this.maxChargerEnemies = 1;
         /** For use later, when we are changing the max ranged enemies. */
         this.initialMaxChargerEnemies = this.maxChargerEnemies;
 
