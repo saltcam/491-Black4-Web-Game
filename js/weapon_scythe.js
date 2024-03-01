@@ -10,8 +10,7 @@ class Weapon_scythe extends Weapon {
             new Upgrade("Dual Blade", "(Unique) Adds primary back attack.", true, "./sprites/upgrade_dual_blade.png", 350, 0.1),
             new Upgrade("Echo Slash", "(Unique) Adds attack echoes.", true, "./sprites/upgrade_echo_slash.png", 400, 0.1),
             new Upgrade("Crippling Chill", "(Unique) Cripple effect on attacks.", true, "./sprites/upgrade_crippling_chill.png", 285, 0.3),
-            new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg is now over-time.", true, "./sprites/upgrade_bleeding_edge.png", 400, 0.15),
-            //new Upgrade("Ramping Blade", "(Unique) Stats up per second scythe equipped.", true, "./sprites/upgrade_bleeding_edge.png", 235)
+            new Upgrade("Bleeding Edge", "(Unique) +50% dmg. Dmg is now over-time.", true, "./sprites/upgrade_bleeding_edge.png", 400, 0.15)
         ];
 
         super(game, "Scythe", 1.2, 5,
@@ -65,10 +64,6 @@ class Weapon_scythe extends Weapon {
             dy = Math.sin(this.attackAngle) * offsetDistance;
 
             this.lastPrimaryAttackTime = currentTime;
-
-            // if(this.upgrades[9].active) {
-            //
-            // }
 
             // If blood scythe is active
             if (this.upgrades[4].active) {
