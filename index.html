@@ -117,7 +117,7 @@
                 }
 
                 if (e.code === 'Escape' && gameEngine.currMap > -1 && gameEngine.currMap < 4 &&
-                    gameEngine.UPGRADE_SYSTEM.currentMenu === -1) gameEngine.pauseMenu();
+                    gameEngine.UPGRADE_SYSTEM.currentMenu === -1 && !gameEngine.player.isDead) gameEngine.pauseMenu();
             });
         });
     </script>
