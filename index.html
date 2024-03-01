@@ -64,9 +64,18 @@
         #debugModeSection, #debugInfo {
             color: white; /* Ensure the debug text is white */
         }
+
+        #gameWorld, #fullscreenButton, #debugModeSection {
+            display: none; /* Hide game elements initially */
+        }
     </style>
 </head>
 <body>
+    <div id="loadingScreen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: black;">
+        <img src="./sprites/how_to_play_HD.png" alt="Loading Image" id="loadingImage" style="max-width: 1450px; width: 100%; margin-bottom: 20px;">
+        <button id="continueButton" style="padding: 10px 20px; font-size: 20px;">Continue</button>
+    </div>
+
     <!-- Setting the rendering to pixelated allows us to have a non-blurry fullscreen. -->
     <canvas id="gameWorld" width="1440" height="810" style="background: white; border: 1px solid black; image-rendering: pixelated;" tabindex="0"></canvas>
 
@@ -151,6 +160,35 @@
             // Prevent the canvas from losing focus
             canvas.addEventListener('blur', () => {
                 canvas.focus();
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const continueButton = document.getElementById('continueButton');
+            const gameElements = [
+                document.getElementById('gameWorld'),
+                document.getElementById('fullscreenButton'),
+                document.getElementById('debugModeSection')
+            ];
+
+            // Preload the click sound
+            const clickSound = new Audio('./sounds/menu_click.mp3');
+
+            continueButton.addEventListener('click', function() {
+                // Play the click sound
+                clickSound.play().catch(error => console.error("Sound playback failed", error));
+
+                // Hide the loading screen
+                document.getElementById('loadingScreen').style.display = 'none';
+
+                // Show the game elements
+                gameElements.forEach(element => {
+                    element.style.display = 'block';
+                });
+
+                // Set focus to the canvas to start the game
+                document.getElementById('gameWorld').focus();
             });
         });
     </script>

@@ -586,7 +586,7 @@ class Player extends Entity {
 
     // called when the user has a valid dash and presses space bar
     performDash() {
-        ASSET_MANAGER.playAsset(this.dashSound, 0.03);
+        ASSET_MANAGER.playAsset(this.dashSound, 0.066);
         this.lastDashTime = this.game.elapsedTime / 1000; // Record the start time of the dash
         this.lastDashTimeVar = this.lastDashTime;
         this.isDashing = true; // Flag to indicate dashing state, this flag also will enable iFrames

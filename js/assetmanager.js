@@ -12,9 +12,12 @@ class AssetManager {
         this.explosionSoundLimit = 25; // Maximum concurrent explosion sounds
         this.explosionSoundCount = 0; // Current number of explosion sounds playing
         this.explosionSoundPath = "./sounds/SE_staff_primary.mp3"; // Path to the explosion sound
+        this.noMusic = false;
     };
 
     playBackgroundMusic(path, volume = 0.1, playbackRate = 1.0) {
+        if (this.noMusic) return;
+
         // Stop current music if it's playing
         if (this.currentBackgroundMusic && this.cache[this.currentBackgroundMusic]) {
             let currentMusic = this.cache[this.currentBackgroundMusic];
@@ -27,6 +30,7 @@ class AssetManager {
 
         // Play the new background music
         if (this.cache[path]) {
+            console.log("Playing music..."+path);
             let audio = this.cache[path];
             audio.volume = volume;
             audio.playbackRate = playbackRate;
@@ -38,6 +42,7 @@ class AssetManager {
 
     stopBackgroundMusic() {
         if (this.currentBackgroundMusic && this.cache[this.currentBackgroundMusic]) {
+            console.log("Stopped music.");
             let music = this.cache[this.currentBackgroundMusic];
             music.pause();
             music.currentTime = 0;

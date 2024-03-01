@@ -137,6 +137,8 @@ ASSET_MANAGER.queueDownload("./sprites/upgrade_smaller_player.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_singularity.png");
 ASSET_MANAGER.queueDownload("./sprites/run_stats_menu.png");
 ASSET_MANAGER.queueDownload("./sprites/meteor.png");
+ASSET_MANAGER.queueDownload("./sprites/how_to_play.png");
+ASSET_MANAGER.queueDownload("./sprites/how_to_play_HD.png");
 
 //ui
 ASSET_MANAGER.queueDownload("./sprites/debug_marker.png");
@@ -211,6 +213,8 @@ ASSET_MANAGER.queueDownload("./sprites/boss_dragon_roar_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/fireball.png");
 
 //sounds
+ASSET_MANAGER.queueDownload("./sounds/menu_click.mp3");
+ASSET_MANAGER.queueDownload("./sounds/menu_click2.mp3");
 ASSET_MANAGER.queueDownload("./sounds/SE_scythe_primary.mp3");
 ASSET_MANAGER.queueDownload("./sounds/SE_scythe_secondary.mp3");
 ASSET_MANAGER.queueDownload("./sounds/SE_tome_primary.mp3");

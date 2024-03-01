@@ -157,6 +157,7 @@ class GameEngine {
         this.mapThreeMusicPlaying = false;
 
         this.youWonScreen = "./sprites/you_won_screen1.png";
+        this.howToPlayScreen = "./sprites/how_to_play.png";
 
         this.drawEndGameScreenFlag = false;
 
@@ -167,6 +168,14 @@ class GameEngine {
         this.meteor = null;
 
         this.isPauseMenu = false;
+
+        this.difficultyButtonsSetup = false;
+        this.pauseMenuSetup = false;
+        this.howToPlayMenuSetup = false;
+        this.mainMenuSetup = false;
+        this.endGameScreenSetup = false;
+        this.youWonScreenSetup = false;
+        this.loseScreenSetup = false;
     }
 
     createPlayerReflection() {
@@ -265,8 +274,8 @@ class GameEngine {
         this.spawnUpgradeChest(1797, 2802);
 
         // Debug Portal
-        // this.spawnPortal(0, 100);
-        // this.spawnEndPortal(0, -100);
+        //this.spawnPortal(0, 100);
+        //this.spawnEndPortal(0, -100);
 
         // Rocks
         let newEntity = this.addEntity(new Map_object(this, -250, 0, 55, 56-30, "./sprites/map_rock_object.png", 0, 0, 86, 56, 1, 1, 2));
@@ -794,43 +803,6 @@ class GameEngine {
 
             }
 
-            // Temp win condition
-            if (this.youWon && this.currMap === -100) {
-                this.ctx.beginPath();
-
-                this.ctx.fillStyle = "black";
-                this.ctx.fillRect(this.ctx.canvas.width / 2 - 175, this.ctx.canvas.height / 2 - 75, 350, 95);
-                // Draw "You Died!" text in large red font at the center of the canvas
-                this.ctx.font = '75px Arial';
-                this.ctx.fillStyle = 'yellow';
-                this.ctx.textAlign = 'center'
-                this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
-                this.ctx.closePath();
-
-                this.setManagedTimeout(() => {
-
-                    if (!this.isGamePaused) {
-                        this.togglePause();
-                    }
-                }, 1000);
-            }
-
-            // If the defeated all enemies on map specific map, display 'You Won!' text.
-            if (this.enemies.length <= 0 && this.currMap === -100) {
-                this.ctx.beginPath();
-
-                // Draw "You Won!" text in large yellow font at the center of the canvas
-                this.ctx.font = '75px Arial';
-                this.ctx.fillStyle = 'yellow';
-                this.ctx.textAlign = 'center'
-                this.ctx.fillText('You Won!', this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
-                this.ctx.closePath();
-
-                if (!this.isGamePaused) {
-                    this.togglePause();
-                }
-            }
-
             // Handle fade-to-black screen effect
             if (this.fadeState !== 'none') {
                 const alpha = this.fadeElapsed / this.fadeDuration;
@@ -1013,87 +985,73 @@ class GameEngine {
             this.ctx.fillText('How to Play', this.ctx.canvas.width / 2, howToPlayButtonY + howToPlayButtonHeight / 2 + howToPlayText.actualBoundingBoxAscent / 2);
             this.drawMouseTracker(this.ctx);
 
-            this.ctx.canvas.addEventListener('click', (event) => {
-                const mouseX = event.clientX - this.ctx.canvas.getBoundingClientRect().left;
-                const mouseY = event.clientY - this.ctx.canvas.getBoundingClientRect().top;
+            if(!this.mainMenuSetup) {
+                this.ctx.canvas.addEventListener('click', (event) => {
+                    const mouseX = event.clientX - this.ctx.canvas.getBoundingClientRect().left;
+                    const mouseY = event.clientY - this.ctx.canvas.getBoundingClientRect().top;
 
-                if (this.currMap === -1) {
-                    if (mouseX >= playButtonX && mouseX <= playButtonX + playButtonWidth &&
-                        mouseY >= playButtonY && mouseY <= playButtonY + playButtonHeight) {
-                        this.loadGame();
-                    }
+                    if (this.currMap === -1) {
+                        if (mouseX >= playButtonX && mouseX <= playButtonX + playButtonWidth &&
+                            mouseY >= playButtonY && mouseY <= playButtonY + playButtonHeight) {
+                            this.loadGame();
+                            ASSET_MANAGER.playAsset("./sounds/menu_click.mp3", 1);
+                            this.mainMenuSetup = false;
+                        }
 
-                    if (mouseX >= howToPlayButtonX && mouseX <= howToPlayButtonX + howToPlayButtonWidth &&
-                        mouseY >= howToPlayButtonY && mouseY <= howToPlayButtonY + howToPlayButtonHeight) {
-                        this.showInstructions();
+                        if (mouseX >= howToPlayButtonX && mouseX <= howToPlayButtonX + howToPlayButtonWidth &&
+                            mouseY >= howToPlayButtonY && mouseY <= howToPlayButtonY + howToPlayButtonHeight) {
+                            this.currMap = -2;
+                            ASSET_MANAGER.playAsset("./sounds/menu_click.mp3", 1);
+                            this.mainMenuSetup = false;
+                        }
                     }
-                }
-            });
+                });
+                this.mainMenuSetup = true;
+            }
             this.difficultyButtonHelper();
         }
         // If -2, load the how to play screen
         else if (this.currMap === -2) {
+            if(!this.isGamePaused){
+                this.togglePause();
+            }
+
             this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+            this.ctx.textAlign = 'center';
             this.ctx.font = '40px Arial';
-            this.ctx.fillStyle = 'black';
-            this.ctx.textAlign = 'left';
-            this.ctx.fillText('How to Play', 600, 50);
 
-            this.ctx.textAlign = 'left';
-            this.ctx.font = '20px Arial';
-            this.ctx.fillText('Controls:', 100, 100);
+            const bgImage = ASSET_MANAGER.getAsset(this.howToPlayScreen);
+            this.ctx.drawImage(bgImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-            this.ctx.fillText('WASD:    movement', 150, 130);
-            this.ctx.fillText('Q, Mousewheel, or 1/2/3:     Switch weapons (Scythe, Tome, Staff)', 150, 160);
-            this.ctx.fillText('Space:   Dash (with iFrames)', 150, 190);
-
-            this.ctx.fillText('Mechanics:', 100, 220);
-            this.ctx.fillText('-Follow yellow arrows to find upgrade chests and blue arrows to find portals to the next maps.', 150, 250);
-            this.ctx.fillText('-You can attack while dashing.', 150, 280);
-            this.ctx.fillText('-Enemies drop XP orbs to level your player up, you get to choose from a selection of random upgrades for your player upon leveling.', 150, 310);
-            this.ctx.fillText('-Enemies drop XP orbs to level your player up, you get to choose from a selection of random upgrades for your player upon leveling.', 150, 340);
-            this.ctx.fillText('-Enemies drop coins (This will let you purchase upgrades of your choice at the rest area between rounds).', 150, 370);
-            this.ctx.fillText('-Every 60 seconds an elite enemy spawns.', 150, 400);
-            this.ctx.fillText('-Elite enemies drop weapon upgrade chests, collect these to get special weapon upgrades.', 200, 430);
-            this.ctx.fillText('-At 5 min, the final boss of the map spawns, defeat him to get a portal to the rest area where buy can more upgrades using your coins, then portal to the next map.', 150, 460);
-            this.ctx.fillText('-At the end of the round, any gold bags left on the map are combined into a golden chest near the portal to the next map (with a 50% tax - so try to collect gold you see on the fly for min-maxing income!)', 150, 490);
-
-            this.ctx.fillText('Weapons:', 100, 520);
-            this.ctx.fillText('Scythe:', 150, 550);
-            this.ctx.fillText('-Left Click: Cone attack.', 200, 580);
-            this.ctx.fillText('-Right Click: Large Spin attack.', 200, 610);
-            this.ctx.fillText('Tome:', 150, 640);
-            this.ctx.fillText('-Left Click: Shoot small orb (Pierces one target, but that can be upgraded).', 200, 670);
-            this.ctx.fillText('-Right Click: Shoot big slow orb (Ticks damage over time).', 200, 700);
-            this.ctx.fillText('Staff:', 150, 730);
-            this.ctx.fillText('-Left Click: Weak explosion, but summon allies to help you if it hits tombstones with the explosion.', 200, 760);
-            this.ctx.fillText('-Right Click: Explode tombstones (Has potential to cause a chain reaction of tombstone explosions for huge damage).', 200, 790);
-
-
-            const exitButtonWidth = 60;
-            const exitButtonHeight = 60;
-            const exitButtonX = this.ctx.canvas.width - exitButtonWidth - 20;
-            const exitButtonY = 20;
-            const exitText = this.ctx.measureText('X');
+            const continueButtonWidth = 300;
+            const continueButtonHeight = 60;
+            const continueButtonX = (this.ctx.canvas.width - continueButtonWidth) / 2;
+            const continueButtonY = ((this.ctx.canvas.height * 2) / 3) + 175;
+            const continueText = this.ctx.measureText('Continue');
 
             this.ctx.fillStyle = 'red';
-            this.ctx.fillRect(exitButtonX, exitButtonY, exitButtonWidth, exitButtonHeight);
+            this.ctx.fillRect(continueButtonX, continueButtonY, continueButtonWidth, continueButtonHeight);
             this.ctx.fillStyle = 'white';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('X', exitButtonX + exitButtonWidth / 2, exitButtonY + exitButtonHeight / 2 + exitText.actualBoundingBoxAscent / 2);
+            this.ctx.fillText('Continue', this.ctx.canvas.width / 2, continueButtonY + continueButtonHeight / 2 + continueText.actualBoundingBoxAscent / 2);
+
             this.drawMouseTracker(this.ctx);
 
-            this.ctx.canvas.addEventListener('click', (event) => {
-                const mouseX = event.clientX - this.ctx.canvas.getBoundingClientRect().left;
-                const mouseY = event.clientY - this.ctx.canvas.getBoundingClientRect().top;
+            if (!this.howToPlayMenuSetup) {
+                this.ctx.canvas.addEventListener('click', (event) => {
+                    const mouseX = event.clientX - this.ctx.canvas.getBoundingClientRect().left;
+                    const mouseY = event.clientY - this.ctx.canvas.getBoundingClientRect().top;
 
-                if (mouseX >= exitButtonX && mouseX <= exitButtonX + exitButtonWidth &&
-                    mouseY >= exitButtonY && mouseY <= exitButtonY + exitButtonHeight) {
-                    this.currMap = -1;
-                }
-            });
-
-
+                    if (this.currMap === -2) {
+                        if (mouseX >= continueButtonX && mouseX <= continueButtonX + continueButtonWidth &&
+                            mouseY >= continueButtonY && mouseY <= continueButtonY + continueButtonHeight) {
+                            this.currMap = -1;
+                            ASSET_MANAGER.playAsset("./sounds/menu_click.mp3", 1);
+                            this.howToPlayMenuSetup = false;
+                        }
+                    }
+                });
+                this.howToPlayMenuSetup = true;
+            }
         }
         // If 0, then Rest Area Map is used.
         else if (this.currMap === 0) {
@@ -1243,37 +1201,6 @@ class GameEngine {
                 right: Infinity,
                 bottom: Infinity
             };
-
-            // const map = ASSET_MANAGER.getAsset("./sprites/transparent.png");
-            //
-            // this.mapWidth = map.width;
-            // this.mapHeight = map.height;
-            //
-            // // Calculate the scaled width and height of the textures.
-            // const scaledWidth = this.mapWidth * this.mapThreeScaleFactor;
-            // const scaledHeight = this.mapHeight * this.mapThreeScaleFactor;
-            //
-            // // If the map has not been centered yet, initialize its position.
-            // if (!this.mapInitialized) {
-            //     this.mapTextureOffsetX = this.player.worldX - scaledWidth / 2 + this.player.animator.width / 2;
-            //     this.mapTextureOffsetY = this.player.worldY - scaledHeight / 2 + this.player.animator.height / 2;
-            //     this.mapInitialized = true;
-            // }
-            //
-            // // Adjust the texture's position to move inversely to the player's movement.
-            // const textureX = this.mapTextureOffsetX - this.camera.x;
-            // const textureY = this.mapTextureOffsetY - this.camera.y;
-            //
-            // // Draw the scaled texture centered on the player's position accounting for the camera.
-            // this.ctx.drawImage(map, textureX, textureY, scaledWidth, scaledHeight);
-            //
-            // // Calculate the actual boundaries considering the scaling
-            // this.mapBoundaries = {
-            //     left: -((this.mapWidth) * this.mapThreeScaleFactor)/2 + this.mapBoundaryOffset,
-            //     top: -((this.mapHeight) * this.mapThreeScaleFactor)/2 + this.mapBoundaryOffset,
-            //     right: ((this.mapWidth) * this.mapThreeScaleFactor)/2 - this.mapBoundaryOffset,
-            //     bottom: ((this.mapHeight) * this.mapThreeScaleFactor)/2 - this.mapBoundaryOffset
-            // };
         }
     }
 
@@ -1832,16 +1759,11 @@ class GameEngine {
         this.currMap = 1;
 
         ASSET_MANAGER.stopBackgroundMusic();
-        ASSET_MANAGER.playBackgroundMusic(this.mapOneMusic);
+        ASSET_MANAGER.playBackgroundMusic(this.mapOneMusic, 0.075);
 
         if(this.isGamePaused) {
             this.togglePause();
         }
-    }
-
-    // Loads the instructions after clicking on the how to play button
-    showInstructions() {
-        this.currMap = -2;
     }
 
     /**
@@ -1892,6 +1814,7 @@ class GameEngine {
         // Check if click was on 'New Game +' button
         if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
             clickY >= this.ctx.canvas.height / 2 + 250 && clickY <= this.ctx.canvas.height / 2 + 250 + 50) {
+            ASSET_MANAGER.playAsset("./sounds/menu_click.mp3", 1);
             // Handle Continue action
             this.switchMap(1);
             this.drawEndGameScreenFlag = false;
@@ -1905,12 +1828,14 @@ class GameEngine {
         // Check if click was on 'Start Over' button
         if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
             clickY >= this.ctx.canvas.height / 2 + 250 + 60 && clickY <= this.ctx.canvas.height / 2 + 250 + 60 + 50) {
+            ASSET_MANAGER.playAsset("./sounds/menu_click.mp3", 1);
             // Handle Start Over action
             window.location.reload();
             this.drawEndGameScreenFlag = false;
             if (this.isGamePaused) this.togglePause();
             // Remove event listener to prevent memory leaks
             this.ctx.canvas.removeEventListener('click', this.handleEndGameScreenClick.bind(this));
+            this.endGameScreenSetup = false;
         }
     }
 
@@ -1932,6 +1857,7 @@ class GameEngine {
             if (this.isGamePaused) this.togglePause();
             // Remove event listener to prevent memory leaks
             this.ctx.canvas.removeEventListener('click', this.handleLoseGameScreenClick.bind(this));
+            this.loseScreenSetup = false;
         }
     }
 
@@ -1951,6 +1877,7 @@ class GameEngine {
             if (this.isGamePaused) this.togglePause();
             // Remove event listener to prevent memory leaks
             this.ctx.canvas.removeEventListener('click', this.handleEndGameScreenClick.bind(this));
+            this.pauseMenuSetup = false;
         }
     }
 
@@ -1974,37 +1901,40 @@ class GameEngine {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
 
-            if (this.youWonScreen === "./sprites/you_won_screen1.png" && easterEgg) {
-                this.youWonScreen = "./sprites/you_won_screen2.png";
-            }
+        if (this.youWonScreen === "./sprites/you_won_screen1.png" && easterEgg) {
+            this.youWonScreen = "./sprites/you_won_screen2.png";
+        }
 
-            // Draw the background image
-            const bgImage = ASSET_MANAGER.getAsset(this.youWonScreen);
-            this.ctx.drawImage(bgImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+        // Draw the background image
+        const bgImage = ASSET_MANAGER.getAsset(this.youWonScreen);
+        this.ctx.drawImage(bgImage, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-            // Draw score
-            this.ctx.fillStyle = 'white';
-            this.ctx.textAlign = 'center';
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
-            this.ctx.shadowBlur = 0; // How much the shadow should be blurred
-            this.ctx.shadowOffsetX = 2; // Horizontal shadow offset
-            this.ctx.shadowOffsetY = 2; // Vertical shadow offset
-            this.ctx.font = 'bold 36px Arial';
-            // this.ctx.fillText("Score: " + this.player.score, this.ctx.canvas.width / 2, this.ctx.canvas.height / 2 + 243);
+        // Draw score
+        this.ctx.fillStyle = 'white';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.75)'; // Shadow color (black with some transparency)
+        this.ctx.shadowBlur = 0; // How much the shadow should be blurred
+        this.ctx.shadowOffsetX = 2; // Horizontal shadow offset
+        this.ctx.shadowOffsetY = 2; // Vertical shadow offset
+        this.ctx.font = 'bold 36px Arial';
+        // this.ctx.fillText("Score: " + this.player.score, this.ctx.canvas.width / 2, this.ctx.canvas.height / 2 + 243);
 
-            // Draw the stats screen
-            this.UPGRADE_SYSTEM.drawPlayerStatsMenu(this.ctx);
-            this.drawRunStatsUI(this.ctx);
+        // Draw the stats screen
+        this.UPGRADE_SYSTEM.drawPlayerStatsMenu(this.ctx);
+        this.drawRunStatsUI(this.ctx);
 
-            // Draw buttons
-            // Continue Button
-            this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250, 300, 50, 'New Game +');
+        // Draw buttons
+        // Continue Button
+        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250, 300, 50, 'New Game +');
 
-            // Start Over Button
-            this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250 + 60, 300, 50, 'Start Over');
+        // Start Over Button
+        this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250 + 60, 300, 50, 'Start Over');
 
-            // Listen for mouse clicks on buttons
+        // Listen for mouse clicks on buttons
+        if (!this.endGameScreenSetup) {
             this.ctx.canvas.addEventListener('click', this.handleEndGameScreenClick.bind(this));
+            this.endGameScreenSetup = true;
+        }
 
         this.drawEndGameScreenFlag = true;
         this.ctx.shadowColor = 'rgba(0, 0, 0, 0)'; // Shadow color (black with some transparency)
@@ -2053,7 +1983,11 @@ class GameEngine {
         this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + +250 + 60, 300, 50, 'Start Over');
 
         // Listen for mouse clicks on buttons
-        this.ctx.canvas.addEventListener('click', this.handleLoseGameScreenClick.bind(this));
+        if (!this.loseScreenSetup) {
+            this.ctx.canvas.addEventListener('click', this.handleLoseGameScreenClick.bind(this));
+            this.loseScreenSetup = true;
+        }
+
         this.ctx.shadowColor = 'rgba(0, 0, 0, 0)'; // Shadow color (black with some transparency)
         this.ctx.shadowBlur = 0; // How much the shadow should be blurred
         this.ctx.shadowOffsetX = 0; // Horizontal shadow offset
@@ -2104,7 +2038,10 @@ class GameEngine {
         this.drawButton(this.ctx.canvas.width / 2 - 150, this.ctx.canvas.height / 2 + 250 + 60, 300, 50, 'Start Over');
 
         // Listen for mouse clicks on buttons
-        this.ctx.canvas.addEventListener('click', this.handlePauseGameScreenClick.bind(this));
+        if (!this.pauseMenuSetup) { // The flag prevents us from adding an event listener every frame
+            this.ctx.canvas.addEventListener('click', this.handlePauseGameScreenClick.bind(this));
+            this.pauseMenuSetup = true;
+        }
 
         this.ctx.shadowColor = 'rgba(0, 0, 0, 0)'; // Shadow color (black with some transparency)
         this.ctx.shadowBlur = 0; // How much the shadow should be blurred
@@ -2271,7 +2208,7 @@ class GameEngine {
                 break;
             case 1:
                 ASSET_MANAGER.stopBackgroundMusic();
-                ASSET_MANAGER.playBackgroundMusic(this.mapOneMusic);
+                ASSET_MANAGER.playBackgroundMusic(this.mapOneMusic, 0.075);
                 break;
             case 2:
                 ASSET_MANAGER.stopBackgroundMusic();
@@ -2381,31 +2318,42 @@ class GameEngine {
 
         this.drawMouseTracker(this.ctx);
 
-        // Event handling for clicks
-        this.ctx.canvas.addEventListener('click', (event) => {
-            const mouseX = event.clientX - this.ctx.canvas.getBoundingClientRect().left;
-            const mouseY = event.clientY - this.ctx.canvas.getBoundingClientRect().top;
+        if (!this.difficultyButtonsSetup) { // The flag prevents us from adding an event listener every frame
+            // Event handling for clicks
+            this.ctx.canvas.addEventListener('click', (event) => {
+                const mouseX = event.clientX - this.ctx.canvas.getBoundingClientRect().left;
+                const mouseY = event.clientY - this.ctx.canvas.getBoundingClientRect().top;
 
-            // Check for easy button click
-            if (mouseX >= easyButtonX && mouseX <= easyButtonX + 80 &&
-                mouseY >= easyButtonY && mouseY <= easyButtonY + 40) {
-                console.log('Easy button clicked');
-                this.difficultySelected = 'easy';
-            }
+                if (this.currMap === -1) {
+                    // Check for easy button click
+                    if (mouseX >= easyButtonX && mouseX <= easyButtonX + 80 &&
+                        mouseY >= easyButtonY && mouseY <= easyButtonY + 40) {
+                        //console.log('Easy button clicked');
+                        ASSET_MANAGER.playAsset("./sounds/menu_click2.mp3", 1);
+                        this.difficultySelected = 'easy';
+                        this.difficultyButtonsSetup = false;
+                    }
 
-            // Check for medium button click
-            if (mouseX >= mediumButtonX && mouseX <= mediumButtonX + 80 &&
-                mouseY >= mediumButtonY && mouseY <= mediumButtonY + 40) {
-                console.log('Medium button clicked');
-                this.difficultySelected = 'medium';
-            }
+                    // Check for medium button click
+                    if (mouseX >= mediumButtonX && mouseX <= mediumButtonX + 80 &&
+                        mouseY >= mediumButtonY && mouseY <= mediumButtonY + 40) {
+                        //console.log('Medium button clicked');
+                        ASSET_MANAGER.playAsset("./sounds/menu_click2.mp3", 1);
+                        this.difficultySelected = 'medium';
+                        this.difficultyButtonsSetup = false;
+                    }
 
-            // Check for hard button click
-            if (mouseX >= hardButtonX && mouseX <= hardButtonX + 80 &&
-                mouseY >= hardButtonY && mouseY <= hardButtonY + 40) {
-                console.log('Hard button clicked');
-                this.difficultySelected = 'hard';
-            }
-        });
+                    // Check for hard button click
+                    if (mouseX >= hardButtonX && mouseX <= hardButtonX + 80 &&
+                        mouseY >= hardButtonY && mouseY <= hardButtonY + 40) {
+                        //console.log('Hard button clicked');
+                        ASSET_MANAGER.playAsset("./sounds/menu_click2.mp3", 1);
+                        this.difficultySelected = 'hard';
+                        this.difficultyButtonsSetup = false;
+                    }
+                }
+            });
+            this.difficultyButtonsSetup = true;
+        }
     }
 }

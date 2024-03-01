@@ -64,7 +64,7 @@ class BossThree extends Entity {
         /** Last time we checked for an attack to possibly happen. */
         this.lastAttackCheckTime = this.game.elapsedTime / 1000; // Set to this to ensure boss doesn't use the attacks right away
         /** How often to check if we are going to enter an attack mode. */
-        this.attackModeCooldown = 2.5;
+        this.attackModeCooldown = 3.3;
         /** This tracks what the status of the boss attacks are. */
         this.attackStatus = "none";
         /** A temporary/re-used timer variable that will help us reduce redundancy. */
@@ -131,13 +131,13 @@ class BossThree extends Entity {
         /** Sets how many small enemies are summoned. */
         this.summAttackSmallEnemyCount = 4;
         /** How long the cooldown of the summon attack is. */
-        this.summAttackCooldown = 10;
+        this.summAttackCooldown = 15;
         /** Tracks when the last summon attack was. */
         this.lastSummAttackTime = 0;
         /** Tracks when we started the last summon attack. */
         this.summAttackStartTime = 0;
         /** Tracks how long the boss is stuck in the 'summoning' attack. */
-        this.summAttackDuration = 6.1;
+        this.summAttackDuration = 3.5;
 
         /** Flag to track whether we are still going to track the target marker to the player. 0.75 = 75% chance. */
         this.trackMode = true;
@@ -668,7 +668,7 @@ class BossThree extends Entity {
             if (!this.animator.spritesheet.src.includes(this.animationBank[0].spritePath.replace(/^\./, ""))) {
                 this.animator.changeSpritesheet(ASSET_MANAGER.getAsset(this.animationBank[0].spritePath), this.animationBank[0].animXStart, this.animationBank[0].animYStart, this.animationBank[0].animW, this.animationBank[0].animH, this.animationBank[0].animFCount, this.animationBank[0].animFDur);
             }
-            ASSET_MANAGER.playAsset(this.summonSound, 0.2);
+            ASSET_MANAGER.playAsset(this.summonSound, 0.4, 0.75);
 
             for(let i = 0; i < this.summAttackBigEnemyCount; i++) {
                 let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
@@ -707,7 +707,7 @@ class BossThree extends Entity {
 
         if (currentTime - this.summAttackStartTime >= this.summAttackDuration) {
             this.summAttackBigEnemyCount += 1;
-            this.summAttackBigEnemyCount += 4;
+            this.summAttackSmallEnemyCount += 4;
             this.animator.outlineColor = "white";
             this.animator.outlineMode = false;
             this.animator.outlineBlur = 10;
