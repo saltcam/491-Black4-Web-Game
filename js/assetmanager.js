@@ -9,6 +9,9 @@ class AssetManager {
         this.hitSoundLimit = 15; // Maximum concurrent hit sounds
         this.hitSoundCount = 0; // Current number of hit sounds playing
         this.hitSoundPath = "./sounds/hit.mp3"; // Path to the hit sound
+        this.explosionSoundLimit = 25; // Maximum concurrent explosion sounds
+        this.explosionSoundCount = 0; // Current number of explosion sounds playing
+        this.explosionSoundPath = "./sounds/SE_staff_primary.mp3"; // Path to the explosion sound
     };
 
     playBackgroundMusic(path, volume = 0.1, playbackRate = 1.0) {
@@ -128,6 +131,17 @@ class AssetManager {
                 this.hitSoundCount++;
             }
 
+            // Special handling for explosion sounds
+            if (path === this.explosionSoundPath) {
+                // Check if the hit sound limit has been reached
+                if (this.explosionSoundCount >= this.explosionSoundLimit) {
+                    console.log("Explosion sound limit reached. Skipping playback.");
+                    return; // Skip playing this sound
+                }
+                // Increment hit sound count
+                this.explosionSoundCount++;
+            }
+
             let audio = this.cache[path].cloneNode(); // Clone the audio element
             audio.volume = volume; // Set the volume for this instance
             audio.playbackRate = playbackRate; // Set the playback rate
@@ -137,6 +151,10 @@ class AssetManager {
                 // Decrement hit sound count when a hit sound ends
                 if (path === this.hitSoundPath) {
                     this.hitSoundCount--;
+                }
+                // Decrement hit sound count when a hit sound ends
+                if (path === this.explosionSoundPath) {
+                    this.explosionSoundCount--;
                 }
             });
         }
