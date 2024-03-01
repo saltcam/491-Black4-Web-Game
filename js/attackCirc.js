@@ -213,7 +213,8 @@ class AttackCirc {
                         switch (this.type) {
                             case "playerAttack_NecromancyAttack":
 
-                                if (this.game.allies.length < 10) {
+                                // if we aren't at ally cap
+                                if (this.game.allies.length < 15) {
                                     let enemyClass = 0;
                                     if (this.game.player.weapons[2].upgrades[6].active) {   // if the player has the upgrade to summon ranged allies
                                         enemyClass = Math.floor(Math.random() * 2);

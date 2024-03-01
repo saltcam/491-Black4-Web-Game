@@ -141,6 +141,8 @@ class GameEngine {
         /** Stores active custom timeout calls, they respond to the game being paused. */
         this.activeTimeouts = []; // To store active timeouts
 
+        this.newGamePlusCount = 0;
+
         // Music
         this.restAreaMusic = "./sounds/music_firelink.mp3";
         this.mapOneMusic = "./sounds/music_nameless_song.mp3";
@@ -1874,6 +1876,8 @@ class GameEngine {
             this.switchMap(1);
             this.drawEndGameScreenFlag = false;
             if (this.isGamePaused) this.togglePause();
+
+            this.newGamePlusCount++;
             // Remove event listener to prevent memory leaks
             this.ctx.canvas.removeEventListener('click', this.handleEndGameScreenClick.bind(this));
         }
@@ -1903,7 +1907,6 @@ class GameEngine {
         if (clickX >= this.ctx.canvas.width / 2 - 150 && clickX <= this.ctx.canvas.width / 2 + 150 &&
             clickY >= this.ctx.canvas.height / 2 + 250 + 60 && clickY <= this.ctx.canvas.height / 2 + 250 + 60 + 50) {
             // Handle Start Over action
-            //TODO fix this so it restarts
             window.location.reload();
             this.drawEndGameScreenFlag = false;
             if (this.isGamePaused) this.togglePause();
@@ -1984,6 +1987,10 @@ class GameEngine {
             this.ctx.canvas.addEventListener('click', this.handleEndGameScreenClick.bind(this));
 
         this.drawEndGameScreenFlag = true;
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0)'; // Shadow color (black with some transparency)
+        this.ctx.shadowBlur = 0; // How much the shadow should be blurred
+        this.ctx.shadowOffsetX = 0; // Horizontal shadow offset
+        this.ctx.shadowOffsetY = 0; // Vertical shadow offset
     }
 
     drawLoseScreen() {
@@ -2027,15 +2034,15 @@ class GameEngine {
 
         // Listen for mouse clicks on buttons
         this.ctx.canvas.addEventListener('click', this.handleLoseGameScreenClick.bind(this));
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0)'; // Shadow color (black with some transparency)
+        this.ctx.shadowBlur = 0; // How much the shadow should be blurred
+        this.ctx.shadowOffsetX = 0; // Horizontal shadow offset
+        this.ctx.shadowOffsetY = 0; // Vertical shadow offset
 
     }
 
     pauseMenu(){
-        if (this.isPauseMenu) {
-            this.isPauseMenu = false;
-        } else {
-            this.isPauseMenu = true;
-        }
+        this.isPauseMenu = !this.isPauseMenu;
         this.togglePause();
         ASSET_MANAGER.playAsset("./sounds/healing_heart.mp3");
 
@@ -2113,14 +2120,19 @@ class GameEngine {
         this.ctx.fillText("Total Score:", screenX, screenY+5);
         this.ctx.fillText(this.player.score, screenX, screenY + 45);
 
-        this.ctx.fillText(this.difficultySelected.toUpperCase(),screenX, screenY + 80);
+        let pluses = "";
+        for (let i = 0; i < this.newGamePlusCount; i++) {
+            pluses = pluses + "+";
+        }
+
+        this.ctx.fillText(this.difficultySelected.toUpperCase() + pluses,screenX, screenY + 80);
 
         let levelNames = ["Grasslands", "Cave", "Space"];
 
         for (let i = 0; i < this.levelTimes.length; i++) {
 
             let minutes = Math.floor(this.levelTimes[i]/1000/60);
-            let seconds = Math.floor(this.levelTimes[i]/1000);
+            let seconds = Math.floor(this.levelTimes[i]/1000) % 60;
             if (seconds < 10) {
                 seconds = "0" + seconds.toString();
             }
@@ -2255,6 +2267,11 @@ class GameEngine {
         if (teleportIndex === 1) {
             this.SPAWN_SYSTEM.DIFFICULTY_SCALE *= 3;
             this.SPAWN_SYSTEM.baseEnemySpawnInterval /= 2;
+
+            for (let i = 0; i < 3; i++) {
+                this.levelScores[i] = 0;
+                this.levelTimes[i] = 0;
+            }
         }
 
         // Reset spawn system on map change

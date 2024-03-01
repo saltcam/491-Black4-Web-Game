@@ -116,8 +116,9 @@
                     e.preventDefault(); // Prevent the default action (scrolling the page down)
                 }
 
-                if (e.code === 'Escape' && gameEngine.currMap > -1 && gameEngine.currMap < 4 &&
-                    gameEngine.UPGRADE_SYSTEM.currentMenu === -1 && !gameEngine.player.isDead) gameEngine.pauseMenu();
+                if (e.code === 'Escape' && gameEngine.currMap > 0 && gameEngine.currMap < 4 &&
+                    gameEngine.UPGRADE_SYSTEM.currentMenu === -1 && !gameEngine.player.isDead
+                    && gameEngine.fadeState === "none") gameEngine.pauseMenu();
             });
         });
     </script>
