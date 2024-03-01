@@ -1367,7 +1367,7 @@ class GameEngine {
                     });
 
                     // Spawn Tombstones on killed enemies (only % of the time)
-                    if (Math.random() < this.player.tombstoneChance && (!wasKilledByExplosion || this.player.weapons[2].upgrades[4].active)) {
+                    if (Math.random() < this.player.tombstoneChance && (!wasKilledByExplosion || this.player.weapons[2].upgrades[11].active)) {
                         // Spawn Tombstone
                         let tombstone = new Map_object(this, this.enemies[i].calculateCenter().x, this.enemies[i].calculateCenter().y, 35, 35, "./sprites/object_tombstone.png", 0, 0, 28, 46, 1, 1, 1);
                         this.addEntity(tombstone);
@@ -2112,6 +2112,8 @@ class GameEngine {
 
         this.ctx.fillText("Total Score:", screenX, screenY+5);
         this.ctx.fillText(this.player.score, screenX, screenY + 45);
+
+        this.ctx.fillText(this.difficultySelected.toUpperCase(),screenX, screenY + 80);
 
         let levelNames = ["Grasslands", "Cave", "Space"];
 

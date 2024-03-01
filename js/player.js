@@ -9,7 +9,7 @@
 class Player extends Entity {
 
     constructor(game) {
-        super(100, 1, 25, game, 0, 0,
+        super(100, 100, 25, game, 0, 0,
             17, 29, "player", 160, //160 speed is default
             "./sprites/McIdle.png",
             0, 0, 32, 28, 2, 0.5, 2.2, 0);
@@ -85,7 +85,7 @@ class Player extends Entity {
         this.initialPickupRange = this.pickupRange;
         this.initialExpGain = this.expGain;
 
-        this.lives = 0; // start with 1 extra life.
+        this.lives = 1; // start with 1 extra life.
         // Store a bank of all possible gold pickup sound effects
         this.pickupSoundBank = [
             "./sounds/Coin_Pickup1.mp3",

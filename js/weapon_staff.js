@@ -35,6 +35,7 @@ class Weapon_staff extends Weapon {
         // this.upgrades[8].active = true;
         // this.upgrades[9].active = true; // heal
         // this.upgrades[10].active = true;    // sets fiery explosion to true
+        // this.upgrades[11].active = true;
         // this.handleUpgrade();
     }
 
