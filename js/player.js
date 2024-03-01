@@ -130,9 +130,10 @@ class Player extends Entity {
 
         // this.upgrades[12].active = true; // gravewalker
         //this.upgrades[13].active = true; // small
+        // this.upgrades[14].active = true; // smoke
         // this.upgrades[15].active = true;// Divine Dash
         // this.upgrades[16].active = true;
-        //this.handleUpgrade();
+        // this.handleUpgrade();
 
         // Turn off bad upgrades
         this.upgrades[9].relevant = false; // Turn off EXP upgrade (too OP)
@@ -172,6 +173,9 @@ class Player extends Entity {
                             break;
                         case "Attack Damage +7.5%":
                             this.atkPow *= 1.075;
+                            this.game.allies.forEach(ally =>{
+                                ally.atkPow *= 1.075;
+                            });
                             break;
                         case "Pickup Range +30%":
                             this.pickupRange *= 1.3;
@@ -601,6 +605,7 @@ class Player extends Entity {
                 0, 0, 32, 32, 5, 0.1, 5, 0, 0,
                 0.5, 100, 14, 0, 1));
             newProjectile.attackCirc.pulsatingDamage = false;
+            ASSET_MANAGER.playAsset("./sounds/smoke_bomb.mp3");
         }
     }
 

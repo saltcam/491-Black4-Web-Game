@@ -280,6 +280,8 @@ ASSET_MANAGER.queueDownload("./sounds/music_dragonlord.mp3");
 ASSET_MANAGER.queueDownload("./sounds/healing_heart.mp3");
 ASSET_MANAGER.queueDownload("./sounds/music_ave_maria.mp3");
 ASSET_MANAGER.queueDownload("./sounds/portal.mp3");
+ASSET_MANAGER.queueDownload("./sounds/smoke_bomb.mp3");
+
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");
