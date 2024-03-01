@@ -30,11 +30,10 @@ class Player extends Entity {
             // TODO need assets for these
             new Upgrade("Extra Life", "Fully heal instead of dying (Once).", false, "./sprites/upgrade_tomb_chance.png", 0, 0.05),
             new Upgrade("Missingno", "(Unique) Drop tomb every 10s.", true, "./sprites/upgrade_tomb_chance.png", 0),
-            new Upgrade("It's what you do with it", "(Unique) 50% smaller.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.15),
+            // generic but only because its easier to apply stat changes that way.
+            new Upgrade("It's what you do with it", "(Unique) 50% smaller.", false, "./sprites/upgrade_tomb_chance.png", 0, 0.15),
             new Upgrade("Smoke Bomb", "(Unique) Explode at end of dash.", true, "./sprites/upgrade_tomb_chance.png", 0, 0.15),
-            // based on hades, maybe grab asset from there?
             new Upgrade("Divine Dash", "(Unique) Dash reflects projectiles.", true, "./sprites/upgrade_divine_dash.png", 0, 0.15),
-            // based on vampire survivors, feel free to grab the sprite from there.
             new Upgrade("Glorious Moon", "(Unique) Suck all EXP every 2 minutes.", true, "./sprites/upgrade_glorious_moon.png", 0, 0.1)
         ];
 
@@ -132,10 +131,11 @@ class Player extends Entity {
         this.lastMoonTime = 0;
 
         // this.upgrades[12].active = true; // gravewalker
-        //this.upgrades[13].active = true; // small
+        // this.upgrades[13].active = true; // small
+        // this.upgrades[14].active = true;    // smoke bomb
         // this.upgrades[15].active = true;// Divine Dash
-        // this.upgrades[16].active = true;
-        //this.handleUpgrade();
+        // this.upgrades[16].active = true;    // glorious moon
+        // this.handleUpgrade();
 
         // Turn off bad upgrades
         this.upgrades[9].relevant = false; // Turn off EXP upgrade (too OP)
@@ -204,34 +204,41 @@ class Player extends Entity {
                         case "Tombstone Chance +5%":
                             this.tombstoneChance += 0.05;
                             // If we hit 100% tombstone chance, remove this upgrade as an option for the future
-                            if (this.tombstoneChance >= 1) {
+                            if (this.tombstoneChance >= 0.5) {
+                                this.tombstoneChance = 0.5;
                                 this.upgrades[i].relevant = false;
                             }
                             break;
                         case "Extra Life":
                             this.lives++;
                             break;
-                    }
-                    // Set generic to 'false' so it can be re-used/activated in the future
-                    this.upgrades[i].active = false;
-                }
-                else if (this.upgrades[i].active && this.upgrades[i].relevant && this.upgrades[i].special) {
-                    switch (this.upgrades[i].name) {
+
                         case "It's what you do with it":
                             this.boundingBox.height *= 0.5;
                             this.animator.scale *= 0.5;
                             this.game.playerReflection = null;
-                            break;
-                        case "Smoke Bomb":
-                            break;
-                        case "Divine Dash":
-                            break;
-                        case "Glorious Moon":
+                            this.upgrades[i].relevant = false;
                             break;
                     }
                     // Set generic to 'false' so it can be re-used/activated in the future
                     this.upgrades[i].active = false;
                 }
+                // // TODO discuss this
+                // else if (this.upgrades[i].active && this.upgrades[i].relevant && this.upgrades[i].special) {
+                //     switch (this.upgrades[i].name) {
+                //         case "It's what you do with it":
+                //
+                //             break;
+                //         case "Smoke Bomb":
+                //             break;
+                //         case "Divine Dash":
+                //             break;
+                //         case "Glorious Moon":
+                //             break;
+                //     }
+                //     // Set generic to 'false' so it can be re-used/activated in the future
+                //     // this.upgrades[i].active = false;
+                // }
         }
     }
 
@@ -587,7 +594,10 @@ class Player extends Entity {
 
     endDash() {
         this.isDashing = false; // Reset dashing state, this flag also will enable iFrames
+        // console.log("end dash");
+        // console.log(this.upgrades[14].active);
         if (this.upgrades[14].active) {
+            // console.log(this.upgrades[14].active);
             let newProjectile = this.game.addEntity(new Projectile(this.game, 10,
                 this.worldX, this.worldY, 10, 10, "playerAttack_Smoke", 0,
                 "./sprites/smoke.png",
