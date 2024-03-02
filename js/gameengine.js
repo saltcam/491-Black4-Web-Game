@@ -154,8 +154,6 @@ class GameEngine {
         this.mapThreeBossMusic = "./sounds/boss_music_god.mp3";
         this.youWonScreenMusic = "./sounds/music_ave_maria.mp3";
 
-        this.mapThreeMusicPlaying = false;
-
         this.youWonScreen = "./sprites/you_won_screen1.png";
         this.howToPlayScreen = "./sprites/how_to_play.png";
 
@@ -237,8 +235,8 @@ class GameEngine {
     }
     /** Call this method to spawn boss three (God - Wrath of God) */
     spawnBossThree() {
-        // ASSET_MANAGER.stopBackgroundMusic();
-        // ASSET_MANAGER.playBackgroundMusic(this.mapThreeBossMusic);
+        ASSET_MANAGER.stopBackgroundMusic();
+        ASSET_MANAGER.playBackgroundMusic(this.mapThreeBossMusic);
         this.boss = this.addEntity(new BossThree(this, 250, 0));
     }
 
@@ -652,6 +650,13 @@ class GameEngine {
                 if (this.debugMode) {
                     object.drawHealth(this.ctx);
                     object.boundingBox.draw(this.ctx, this);
+                }
+            }
+
+            // Draw 'fire' attack entities.
+            for (let attack of this.attacks) {
+                if (attack instanceof Projectile && attack.boundingBox.type === "playerAttack_Fire") {
+                    attack.draw(this.ctx, this);
                 }
             }
 
@@ -1267,13 +1272,6 @@ class GameEngine {
                     this.spawnBossThree();
                     break;
             }
-        }
-
-        // Handle special boss three music timer
-        if (this.currMap === 3 && currentTimer >= 240 && !this.mapThreeMusicPlaying) {
-            ASSET_MANAGER.stopBackgroundMusic();
-            ASSET_MANAGER.playBackgroundMusic(this.mapThreeBossMusic);
-            this.mapThreeMusicPlaying = true;
         }
 
         // Remove 'other' entities that are marked for deletion.

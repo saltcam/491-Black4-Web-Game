@@ -127,9 +127,9 @@ class BossThree extends Entity {
         /** Controls if it is time to enter summon attack mode. */
         this.enterSummAttackMode = false;
         /** Sets how many big enemies are summoned. */
-        this.summAttackBigEnemyCount = 1;
+        this.summAttackBigEnemyCount = 2;
         /** Sets how many small enemies are summoned. */
-        this.summAttackSmallEnemyCount = 4;
+        this.summAttackSmallEnemyCount = 20;
         /** How long the cooldown of the summon attack is. */
         this.summAttackCooldown = 7.5;
         /** Tracks when the last summon attack was. */
@@ -137,7 +137,7 @@ class BossThree extends Entity {
         /** Tracks when we started the last summon attack. */
         this.summAttackStartTime = 0;
         /** Tracks how long the boss is stuck in the 'summoning' attack. */
-        this.summAttackDuration = 1;
+        this.summAttackDuration = 2;
 
         /** Flag to track whether we are still going to track the target marker to the player. 0.75 = 75% chance. */
         this.trackMode = true;
@@ -229,7 +229,7 @@ class BossThree extends Entity {
                 this.game.killAllEnemies();
                 this.game.spawnEndChest();
                 this.game.mapThreeMusicPlaying = false;
-                //ASSET_MANAGER.stopBackgroundMusic();
+                ASSET_MANAGER.stopBackgroundMusic();
                 this.removeFromWorld = true;
                 return;
             }
@@ -406,14 +406,14 @@ class BossThree extends Entity {
                 }
             }
             // Attempt phase 2 attacks
-            else if (this.phaseTwoActivated) {
+            else if (this.phaseTwoActivated && !this.enterSummAttackMode) {
                 if (currentTime - this.lastChargeAttackTime >= this.chargeAttackCooldown) {
                     this.enterChargeMode = true;
                 }
             }
 
             // Attempt to summon attack (call allies)
-            if (currentTime - this.lastSummAttackTime >= this.summAttackCooldown) {
+            if (!this.enterChargeMode && currentTime - this.lastSummAttackTime >= this.summAttackCooldown) {
                 this.enterSummAttackMode = true;
             }
 
@@ -709,8 +709,8 @@ class BossThree extends Entity {
 
         if (currentTime - this.summAttackStartTime >= this.summAttackDuration) {
             this.summAttackCooldown = Math.max(this.summAttackCooldown - 1, 2);
-            this.summAttackBigEnemyCount += 1;
-            this.summAttackSmallEnemyCount += 4;
+            // this.summAttackBigEnemyCount += 1;
+            // this.summAttackSmallEnemyCount += 4;
             this.animator.outlineColor = "white";
             this.animator.outlineMode = false;
             this.animator.outlineBlur = 10;
