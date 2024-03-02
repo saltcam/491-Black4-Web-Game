@@ -131,7 +131,7 @@ class BossThree extends Entity {
         /** Sets how many small enemies are summoned. */
         this.summAttackSmallEnemyCount = 4;
         /** How long the cooldown of the summon attack is. */
-        this.summAttackCooldown = 10;
+        this.summAttackCooldown = 7.5;
         /** Tracks when the last summon attack was. */
         this.lastSummAttackTime = 0;
         /** Tracks when we started the last summon attack. */
@@ -201,6 +201,8 @@ class BossThree extends Entity {
             this.maxHP = Math.round(this.maxHP * this.game.SPAWN_SYSTEM.DIFFICULTY_SCALE);
             this.currHP = this.maxHP;
             this.atkPow = Math.round(this.atkPow * this.game.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+            this.summAttackBigEnemyCount = this.summAttackBigEnemyCount * Math.floor(this.game.SPAWN_SYSTEM.DIFFICULTY_SCALE);
+            this.summAttackSmallEnemyCount = this.summAttackSmallEnemyCount * Math.floor(this.game.SPAWN_SYSTEM.DIFFICULTY_SCALE);
 
             this.initialized = true;
         }
@@ -684,7 +686,7 @@ class BossThree extends Entity {
                     enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
                     enemy.exp, enemy.fleeDist, enemy.approachDist));
 
-                this.game.SPAWN_SYSTEM.scaleStatsForDifficulty(enemy);
+                console.log("BIG:HP="+enemy.maxHP+", DMG="+enemy.atkPow);
             }
 
             for(let i = 0; i < this.summAttackSmallEnemyCount; i++) {
@@ -701,12 +703,12 @@ class BossThree extends Entity {
                     enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
                     enemy.exp, enemy.fleeDist, enemy.approachDist));
 
-                this.game.SPAWN_SYSTEM.scaleStatsForDifficulty(enemy);
+                console.log("SMALL:HP="+enemy.maxHP+", DMG="+enemy.atkPow);
             }
         }
 
         if (currentTime - this.summAttackStartTime >= this.summAttackDuration) {
-            this.summAttackCooldown /= 2;
+            this.summAttackCooldown = Math.max(this.summAttackCooldown - 1, 2);
             this.summAttackBigEnemyCount += 1;
             this.summAttackSmallEnemyCount += 4;
             this.animator.outlineColor = "white";
