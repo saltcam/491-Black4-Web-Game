@@ -272,7 +272,7 @@ class GameEngine {
         this.spawnUpgradeChest(1797, 2802);
 
         // Debug Portal
-        //this.spawnPortal(0, 100);
+        this.spawnPortal(0, 100);
         //this.spawnEndPortal(0, -100);
 
         // Rocks
@@ -329,7 +329,7 @@ class GameEngine {
         this.spawnUpgradeChest(2778, 2844);
 
         // Debug Portal
-        //this.spawnPortal(0, 100);
+        this.spawnPortal(0, 100);
 
         // Rock objects
         let newEntity = this.addEntity(new Map_object(this, -450, 0, 55, 56-30, "./sprites/map_rock_object_black.png", 0, 0, 86, 56, 1, 1, 2));
@@ -412,7 +412,7 @@ class GameEngine {
         this.spawnUpgradeChest(500, 3000);
 
         // Debug Portal
-        //this.spawnPortal(0, 100);
+        this.spawnPortal(0, 100);
 
         // Meteors
         this.meteor = this.spawnMeteor(3.22 * Math.random(), 25 * Math.random(), 50);
@@ -1951,14 +1951,7 @@ class GameEngine {
     }
 
     drawLoseScreen() {
-        if (this.currMap > 0 && this.currMap < 4) {
-            this.levelTimes[this.currMap-1] = this.elapsedTime;
-            if (this.currMap === 1) {
-                this.levelScores[0] = this.player.score;
-            } else {
-                this.levelScores[this.currMap - 1] = this.player.score - this.levelScores[this.currMap - 2];
-            }
-        }
+        this.updateRunScores();
         if (!this.isGamePaused) this.togglePause();
 
         // Clear the canvas
@@ -2006,19 +1999,9 @@ class GameEngine {
         this.isPauseMenu = !this.isPauseMenu;
         this.togglePause();
         ASSET_MANAGER.playAsset("./sounds/healing_heart.mp3");
-
-        if (this.currMap > 0 && this.currMap < 4) {
-            this.levelTimes[this.currMap-1] = this.elapsedTime;
-            if (this.currMap === 1) {
-                this.levelScores[0] = this.player.score;
-            } else {
-                this.levelScores[this.currMap - 1] = this.player.score - this.levelScores[this.currMap - 2];
-            }
-        }
-
+        this.updateRunScores();
     }
     drawPauseMenu() {
-
 
         // Draw the background red color
         this.ctx.fillStyle = `rgba(255, 255, 255, 0.42)`;
@@ -2116,17 +2099,23 @@ class GameEngine {
 
     }
 
-    switchMap(teleportIndex) {
-        let currentTime = this.elapsedTime / 1000
-
+    updateRunScores() {
         if (this.currMap > 0 && this.currMap < 4) {
             this.levelTimes[this.currMap-1] = this.elapsedTime;
             if (this.currMap === 1) {
                 this.levelScores[0] = this.player.score;
-            } else {
-                this.levelScores[this.currMap - 1] = this.player.score - this.levelScores[this.currMap - 2];
+            } else if (this.currMap === 2) {
+                this.levelScores[1] = this.player.score - this.levelScores[0];
+            } else if (this.currMap === 3) {
+                this.levelScores[2] = this.player.score - this.levelScores[1] - this.levelScores[0];
             }
         }
+    }
+
+    switchMap(teleportIndex) {
+        let currentTime = this.elapsedTime / 1000
+
+        this.updateRunScores();
 
         // Delete old map stuff
         // Delete 'other' entities
