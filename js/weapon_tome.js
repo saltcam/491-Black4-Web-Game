@@ -205,6 +205,7 @@ class Weapon_tome extends Weapon {
                         // Fixes a bug where size affected projectile movement speed
                         // TODO THIS IS NOT A PERFECT BUG-FIX, need to find the real issue!!!
                         this.primaryProjectileMovementSpeed *= 0.9;
+                        this.initialPrimaryProjectileMovementSpeed *= 0.9;
                         this.secondaryProjectileMovementSpeed *= 0.9;
                         this.upgrades[i].goldCost = Math.ceil(this.upgrades[i].goldCost * 1.20);
                         break;
