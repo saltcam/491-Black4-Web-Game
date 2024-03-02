@@ -2342,7 +2342,7 @@ class GameEngine {
                     if (mouseX >= easyButtonX && mouseX <= easyButtonX + 80 &&
                         mouseY >= easyButtonY && mouseY <= easyButtonY + 40) {
                         //console.log('Easy button clicked');
-                        ASSET_MANAGER.playAsset("./sounds/menu_click2.mp3", 1);
+                        // ASSET_MANAGER.playAsset("./sounds/menu_click2.mp3", 1);
                         this.difficultySelected = 'easy';
                         this.difficultyButtonsSetup = false;
                     }
@@ -2351,7 +2351,7 @@ class GameEngine {
                     if (mouseX >= mediumButtonX && mouseX <= mediumButtonX + 80 &&
                         mouseY >= mediumButtonY && mouseY <= mediumButtonY + 40) {
                         //console.log('Medium button clicked');
-                        ASSET_MANAGER.playAsset("./sounds/menu_click2.mp3", 1);
+                        // ASSET_MANAGER.playAsset("./sounds/menu_click2.mp3", 1);
                         this.difficultySelected = 'medium';
                         this.difficultyButtonsSetup = false;
                     }
@@ -2360,7 +2360,7 @@ class GameEngine {
                     if (mouseX >= hardButtonX && mouseX <= hardButtonX + 80 &&
                         mouseY >= hardButtonY && mouseY <= hardButtonY + 40) {
                         //console.log('Hard button clicked');
-                        ASSET_MANAGER.playAsset("./sounds/menu_click2.mp3", 1);
+                        // ASSET_MANAGER.playAsset("./sounds/menu_click2.mp3", 1);
                         this.difficultySelected = 'hard';
                         this.difficultyButtonsSetup = false;
                     }

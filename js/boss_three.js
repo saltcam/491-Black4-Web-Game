@@ -6,7 +6,7 @@
 class BossThree extends Entity {
     /** Default Constructor - Only needs to be passed the gameengine and worldX and Y coords. */
     constructor(game, worldX, worldY) {
-        super(15000, 15000, 40,
+        super(30000, 30000, 40,
             game, worldX, worldY,
             70, 120, "enemyBoss",
             100,
@@ -683,8 +683,6 @@ class BossThree extends Entity {
                     enemy.chargeAnimXStart, enemy.chargeAnimYStart, enemy.chargeAnimW,
                     enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
                     enemy.exp, enemy.fleeDist, enemy.approachDist));
-
-                this.game.SPAWN_SYSTEM.scaleStatsForDifficulty(enemy);
             }
 
             for(let i = 0; i < this.summAttackSmallEnemyCount; i++) {
@@ -700,8 +698,6 @@ class BossThree extends Entity {
                     enemy.chargeAnimXStart, enemy.chargeAnimYStart, enemy.chargeAnimW,
                     enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
                     enemy.exp, enemy.fleeDist, enemy.approachDist));
-
-                this.game.SPAWN_SYSTEM.scaleStatsForDifficulty(enemy);
             }
         }
 
