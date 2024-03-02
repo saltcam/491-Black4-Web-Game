@@ -230,6 +230,7 @@ class BossThree extends Entity {
                 this.game.spawnEndChest();
                 this.game.mapThreeMusicPlaying = false;
                 ASSET_MANAGER.stopBackgroundMusic();
+                this.game.SPAWN_SYSTEM.spawnWithBoss = false;
                 this.removeFromWorld = true;
                 return;
             }
@@ -241,26 +242,6 @@ class BossThree extends Entity {
         if (!this.game.player) {
             return;
         }
-
-        // // If health hits 0 or below, this entity is declared dead
-        // if (this.isDead) {
-        //     // Spawn a portal to rest area (because map is completed once boss is dead)
-        //     //this.game.spawnPortal(0, 0);
-        //     this.game.spawnEndPortal(0,0);
-        //
-        //     // Set the gameengine to roundOver
-        //     this.game.roundOver = true;
-        //
-        //     // Send the right stuff to garbage collection
-        //     if (this.targetMarker) this.targetMarker.removeFromWorld = true;
-        //     if (this.eyeBallEntity) this.eyeBallEntity.removeFromWorld = true;
-        //     if (this.wingsEntity) this.wingsEntity.removeFromWorld = true;
-        //     this.game.killAllEnemies();
-        //     this.game.spawnEndChest();
-        //     ASSET_MANAGER.stopBackgroundMusic();
-        //     this.removeFromWorld = true;
-        //     return;
-        // }
 
         // Make sure the eyeball entity is always 'looking' at the player
         this.eyeBallEntity.lookAtEntity(this.game.player, 3.1);
@@ -412,10 +393,10 @@ class BossThree extends Entity {
                 }
             }
 
-            // Attempt to summon attack (call allies)
-            if (!this.enterChargeMode && currentTime - this.lastSummAttackTime >= this.summAttackCooldown) {
-                this.enterSummAttackMode = true;
-            }
+            // // Attempt to summon attack (call allies)
+            // if (!this.enterChargeMode && currentTime - this.lastSummAttackTime >= this.summAttackCooldown) {
+            //     this.enterSummAttackMode = true;
+            // }
 
             this.lastAttackCheckTime = currentTime;
         }
@@ -463,6 +444,8 @@ class BossThree extends Entity {
     /** This method performs all the necessary actions to start phase two. */
     startPhaseTwo() {
         if (this.phaseTwoActivated) return;
+
+        this.game.SPAWN_SYSTEM.spawnWithBoss = true;
 
         this.lastAttackCheckTime = this.game.elapsedTime / 1000;
 

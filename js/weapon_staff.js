@@ -9,10 +9,10 @@ class Weapon_staff extends Weapon {
             new Upgrade("Gravewalker", "(Stackable, Additive)\n+1 Tombstone every 15 sec.", false, "./sprites/upgrade_tomb_chance.png", 150, 1),
             new Upgrade("Ranged Summons", "(Unique) 50% for ranged Summons.", true, "./sprites/upgrade_summon_ranged.png", 150, 0.2),
             new Upgrade("Explosive Finish", "(Unique) Summons explode on death.", true, "./sprites/upgrade_summon_explode.png", 200, 0.2),
-            new Upgrade("Empower Summons", "(Unique) Brief 2x Speed, Damage, and Attack Freq.", true, "./sprites/upgrade_summon_empower.png", 300, 0.15),
+            new Upgrade("Empower Summons", "(Unique) Primary briefly empowers allies.", true, "./sprites/upgrade_summon_empower.png", 300, 0.15),
             new Upgrade("Heal Summons", "(Unique) Heal HP of Summons", true, "./sprites/upgrade_knockback.png", 200, 0.15),
             new Upgrade("Fiery Explosions", "(Unique) Explosions make fire hazards.", true, "./sprites/upgrade_staff_fire.png", 275, 0.15),
-            new Upgrade("Corpse Explosion", "(Unique) Enemies killed with explosions may explode.", true, "./sprites/upgrade_corpse_explosion.png", 300, 0.1)];
+            new Upgrade("Corpse Explosion", "(Unique) Enemies can chain explode.", true, "./sprites/upgrade_corpse_explosion.png", 300, 0.1)];
 
         super(game, "Staff", 4, 5,
             0, 0,

@@ -54,6 +54,8 @@ class Spawn_System {
         this.bossSpawnTimer = 300; // 300 by default
         /** Tracks how long it has been since we last spawned an elite. */
         this.lastEliteSpawnTime = 0;
+        /** Spawn with boss flag. */
+        this.spawnWithBoss = false;
 
         /** An array of all potential enemies of type 'Enemy_Contact'. */
         this.contactEnemyTypes = [
@@ -222,7 +224,7 @@ class Spawn_System {
         //if (this.game.elapsedTime > 0 && this.game.elapsedTime % currentSpawnInterval < this.game.clockTick * 1000) {
         if (currentTime - this.lastSpawnTime >= this.baseEnemySpawnInterval) {
             // Conditions to spawn enemies: no boss, round not over, not in rest area, (this.game.elapsedTime / 1000) - this.lastSpawnTime >= this.baseEnemySpawnInterval
-            if (this.game.boss === null && !this.game.roundOver && this.game.currMap !== 0 &&
+            if ((this.game.boss === null || this.spawnWithBoss) && !this.game.roundOver && this.game.currMap !== 0 &&
                 this.game.enemies.length < this.currentMaxEnemies) {
                 this.spawnScalingEnemies();
                 //console.log("CURR = " + this.game.enemies.length + ", MAX = " + this.currentMaxEnemies);
