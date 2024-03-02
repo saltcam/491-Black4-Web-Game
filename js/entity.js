@@ -256,7 +256,7 @@ class Entity {
         let isCrit = false;
         let isBleed = false;
 
-        if (!(this instanceof Player)) {
+        if (!(this instanceof Player || this.boundingBox.type === "ally")) {
             const critRoll = Math.random();
             if (critRoll < this.game.player.critChance) {
                 amount *= this.game.player.critDamage;
