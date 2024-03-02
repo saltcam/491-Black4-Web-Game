@@ -669,7 +669,7 @@ class BossThree extends Entity {
                     enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
                     enemy.exp, enemy.fleeDist, enemy.approachDist));
 
-                console.log("BIG:HP="+enemy.maxHP+", DMG="+enemy.atkPow);
+                //console.log("BIG:HP="+enemy.maxHP+", DMG="+enemy.atkPow);
             }
 
             for(let i = 0; i < this.summAttackSmallEnemyCount; i++) {
@@ -686,7 +686,7 @@ class BossThree extends Entity {
                     enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
                     enemy.exp, enemy.fleeDist, enemy.approachDist));
 
-                console.log("SMALL:HP="+enemy.maxHP+", DMG="+enemy.atkPow);
+                //console.log("SMALL:HP="+enemy.maxHP+", DMG="+enemy.atkPow);
             }
         }
 

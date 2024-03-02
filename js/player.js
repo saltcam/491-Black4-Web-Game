@@ -507,7 +507,7 @@ class Player extends Entity {
                             newSpritesheetPath = "." + newSpritesheetPath.substring(spritesIndex);
                         }
 
-                        console.log(newSpritesheetPath);
+                        //console.log(newSpritesheetPath);
 
                         let reflectedProjectile = this.game.addEntity(new Projectile(this.game, projectile.atkPow,
                             projectile.worldX, projectile.worldY, projectile.boundingBox.width, projectile.boundingBox.height,

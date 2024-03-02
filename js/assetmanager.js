@@ -9,7 +9,7 @@ class AssetManager {
         this.hitSoundLimit = 15; // Maximum concurrent hit sounds
         this.hitSoundCount = 0; // Current number of hit sounds playing
         this.hitSoundPath = "./sounds/hit.mp3"; // Path to the hit sound
-        this.explosionSoundLimit = 25; // Maximum concurrent explosion sounds
+        this.explosionSoundLimit = 33; // Maximum concurrent explosion sounds
         this.explosionSoundCount = 0; // Current number of explosion sounds playing
         this.explosionSoundPath = "./sounds/SE_staff_primary.mp3"; // Path to the explosion sound
         this.noMusic = false;
@@ -30,7 +30,7 @@ class AssetManager {
 
         // Play the new background music
         if (this.cache[path]) {
-            console.log("Playing music..."+path);
+            //console.log("Playing music..."+path);
             let audio = this.cache[path];
             audio.volume = volume;
             audio.playbackRate = playbackRate;
@@ -42,7 +42,7 @@ class AssetManager {
 
     stopBackgroundMusic() {
         if (this.currentBackgroundMusic && this.cache[this.currentBackgroundMusic]) {
-            console.log("Stopped music.");
+            //console.log("Stopped music.");
             let music = this.cache[this.currentBackgroundMusic];
             music.pause();
             music.currentTime = 0;
@@ -129,7 +129,7 @@ class AssetManager {
             if (path === this.hitSoundPath) {
                 // Check if the hit sound limit has been reached
                 if (this.hitSoundCount >= this.hitSoundLimit) {
-                    console.log("Hit sound limit reached. Skipping playback.");
+                    //console.log("Hit sound limit reached. Skipping playback.");
                     return; // Skip playing this sound
                 }
                 // Increment hit sound count
@@ -140,7 +140,7 @@ class AssetManager {
             if (path === this.explosionSoundPath) {
                 // Check if the hit sound limit has been reached
                 if (this.explosionSoundCount >= this.explosionSoundLimit) {
-                    console.log("Explosion sound limit reached. Skipping playback.");
+                    //console.log("Explosion sound limit reached. Skipping playback.");
                     return; // Skip playing this sound
                 }
                 // Increment hit sound count
