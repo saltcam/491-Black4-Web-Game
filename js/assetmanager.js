@@ -9,9 +9,11 @@ class AssetManager {
         this.hitSoundLimit = 15; // Maximum concurrent hit sounds
         this.hitSoundCount = 0; // Current number of hit sounds playing
         this.hitSoundPath = "./sounds/hit.mp3"; // Path to the hit sound
-        this.explosionSoundLimit = 33; // Maximum concurrent explosion sounds
+        this.explosionSoundLimit = 30; // Maximum concurrent explosion sounds
         this.explosionSoundCount = 0; // Current number of explosion sounds playing
         this.explosionSoundPath = "./sounds/SE_staff_primary.mp3"; // Path to the explosion sound
+        this.xpSoundLimit = 5; // Cap for concurrent XP gain sounds
+        this.xpSoundsPlaying = []; // Track actively playing XP gain sounds
         this.noMusic = false;
     };
 
@@ -162,6 +164,30 @@ class AssetManager {
                     this.explosionSoundCount--;
                 }
             });
+
+            // Determine if this is an experience gain sound
+            const isXpSound = path.startsWith("./sounds/exp_");
+
+            // Handle XP gain sound cap
+            if (isXpSound && this.xpSoundsPlaying.length >= this.xpSoundLimit) {
+                // Stop the oldest XP gain sound
+                let oldestXpSound = this.xpSoundsPlaying.shift();
+                oldestXpSound.pause();
+                oldestXpSound.currentTime = 0;
+            }
+
+            audio.addEventListener("ended", () => {
+                audio.remove(); // Remove the cloned element once it has played
+                // Remove this sound from the tracking array if it's an XP gain sound
+                if (isXpSound) {
+                    this.xpSoundsPlaying = this.xpSoundsPlaying.filter(a => a !== audio);
+                }
+            });
+
+            // Add this sound to the tracking array if it's an XP gain sound
+            if (isXpSound) {
+                this.xpSoundsPlaying.push(audio);
+            }
         }
     }
 

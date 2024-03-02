@@ -151,6 +151,7 @@ ASSET_MANAGER.queueDownload("./sprites/menu_weapon_upgrade_2options.png");
 ASSET_MANAGER.queueDownload("./sprites/menu_player_stats.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_size.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_reduce_cd.png");
+ASSET_MANAGER.queueDownload("./sprites/upgrade_ally_heal.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_knockback.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_bleeding_edge.png");
 ASSET_MANAGER.queueDownload("./sprites/upgrade_crippling_chill.png");

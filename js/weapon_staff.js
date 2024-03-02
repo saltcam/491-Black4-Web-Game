@@ -10,7 +10,7 @@ class Weapon_staff extends Weapon {
             new Upgrade("Ranged Summons", "(Unique) 50% for ranged Summons.", true, "./sprites/upgrade_summon_ranged.png", 150, 0.2),
             new Upgrade("Explosive Finish", "(Unique) Summons explode on death.", true, "./sprites/upgrade_summon_explode.png", 200, 0.2),
             new Upgrade("Empower Summons", "(Unique) Primary briefly empowers allies.", true, "./sprites/upgrade_summon_empower.png", 300, 0.15),
-            new Upgrade("Heal Summons", "(Unique) Heal HP of Summons", true, "./sprites/upgrade_knockback.png", 200, 0.15),
+            new Upgrade("Heal Summons", "(Unique) Heal HP of Summons", true, "./sprites/upgrade_ally_heal.png", 200, 0.15),
             new Upgrade("Fiery Explosions", "(Unique) Explosions make fire hazards.", true, "./sprites/upgrade_staff_fire.png", 275, 0.15),
             new Upgrade("Corpse Explosion", "(Unique) Enemies can chain explode.", true, "./sprites/upgrade_corpse_explosion.png", 300, 0.1)];
 

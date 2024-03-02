@@ -260,6 +260,10 @@ class GameEngine {
     /** Call this to initialize the Rest Area (Map #0) objects. */
     initRestAreaObjects() {
         let anvil = this.addEntity(new Map_object(this, 150, -65, 40, 20, "./sprites/object_anvil.png", 0, 0, 93, 57, 20 + (32), 0.035, 1));
+
+        // Debug portal
+        //this.spawnEndPortal(0, 65);
+
         anvil.boundingBox.type = "anvil";
         this.mapObjectsInitialized = true;
     }
@@ -2219,7 +2223,7 @@ class GameEngine {
 
         // Ramp up the difficulty for new game plus
         if (teleportIndex === 1) {
-            this.SPAWN_SYSTEM.DIFFICULTY_SCALE *= 3;
+            this.SPAWN_SYSTEM.DIFFICULTY_SCALE *= 8;
             this.SPAWN_SYSTEM.baseEnemySpawnInterval /= 2;
 
             for (let i = 0; i < 3; i++) {

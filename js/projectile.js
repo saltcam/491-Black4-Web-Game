@@ -118,6 +118,7 @@ class Projectile extends Entity{
 
     draw(ctx, game) {
         if (this.game.player.weapons[1].upgrades[8].active
+            && this.attackCirc && this.attackCirc.type
             && this.attackCirc.type.includes("playerAttack_TomeAttack")) {
             if (this.attackCirc.radius !== this.attackCirc.savedRadius) {
                 this.animator.scale = this.initialScale * (this.attackCirc.radius / this.attackCirc.initialRadius);
