@@ -6,7 +6,7 @@
 class BossThree extends Entity {
     /** Default Constructor - Only needs to be passed the gameengine and worldX and Y coords. */
     constructor(game, worldX, worldY) {
-        super(30000, 30000, 40,
+        super(35000, 35000, 40,
             game, worldX, worldY,
             70, 120, "enemyBoss",
             100,
@@ -131,13 +131,13 @@ class BossThree extends Entity {
         /** Sets how many small enemies are summoned. */
         this.summAttackSmallEnemyCount = 4;
         /** How long the cooldown of the summon attack is. */
-        this.summAttackCooldown = 15;
+        this.summAttackCooldown = 10;
         /** Tracks when the last summon attack was. */
         this.lastSummAttackTime = 0;
         /** Tracks when we started the last summon attack. */
         this.summAttackStartTime = 0;
         /** Tracks how long the boss is stuck in the 'summoning' attack. */
-        this.summAttackDuration = 3.5;
+        this.summAttackDuration = 1;
 
         /** Flag to track whether we are still going to track the target marker to the player. 0.75 = 75% chance. */
         this.trackMode = true;
@@ -208,7 +208,7 @@ class BossThree extends Entity {
         if ((this.currHP <= 0 || this.currHP / this.maxHP <= this.phaseTwoHealthThreshhold)) {
             if (!this.phaseTwoActivated) {
                 this.immune = true;
-                this.currHP = this.maxHP * 0.66;
+                this.currHP = this.maxHP;
                 this.maxHP = this.currHP;
                 this.isDead = false;
                 this.enterPhaseTwo = true;
@@ -683,13 +683,15 @@ class BossThree extends Entity {
                     enemy.chargeAnimXStart, enemy.chargeAnimYStart, enemy.chargeAnimW,
                     enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
                     enemy.exp, enemy.fleeDist, enemy.approachDist));
+
+                this.game.SPAWN_SYSTEM.scaleStatsForDifficulty(enemy);
             }
 
             for(let i = 0; i < this.summAttackSmallEnemyCount; i++) {
                 let {x: randomXNumber, y: randomYNumber} = this.game.randomOffscreenCoords();
                 let enemy = this.game.SPAWN_SYSTEM.contactEnemyTypes[2];
 
-                this.game.addEntity(new Enemy_Charger(enemy.name, enemy.maxHP,
+                this.game.addEntity(new Enemy_Contact(enemy.name, enemy.maxHP,
                     enemy.currHP, enemy.atkPow, this.game, randomXNumber, randomYNumber,
                     enemy.boxWidth, enemy.boxHeight, enemy.boxType,
                     enemy.speed, enemy.spritePath, enemy.animXStart,
@@ -698,10 +700,13 @@ class BossThree extends Entity {
                     enemy.chargeAnimXStart, enemy.chargeAnimYStart, enemy.chargeAnimW,
                     enemy.chargeAnimH, enemy.chargeAnimFCount, enemy.chargeAnimFDur, enemy.chargeScale,
                     enemy.exp, enemy.fleeDist, enemy.approachDist));
+
+                this.game.SPAWN_SYSTEM.scaleStatsForDifficulty(enemy);
             }
         }
 
         if (currentTime - this.summAttackStartTime >= this.summAttackDuration) {
+            this.summAttackCooldown /= 2;
             this.summAttackBigEnemyCount += 1;
             this.summAttackSmallEnemyCount += 4;
             this.animator.outlineColor = "white";
