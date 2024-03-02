@@ -6,7 +6,7 @@ class Weapon_staff extends Weapon {
             new Upgrade("Secondary CD -10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_reduce_cd.png", 115, 1),
             new Upgrade("Summon Health +5", "(Stackable, Additive).", false, "./sprites/upgrade_summon_health.png", 35, 1),
             new Upgrade("Summon Speed +10%", "(Stackable, Multiplicative).", false, "./sprites/upgrade_summon_speed.png", 85, 1),
-            new Upgrade("Gravewalker", "(Stackable, Additive)\n+1 Tombstone every 15 sec.", false, "./sprites/upgrade_tomb_chance.png", 150, 1),
+            new Upgrade("Gravewalker", "(Stackable) +1 Tomb per 15s.", false, "./sprites/upgrade_tomb_chance.png", 150, 1),
             new Upgrade("Ranged Summons", "(Unique) 50% for ranged Summons.", true, "./sprites/upgrade_summon_ranged.png", 150, 0.2),
             new Upgrade("Explosive Finish", "(Unique) Summons explode on death.", true, "./sprites/upgrade_summon_explode.png", 200, 0.2),
             new Upgrade("Empower Summons", "(Unique) Primary briefly empowers allies.", true, "./sprites/upgrade_summon_empower.png", 300, 0.15),
