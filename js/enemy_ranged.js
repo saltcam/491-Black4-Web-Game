@@ -102,6 +102,8 @@ class Enemy_Ranged extends Entity {
         this.projectileAnimCount = projectileAnimCount;
         this.projectileAnimDur = projectileAnimDur;
         this.projectileAnimScale = projectileAnimScale;
+
+        this.mode = "idle"; // idle = moving normally; attacking = shooting projectile
     }
 
     applyPushback(forceX, forceY) {
@@ -169,7 +171,19 @@ class Enemy_Ranged extends Entity {
         const selfCenter = this.calculateCenter();
         const distanceToPlayer = Math.hypot(playerCenter.x - selfCenter.x, playerCenter.y - selfCenter.y);
 
-        if (distanceToPlayer <= this.shootRange) this.castProjectile();
+        if (distanceToPlayer <= this.shootRange) {
+            // this.changeMode("attacking");
+            this.castProjectile();
+        } else {
+            this.changeMode("idle");
+        }
+
+        // if (distanceToPlayer <= this.shootRange){
+        //     this.changeMode("attacking");
+        //     this.castProjectile();
+        // } else {
+        //     this.changeMode("idle");
+        // }
     }
 
     /*
@@ -219,38 +233,29 @@ class Enemy_Ranged extends Entity {
     castProjectile() {
         let currentTime = this.game.elapsedTime / 1000;
         if (currentTime - this.lastAttackTime >= this.projectileAttackCooldown) {
-            //console.log("SHOOTING");
+            this.changeMode("attacking");
+            // console.log("SHOOTING");
             // Switch to shooting animation
-            this.isShooting = true;
+            // this.isShooting = true;
 
             // Switch to shoot animation sprite if this enemy has one, otherwise ignore and shoot the projectile
-            if (this.shootingSpritePath !== null && this.animator.spritesheet !== ASSET_MANAGER.getAsset(this.shootingSpritePath)) {
-                this.animator.changeSpritesheet(
-                    ASSET_MANAGER.getAsset(this.shootingSpritePath),
-                    this.shootingAnimXStart,
-                    this.shootingAnimYStart,
-                    this.shootingAnimW,
-                    this.shootingAnimH,
-                    this.shootingAnimFCount,
-                    this.shootingAnimFDur
-                );
-                this.movementSpeed = 0;
-
-                // Set a timeout to revert to original animation after shooting ends
-                this.game.setManagedTimeout(() => {
-                    this.movementSpeed = this.initialMovementSpeed;
-                    this.revertToOriginalSprite();
-                }, this.shootingAnimFCount * this.shootingAnimFDur * 1000); // Duration of the entire shooting animation
-            }
+            // if (this.shootingSpritePath !== null && this.animator.spritesheet !== ASSET_MANAGER.getAsset(this.shootingSpritePath)) {
+            //     console.log("Attempting change!");
+            //
+            // }
 
             const centerOfEntity = this.calculateCenter();
 
             // Define the frame at which the projectile should be spawned
-            const shootingFrame = 4; // for example, spawn projectile on the 4th frame of the animation
+            const shootingFrame = 3; // for example, spawn projectile on the 4th frame of the animation
 
-            let currentTime = this.game.elapsedTime / 1000;
+            // let currentTime = this.game.elapsedTime / 1000;
             // Check if the current frame is the shooting frame and if enough time has passed since the last attack
-            if (((this.shootingSpritePath !== null && this.animator.currentFrame() === shootingFrame) || this.shootingSpritePath === null) && currentTime - this.lastAttackTime >= this.projectileAttackCooldown) {
+            // if ((this.animator.currentFrame() >= shootingFrame || !this.shootingSpritePath)) {
+            //     console.log ("Did this work?");
+            // }
+
+            if (this.animator.currentFrame() >= shootingFrame) {
                 const playerCenter = this.game.player.calculateCenter();
                 const thisCenter = this.calculateCenter();
                 // Calculate the angle towards the mouse position
@@ -292,25 +297,69 @@ class Enemy_Ranged extends Entity {
                     newProjectile.pulsatingDamage = this.pulse;
                 }
                 this.lastAttackTime = currentTime; // Update last attack time
+
+                // Set a timeout to revert to original animation after shooting ends
+                this.game.setManagedTimeout(() => {
+                    this.movementSpeed = this.initialMovementSpeed;
+                    this.changeMode("idle");
+                }, this.shootingAnimFCount * this.shootingAnimFDur * 1000); // Duration of the entire shooting animation
+                // this.changeMode("idle");
             }
         }
     }
 
-    revertToOriginalSprite() {
-        this.isShooting = false; // Reset shooting flag
+    // revertToOriginalSprite() {
+    //     this.isShooting = false; // Reset shooting flag
+    //
+    //     //console.log("Reverting...");
+    //
+    //     //this.animator = new Animator(this.game, this.spritePath, this.animXStart)
+    //     // Switch back to original animation
+    //     this.animator.changeSpritesheet(
+    //         ASSET_MANAGER.getAsset(this.spritePath),
+    //         this.animXStart,
+    //         this.animYStart,
+    //         this.animW,
+    //         this.animH,
+    //         this.animFCount,
+    //         this.animFDur
+    //     );
+    // }
 
-        //console.log("Reverting...");
+    changeMode(mode) {
+        if (this.mode !== mode) {
+            // console.log("changing from " + this.mode + " to: " + mode);
+            switch (mode) {
+                case "attacking":
+                    if (this.shootingSpritePath) {
 
-        //this.animator = new Animator(this.game, this.spritePath, this.animXStart)
-        // Switch back to original animation
-        this.animator.changeSpritesheet(
-            ASSET_MANAGER.getAsset(this.spritePath),
-            this.animXStart,
-            this.animYStart,
-            this.animW,
-            this.animH,
-            this.animFCount,
-            this.animFDur
-        );
+                        this.animator.changeSpritesheet(
+                            ASSET_MANAGER.getAsset(this.shootingSpritePath),
+                            this.shootingAnimXStart,
+                            this.shootingAnimYStart,
+                            this.shootingAnimW,
+                            this.shootingAnimH,
+                            this.shootingAnimFCount,
+                            this.shootingAnimFDur
+                        );
+                    }
+                    this.movementSpeed = 0;
+                    this.mode = mode;
+                    break;
+                case "idle":
+                        this.animator.changeSpritesheet(
+                            ASSET_MANAGER.getAsset(this.spritePath),
+                            this.animXStart,
+                            this.animYStart,
+                            this.animW,
+                            this.animH,
+                            this.animFCount,
+                            this.animFDur
+                        );
+                    this.movementSpeed = this.initialMovementSpeed;
+                    this.mode = mode;
+                    break;
+            }
+        }
     }
 }
