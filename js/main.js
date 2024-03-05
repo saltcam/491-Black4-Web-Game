@@ -213,6 +213,12 @@ ASSET_MANAGER.queueDownload("./sprites/boss_dragon_walk_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_dragon_roar_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/fireball.png");
 
+ASSET_MANAGER.queueDownload("./sprites/angel_idle.png");
+ASSET_MANAGER.queueDownload("./sprites/angel_attack.png");
+ASSET_MANAGER.queueDownload("./sprites/angel_idle_DAMAGED.png");
+ASSET_MANAGER.queueDownload("./sprites/angel_attack_DAMAGED.png");
+// TODO add fallen angel as well as projectiles for both.
+
 //sounds
 ASSET_MANAGER.queueDownload("./sounds/menu_click.mp3");
 ASSET_MANAGER.queueDownload("./sounds/menu_click2.mp3");

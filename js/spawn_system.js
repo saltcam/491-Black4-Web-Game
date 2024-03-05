@@ -97,7 +97,16 @@ class Spawn_System {
                 shootAnimH: 30, shootAnimFCount: 8, shootAnimFDur: 0.35, shootScale: 0.65, exp: -1, projectileFreq: 2,
                 projectileSpeed: 35, projectileSize: 15, projectilePulse: false, projectileCount: 3, projectileSpread: 30,
                 fleeDist: 100, approachDist: 250, projectileSprite: "./sprites/Orby.png",
+                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 29, projectileAnimH: 31, projectileAnimCount: 10, projectileAnimDurr: 0.05, projectileAnimScale: 0.75, shootRange: 275},
+            { enemyType: "ranged", name: "Angel", maxHP: 30, currHP: 30, atkPow: 2, worldX: 0, worldY: 0,
+                boxWidth: 15, boxHeight: 20, boxType: "enemy", speed: 45, spritePath: "./sprites/angel_idle.png",
+                shootSpritePath: "./sprites/angel_attack.png" , animXStart: 0, animYStart: 0, animW: 432/4 - 2, animH: 110,
+                animFCount: 4, animFDur: 0.15, scale: 1.4, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 432/4 - 2,
+                shootAnimH: 110, shootAnimFCount: 4, shootAnimFDur: 0.08, shootScale: 1.4, exp: -1, projectileFreq: 2,
+                projectileSpeed: 35, projectileSize: 15, projectilePulse: false, projectileCount: 1, projectileSpread: 30,
+                fleeDist: 100, approachDist: 250, projectileSprite: "./sprites/Orby.png",
                 projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 29, projectileAnimH: 31, projectileAnimCount: 10, projectileAnimDurr: 0.05, projectileAnimScale: 0.75, shootRange: 275}
+
         ];
         /** An array of all potential enemies of type 'Enemy_Charger'. */
         this.chargerEnemyTypes = [
@@ -141,8 +150,9 @@ class Spawn_System {
          * Each map is 5 minutes, with each minute representing one wave.
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
+        //TODO revert line 1 to contactEnemyTypes[0]
         this.mapOneEnemies = [
-            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
+            this.rangedEnemyTypes[3],  // Wave 0 (0:00 - 0:30)
             this.contactEnemyTypes[2],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[1],  // Wave 2 (1:00 - 1:30)
             this.rangedEnemyTypes[2],   // Wave 3 (1:30 - 2:00)
