@@ -1,7 +1,7 @@
 class BossTwo extends Entity {
 
     constructor(game, worldX, worldY) {
-        super(5000, 5000, 20,
+        super(3500, 3500, 20,
             game, worldX, worldY,
             80, 55, "enemyBoss",
             100,
