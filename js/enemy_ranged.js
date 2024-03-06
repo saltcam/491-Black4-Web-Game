@@ -294,7 +294,7 @@ class Enemy_Ranged extends Entity {
                         this.projectileAnimX, this.projectileAnimY, this.projectileAnimW, this.projectileAnimH,
                         this.projectileAnimCount, this.projectileAnimDur, this.projectileAnimScale, dx, dy,
                         3, this.projectileSize, 1, 0, 0.3));
-                    newProjectile.pulsatingDamage = this.pulse;
+                    newProjectile.attackCirc.pulsatingDamage = this.pulse;
                 }
                 this.lastAttackTime = currentTime; // Update last attack time
 

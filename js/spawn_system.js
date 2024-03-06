@@ -110,10 +110,10 @@ class Spawn_System {
                 boxWidth: 65, boxHeight: 85, boxType: "enemy", speed: 45, spritePath: "./sprites/fallenAngel_idle.png",
                 shootSpritePath: "./sprites/fallenAngel_attack.png" , animXStart: 0, animYStart: 0, animW: 432/4 - 2, animH: 110,
                 animFCount: 4, animFDur: 0.15, scale: 1.4, shootAnimXStart: 0, shootAnimYStart: 0, shootAnimW: 432/4 - 2,
-                shootAnimH: 110, shootAnimFCount: 4, shootAnimFDur: 0.08, shootScale: 1.4, exp: -1, projectileFreq: 1,
-                projectileSpeed: 35, projectileSize: 15, projectilePulse: false, projectileCount: 2, projectileSpread: 45,
+                shootAnimH: 110, shootAnimFCount: 4, shootAnimFDur: 0.08, shootScale: 1.4, exp: -1, projectileFreq: 3,
+                projectileSpeed: 10, projectileSize: 75, projectilePulse: true, projectileCount: 1, projectileSpread: 45,
                 fleeDist: 200, approachDist: 250, projectileSprite: "./sprites/Orby.png",
-                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 29, projectileAnimH: 31, projectileAnimCount: 10, projectileAnimDurr: 0.05, projectileAnimScale: 0.75, shootRange: 500}
+                projectileAnimX: 0, projectileAnimY: 0, projectileAnimW: 29, projectileAnimH: 31, projectileAnimCount: 10, projectileAnimDurr: 0.05, projectileAnimScale: 4, shootRange: 500}
 
         ];
         /** An array of all potential enemies of type 'Enemy_Charger'. */
@@ -158,11 +158,9 @@ class Spawn_System {
          * Each map is 5 minutes, with each minute representing one wave.
          * Each map can have a range of 0-8 waves (8th wave starting at 4:30 game time).
          */
-        //TODO revert line 1 to contactEnemyTypes[0]
-        //TODO revert line 2 to contactEnemyTypes[2]
         this.mapOneEnemies = [
-            this.rangedEnemyTypes[3],  // Wave 0 (0:00 - 0:30)
-            this.rangedEnemyTypes[4],  // Wave 1 (0:30 - 1:00)
+            this.contactEnemyTypes[0],  // Wave 0 (0:00 - 0:30)
+            this.contactEnemyTypes[2],  // Wave 1 (0:30 - 1:00)
             this.contactEnemyTypes[1],  // Wave 2 (1:00 - 1:30)
             this.rangedEnemyTypes[2],   // Wave 3 (1:30 - 2:00)
             this.chargerEnemyTypes[0],  // Wave 4 (2:00 - 2:30)
@@ -200,8 +198,8 @@ class Spawn_System {
             this.chargerEnemyTypes[1],  // Wave 4 (2:00 - 2:30)
             this.rangedEnemyTypes[1],  // Wave 5 (2:30 - 3:00)
             this.chargerEnemyTypes[1],  // Wave 6 (3:00 - 3:30)
-            this.rangedEnemyTypes[1],  // Wave 7 (3:30 - 4:00)
-            this.contactEnemyTypes[3]   // Wave 8 (4:00 - 4:30+)
+            this.rangedEnemyTypes[3],  // Wave 7 (3:30 - 4:00)
+            this.rangedEnemyTypes[4]   // Wave 8 (4:00 - 4:30+)
         ];
 
         /** This array stores enemies from previous waves for constant spawning. */
@@ -595,7 +593,7 @@ class Spawn_System {
                 break;
             // Spawn enemy type of 'Enemy_Charger'.
             case 2 :
-                //TODO replace with charge enemies
+                // replace with charge enemies
                 randomEnemyType = this.contactEnemyTypes[Math.floor(Math.random() * this.contactEnemyTypes.length)];
                 //Creates the new random enemy at a random location
                 newEnemy = this.spawnEnemy(randomEnemyType, randomXNumber, randomYNumber);

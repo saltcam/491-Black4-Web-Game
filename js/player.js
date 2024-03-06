@@ -506,10 +506,15 @@ class Player extends Entity {
                         if (spritesIndex !== -1) {
                             newSpritesheetPath = "." + newSpritesheetPath.substring(spritesIndex);
                         }
+                        // because pulsing doesn't work, we improvise with triple damage.
+                        let pow = projectile.atkPow;
+                        if (projectile.attackCirc.pulsatingDamage) {
+                            pow *= 3;
+                        }
 
                         //console.log(newSpritesheetPath);
 
-                        let reflectedProjectile = this.game.addEntity(new Projectile(this.game, projectile.atkPow,
+                        let reflectedProjectile = this.game.addEntity(new Projectile(this.game, pow,
                             projectile.worldX, projectile.worldY, projectile.boundingBox.width, projectile.boundingBox.height,
                             "playerAttack_TomeAttack", projectile.speed*2,
                             newSpritesheetPath,
@@ -518,7 +523,7 @@ class Player extends Entity {
                             projectile.animator.frameDuration, projectile.animator.scale, projectile.angleX * -1, projectile.angleY * -1,
                             2.5, 20, 1, 0,
                             0.3));
-                        reflectedProjectile.pulsatingDamage = projectile.pulse;
+                        reflectedProjectile.attackCirc.pulsatingDamage = projectile.pulse; // basically doesn't work, unimportant though unless its against dragon.
 
                         reflectedProjectile.animator.outlineMode = true;
                         reflectedProjectile.animator.outlineColor = 'rgb(0,128,255)';
