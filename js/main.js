@@ -221,7 +221,8 @@ ASSET_MANAGER.queueDownload("./sprites/fallenAngel_idle.png");
 ASSET_MANAGER.queueDownload("./sprites/fallenAngel_attack.png");
 ASSET_MANAGER.queueDownload("./sprites/fallenAngel_idle_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/fallenAngel_attack_DAMAGED.png");
-// TODO add projectiles for each angel
+ASSET_MANAGER.queueDownload("./sprites/bullet_angel.png");
+ASSET_MANAGER.queueDownload("./sprites/bullet_fallen.png");
 
 //sounds
 ASSET_MANAGER.queueDownload("./sounds/menu_click.mp3");
