@@ -71,6 +71,9 @@ class Spawn_System {
             { enemyType: "contact", name: "Skeleton", maxHP: 75, currHP: 75, atkPow: 10, worldX: 0, worldY: 0,
                 boxWidth: 38/2, boxHeight: 56/2, boxType: "enemy", speed: 60, spritePath: "./sprites/skeleton.png",
                 animXStart: 0.5, animYStart: 0, animW: 70.5, animH: 77, animFCount: 8, animFDur: 0.2, scale: 1.4, exp: -1},
+            { enemyType: "contact", name: "Rat", maxHP: 65, currHP: 65, atkPow: 9, worldX: 0, worldY: 0, boxWidth: 24/2,
+                boxHeight: 42/2, boxType: "enemy", speed: 70, spritePath: "./sprites/Rat.png", animXStart: 0,
+                animYStart: 0, animW: 33, animH: 50, animFCount: 4, animFDur: 0.185, scale: 1.75, exp: -1}
         ];
         /** An array of all potential enemies of type 'Enemy_Ranged'. */
         this.rangedEnemyTypes = [

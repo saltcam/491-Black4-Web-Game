@@ -212,6 +212,8 @@ ASSET_MANAGER.queueDownload("./sprites/boss_dragon_roar.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_dragon_walk_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/boss_dragon_roar_DAMAGED.png");
 ASSET_MANAGER.queueDownload("./sprites/fireball.png");
+ASSET_MANAGER.queueDownload("./sprites/Rat.png");
+ASSET_MANAGER.queueDownload("./sprites/Rat_DAMAGED.png");
 
 ASSET_MANAGER.queueDownload("./sprites/angel_idle.png");
 ASSET_MANAGER.queueDownload("./sprites/angel_attack.png");
